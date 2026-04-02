@@ -3,77 +3,113 @@
 <head>
     <meta charset='utf-8' />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>중기 3기 일정 관리</title>
+    <title>My Schedule</title>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         :root {
-            --primary-color: #4A90E2;
-            --bg-color: #f0f2f5;
+            --ios-bg: #F2F2F7;
+            --ios-card: #FFFFFF;
+            --ios-blue: #007AFF;
+            --ios-green: #34C759;
+            --ios-red: #FF3B30;
+            --ios-gray: #8E8E93;
         }
         body {
             margin: 0;
-            padding: 10px;
-            font-family: 'Pretendard', sans-serif;
-            background-color: var(--bg-color);
-            display: flex;
-            justify-content: center;
+            padding: 0;
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif;
+            background-color: var(--ios-bg);
+            color: #000;
         }
         #calendar-container {
-            width: 100%;
-            max-width: 500px; /* S24+ 비율에 적당한 너비 */
-            background: #fff;
             padding: 15px;
-            border-radius: 20px;
-            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            max-width: 500px;
+            margin: 0 auto;
         }
-        h2 { font-size: 1.2rem; text-align: center; margin-bottom: 15px; color: #333; }
+        h2 { 
+            font-size: 22px; 
+            font-weight: 700; 
+            margin: 20px 0 10px 5px; 
+            letter-spacing: -0.5px;
+        }
+
+        /* FullCalendar iOS 스타일 커스텀 */
+        .fc {
+            background: var(--ios-card);
+            border-radius: 14px;
+            overflow: hidden;
+            border: none !important;
+            box-shadow: 0 4px 20px rgba(0,0,0,0.05);
+        }
+        .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 600; }
+        .fc-button { background: transparent !important; border: none !important; color: var(--ios-blue) !important; font-weight: 500 !important; text-transform: capitalize !important; }
+        .fc-button:focus { box-shadow: none !important; }
         
-        /* 캘린더 내부 텍스트 크기 조절 (겹침 방지) */
-        .fc { font-size: 0.85rem; }
-        .fc-event { border-radius: 4px; padding: 1px 3px; margin-bottom: 1px !important; border: none !important; }
-        .fc-event-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-        .fc-daygrid-event-dot { display: none; } /* 점 숨기기 */
-
-        /* 완료된 일정 스타일 */
-        .event-completed {
-            text-decoration: line-through;
-            opacity: 0.5;
-            filter: grayscale(1);
+        /* 날짜 칸 내부 스타일 - 글자 크기 축소 및 줄바꿈 */
+        .fc-daygrid-day-number { font-size: 13px; font-weight: 400; padding: 5px !important; color: #333; }
+        .fc-event {
+            background-color: transparent !important;
+            border: none !important;
+            margin: 1px 2px !important;
+            padding: 0 !important;
+        }
+        .fc-event-main {
+            padding: 2px 4px !important;
+            border-radius: 4px;
+            font-size: 10px !important; /* 글씨 크기 대폭 축소 */
+            line-height: 1.2;
+            white-space: normal !important; /* 줄바꿈 허용 */
+            display: block !important;
+        }
+        /* 시간 강조 스타일 */
+        .event-time {
+            display: block;
+            font-weight: 800;
+            font-size: 9px;
+            margin-bottom: 1px;
         }
 
-        /* 모달 스타일 */
+        /* 완료 상태 */
+        .event-completed {
+            opacity: 0.3;
+            text-decoration: line-through;
+        }
+
+        /* iOS 모달 스타일 */
         #modal {
             display: none;
             position: fixed;
             top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.5);
+            background: rgba(0,0,0,0.2);
+            backdrop-filter: blur(10px); /* 아이폰 블러 효과 */
             z-index: 1000;
             align-items: center;
             justify-content: center;
         }
         .modal-content {
-            background: white;
-            padding: 25px;
+            background: rgba(255, 255, 255, 0.9);
+            padding: 20px;
             border-radius: 20px;
-            width: 85%;
-            max-width: 350px;
+            width: 280px;
             text-align: center;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
         }
-        .modal-title { font-weight: bold; font-size: 1.1rem; margin-bottom: 10px; }
-        .modal-info { font-size: 0.95rem; color: #666; margin-bottom: 20px; line-height: 1.6; }
-        .btn-group { display: flex; gap: 10px; }
+        .modal-title { font-weight: 600; font-size: 17px; margin-bottom: 5px; }
+        .modal-info { font-size: 13px; color: #333; margin-bottom: 20px; }
+        
+        .btn-group { display: flex; border-top: 0.5px solid #C6C6C8; }
         button {
-            flex: 1; padding: 12px; border: none; border-radius: 10px;
-            font-weight: bold; cursor: pointer;
+            flex: 1; padding: 12px; border: none; background: transparent;
+            font-size: 17px; cursor: pointer; color: var(--ios-blue);
         }
-        .btn-complete { background: #28a745; color: white; }
-        .btn-close { background: #eee; color: #333; }
+        .btn-complete { font-weight: 600; border-right: 0.5px solid #C6C6C8; }
+        .btn-close { font-weight: 400; }
     </style>
 </head>
 <body>
 
     <div id="calendar-container">
-        <h2>중기 3기 1회차 프로그램</h2>
+        <h2>중기 3기 일정</h2>
         <div id='calendar'></div>
     </div>
 
@@ -82,7 +118,7 @@
             <div id="m-title" class="modal-title"></div>
             <div id="m-info" class="modal-info"></div>
             <div class="btn-group">
-                <button class="btn-complete" onclick="toggleComplete()">완료/미완료</button>
+                <button class="btn-complete" onclick="toggleComplete()">체크</button>
                 <button class="btn-close" onclick="closeModal()">닫기</button>
             </div>
         </div>
@@ -90,9 +126,7 @@
 
     <script>
         let currentEvent = null;
-        const storageKey = 'completed_events';
-
-        // 로컬스토리지에서 완료 목록 불러오기
+        const storageKey = 'ios_completed_events';
         let completedIds = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -102,21 +136,30 @@
                 initialDate: '2026-04-01',
                 locale: 'ko',
                 height: 'auto',
-                headerToolbar: { left: 'prev', center: 'title', right: 'next' },
+                headerToolbar: { left: 'today', center: 'title', right: 'prev,next' },
+                dayMaxEvents: false, // 모든 이벤트 표시
                 events: [
-                    { id: '1', title: 'OT: 비전 게임', start: '2026-04-01T13:00:00', end: '2026-04-01T15:00:00', color: '#FFD700', textColor: '#000', extendedProps: { loc: '미래기술산업진흥원 3층' } },
-                    { id: '2', title: '비즈니스 매너', start: '2026-04-01T15:00:00', end: '2026-04-01T17:00:00', color: '#00BFFF', extendedProps: { loc: '미래기술산업진흥원 3층' } },
-                    { id: '3', title: '기업탐방(포스코)', start: '2026-04-02T12:30:00', end: '2026-04-02T17:30:00', color: '#32CD32', extendedProps: { loc: '포스코 홍보관' } },
-                    { id: '4', title: '트레이 만들기', start: '2026-04-06T13:00:00', end: '2026-04-06T17:00:00', color: '#FFD700', textColor: '#000', extendedProps: { loc: '미래기술산업진흥원 3층' } },
-                    { id: '5', title: '집단심리상담', start: '2026-04-08T14:00:00', end: '2026-04-08T17:00:00', color: '#FF0000', extendedProps: { loc: '미래기술산업진흥원 3층' } },
-                    { id: '6', title: '퍼스널 컬러', start: '2026-04-13T13:00:00', end: '2026-04-13T17:00:00', color: '#DA70D6', extendedProps: { loc: 'CL미용학원' } },
-                    { id: '7', title: '나의 이야기', start: '2026-04-15T13:00:00', end: '2026-04-15T17:00:00', color: '#00BFFF', extendedProps: { loc: '시민공익활동지원센터' } },
-                    { id: '8', title: 'TA자기분석', start: '2026-04-20T13:00:00', end: '2026-04-20T17:00:00', color: '#32CD32', extendedProps: { loc: '미래기술산업진흥원 3층' } },
-                    { id: '9', title: '직업선호도 검사', start: '2026-04-22T14:00:00', end: '2026-04-22T17:00:00', color: '#DA70D6', extendedProps: { loc: '시민공익활동지원센터' } },
-                    { id: '10', title: '청년 퍼실리테이션', start: '2026-04-27T14:00:00', end: '2026-04-27T17:00:00', color: '#32CD32', extendedProps: { loc: '시민공익활동지원센터' } },
-                    { id: '11', title: '중독예방교육', start: '2026-04-29T13:00:00', end: '2026-04-29T15:00:00', color: '#FFA500', extendedProps: { loc: '미래기술산업진흥원 2층' } },
-                    { id: '12', title: '원예 활동', start: '2026-04-29T15:00:00', end: '2026-04-29T17:00:00', color: '#DA70D6', extendedProps: { loc: '미래기술산업진흥원 2층' } }
+                    { id: '1', title: 'OT:비전게임', start: '2026-04-01T13:00:00', end: '2026-04-01T15:00:00', color: '#FFD60A', textColor: '#000', loc: '3층 1교육실' },
+                    { id: '2', title: '비즈매너', start: '2026-04-01T15:00:00', end: '2026-04-01T17:00:00', color: '#0A84FF', loc: '3층 1교육실' },
+                    { id: '3', title: '포스코탐방', start: '2026-04-02T12:30:00', end: '2026-04-02T17:30:00', color: '#30D158', loc: '포스코 홍보관' },
+                    { id: '4', title: '트레이제작', start: '2026-04-06T13:00:00', end: '2026-04-06T17:00:00', color: '#FFD60A', textColor: '#000', loc: '3층 1교육실' },
+                    { id: '5', title: '심리상담', start: '2026-04-08T14:00:00', end: '2026-04-08T17:00:00', color: '#FF453A', loc: '3층 1교육실' },
+                    { id: '6', title: '퍼스널컬러', start: '2026-04-13T13:00:00', end: '2026-04-13T17:00:00', color: '#BF5AF2', loc: 'CL미용학원' },
+                    { id: '7', title: '나의이야기', start: '2026-04-15T13:00:00', end: '2026-04-15T17:00:00', color: '#0A84FF', loc: '시민지원센터' },
+                    { id: '8', title: 'TA분석', start: '2026-04-20T13:00:00', end: '2026-04-20T17:00:00', color: '#30D158', loc: '3층 1교육실' },
+                    { id: '9', title: '직업선호도', start: '2026-04-22T14:00:00', end: '2026-04-22T17:00:00', color: '#BF5AF2', loc: '시민지원센터' },
+                    { id: '10', title: '청년퍼실리', start: '2026-04-27T14:00:00', end: '2026-04-27T17:00:00', color: '#30D158', loc: '시민지원센터' },
+                    { id: '11', title: '중독예방', start: '2026-04-29T13:00:00', end: '2026-04-29T15:00:00', color: '#FF9F0A', loc: '2층 교육실' },
+                    { id: '12', title: '원예활동', start: '2026-04-29T15:00:00', end: '2026-04-29T17:00:00', color: '#BF5AF2', loc: '2층 교육실' }
                 ],
+                eventContent: function(arg) {
+                    let timeText = arg.event.start.getHours() + "시";
+                    let html = `<div class="fc-event-main" style="background-color:${arg.backgroundColor}; color:${arg.textColor || '#fff'}">
+                                    <span class="event-time">오후 ${timeText}</span>
+                                    ${arg.event.title}
+                                </div>`;
+                    return { html: html };
+                },
                 eventDidMount: function(info) {
                     if (completedIds.includes(info.event.id)) {
                         info.el.classList.add('event-completed');
@@ -126,8 +169,8 @@
                     currentEvent = info.event;
                     document.getElementById('m-title').innerText = info.event.title;
                     document.getElementById('m-info').innerHTML = `
-                        🕒 시간: ${info.event.start.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})} ~ ${info.event.end.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'})}<br>
-                        📍 장소: ${info.event.extendedProps.loc}
+                        오후 ${info.event.start.getHours()}시 ~ ${info.event.end.getHours()}시<br>
+                        ${info.event.extendedProps.loc}
                     `;
                     document.getElementById('modal').style.display = 'flex';
                 }
@@ -140,7 +183,6 @@
         function toggleComplete() {
             const id = currentEvent.id;
             const index = completedIds.indexOf(id);
-            
             if (index > -1) {
                 completedIds.splice(index, 1);
                 currentEvent.el.classList.remove('event-completed');
@@ -148,10 +190,10 @@
                 completedIds.push(id);
                 currentEvent.el.classList.add('event-completed');
             }
-            
             localStorage.setItem(storageKey, JSON.stringify(completedIds));
             closeModal();
         }
     </script>
 </body>
 </html>
+
