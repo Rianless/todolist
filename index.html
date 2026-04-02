@@ -46,8 +46,8 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .nav-lbl  { font-size: 14px; font-weight: 700; color: #1C1C1E; }
 
 /* dow row */
-.dow-row { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid #F2F2F7; padding: 0 14px; }
-.dow-cell { text-align: center; font-size: 10px; font-weight: 700; padding: 4px 0; letter-spacing: .3px; }
+.dow-row { display: grid; grid-template-columns: repeat(7,1fr); background: #F9F9F9; border-bottom: 1px solid #F2F2F7; border-radius: 16px 16px 0 0; }
+.dow-cell { text-align: center; font-size: 10px; font-weight: 700; padding: 6px 0; letter-spacing: .3px; }
 
 /* week strip */
 .week-strip { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid #F2F2F7; padding: 5px 0 7px; }
@@ -57,15 +57,23 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 .ws-dot { width: 4px; height: 4px; border-radius: 2px; }
 
 /* ── MONTH GRID ── */
-#view { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
-.month-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px; }
-/* cell height set dynamically by JS */
-.month-cell { border-bottom: 1px solid #F2F2F7; border-right: 1px solid #F2F2F7; padding: 2px 3px 1px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; }
+#view { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
+.month-wrap {
+  flex: 1;
+  margin: 6px 14px 8px;
+  background: #fff;
+  border-radius: 16px;
+  box-shadow: 0 1px 6px rgba(0,0,0,.07);
+  overflow: hidden;
+  display: flex;
+  flex-direction: column;
+}
+.month-grid { display: grid; grid-template-columns: repeat(7,1fr); flex: 1; }
+.month-cell { border-bottom: 1px solid #F2F2F7; border-right: 1px solid #F2F2F7; padding: 3px 3px 2px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; }
 .month-cell:nth-child(7n) { border-right: none; }
-.month-num { width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-bottom: 1px; }
+.month-num { width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-bottom: 1px; align-self: flex-start; }
 .month-ev { border-radius: 3px; padding: 1px 4px; margin-bottom: 1px; overflow: hidden; cursor: pointer; flex-shrink: 0; width: fit-content; max-width: 100%; }
 .month-ev-time { font-size: 8px; font-weight: 700; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.month-ev-title { font-size: 8px; color: rgba(255,255,255,.9); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .month-more { font-size: 8px; color: #8E8E93; padding-left: 1px; }
 
 /* ── WEEK CARDS ── */
@@ -313,52 +321,47 @@ function cardHtml(ev, onclickStr){
 
 /* ── MONTH ── */
 function renderMonth(){
+  const v=document.getElementById("view");
+  v.style.overflowY="hidden";
+  v.style.padding="0";
   const y=monthRef.getFullYear(), m=monthRef.getMonth();
   const total=daysInMonth(y,m), first=firstDayOfMonth(y,m);
   const cells=Array.from({length:first+total},(_,i)=>i<first?null:i-first+1);
   while(cells.length%7!==0) cells.push(null);
-  const rows=cells.length/7;
 
-  /* header-cal */
-  const isThisMonth = (y===TODAY.getFullYear()&&m===TODAY.getMonth());
+  /* header-cal: nav only */
+  const isThisMonth=(y===TODAY.getFullYear()&&m===TODAY.getMonth());
   let hh=`<div class="cal-nav">
     <button class="nav-btn" onclick="monthPrev()">‹</button>
     <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
     <div style="display:flex;align-items:center;gap:5px">
-      <button class="ibtn ibtn-gray" onclick="toggleTitle()" title="제목 표시 토글" style="font-size:10px;width:auto;padding:0 7px;height:24px;border-radius:8px">${showTitle?"제목 숨김":"제목 표시"}</button>
+      <button class="ibtn ibtn-gray" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 7px;height:24px;border-radius:8px">${showTitle?"제목 숨김":"제목 표시"}</button>
       ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
       <button class="nav-btn" onclick="monthNext()">›</button>
     </div>
-  </div><div class="dow-row">`;
-  DAY_KR.forEach((d,i)=>{ hh+=`<div class="dow-cell" style="color:${i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93"}">${d}</div>`; });
-  hh+=`</div>`;
+  </div>`;
   document.getElementById("header-cal").innerHTML=hh;
 
-  /* compute cell height to fill view */
-  const viewH = document.getElementById("view").clientHeight || (window.innerHeight - document.getElementById("header").offsetHeight);
-  const cellH = Math.floor(viewH / rows);
+  /* view: wrap > dow-row + grid */
+  let h=`<div class="month-wrap"><div class="dow-row">`;
+  DAY_KR.forEach((d,i)=>{ h+=`<div class="dow-cell" style="color:${i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93"}">${d}</div>`; });
+  h+=`</div><div class="month-grid">`;
 
-  /* view: grid */
-  let h=`<div class="month-grid">`;
   cells.forEach((day,ci)=>{
-    if(!day){ h+=`<div class="month-cell" style="height:${cellH}px;cursor:default;border-right:1px solid #F2F2F7"></div>`; return; }
+    if(!day){ h+=`<div class="month-cell" style="cursor:default"></div>`; return; }
     const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
     const isT=ds===todayStr, dow=ci%7, evs=getEvs(ds);
-    const ct=cat;
-    h+=`<div class="month-cell" style="height:${cellH}px" onclick="openDayPanel('${ds}')">
+    h+=`<div class="month-cell" onclick="openDayPanel('${ds}')">
       <div class="month-num" style="background:${isT?"#FF6B6B":"transparent"};color:${isT?"#fff":dow===0?"#FF6B6B":dow===6?"#4D96FF":"#1C1C1E"}">${day}</div>`;
-    /* how many events can we fit? each ev ~14px, num ~20px, leaving room */
-    const maxEv = Math.max(0, Math.floor((cellH - 22) / 14) - (showTitle?0:0));
-    evs.slice(0, maxEv).forEach(ev=>{
+    evs.forEach(ev=>{
       const c=cat(ev.category);
       h+=`<div class="month-ev" style="background:${c.bg};opacity:${ev.done?.5:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
         <span class="month-ev-time">${esc(ev.startTime)}${showTitle?" "+esc(ev.title):""}</span>
       </div>`;
     });
-    if(evs.length>maxEv) h+=`<div class="month-more">+${evs.length-maxEv}개</div>`;
     h+=`</div>`;
   });
-  h+=`</div>`;
+  h+=`</div></div>`;
   document.getElementById("view").innerHTML=h;
 }
 function monthPrev(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()-1,1); renderView(); }
@@ -366,6 +369,9 @@ function monthNext(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth
 
 /* ── WEEK ── */
 function renderWeek(){
+  const v=document.getElementById("view");
+  v.style.overflowY="auto";
+  v.style.padding="0";
   const days=Array.from({length:7},(_,i)=>addDays(weekRef,i));
   const isThisWeek=days.some(d=>fmt(d)===todayStr);
 
