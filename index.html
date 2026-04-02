@@ -3,198 +3,259 @@
 <head>
     <meta charset='utf-8' />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Sleek Planner</title>
+    <title>Minimal Planner</title>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         :root {
             --ios-blue: #007AFF;
-            --bg-glass: rgba(255, 255, 255, 0.7);
-            --border-light: rgba(0, 0, 0, 0.05);
+            --ios-red: #FF3B30;
+            --card-bg: rgba(255, 255, 255, 0.9);
         }
         body {
             margin: 0; padding: 0;
-            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            background: #f2f2f7; /* iOS 시스템 배경색 */
             font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
             display: flex; justify-content: center; min-height: 100vh;
         }
+        
+        #app-container {
+            width: 92%; max-width: 400px;
+            margin: 30px auto;
+        }
+
+        /* 1. 달력 선 지우기 및 카드 스타일 (이미지 2 참고) */
         #calendar-container {
-            width: 94%; max-width: 420px;
-            margin: 20px auto;
-            background: var(--bg-glass);
+            background: var(--card-bg);
             backdrop-filter: blur(20px);
-            -webkit-backdrop-filter: blur(20px);
-            border-radius: 30px;
-            border: 1px solid rgba(255,255,255,0.3);
-            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            border-radius: 25px;
             padding: 15px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.05);
         }
-        .mac-buttons { display: flex; gap: 7px; margin-bottom: 15px; padding-left: 5px; }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
-        .red { background: #FF5F57; } .yellow { background: #FFBD2E; } .green { background: #28C840; }
 
-        /* 캘린더 커스텀 */
+        /* FullCalendar 선 제거 및 커스텀 */
         .fc { border: none !important; }
-        .fc-toolbar-title { font-size: 1.2rem !important; font-weight: 800; color: #1d1d1f; }
+        .fc td, .fc th { border: none !important; } /* 모든 선 제거 */
+        .fc-theme-standard .fc-scrollgrid { border: none !important; }
+        
+        .fc-toolbar { margin-bottom: 15px !important; display: flex; align-items: center; }
+        .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; color: #1c1c1e; }
+        
+        /* 주간/월간 전환 버튼 */
         .fc-button { 
-            background: rgba(0,0,0,0.05) !important; border: none !important; 
-            color: #1d1d1f !important; border-radius: 12px !important;
-            font-weight: 600 !important; font-size: 13px !important;
+            background: transparent !important; border: none !important; 
+            color: #8e8e93 !important; font-size: 13px !important; font-weight: 600 !important;
         }
-        .fc-button-active { background: #000 !important; color: #fff !important; }
+        .fc-button-active { color: var(--ios-blue) !important; }
+        .fc-today-button { color: var(--ios-blue) !important; opacity: 1 !important; }
+
+        /* 요일 헤더 디자인 */
+        .fc-col-header-cell-cushion { font-size: 11px; color: #8e8e93; font-weight: 500; }
+        .fc-daygrid-day-number { font-size: 14px; font-weight: 500; padding: 8px !important; color: #1c1c1e; }
         
-        /* 날짜칸 및 이벤트 디자인 */
-        .fc-daygrid-day { border: none !important; }
-        .fc-day-other { opacity: 0; pointer-events: none; } /* 다음달 숨기기 */
-        .fc-daygrid-day-number { font-size: 13px; font-weight: 500; color: #86868b; }
-        .fc-day-today { background: rgba(0, 122, 255, 0.05) !important; border-radius: 15px; }
-        
-        .event-box {
-            font-size: 10px; font-weight: 700; padding: 5px;
-            border-radius: 10px; color: #fff; text-align: center;
-            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s;
-        }
-        .event-box:active { transform: scale(0.95); }
-        .is-completed { 
-            background: #d1d1d6 !important; text-decoration: line-through; 
-            opacity: 0.5; box-shadow: none; 
+        /* 오늘 날짜 표시 (두 번째 이미지 스타일) */
+        .fc-day-today { background: transparent !important; }
+        .fc-day-today .fc-daygrid-day-number { 
+            background: #f19a7a; color: white !important; 
+            border-radius: 50%; display: inline-block; width: 24px; height: 24px; 
+            line-height: 24px; text-align: center; padding: 0 !important; margin: 5px;
         }
 
-        /* 세련된 모달 디자인 */
+        /* 3. 일정 내용 표시 수정 (점 형태 또는 하단 리스트) */
+        .fc-daygrid-event-harness { display: none; } /* 달력 칸 안의 글자 숨김 */
+        .fc-daygrid-day-bottom { 
+            display: flex; justify-content: center; margin-top: -10px; 
+        }
+        .event-dot { 
+            width: 4px; height: 4px; background: #f19a7a; border-radius: 50%; 
+        }
+
+        /* 하단 상세 일정 리스트 (이미지 2 스타일) */
+        #event-list {
+            margin-top: 15px; padding: 0 5px;
+        }
+        .event-item {
+            background: white; border-radius: 15px; padding: 15px;
+            margin-bottom: 10px; display: flex; align-items: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.03);
+            animation: fadeIn 0.4s ease;
+        }
+        @keyframes fadeIn { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: translateY(0); } }
+        
+        .check-box { 
+            width: 22px; height: 22px; border-radius: 6px; 
+            border: 1.5px solid #d1d1d6; margin-right: 12px;
+            display: flex; align-items: center; justify-content: center; font-size: 12px;
+        }
+        .check-box.done { background: #c6e7d1; border-color: #c6e7d1; color: #28C840; }
+        
+        .event-text { flex: 1; }
+        .event-time { font-size: 13px; font-weight: 600; color: #1c1c1e; margin-bottom: 2px; }
+        .event-desc { font-size: 12px; color: #8e8e93; line-height: 1.4; }
+
+        /* 모달 (편집창) */
         #modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.2); backdrop-filter: blur(8px); z-index: 9999;
-            align-items: flex-end; justify-content: center;
+            background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); z-index: 1000;
+            align-items: flex-end;
         }
         .modal-content {
-            background: #fff; width: 100%; max-width: 420px;
-            border-top-left-radius: 30px; border-top-right-radius: 30px;
-            padding: 30px 20px; animation: slideUp 0.3s ease-out;
+            background: #fff; width: 100%; border-radius: 25px 25px 0 0;
+            padding: 25px; box-sizing: border-box;
         }
-        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
-        
-        .modal-body h3 { margin-bottom: 20px; font-weight: 800; font-size: 22px; }
-        .modal-body input {
+        .modal-content input {
             width: 100%; border: none; background: #f2f2f7; border-radius: 12px;
-            padding: 15px; margin-bottom: 15px; font-size: 16px; outline: none;
+            padding: 15px; margin-bottom: 10px; outline: none; box-sizing: border-box;
         }
-        .btn-main {
-            width: 100%; padding: 16px; border: none; border-radius: 15px;
-            font-size: 17px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
+        .btn-group { display: flex; gap: 10px; margin-top: 10px; }
+        .btn-group button { 
+            flex: 1; padding: 15px; border-radius: 12px; border: none; 
+            font-weight: 700; font-size: 15px; cursor: pointer;
         }
-        .save { background: #000; color: #fff; }
-        .complete { background: var(--ios-blue); color: #fff; }
-        .delete { background: #fff; color: #ff3b30; }
-        .cancel { background: #f2f2f7; color: #8e8e93; }
+        .save-btn { background: #1c1c1e; color: #fff; }
+        .cancel-btn { background: #f2f2f7; color: #8e8e93; }
     </style>
 </head>
 <body>
 
+<div id="app-container">
     <div id="calendar-container">
-        <div class="mac-buttons">
-            <div class="dot red"></div> <div class="dot yellow"></div> <div class="dot green"></div>
-        </div>
         <div id='calendar'></div>
     </div>
-
-    <div id="modal">
-        <div class="modal-content">
-            <div class="modal-body">
-                <h3 id="modal-title-text">일정 편집</h3>
-                <input type="text" id="m-title" placeholder="무엇을 하시나요?">
-                <input type="text" id="m-loc" placeholder="어디서 하시나요?">
-                <input type="datetime-local" id="m-start">
-                
-                <button class="btn-main save" onclick="saveEvent()">일정 저장</button>
-                <button class="btn-main complete" onclick="toggleComplete()">완료 체크/해제</button>
-                <button class="btn-main delete" id="btn-delete" onclick="deleteEvent()">일정 삭제</button>
-                <button class="btn-main cancel" onclick="closeModal()">취소</button>
-            </div>
+    
+    <div id="event-list">
         </div>
+</div>
+
+<div id="modal">
+    <div class="modal-content">
+        <h3 style="margin-top:0; font-size:18px;">일정 편집</h3>
+        <input type="text" id="m-title" placeholder="할 일 입력">
+        <input type="text" id="m-loc" placeholder="장소 입력">
+        <input type="datetime-local" id="m-start">
+        <div class="btn-group">
+            <button class="save-btn" onclick="saveEvent()">저장</button>
+            <button class="cancel-btn" onclick="closeModal()">취소</button>
+        </div>
+        <button onclick="deleteEvent()" style="width:100%; background:none; border:none; color:#ff3b30; margin-top:15px; font-size:14px;">일정 삭제</button>
     </div>
+</div>
 
-    <script>
-        let calendar;
-        let selectedEvent = null;
-        const storageKey = 'sleek_planner_v1';
-        let events = JSON.parse(localStorage.getItem(storageKey)) || [
-            { id: '1', title: '비전 게임 OT', start: '2026-04-01T13:00', loc: '진흥원 3층 1교육실', color: '#5856D6', completed: false },
-            { id: '2', title: '포스코 탐방', start: '2026-04-02T12:30', loc: '포스코 홍보관', color: '#34C759', completed: false }
-        ];
+<script>
+    let calendar;
+    let selectedDate = new Date().toISOString().split('T')[0];
+    let selectedEventId = null;
+    const storageKey = 'clean_planner_v2';
+    
+    // 원본 데이터 복구 및 유지
+    let events = JSON.parse(localStorage.getItem(storageKey)) || [
+        { id: '1', title: 'OT: 비전 게임 시작!', start: '2026-04-01T13:00', loc: '미래기술산업진흥원 3층 1교육실', completed: false },
+        { id: '2', title: '청도활동 2', start: '2026-04-02T12:30', loc: '광양시 금호로 187-7 포스코홍보관', completed: false }
+    ];
 
-        document.addEventListener('DOMContentLoaded', function() {
-            const calendarEl = document.getElementById('calendar');
-            calendar = new FullCalendar.Calendar(calendarEl, {
-                initialView: 'dayGridMonth',
-                headerToolbar: { left: 'today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
-                locale: 'ko',
-                fixedWeekCount: false,
-                showNonCurrentDates: false,
-                height: 'auto',
-                events: events.map(ev => ({
-                    id: ev.id, title: ev.title, start: ev.start,
-                    extendedProps: { loc: ev.loc, completed: ev.completed },
-                    backgroundColor: ev.completed ? '#d1d1d6' : (ev.color || '#007AFF'),
-                    borderColor: 'transparent'
-                })),
-                dateClick: (info) => openModal(null, info.dateStr),
-                eventClick: (info) => openModal(info.event),
-                eventContent: (arg) => {
-                    const doneClass = arg.event.extendedProps.completed ? 'is-completed' : '';
-                    return { html: `<div class="event-box ${doneClass}">${arg.event.title}</div>` };
-                }
-            });
-            calendar.render();
+    document.addEventListener('DOMContentLoaded', function() {
+        const calendarEl = document.getElementById('calendar');
+        calendar = new FullCalendar.Calendar(calendarEl, {
+            // 2. 주 단위 설정 (이미지 2의 가로 한 줄 뷰)
+            initialView: 'dayGridMonth',
+            headerToolbar: { left: 'title', center: '', right: 'today prev,next dayGridMonth,dayGridWeek' },
+            locale: 'ko',
+            fixedWeekCount: false,
+            showNonCurrentDates: false,
+            height: 'auto',
+            events: events,
+            dateClick: function(info) {
+                selectedDate = info.dateStr;
+                renderEventList(selectedDate);
+                // 오늘 날짜 강조 효과를 위해 렌더링
+                document.querySelectorAll('.fc-day').forEach(el => el.classList.remove('fc-day-today'));
+                info.dayEl.classList.add('fc-day-today');
+            },
+            eventClick: function(info) {
+                openEditModal(info.event);
+            },
+            // 3. 달력 내 내용 숨기고 점으로 표시
+            dayCellContent: function(arg) {
+                let hasEvent = events.some(e => e.start.startsWith(arg.date.toISOString().split('T')[0]));
+                let dot = hasEvent ? '<div class="event-dot"></div>' : '';
+                return { html: `<div class="fc-daygrid-day-number">${arg.dayNumberText.replace('일','')}</div><div class="fc-daygrid-day-bottom">${dot}</div>` };
+            }
         });
+        calendar.render();
+        renderEventList(selectedDate);
+    });
 
-        function openModal(event, dateStr) {
-            selectedEvent = event;
-            if (event) {
-                document.getElementById('m-title').value = event.title;
-                document.getElementById('m-loc').value = event.extendedProps.loc;
-                document.getElementById('m-start').value = event.startStr.substring(0,16);
-                document.getElementById('btn-delete').style.display = "block";
-            } else {
-                document.getElementById('m-title').value = "";
-                document.getElementById('m-loc').value = "";
-                document.getElementById('m-start').value = dateStr + "T13:00";
-                document.getElementById('btn-delete').style.display = "none";
-            }
-            document.getElementById('modal').style.display = 'flex';
+    // 하단 일정 리스트 렌더링 (이미지 2 스타일)
+    function renderEventList(dateStr) {
+        const listEl = document.getElementById('event-list');
+        const dayEvents = events.filter(e => e.start.startsWith(dateStr));
+        
+        if (dayEvents.length === 0) {
+            listEl.innerHTML = `<div style="text-align:center; color:#8e8e93; font-size:13px; margin-top:20px;">일정이 없습니다.</div>`;
+            return;
         }
 
-        function saveEvent() {
-            const title = document.getElementById('m-title').value;
-            const loc = document.getElementById('m-loc').value;
-            const start = document.getElementById('m-start').value;
-            if (!title) return alert("내용을 입력하세요!");
+        listEl.innerHTML = dayEvents.map(ev => `
+            <div class="event-item" onclick="openEditModalById('${ev.id}')">
+                <div class="check-box ${ev.completed ? 'done' : ''}" onclick="event.stopPropagation(); toggleCheck('${ev.id}')">
+                    ${ev.completed ? '✓' : ''}
+                </div>
+                <div class="event-text">
+                    <div class="event-time">${ev.start.split('T')[1]} ${ev.title}</div>
+                    <div class="event-desc">${ev.loc}</div>
+                </div>
+            </div>
+        `).join('');
+    }
 
-            if (selectedEvent) {
-                const idx = events.findIndex(e => e.id === selectedEvent.id);
-                events[idx] = { ...events[idx], title, loc, start };
-            } else {
-                events.push({ id: Date.now().toString(), title, loc, start, completed: false });
-            }
-            sync();
+    function openEditModal(fcEvent) {
+        selectedEventId = fcEvent.id;
+        const ev = events.find(e => e.id === selectedEventId);
+        document.getElementById('m-title').value = ev.title;
+        document.getElementById('m-loc').value = ev.loc;
+        document.getElementById('m-start').value = ev.start;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function openEditModalById(id) {
+        selectedEventId = id;
+        const ev = events.find(e => e.id === id);
+        document.getElementById('m-title').value = ev.title;
+        document.getElementById('m-loc').value = ev.loc;
+        document.getElementById('m-start').value = ev.start;
+        document.getElementById('modal').style.display = 'flex';
+    }
+
+    function saveEvent() {
+        const title = document.getElementById('m-title').value;
+        const loc = document.getElementById('m-loc').value;
+        const start = document.getElementById('m-start').value;
+        
+        if (selectedEventId) {
+            const idx = events.findIndex(e => e.id === selectedEventId);
+            events[idx] = { ...events[idx], title, loc, start };
         }
+        sync();
+    }
 
-        function deleteEvent() {
-            events = events.filter(e => e.id !== selectedEvent.id);
-            sync();
-        }
+    function deleteEvent() {
+        events = events.filter(e => e.id !== selectedEventId);
+        sync();
+    }
 
-        function toggleComplete() {
-            const idx = events.findIndex(e => e.id === selectedEvent.id);
-            events[idx].completed = !events[idx].completed;
-            sync();
-        }
+    function toggleCheck(id) {
+        const idx = events.findIndex(e => e.id === id);
+        events[idx].completed = !events[idx].completed;
+        sync();
+    }
 
-        function sync() {
-            localStorage.setItem(storageKey, JSON.stringify(events));
-            location.reload();
-        }
+    function sync() {
+        localStorage.setItem(storageKey, JSON.stringify(events));
+        location.reload();
+    }
 
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-    </script>
+    function closeModal() { document.getElementById('modal').style.display = 'none'; }
+</script>
+
 </body>
 </html>
 
