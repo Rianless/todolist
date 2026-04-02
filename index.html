@@ -3,43 +3,88 @@
 <head>
     <meta charset='utf-8' />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>일정 관리 시스템</title>
+    <title>Sleek Planner</title>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         :root {
-            --ios-bg: #F2F2F7;
             --ios-blue: #007AFF;
-            --mac-red: #FF5F57;
-            --mac-yellow: #FFBD2E;
-            --mac-green: #28C840;
+            --bg-glass: rgba(255, 255, 255, 0.7);
+            --border-light: rgba(0, 0, 0, 0.05);
         }
-        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--ios-bg); display: flex; flex-direction: column; align-items: center; }
-        #calendar-container { width: 94%; max-width: 450px; margin: 15px auto; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.06); padding-bottom: 10px; }
-        .mac-buttons { display: flex; gap: 6px; padding: 12px 0 0 12px; }
-        .dot { width: 10px; height: 10px; border-radius: 50%; }
-        .red { background: var(--mac-red); } .yellow { background: var(--mac-yellow); } .green { background: var(--mac-green); }
+        body {
+            margin: 0; padding: 0;
+            background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+            font-family: -apple-system, BlinkMacSystemFont, "SF Pro Display", sans-serif;
+            display: flex; justify-content: center; min-height: 100vh;
+        }
+        #calendar-container {
+            width: 94%; max-width: 420px;
+            margin: 20px auto;
+            background: var(--bg-glass);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border-radius: 30px;
+            border: 1px solid rgba(255,255,255,0.3);
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 15px;
+        }
+        .mac-buttons { display: flex; gap: 7px; margin-bottom: 15px; padding-left: 5px; }
+        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .red { background: #FF5F57; } .yellow { background: #FFBD2E; } .green { background: #28C840; }
 
-        /* 달력 스타일: 다음달 날짜 숨기기 및 주 단위 지원 */
-        .fc { border: none !important; padding: 0 5px; }
-        .fc-day-other { visibility: hidden; } /* 다른 달 날짜 숨기기 */
-        .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; }
-        .fc-button { background: #E9E9EB !important; border: none !important; color: #000 !important; font-size: 12px !important; text-transform: capitalize !important; }
-        .fc-button-active { background: var(--ios-blue) !important; color: #fff !important; }
+        /* 캘린더 커스텀 */
+        .fc { border: none !important; }
+        .fc-toolbar-title { font-size: 1.2rem !important; font-weight: 800; color: #1d1d1f; }
+        .fc-button { 
+            background: rgba(0,0,0,0.05) !important; border: none !important; 
+            color: #1d1d1f !important; border-radius: 12px !important;
+            font-weight: 600 !important; font-size: 13px !important;
+        }
+        .fc-button-active { background: #000 !important; color: #fff !important; }
         
-        .event-box { font-size: 10px; font-weight: 700; padding: 3px; border-radius: 4px; color: #fff; text-align: center; margin: 1px 0; cursor: pointer; }
-        .is-completed { opacity: 0.4; text-decoration: line-through; }
+        /* 날짜칸 및 이벤트 디자인 */
+        .fc-daygrid-day { border: none !important; }
+        .fc-day-other { opacity: 0; pointer-events: none; } /* 다음달 숨기기 */
+        .fc-daygrid-day-number { font-size: 13px; font-weight: 500; color: #86868b; }
+        .fc-day-today { background: rgba(0, 122, 255, 0.05) !important; border-radius: 15px; }
+        
+        .event-box {
+            font-size: 10px; font-weight: 700; padding: 5px;
+            border-radius: 10px; color: #fff; text-align: center;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .event-box:active { transform: scale(0.95); }
+        .is-completed { 
+            background: #d1d1d6 !important; text-decoration: line-through; 
+            opacity: 0.5; box-shadow: none; 
+        }
 
-        /* 모달 스타일 */
-        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center; }
-        .modal-content { background: #fff; border-radius: 15px; width: 85%; max-width: 320px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
-        .modal-body { padding: 20px; }
-        .modal-body input, .modal-body textarea { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 8px; margin-top: 5px; font-size: 14px; box-sizing: border-box; }
-        .modal-label { font-size: 12px; color: #888; margin-top: 10px; display: block; }
+        /* 세련된 모달 디자인 */
+        #modal {
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.2); backdrop-filter: blur(8px); z-index: 9999;
+            align-items: flex-end; justify-content: center;
+        }
+        .modal-content {
+            background: #fff; width: 100%; max-width: 420px;
+            border-top-left-radius: 30px; border-top-right-radius: 30px;
+            padding: 30px 20px; animation: slideUp 0.3s ease-out;
+        }
+        @keyframes slideUp { from { transform: translateY(100%); } to { transform: translateY(0); } }
         
-        .btn-group { display: flex; border-top: 0.5px solid #eee; }
-        .btn-group button { flex: 1; padding: 15px; border: none; background: transparent; font-size: 16px; color: var(--ios-blue); cursor: pointer; }
-        .btn-delete { color: #FF3B30 !important; }
-        .btn-save { font-weight: 700; border-left: 0.5px solid #eee; border-right: 0.5px solid #eee; }
+        .modal-body h3 { margin-bottom: 20px; font-weight: 800; font-size: 22px; }
+        .modal-body input {
+            width: 100%; border: none; background: #f2f2f7; border-radius: 12px;
+            padding: 15px; margin-bottom: 15px; font-size: 16px; outline: none;
+        }
+        .btn-main {
+            width: 100%; padding: 16px; border: none; border-radius: 15px;
+            font-size: 17px; font-weight: 700; cursor: pointer; margin-bottom: 10px;
+        }
+        .save { background: #000; color: #fff; }
+        .complete { background: var(--ios-blue); color: #fff; }
+        .delete { background: #fff; color: #ff3b30; }
+        .cancel { background: #f2f2f7; color: #8e8e93; }
     </style>
 </head>
 <body>
@@ -54,21 +99,15 @@
     <div id="modal">
         <div class="modal-content">
             <div class="modal-body">
-                <h3 id="modal-type-title" style="margin:0 0 15px 0; font-size:17px;">일정 관리</h3>
-                <span class="modal-label">내용</span>
-                <input type="text" id="m-title" placeholder="할 일을 입력하세요">
-                <span class="modal-label">장소</span>
-                <input type="text" id="m-loc" placeholder="장소를 입력하세요">
-                <span class="modal-label">날짜 및 시간</span>
+                <h3 id="modal-title-text">일정 편집</h3>
+                <input type="text" id="m-title" placeholder="무엇을 하시나요?">
+                <input type="text" id="m-loc" placeholder="어디서 하시나요?">
                 <input type="datetime-local" id="m-start">
-            </div>
-            <div class="btn-group">
-                <button class="btn-delete" id="btn-delete" onclick="deleteEvent()">삭제</button>
-                <button class="btn-save" onclick="saveEvent()">저장</button>
-                <button onclick="closeModal()">취소</button>
-            </div>
-            <div class="btn-group" style="border-top: none;">
-                <button style="width:100%; font-weight:700;" onclick="toggleComplete()">체크/해제</button>
+                
+                <button class="btn-main save" onclick="saveEvent()">일정 저장</button>
+                <button class="btn-main complete" onclick="toggleComplete()">완료 체크/해제</button>
+                <button class="btn-main delete" id="btn-delete" onclick="deleteEvent()">일정 삭제</button>
+                <button class="btn-main cancel" onclick="closeModal()">취소</button>
             </div>
         </div>
     </div>
@@ -76,39 +115,32 @@
     <script>
         let calendar;
         let selectedEvent = null;
-        let selectedDate = null;
-        const storageKey = 'user_custom_schedule_v1';
-        
-        // 초기 데이터 (이미지 기반 기본 일정 포함)
-        let customEvents = JSON.parse(localStorage.getItem(storageKey)) || [
-            { id: 'e1', title: '청년 도전! 비전 게임 시작!(OT)', start: '2026-04-01T13:00', loc: '미래기술산업진흥원 3층 1교육실', color: '#FFCC00', completed: false },
-            { id: 'e2', title: '기업탐방(포스코광양제철소)', start: '2026-04-02T12:30', loc: '포스코 홍보관', color: '#34C759', completed: false }
-            // ... 다른 기본 일정들도 여기에 추가 가능
+        const storageKey = 'sleek_planner_v1';
+        let events = JSON.parse(localStorage.getItem(storageKey)) || [
+            { id: '1', title: '비전 게임 OT', start: '2026-04-01T13:00', loc: '진흥원 3층 1교육실', color: '#5856D6', completed: false },
+            { id: '2', title: '포스코 탐방', start: '2026-04-02T12:30', loc: '포스코 홍보관', color: '#34C759', completed: false }
         ];
 
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
+                headerToolbar: { left: 'today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
                 locale: 'ko',
-                fixedWeekCount: false, // 다음달 날짜칸 생성 방지
-                showNonCurrentDates: false, // 다음달 날짜 숨기기
-                dateClick: function(info) {
-                    openModal(null, info.dateStr); // 날짜 클릭 시 새로 추가
-                },
-                eventClick: function(info) {
-                    openModal(info.event); // 기존 일정 클릭 시 수정
-                },
-                events: customEvents.map(ev => ({
-                    id: ev.id, title: ev.title, start: ev.start, 
+                fixedWeekCount: false,
+                showNonCurrentDates: false,
+                height: 'auto',
+                events: events.map(ev => ({
+                    id: ev.id, title: ev.title, start: ev.start,
                     extendedProps: { loc: ev.loc, completed: ev.completed },
-                    backgroundColor: ev.completed ? '#C7C7CC' : (ev.color || '#007AFF'),
-                    borderColor: 'transparent',
-                    className: ev.completed ? 'is-completed' : ''
+                    backgroundColor: ev.completed ? '#d1d1d6' : (ev.color || '#007AFF'),
+                    borderColor: 'transparent'
                 })),
-                eventContent: function(arg) {
-                    return { html: `<div class="event-box">${arg.event.title}</div>` };
+                dateClick: (info) => openModal(null, info.dateStr),
+                eventClick: (info) => openModal(info.event),
+                eventContent: (arg) => {
+                    const doneClass = arg.event.extendedProps.completed ? 'is-completed' : '';
+                    return { html: `<div class="event-box ${doneClass}">${arg.event.title}</div>` };
                 }
             });
             calendar.render();
@@ -117,13 +149,11 @@
         function openModal(event, dateStr) {
             selectedEvent = event;
             if (event) {
-                document.getElementById('modal-type-title').innerText = "일정 수정";
                 document.getElementById('m-title').value = event.title;
-                document.getElementById('m-loc').value = event.extendedProps.loc || '';
-                document.getElementById('m-start').value = event.startStr.substring(0, 16);
+                document.getElementById('m-loc').value = event.extendedProps.loc;
+                document.getElementById('m-start').value = event.startStr.substring(0,16);
                 document.getElementById('btn-delete').style.display = "block";
             } else {
-                document.getElementById('modal-type-title').innerText = "새 일정 추가";
                 document.getElementById('m-title').value = "";
                 document.getElementById('m-loc').value = "";
                 document.getElementById('m-start').value = dateStr + "T13:00";
@@ -136,37 +166,31 @@
             const title = document.getElementById('m-title').value;
             const loc = document.getElementById('m-loc').value;
             const start = document.getElementById('m-start').value;
+            if (!title) return alert("내용을 입력하세요!");
 
             if (selectedEvent) {
-                // 수정
-                const idx = customEvents.findIndex(e => e.id === selectedEvent.id);
-                customEvents[idx] = { ...customEvents[idx], title, loc, start };
+                const idx = events.findIndex(e => e.id === selectedEvent.id);
+                events[idx] = { ...events[idx], title, loc, start };
             } else {
-                // 신규 추가
-                customEvents.push({ id: Date.now().toString(), title, loc, start, completed: false });
+                events.push({ id: Date.now().toString(), title, loc, start, completed: false });
             }
-            
-            updateStorage();
+            sync();
         }
 
         function deleteEvent() {
-            if (confirm("일정을 삭제하시겠습니까?")) {
-                customEvents = customEvents.filter(e => e.id !== selectedEvent.id);
-                updateStorage();
-            }
+            events = events.filter(e => e.id !== selectedEvent.id);
+            sync();
         }
 
         function toggleComplete() {
-            if (selectedEvent) {
-                const idx = customEvents.findIndex(e => e.id === selectedEvent.id);
-                customEvents[idx].completed = !customEvents[idx].completed;
-                updateStorage();
-            }
+            const idx = events.findIndex(e => e.id === selectedEvent.id);
+            events[idx].completed = !events[idx].completed;
+            sync();
         }
 
-        function updateStorage() {
-            localStorage.setItem(storageKey, JSON.stringify(customEvents));
-            location.reload(); // 간단한 UI 갱신을 위해 새로고침
+        function sync() {
+            localStorage.setItem(storageKey, JSON.stringify(events));
+            location.reload();
         }
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
