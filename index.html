@@ -10,7 +10,6 @@
     <style>
         body { margin: 0; padding: 0; background-color: #F2F2F7; -webkit-tap-highlight-color: transparent; }
         * { box-sizing: border-box; }
-        /* 스크롤바 숨기기 */
         ::-webkit-scrollbar { display: none; }
     </style>
 </head>
@@ -210,6 +209,7 @@
             );
         }
 
+        /** [수정됨] 달력 뷰: 제목 대신 시간만 작게 표시 **/
         function MonthlyView({ events, todayStr, monthRef, setMonthRef, onSelect, onDayClick }){
             const y=monthRef.getFullYear(), m=monthRef.getMonth();
             const total=daysInMonth(y,m), first=firstDayOfMonth(y,m);
@@ -242,7 +242,7 @@
                             const dow=ci%7;
                             return (
                                 <div key={ci}
-                                    style={{minHeight:80,borderBottom:"1px solid #F2F2F7",padding:"4px 2px 4px",cursor:day?"pointer":"default",background:isToday?"#FFF5F5":"transparent"}}
+                                    style={{minHeight:60,borderBottom:"1px solid #F2F2F7",padding:"4px 2px 8px",cursor:day?"pointer":"default",background:isToday?"#FFF5F5":"transparent"}}
                                     onClick={()=>ds&&onDayClick(ds)}>
                                     {day&&(
                                         <>
@@ -251,19 +251,20 @@
                                                 color:isToday?"#fff":dow===0?"#FF6B6B":dow===6?"#4D96FF":"#1C1C1E"}}>
                                                 {day}
                                             </div>
-                                            {evs.slice(0,2).map(ev=>{
-                                                const cat=CATEGORY_COLORS[ev.category]||CATEGORY_COLORS["기타"];
-                                                return (
-                                                    <div key={ev.id}
-                                                        style={{borderRadius:4,padding:"1px 3px",marginBottom:2,background:cat.bg,opacity:ev.done?.5:1,cursor:"pointer",overflow:"hidden"}}
-                                                        onClick={e=>{e.stopPropagation();onSelect(ev);}}>
-                                                        <span style={{fontSize:8,fontWeight:700,color:"#fff",display:"block",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
-                                                            {ev.startTime} {ev.title}
-                                                        </span>
-                                                    </div>
-                                                );
-                                            })}
-                                            {evs.length>2&&<div style={{fontSize:9,color:"#8E8E93",paddingLeft:2}}>+{evs.length-2}개</div>}
+                                            <div style={{display:"flex", flexDirection:"column", gap:1}}>
+                                                {evs.map(ev=>{
+                                                    const cat=CATEGORY_COLORS[ev.category]||CATEGORY_COLORS["기타"];
+                                                    return (
+                                                        <div key={ev.id}
+                                                            style={{borderRadius:3,padding:"1px 2px",background:cat.bg,opacity:ev.done?.5:1,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center"}}
+                                                            onClick={e=>{e.stopPropagation();onSelect(ev);}}>
+                                                            <span style={{fontSize:8,fontWeight:800,color:"#fff",lineHeight:1}}>
+                                                                {ev.startTime}
+                                                            </span>
+                                                        </div>
+                                                    );
+                                                })}
+                                            </div>
                                         </>
                                     )}
                                 </div>
@@ -425,3 +426,4 @@
     </script>
 </body>
 </html>
+
