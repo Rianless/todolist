@@ -20,92 +20,59 @@
             background-color: var(--ios-bg);
             display: flex;
             justify-content: center;
+            align-items: flex-start;
+            min-height: 100vh;
         }
         #calendar-container {
-            width: 100%;
-            max-width: 480px;
-            margin: 20px 10px;
+            width: 92%;
+            max-width: 450px;
+            margin: 15px auto;
             background: #fff;
             border-radius: 18px;
             overflow: hidden;
-            box-shadow: 0 10px 30px rgba(0,0,0,0.08);
-            position: relative;
+            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
         }
-
-        /* 왼쪽 상단 신호등 버튼 */
-        .mac-buttons {
-            display: flex;
-            gap: 8px;
-            padding: 15px 0 0 15px;
-        }
-        .dot { width: 12px; height: 12px; border-radius: 50%; }
+        .mac-buttons { display: flex; gap: 6px; padding: 12px 0 0 12px; }
+        .dot { width: 10px; height: 10px; border-radius: 50%; }
         .red { background: var(--mac-red); }
         .yellow { background: var(--mac-yellow); }
         .green { background: var(--mac-green); }
 
-        /* FullCalendar 스타일 */
-        .fc { border: none !important; padding: 5px; }
-        .fc-toolbar { margin-bottom: 10px !important; padding: 0 10px; }
-        .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; color: #1c1c1e; }
-        .fc-button { background: transparent !important; border: none !important; color: var(--ios-blue) !important; font-size: 14px !important; }
+        /* 달력 세로 길이 압축 */
+        .fc { border: none !important; padding: 0 5px 10px 5px; }
+        .fc-view-harness { height: 420px !important; } /* 세로 높이 고정 및 축소 */
+        .fc-toolbar { margin-top: -5px !important; margin-bottom: 5px !important; }
+        .fc-toolbar-title { font-size: 1rem !important; font-weight: 700; }
+        .fc-button { padding: 4px 8px !important; font-size: 13px !important; }
         
-        /* 날짜 및 일정 칸 최적화 */
-        .fc-daygrid-day-number { font-size: 12px; font-weight: 500; padding: 6px !important; color: #3a3a3c; }
-        .fc-event { background: transparent !important; border: none !important; margin: 1px 2px !important; }
+        /* 날짜 칸 간격 축소 */
+        .fc-daygrid-day-number { font-size: 11px; padding: 4px !important; }
+        .fc-daygrid-day-frame { min-height: 60px !important; } /* 칸 높이 줄임 */
+        .fc-event { margin: 1px 1px !important; }
         
         .event-box {
             font-size: 9px;
             font-weight: 700;
-            padding: 3px 0;
-            border-radius: 5px;
+            padding: 2px 0;
+            border-radius: 4px;
             color: #fff;
             text-align: center;
-            letter-spacing: -0.5px;
-            box-shadow: 0 1px 3px rgba(0,0,0,0.1);
+            line-height: 1.1;
         }
+        .is-completed { background-color: #C7C7CC !important; opacity: 0.6; }
 
-        /* 완료 상태 (체크 시 회색 + 체크마크) */
-        .is-completed {
-            background-color: #AEAEB2 !important;
-            opacity: 0.5;
-            position: relative;
-        }
-        .is-completed::after {
-            content: '✓';
-            position: absolute;
-            right: 2px;
-            top: 50%;
-            transform: translateY(-50%);
-            font-size: 8px;
-        }
-
-        /* iOS 모달 */
+        /* 모달 스타일 */
         #modal {
-            display: none;
-            position: fixed;
-            top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.15);
-            backdrop-filter: blur(20px);
-            z-index: 9999;
-            align-items: center;
-            justify-content: center;
+            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.1); backdrop-filter: blur(15px); z-index: 9999;
+            align-items: center; justify-content: center;
         }
-        .modal-content {
-            background: rgba(255, 255, 255, 0.9);
-            border-radius: 14px;
-            width: 270px;
-            text-align: center;
-            overflow: hidden;
-        }
-        .modal-body { padding: 20px; }
-        .modal-title { font-weight: 600; font-size: 17px; margin-bottom: 4px; }
-        .modal-info { font-size: 13px; color: #3c3c43; line-height: 1.4; }
-        
+        .modal-content { background: rgba(255, 255, 255, 0.95); border-radius: 14px; width: 270px; text-align: center; }
+        .modal-body { padding: 18px; }
+        .modal-title { font-weight: 600; font-size: 16px; margin-bottom: 6px; }
+        .modal-info { font-size: 13px; color: #3c3c43; line-height: 1.4; word-break: keep-all; }
         .btn-group { display: flex; border-top: 0.5px solid #c6c6c8; }
-        button {
-            flex: 1; padding: 12px; border: none; background: transparent;
-            font-size: 17px; color: var(--ios-blue); cursor: pointer;
-        }
+        button { flex: 1; padding: 12px; border: none; background: transparent; font-size: 16px; color: var(--ios-blue); cursor: pointer; }
         .btn-complete { font-weight: 600; border-right: 0.5px solid #c6c6c8; }
     </style>
 </head>
@@ -136,7 +103,7 @@
     <script>
         let calendar;
         let currentEventId = null;
-        const storageKey = 'ios_schedule_v3';
+        const storageKey = 'ios_schedule_final_v2';
         let completedIds = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -145,37 +112,30 @@
                 initialView: 'dayGridMonth',
                 initialDate: '2026-04-01',
                 locale: 'ko',
-                height: 'auto',
+                contentHeight: 'auto',
                 headerToolbar: { left: 'today', center: 'title', right: 'prev,next' },
                 events: [
-                    { id: '1', title: 'OT: 비전 게임', start: '2026-04-01T13:00:00', end: '2026-04-01T15:00:00', color: '#FFCC00', loc: '3층 1교육실' },
-                    { id: '2', title: '비즈니스 매너', start: '2026-04-01T15:00:00', end: '2026-04-01T17:00:00', color: '#007AFF', loc: '3층 1교육실' },
-                    { id: '3', title: '포스코 탐방', start: '2026-04-02T12:30:00', end: '2026-04-02T17:30:00', color: '#34C759', loc: '포스코 홍보관' },
-                    { id: '4', title: '트레이 제작', start: '2026-04-06T13:00:00', end: '2026-04-06T17:00:00', color: '#FFCC00', loc: '3층 1교육실' },
-                    { id: '5', title: '집단 심리상담', start: '2026-04-08T14:00:00', end: '2026-04-08T17:00:00', color: '#FF3B30', loc: '3층 1교육실' },
-                    { id: '6', title: '퍼스널 컬러', start: '2026-04-13T13:00:00', end: '2026-04-13T17:00:00', color: '#AF52DE', loc: 'CL미용학원' },
-                    { id: '7', title: '나의 이야기', start: '2026-04-15T13:00:00', end: '2026-04-15T17:00:00', color: '#007AFF', loc: '시민지원센터' },
-                    { id: '8', title: 'TA 자기분석', start: '2026-04-20T13:00:00', end: '2026-04-20T17:00:00', color: '#34C759', loc: '3층 1교육실' },
-                    { id: '9', title: '직업선호도 검사', start: '2026-04-22T14:00:00', end: '2026-04-22T17:00:00', color: '#AF52DE', loc: '시민지원센터' },
-                    { id: '10', title: '청년 퍼실리테이션', start: '2026-04-27T14:00:00', end: '2026-04-27T17:00:00', color: '#34C759', loc: '시민지원센터' },
-                    { id: '11', title: '중독예방교육', start: '2026-04-29T13:00:00', end: '2026-04-29T15:00:00', color: '#FF9500', loc: '2층 교육실' },
-                    { id: '12', title: '원예 활동', start: '2026-04-29T15:00:00', end: '2026-04-29T17:00:00', color: '#AF52DE', loc: '2층 교육실' }
+                    { id: '1', title: 'OT: 비전 게임 시작!', start: '2026-04-01T13:00:00', end: '2026-04-01T15:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '2', title: '비즈니스 매너 및 에티켓', start: '2026-04-01T15:00:00', end: '2026-04-01T17:00:00', color: '#007AFF', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '3', title: '기업탐방(포스코)', start: '2026-04-02T12:30:00', end: '2026-04-02T17:30:00', color: '#34C759', loc: '포스코 홍보관 (광양시 금호로 187-7)' },
+                    { id: '4', title: '트레이 만들기', start: '2026-04-06T13:00:00', end: '2026-04-06T17:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '5', title: '집단심리상담(미술치료)', start: '2026-04-08T14:00:00', end: '2026-04-08T17:00:00', color: '#FF3B30', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '6', title: '퍼스널 컬러 진단', start: '2026-04-13T13:00:00', end: '2026-04-13T17:00:00', color: '#AF52DE', loc: 'CL미용학원 (중앙로 48-1 2층)' },
+                    { id: '7', title: '나의 이야기 만들기', start: '2026-04-15T13:00:00', end: '2026-04-15T17:00:00', color: '#007AFF', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
+                    { id: '8', title: 'TA자기분석', start: '2026-04-20T13:00:00', end: '2026-04-20T17:00:00', color: '#34C759', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '9', title: '진로 로드맵 설계', start: '2026-04-22T14:00:00', end: '2026-04-22T17:00:00', color: '#AF52DE', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
+                    { id: '10', title: '청년 퍼실리테이션', start: '2026-04-27T14:00:00', end: '2026-04-27T17:00:00', color: '#34C759', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
+                    { id: '11', title: '중독예방교육', start: '2026-04-29T13:00:00', end: '2026-04-29T15:00:00', color: '#FF9500', loc: '미래기술산업진흥원 2층 교육실' },
+                    { id: '12', title: '원예 활동', start: '2026-04-29T15:00:00', end: '2026-04-29T17:00:00', color: '#AF52DE', loc: '미래기술산업진흥원 2층 교육실' }
                 ],
                 eventContent: function(arg) {
                     const isDone = completedIds.includes(arg.event.id) ? 'is-completed' : '';
-                    const h = arg.event.start.getHours();
-                    const timeStr = h < 12 ? `오전 ${h}시` : `오후 ${h}시`;
-                    return { 
-                        html: `<div class="event-box ${isDone}" style="background-color:${arg.event.backgroundColor}">${timeStr}</div>` 
-                    };
+                    return { html: `<div class="event-box ${isDone}" style="background-color:${arg.event.backgroundColor}">오후 ${arg.event.start.getHours()}시</div>` };
                 },
                 eventClick: function(info) {
                     currentEventId = info.event.id;
                     document.getElementById('m-title').innerText = info.event.title;
-                    document.getElementById('m-info').innerHTML = `
-                        🕒 ${info.event.start.getHours()}시 ~ ${info.event.end.getHours()}시<br>
-                        📍 ${info.event.extendedProps.loc}
-                    `;
+                    document.getElementById('m-info').innerHTML = `🕒 ${info.event.start.getHours()}시 ~ ${info.event.end.getHours()}시<br>📍 ${info.event.extendedProps.loc}`;
                     document.getElementById('modal').style.display = 'flex';
                 }
             });
@@ -183,15 +143,12 @@
         });
 
         function closeModal() { document.getElementById('modal').style.display = 'none'; }
-
         function toggleComplete() {
             const idx = completedIds.indexOf(currentEventId);
             if (idx > -1) completedIds.splice(idx, 1);
             else completedIds.push(currentEventId);
-            
             localStorage.setItem(storageKey, JSON.stringify(completedIds));
-            // 캘린더 전체 리렌더링으로 체크 상태 즉시 반영
-            calendar.render(); 
+            calendar.render();
             closeModal();
         }
     </script>
