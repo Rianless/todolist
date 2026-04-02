@@ -3,7 +3,7 @@
 <head>
     <meta charset='utf-8' />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>My Schedule</title>
+    <title>중기 3기 일정 관리</title>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         :root {
@@ -14,23 +14,16 @@
             --mac-green: #28C840;
         }
         body {
-            margin: 0;
-            padding: 0;
+            margin: 0; padding: 0;
             font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
             background-color: var(--ios-bg);
-            display: flex;
-            justify-content: center;
-            align-items: flex-start;
-            min-height: 100vh;
+            display: flex; justify-content: center;
         }
         #calendar-container {
-            width: 92%;
-            max-width: 450px;
+            width: 94%; max-width: 450px;
             margin: 15px auto;
-            background: #fff;
-            border-radius: 18px;
-            overflow: hidden;
-            box-shadow: 0 8px 25px rgba(0,0,0,0.06);
+            background: #fff; border-radius: 18px;
+            overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.06);
         }
         .mac-buttons { display: flex; gap: 6px; padding: 12px 0 0 12px; }
         .dot { width: 10px; height: 10px; border-radius: 50%; }
@@ -38,41 +31,42 @@
         .yellow { background: var(--mac-yellow); }
         .green { background: var(--mac-green); }
 
-        /* 달력 세로 길이 압축 */
+        /* 달력 세로 길이 및 칸 높이 압축 */
         .fc { border: none !important; padding: 0 5px 10px 5px; }
-        .fc-view-harness { height: 420px !important; } /* 세로 높이 고정 및 축소 */
+        .fc-view-harness { height: 430px !important; } 
         .fc-toolbar { margin-top: -5px !important; margin-bottom: 5px !important; }
         .fc-toolbar-title { font-size: 1rem !important; font-weight: 700; }
         .fc-button { padding: 4px 8px !important; font-size: 13px !important; }
         
-        /* 날짜 칸 간격 축소 */
         .fc-daygrid-day-number { font-size: 11px; padding: 4px !important; }
-        .fc-daygrid-day-frame { min-height: 60px !important; } /* 칸 높이 줄임 */
-        .fc-event { margin: 1px 1px !important; }
+        .fc-daygrid-day-frame { min-height: 65px !important; } 
         
         .event-box {
-            font-size: 9px;
-            font-weight: 700;
-            padding: 2px 0;
-            border-radius: 4px;
-            color: #fff;
-            text-align: center;
-            line-height: 1.1;
+            font-size: 9px; font-weight: 700; padding: 2px 0;
+            border-radius: 4px; color: #fff; text-align: center;
         }
-        .is-completed { background-color: #C7C7CC !important; opacity: 0.6; }
+        /* 완료 시 시각적 처리 */
+        .is-completed { background-color: #C7C7CC !important; opacity: 0.6; text-decoration: line-through; position: relative; }
+        .is-completed::after { content: '✓'; position: absolute; right: 2px; font-size: 8px; }
 
-        /* 모달 스타일 */
+        /* 모달: 장소 텍스트 줄바꿈 및 너비 최적화 */
         #modal {
             display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.1); backdrop-filter: blur(15px); z-index: 9999;
+            background: rgba(0,0,0,0.15); backdrop-filter: blur(15px); z-index: 9999;
             align-items: center; justify-content: center;
         }
-        .modal-content { background: rgba(255, 255, 255, 0.95); border-radius: 14px; width: 270px; text-align: center; }
-        .modal-body { padding: 18px; }
-        .modal-title { font-weight: 600; font-size: 16px; margin-bottom: 6px; }
-        .modal-info { font-size: 13px; color: #3c3c43; line-height: 1.4; word-break: keep-all; }
+        .modal-content { 
+            background: rgba(255, 255, 255, 0.95); border-radius: 14px; 
+            width: 300px; text-align: center; overflow: hidden;
+        }
+        .modal-body { padding: 20px; text-align: left; }
+        .modal-title { font-weight: 700; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3; }
+        .modal-info { 
+            font-size: 14px; color: #3c3c43; line-height: 1.6; 
+            word-break: keep-all; overflow-wrap: break-word; /* 장소 안 잘리게 설정 */
+        }
         .btn-group { display: flex; border-top: 0.5px solid #c6c6c8; }
-        button { flex: 1; padding: 12px; border: none; background: transparent; font-size: 16px; color: var(--ios-blue); cursor: pointer; }
+        button { flex: 1; padding: 14px; border: none; background: transparent; font-size: 17px; color: var(--ios-blue); cursor: pointer; }
         .btn-complete { font-weight: 600; border-right: 0.5px solid #c6c6c8; }
     </style>
 </head>
@@ -103,7 +97,7 @@
     <script>
         let calendar;
         let currentEventId = null;
-        const storageKey = 'ios_schedule_final_v2';
+        const storageKey = 'my_local_schedule_v5'; // 독립 저장 키
         let completedIds = JSON.parse(localStorage.getItem(storageKey) || '[]');
 
         document.addEventListener('DOMContentLoaded', function() {
@@ -115,18 +109,18 @@
                 contentHeight: 'auto',
                 headerToolbar: { left: 'today', center: 'title', right: 'prev,next' },
                 events: [
-                    { id: '1', title: 'OT: 비전 게임 시작!', start: '2026-04-01T13:00:00', end: '2026-04-01T15:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '1', title: 'OT: 청년 도전! 비전 게임 시작!', start: '2026-04-01T13:00:00', end: '2026-04-01T15:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
                     { id: '2', title: '비즈니스 매너 및 에티켓', start: '2026-04-01T15:00:00', end: '2026-04-01T17:00:00', color: '#007AFF', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '3', title: '기업탐방(포스코)', start: '2026-04-02T12:30:00', end: '2026-04-02T17:30:00', color: '#34C759', loc: '포스코 홍보관 (광양시 금호로 187-7)' },
-                    { id: '4', title: '트레이 만들기', start: '2026-04-06T13:00:00', end: '2026-04-06T17:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '3', title: '기업탐방(포스코광양제철소)', start: '2026-04-02T12:30:00', end: '2026-04-02T17:30:00', color: '#34C759', loc: '포스코 홍보관 (광양시 금호로 187-7)' },
+                    { id: '4', title: '스테인드글라스 트레이 만들기', start: '2026-04-06T13:00:00', end: '2026-04-06T17:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
                     { id: '5', title: '집단심리상담(미술치료)', start: '2026-04-08T14:00:00', end: '2026-04-08T17:00:00', color: '#FF3B30', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '6', title: '퍼스널 컬러 진단', start: '2026-04-13T13:00:00', end: '2026-04-13T17:00:00', color: '#AF52DE', loc: 'CL미용학원 (중앙로 48-1 2층)' },
-                    { id: '7', title: '나의 이야기 만들기', start: '2026-04-15T13:00:00', end: '2026-04-15T17:00:00', color: '#007AFF', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
-                    { id: '8', title: 'TA자기분석', start: '2026-04-20T13:00:00', end: '2026-04-20T17:00:00', color: '#34C759', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '9', title: '진로 로드맵 설계', start: '2026-04-22T14:00:00', end: '2026-04-22T17:00:00', color: '#AF52DE', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
-                    { id: '10', title: '청년 퍼실리테이션', start: '2026-04-27T14:00:00', end: '2026-04-27T17:00:00', color: '#34C759', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
+                    { id: '6', title: '이미지메이킹(퍼스널 컬러)', start: '2026-04-13T13:00:00', end: '2026-04-13T17:00:00', color: '#AF52DE', loc: 'CL미용학원 (중앙로 48-1 2층)' },
+                    { id: '7', title: '경험과 강점으로 여는 나의 이야기', start: '2026-04-15T13:00:00', end: '2026-04-15T17:00:00', color: '#007AFF', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
+                    { id: '8', title: 'TA자기분석 및 강점활용', start: '2026-04-20T13:00:00', end: '2026-04-20T17:00:00', color: '#34C759', loc: '미래기술산업진흥원 3층 1교육실' },
+                    { id: '9', title: '직업선호도 검사 및 진로 로드맵', start: '2026-04-22T14:00:00', end: '2026-04-22T17:00:00', color: '#AF52DE', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
+                    { id: '10', title: '순천 청년 퍼실리테이션', start: '2026-04-27T14:00:00', end: '2026-04-27T17:00:00', color: '#34C759', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
                     { id: '11', title: '중독예방교육', start: '2026-04-29T13:00:00', end: '2026-04-29T15:00:00', color: '#FF9500', loc: '미래기술산업진흥원 2층 교육실' },
-                    { id: '12', title: '원예 활동', start: '2026-04-29T15:00:00', end: '2026-04-29T17:00:00', color: '#AF52DE', loc: '미래기술산업진흥원 2층 교육실' }
+                    { id: '12', title: '나의 작은 정원(원예)', start: '2026-04-29T15:00:00', end: '2026-04-29T17:00:00', color: '#AF52DE', loc: '미래기술산업진흥원 2층 교육실' }
                 ],
                 eventContent: function(arg) {
                     const isDone = completedIds.includes(arg.event.id) ? 'is-completed' : '';
@@ -135,7 +129,7 @@
                 eventClick: function(info) {
                     currentEventId = info.event.id;
                     document.getElementById('m-title').innerText = info.event.title;
-                    document.getElementById('m-info').innerHTML = `🕒 ${info.event.start.getHours()}시 ~ ${info.event.end.getHours()}시<br>📍 ${info.event.extendedProps.loc}`;
+                    document.getElementById('m-info').innerHTML = `<b>시간:</b> ${info.event.start.getHours()}시 ~ ${info.event.end.getHours()}시<br><b>장소:</b> ${info.event.extendedProps.loc}`;
                     document.getElementById('modal').style.display = 'flex';
                 }
             });
