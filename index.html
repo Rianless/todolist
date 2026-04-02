@@ -3,7 +3,7 @@
 <head>
     <meta charset='utf-8' />
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>중기 3기 일정 관리</title>
+    <title>일정 관리 시스템</title>
     <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
     <style>
         :root {
@@ -13,70 +13,40 @@
             --mac-yellow: #FFBD2E;
             --mac-green: #28C840;
         }
-        body {
-            margin: 0; padding: 0;
-            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-            background-color: var(--ios-bg);
-            display: flex; justify-content: center;
-        }
-        #calendar-container {
-            width: 94%; max-width: 450px;
-            margin: 15px auto;
-            background: #fff; border-radius: 18px;
-            overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.06);
-        }
+        body { margin: 0; padding: 0; font-family: -apple-system, BlinkMacSystemFont, sans-serif; background-color: var(--ios-bg); display: flex; flex-direction: column; align-items: center; }
+        #calendar-container { width: 94%; max-width: 450px; margin: 15px auto; background: #fff; border-radius: 18px; overflow: hidden; box-shadow: 0 8px 25px rgba(0,0,0,0.06); padding-bottom: 10px; }
         .mac-buttons { display: flex; gap: 6px; padding: 12px 0 0 12px; }
         .dot { width: 10px; height: 10px; border-radius: 50%; }
-        .red { background: var(--mac-red); }
-        .yellow { background: var(--mac-yellow); }
-        .green { background: var(--mac-green); }
+        .red { background: var(--mac-red); } .yellow { background: var(--mac-yellow); } .green { background: var(--mac-green); }
 
-        /* 달력 세로 길이 및 칸 높이 압축 */
-        .fc { border: none !important; padding: 0 5px 10px 5px; }
-        .fc-view-harness { height: 430px !important; } 
-        .fc-toolbar { margin-top: -5px !important; margin-bottom: 5px !important; }
-        .fc-toolbar-title { font-size: 1rem !important; font-weight: 700; }
-        .fc-button { padding: 4px 8px !important; font-size: 13px !important; }
+        /* 달력 스타일: 다음달 날짜 숨기기 및 주 단위 지원 */
+        .fc { border: none !important; padding: 0 5px; }
+        .fc-day-other { visibility: hidden; } /* 다른 달 날짜 숨기기 */
+        .fc-toolbar-title { font-size: 1.1rem !important; font-weight: 700; }
+        .fc-button { background: #E9E9EB !important; border: none !important; color: #000 !important; font-size: 12px !important; text-transform: capitalize !important; }
+        .fc-button-active { background: var(--ios-blue) !important; color: #fff !important; }
         
-        .fc-daygrid-day-number { font-size: 11px; padding: 4px !important; }
-        .fc-daygrid-day-frame { min-height: 65px !important; } 
-        
-        .event-box {
-            font-size: 9px; font-weight: 700; padding: 2px 0;
-            border-radius: 4px; color: #fff; text-align: center;
-        }
-        /* 완료 시 시각적 처리 */
-        .is-completed { background-color: #C7C7CC !important; opacity: 0.6; text-decoration: line-through; position: relative; }
-        .is-completed::after { content: '✓'; position: absolute; right: 2px; font-size: 8px; }
+        .event-box { font-size: 10px; font-weight: 700; padding: 3px; border-radius: 4px; color: #fff; text-align: center; margin: 1px 0; cursor: pointer; }
+        .is-completed { opacity: 0.4; text-decoration: line-through; }
 
-        /* 모달: 장소 텍스트 줄바꿈 및 너비 최적화 */
-        #modal {
-            display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: rgba(0,0,0,0.15); backdrop-filter: blur(15px); z-index: 9999;
-            align-items: center; justify-content: center;
-        }
-        .modal-content { 
-            background: rgba(255, 255, 255, 0.95); border-radius: 14px; 
-            width: 300px; text-align: center; overflow: hidden;
-        }
-        .modal-body { padding: 20px; text-align: left; }
-        .modal-title { font-weight: 700; font-size: 17px; margin-bottom: 10px; color: #000; line-height: 1.3; }
-        .modal-info { 
-            font-size: 14px; color: #3c3c43; line-height: 1.6; 
-            word-break: keep-all; overflow-wrap: break-word; /* 장소 안 잘리게 설정 */
-        }
-        .btn-group { display: flex; border-top: 0.5px solid #c6c6c8; }
-        button { flex: 1; padding: 14px; border: none; background: transparent; font-size: 17px; color: var(--ios-blue); cursor: pointer; }
-        .btn-complete { font-weight: 600; border-right: 0.5px solid #c6c6c8; }
+        /* 모달 스타일 */
+        #modal { display: none; position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: rgba(0,0,0,0.3); backdrop-filter: blur(10px); z-index: 10000; align-items: center; justify-content: center; }
+        .modal-content { background: #fff; border-radius: 15px; width: 85%; max-width: 320px; overflow: hidden; box-shadow: 0 20px 40px rgba(0,0,0,0.2); }
+        .modal-body { padding: 20px; }
+        .modal-body input, .modal-body textarea { width: 100%; border: 1px solid #ddd; border-radius: 8px; padding: 8px; margin-top: 5px; font-size: 14px; box-sizing: border-box; }
+        .modal-label { font-size: 12px; color: #888; margin-top: 10px; display: block; }
+        
+        .btn-group { display: flex; border-top: 0.5px solid #eee; }
+        .btn-group button { flex: 1; padding: 15px; border: none; background: transparent; font-size: 16px; color: var(--ios-blue); cursor: pointer; }
+        .btn-delete { color: #FF3B30 !important; }
+        .btn-save { font-weight: 700; border-left: 0.5px solid #eee; border-right: 0.5px solid #eee; }
     </style>
 </head>
 <body>
 
     <div id="calendar-container">
         <div class="mac-buttons">
-            <div class="dot red"></div>
-            <div class="dot yellow"></div>
-            <div class="dot green"></div>
+            <div class="dot red"></div> <div class="dot yellow"></div> <div class="dot green"></div>
         </div>
         <div id='calendar'></div>
     </div>
@@ -84,67 +54,122 @@
     <div id="modal">
         <div class="modal-content">
             <div class="modal-body">
-                <div id="m-title" class="modal-title"></div>
-                <div id="m-info" class="modal-info"></div>
+                <h3 id="modal-type-title" style="margin:0 0 15px 0; font-size:17px;">일정 관리</h3>
+                <span class="modal-label">내용</span>
+                <input type="text" id="m-title" placeholder="할 일을 입력하세요">
+                <span class="modal-label">장소</span>
+                <input type="text" id="m-loc" placeholder="장소를 입력하세요">
+                <span class="modal-label">날짜 및 시간</span>
+                <input type="datetime-local" id="m-start">
             </div>
             <div class="btn-group">
-                <button class="btn-complete" onclick="toggleComplete()">체크/해제</button>
-                <button onclick="closeModal()">닫기</button>
+                <button class="btn-delete" id="btn-delete" onclick="deleteEvent()">삭제</button>
+                <button class="btn-save" onclick="saveEvent()">저장</button>
+                <button onclick="closeModal()">취소</button>
+            </div>
+            <div class="btn-group" style="border-top: none;">
+                <button style="width:100%; font-weight:700;" onclick="toggleComplete()">체크/해제</button>
             </div>
         </div>
     </div>
 
     <script>
         let calendar;
-        let currentEventId = null;
-        const storageKey = 'my_local_schedule_v5'; // 독립 저장 키
-        let completedIds = JSON.parse(localStorage.getItem(storageKey) || '[]');
+        let selectedEvent = null;
+        let selectedDate = null;
+        const storageKey = 'user_custom_schedule_v1';
+        
+        // 초기 데이터 (이미지 기반 기본 일정 포함)
+        let customEvents = JSON.parse(localStorage.getItem(storageKey)) || [
+            { id: 'e1', title: '청년 도전! 비전 게임 시작!(OT)', start: '2026-04-01T13:00', loc: '미래기술산업진흥원 3층 1교육실', color: '#FFCC00', completed: false },
+            { id: 'e2', title: '기업탐방(포스코광양제철소)', start: '2026-04-02T12:30', loc: '포스코 홍보관', color: '#34C759', completed: false }
+            // ... 다른 기본 일정들도 여기에 추가 가능
+        ];
 
         document.addEventListener('DOMContentLoaded', function() {
             const calendarEl = document.getElementById('calendar');
             calendar = new FullCalendar.Calendar(calendarEl, {
                 initialView: 'dayGridMonth',
-                initialDate: '2026-04-01',
+                headerToolbar: { left: 'prev,next today', center: 'title', right: 'dayGridMonth,timeGridWeek' },
                 locale: 'ko',
-                contentHeight: 'auto',
-                headerToolbar: { left: 'today', center: 'title', right: 'prev,next' },
-                events: [
-                    { id: '1', title: 'OT: 청년 도전! 비전 게임 시작!', start: '2026-04-01T13:00:00', end: '2026-04-01T15:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '2', title: '비즈니스 매너 및 에티켓', start: '2026-04-01T15:00:00', end: '2026-04-01T17:00:00', color: '#007AFF', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '3', title: '기업탐방(포스코광양제철소)', start: '2026-04-02T12:30:00', end: '2026-04-02T17:30:00', color: '#34C759', loc: '포스코 홍보관 (광양시 금호로 187-7)' },
-                    { id: '4', title: '스테인드글라스 트레이 만들기', start: '2026-04-06T13:00:00', end: '2026-04-06T17:00:00', color: '#FFCC00', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '5', title: '집단심리상담(미술치료)', start: '2026-04-08T14:00:00', end: '2026-04-08T17:00:00', color: '#FF3B30', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '6', title: '이미지메이킹(퍼스널 컬러)', start: '2026-04-13T13:00:00', end: '2026-04-13T17:00:00', color: '#AF52DE', loc: 'CL미용학원 (중앙로 48-1 2층)' },
-                    { id: '7', title: '경험과 강점으로 여는 나의 이야기', start: '2026-04-15T13:00:00', end: '2026-04-15T17:00:00', color: '#007AFF', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
-                    { id: '8', title: 'TA자기분석 및 강점활용', start: '2026-04-20T13:00:00', end: '2026-04-20T17:00:00', color: '#34C759', loc: '미래기술산업진흥원 3층 1교육실' },
-                    { id: '9', title: '직업선호도 검사 및 진로 로드맵', start: '2026-04-22T14:00:00', end: '2026-04-22T17:00:00', color: '#AF52DE', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
-                    { id: '10', title: '순천 청년 퍼실리테이션', start: '2026-04-27T14:00:00', end: '2026-04-27T17:00:00', color: '#34C759', loc: '시민공익활동지원센터 (중앙시장길 31 2층)' },
-                    { id: '11', title: '중독예방교육', start: '2026-04-29T13:00:00', end: '2026-04-29T15:00:00', color: '#FF9500', loc: '미래기술산업진흥원 2층 교육실' },
-                    { id: '12', title: '나의 작은 정원(원예)', start: '2026-04-29T15:00:00', end: '2026-04-29T17:00:00', color: '#AF52DE', loc: '미래기술산업진흥원 2층 교육실' }
-                ],
-                eventContent: function(arg) {
-                    const isDone = completedIds.includes(arg.event.id) ? 'is-completed' : '';
-                    return { html: `<div class="event-box ${isDone}" style="background-color:${arg.event.backgroundColor}">오후 ${arg.event.start.getHours()}시</div>` };
+                fixedWeekCount: false, // 다음달 날짜칸 생성 방지
+                showNonCurrentDates: false, // 다음달 날짜 숨기기
+                dateClick: function(info) {
+                    openModal(null, info.dateStr); // 날짜 클릭 시 새로 추가
                 },
                 eventClick: function(info) {
-                    currentEventId = info.event.id;
-                    document.getElementById('m-title').innerText = info.event.title;
-                    document.getElementById('m-info').innerHTML = `<b>시간:</b> ${info.event.start.getHours()}시 ~ ${info.event.end.getHours()}시<br><b>장소:</b> ${info.event.extendedProps.loc}`;
-                    document.getElementById('modal').style.display = 'flex';
+                    openModal(info.event); // 기존 일정 클릭 시 수정
+                },
+                events: customEvents.map(ev => ({
+                    id: ev.id, title: ev.title, start: ev.start, 
+                    extendedProps: { loc: ev.loc, completed: ev.completed },
+                    backgroundColor: ev.completed ? '#C7C7CC' : (ev.color || '#007AFF'),
+                    borderColor: 'transparent',
+                    className: ev.completed ? 'is-completed' : ''
+                })),
+                eventContent: function(arg) {
+                    return { html: `<div class="event-box">${arg.event.title}</div>` };
                 }
             });
             calendar.render();
         });
 
-        function closeModal() { document.getElementById('modal').style.display = 'none'; }
-        function toggleComplete() {
-            const idx = completedIds.indexOf(currentEventId);
-            if (idx > -1) completedIds.splice(idx, 1);
-            else completedIds.push(currentEventId);
-            localStorage.setItem(storageKey, JSON.stringify(completedIds));
-            calendar.render();
-            closeModal();
+        function openModal(event, dateStr) {
+            selectedEvent = event;
+            if (event) {
+                document.getElementById('modal-type-title').innerText = "일정 수정";
+                document.getElementById('m-title').value = event.title;
+                document.getElementById('m-loc').value = event.extendedProps.loc || '';
+                document.getElementById('m-start').value = event.startStr.substring(0, 16);
+                document.getElementById('btn-delete').style.display = "block";
+            } else {
+                document.getElementById('modal-type-title').innerText = "새 일정 추가";
+                document.getElementById('m-title').value = "";
+                document.getElementById('m-loc').value = "";
+                document.getElementById('m-start').value = dateStr + "T13:00";
+                document.getElementById('btn-delete').style.display = "none";
+            }
+            document.getElementById('modal').style.display = 'flex';
         }
+
+        function saveEvent() {
+            const title = document.getElementById('m-title').value;
+            const loc = document.getElementById('m-loc').value;
+            const start = document.getElementById('m-start').value;
+
+            if (selectedEvent) {
+                // 수정
+                const idx = customEvents.findIndex(e => e.id === selectedEvent.id);
+                customEvents[idx] = { ...customEvents[idx], title, loc, start };
+            } else {
+                // 신규 추가
+                customEvents.push({ id: Date.now().toString(), title, loc, start, completed: false });
+            }
+            
+            updateStorage();
+        }
+
+        function deleteEvent() {
+            if (confirm("일정을 삭제하시겠습니까?")) {
+                customEvents = customEvents.filter(e => e.id !== selectedEvent.id);
+                updateStorage();
+            }
+        }
+
+        function toggleComplete() {
+            if (selectedEvent) {
+                const idx = customEvents.findIndex(e => e.id === selectedEvent.id);
+                customEvents[idx].completed = !customEvents[idx].completed;
+                updateStorage();
+            }
+        }
+
+        function updateStorage() {
+            localStorage.setItem(storageKey, JSON.stringify(customEvents));
+            location.reload(); // 간단한 UI 갱신을 위해 새로고침
+        }
+
+        function closeModal() { document.getElementById('modal').style.display = 'none'; }
     </script>
 </body>
 </html>
