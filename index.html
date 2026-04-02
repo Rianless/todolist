@@ -2,106 +2,141 @@
 <html lang="ko">
 <head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0">
+<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
 <title>1회차 프로그램</title>
 <style>
-* { box-sizing: border-box; margin: 0; padding: 0; }
-body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F2F2F7; }
-#app { max-width: 430px; margin: 0 auto; min-height: 100vh; display: flex; flex-direction: column; }
-#header { background: #fff; padding: 48px 20px 0; box-shadow: 0 1px 0 rgba(0,0,0,0.07); position: sticky; top: 0; z-index: 10; }
-.header-top { display: flex; justify-content: space-between; align-items: flex-start; margin-bottom: 4px; }
-.header-sub { font-size: 11px; color: #8E8E93; font-weight: 500; letter-spacing: 0.3px; }
-.header-title { font-size: 23px; font-weight: 800; color: #1C1C1E; letter-spacing: -0.5px; }
-#plus-btn { width: 34px; height: 34px; border-radius: 17px; background: #1C1C1E; border: none; color: #fff; font-size: 22px; cursor: pointer; display: flex; align-items: center; justify-content: center; flex-shrink: 0; line-height: 1; }
-.prog-wrap { margin-bottom: 14px; }
-.prog-top { display: flex; justify-content: space-between; margin-bottom: 5px; font-size: 11px; color: #8E8E93; }
-.prog-count { font-weight: 700; color: #34C759; }
-.prog-bar { height: 5px; background: #E5E5EA; border-radius: 3px; overflow: hidden; }
-.prog-fill { height: 100%; background: linear-gradient(90deg,#34C759,#30D158); border-radius: 3px; transition: width .4s ease; }
-.seg { display: flex; background: #F2F2F7; border-radius: 12px; padding: 3px; margin-bottom: 12px; }
-.seg-btn { flex: 1; padding: 7px 0; border-radius: 9px; border: none; background: transparent; font-size: 13px; font-weight: 600; color: #8E8E93; cursor: pointer; }
-.seg-btn.active { background: #fff; color: #1C1C1E; box-shadow: 0 1px 4px rgba(0,0,0,0.12); }
-.legend { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
+* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F2F2F7; }
+
+#app { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
+
+/* ── HEADER ── */
+#header { background: #fff; padding: 12px 14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.08); flex-shrink: 0; }
+.hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 6px; }
+.hdr-left { display: flex; align-items: baseline; gap: 5px; }
+.hdr-sub  { font-size: 11px; color: #8E8E93; font-weight: 500; }
+.hdr-ttl  { font-size: 17px; font-weight: 800; color: #1C1C1E; letter-spacing: -.5px; }
+.hdr-right { display: flex; align-items: center; gap: 7px; }
+.prog-wrap { display: flex; align-items: center; gap: 5px; }
+.prog-bar  { width: 54px; height: 4px; background: #E5E5EA; border-radius: 2px; overflow: hidden; }
+.prog-fill { height: 100%; background: linear-gradient(90deg,#34C759,#30D158); border-radius: 2px; transition: width .4s; }
+.prog-lbl  { font-size: 11px; font-weight: 700; color: #34C759; min-width: 28px; }
+
+/* icon buttons */
+.ibtn { width: 28px; height: 28px; border-radius: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
+.ibtn-dark { background: #1C1C1E; color: #fff; font-size: 20px; }
+.ibtn-gray { background: #F2F2F7; color: #8E8E93; font-weight: 700; }
+.ibtn-today { background: #FF6B6B; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: -.3px; width: auto; padding: 0 7px; border-radius: 8px; height: 24px; }
+
+/* seg */
+.seg { display: flex; background: #F2F2F7; border-radius: 10px; padding: 2px; margin-bottom: 5px; }
+.seg-btn { flex: 1; padding: 5px 0; border-radius: 8px; border: none; background: transparent; font-size: 12px; font-weight: 600; color: #8E8E93; cursor: pointer; }
+.seg-btn.active { background: #fff; color: #1C1C1E; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+
+/* legend */
+.legend { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 6px; scrollbar-width: none; }
 .legend::-webkit-scrollbar { display: none; }
-.legend-item { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
-.legend-dot { width: 7px; height: 7px; border-radius: 3.5px; }
-.legend-label { font-size: 9px; color: #8E8E93; white-space: nowrap; }
-#view { flex: 1; overflow-y: auto; }
-.week-nav { display: flex; align-items: center; justify-content: space-between; padding: 14px 20px 10px; }
-.nav-btn { background: none; border: none; font-size: 26px; color: #8E8E93; cursor: pointer; padding: 0 10px; line-height: 1; }
-.nav-label { font-size: 15px; font-weight: 700; color: #1C1C1E; }
-.mini-strip { display: flex; justify-content: space-around; padding: 0 16px 12px; }
-.mini-day { display: flex; flex-direction: column; align-items: center; gap: 3px; }
-.mini-dow { font-size: 10px; font-weight: 600; }
-.mini-num { width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-.mini-dot { width: 4px; height: 4px; border-radius: 2px; }
-.day-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 8px; padding-left: 4px; }
-.day-hdr-date { font-size: 15px; font-weight: 700; }
-.day-hdr-sub { font-size: 13px; color: #8E8E93; font-weight: 500; }
-.today-badge { font-size: 10px; font-weight: 700; background: #FF6B6B; color: #fff; padding: 2px 7px; border-radius: 8px; }
-.card { background: #fff; border-radius: 14px; display: flex; align-items: center; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,0.06); cursor: pointer; margin-bottom: 8px; }
+.legend-item { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
+.legend-dot  { width: 6px; height: 6px; border-radius: 3px; }
+.legend-lbl  { font-size: 9px; color: #8E8E93; white-space: nowrap; }
+
+/* cal nav (inside header) */
+.cal-nav { display: flex; align-items: center; justify-content: space-between; padding: 3px 0 5px; }
+.nav-btn  { background: none; border: none; font-size: 22px; color: #8E8E93; cursor: pointer; padding: 0 6px; line-height: 1; }
+.nav-lbl  { font-size: 14px; font-weight: 700; color: #1C1C1E; }
+
+/* dow row */
+.dow-row { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid #F2F2F7; padding: 0 14px; }
+.dow-cell { text-align: center; font-size: 10px; font-weight: 700; padding: 4px 0; letter-spacing: .3px; }
+
+/* week strip */
+.week-strip { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid #F2F2F7; padding: 5px 0 7px; }
+.ws-day { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
+.ws-dow { font-size: 10px; font-weight: 600; }
+.ws-num { width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
+.ws-dot { width: 4px; height: 4px; border-radius: 2px; }
+
+/* ── MONTH GRID ── */
+#view { flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+.month-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 14px; }
+/* cell height set dynamically by JS */
+.month-cell { border-bottom: 1px solid #F2F2F7; border-right: 1px solid #F2F2F7; padding: 2px 3px 1px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; }
+.month-cell:nth-child(7n) { border-right: none; }
+.month-num { width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-bottom: 1px; }
+.month-ev { border-radius: 3px; padding: 1px 4px; margin-bottom: 1px; overflow: hidden; cursor: pointer; flex-shrink: 0; width: fit-content; max-width: 100%; }
+.month-ev-time { font-size: 8px; font-weight: 700; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.month-ev-title { font-size: 8px; color: rgba(255,255,255,.9); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.month-more { font-size: 8px; color: #8E8E93; padding-left: 1px; }
+
+/* ── WEEK CARDS ── */
+.week-cards { padding: 10px 14px 40px; display: flex; flex-direction: column; gap: 14px; }
+.day-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; padding-left: 2px; }
+.day-hdr-date { font-size: 14px; font-weight: 700; }
+.day-hdr-sub { font-size: 12px; color: #8E8E93; font-weight: 500; }
+.today-badge { font-size: 9px; font-weight: 800; background: #FF6B6B; color: #fff; padding: 2px 6px; border-radius: 7px; }
+
+/* cards */
+.card { background: #fff; border-radius: 12px; display: flex; align-items: center; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); cursor: pointer; margin-bottom: 7px; }
 .card-line { width: 4px; align-self: stretch; flex-shrink: 0; }
-.card-body { flex: 1; padding: 10px 10px 10px 12px; min-width: 0; }
-.card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
-.cat-badge { font-size: 10px; font-weight: 700; padding: 2px 7px; border-radius: 8px; letter-spacing: 0.2px; white-space: nowrap; }
-.time-tag { font-size: 11px; color: #8E8E93; font-weight: 500; margin-left: auto; flex-shrink: 0; }
-.card-title { font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 4px; }
-.card-meta { font-size: 11px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.check-btn { width: 24px; height: 24px; border-radius: 12px; border: 2px solid #D1D1D6; background: transparent; cursor: pointer; margin-right: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 11px; color: #fff; }
-.month-dow-row { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 12px; border-bottom: 1px solid #F2F2F7; }
-.month-dow-cell { text-align: center; font-size: 11px; font-weight: 700; padding: 6px 0; letter-spacing: 0.3px; }
-.month-grid { display: grid; grid-template-columns: repeat(7,1fr); padding: 0 12px 40px; }
-.month-cell { min-height: 80px; border-bottom: 1px solid #F2F2F7; padding: 4px 2px; cursor: pointer; }
-.month-num { width: 22px; height: 22px; border-radius: 11px; display: flex; align-items: center; justify-content: center; font-size: 12px; font-weight: 700; margin-bottom: 3px; }
-.month-ev { border-radius: 4px; padding: 2px 4px; margin-bottom: 2px; overflow: hidden; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.month-ev-text { font-size: 9px; font-weight: 700; color: #fff; display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.month-more { font-size: 9px; color: #8E8E93; padding-left: 2px; }
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.45); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: flex-end; }
+.card-body { flex: 1; padding: 9px 8px 9px 11px; min-width: 0; }
+.card-top  { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
+.cat-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 7px; white-space: nowrap; }
+.time-tag  { font-size: 10px; color: #8E8E93; font-weight: 500; margin-left: auto; flex-shrink: 0; }
+.card-title { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 3px; }
+.card-meta  { font-size: 10px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.check-btn  { width: 22px; height: 22px; border-radius: 11px; border: 2px solid #D1D1D6; background: transparent; cursor: pointer; margin-right: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; }
+.empty { text-align: center; padding: 40px 0; }
+.empty-icon { font-size: 38px; margin-bottom: 8px; }
+.empty-text { color: #8E8E93; font-size: 13px; }
+
+/* ── OVERLAYS ── */
+.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: flex-end; }
 .overlay.show { display: flex; }
-.sheet { background: #fff; border-radius: 24px 24px 0 0; width: 100%; max-height: 88vh; overflow-y: auto; padding: 0 20px 32px; }
-.sheet-bar { height: 4px; margin: 0 -20px; }
-.handle { width: 36px; height: 4px; background: #E5E5EA; border-radius: 2px; margin: 12px auto 16px; }
-.sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.sheet-title { font-size: 19px; font-weight: 800; color: #1C1C1E; line-height: 1.3; margin-bottom: 16px; letter-spacing: -0.3px; }
-.close-btn { background: #F2F2F7; border: none; border-radius: 16px; width: 28px; height: 28px; cursor: pointer; font-size: 12px; color: #8E8E93; font-weight: 700; }
-.divider { height: 1px; background: #F2F2F7; margin: 0 -20px 14px; }
-.info-row { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 12px; }
-.info-icon { font-size: 15px; width: 20px; flex-shrink: 0; }
-.info-lbl { font-size: 13px; color: #8E8E93; width: 48px; flex-shrink: 0; font-weight: 500; }
-.info-val { font-size: 14px; color: #1C1C1E; font-weight: 500; flex: 1; }
-.act-row { display: flex; gap: 10px; margin-top: 20px; }
-.act-btn { flex: 1; padding: 13px; border-radius: 14px; border: none; font-size: 15px; font-weight: 700; cursor: pointer; }
-.fm-lbl { font-size: 11px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: 0.5px; margin-bottom: 5px; display: block; }
-.fm-in { width: 100%; padding: 11px 14px; border-radius: 12px; border: 1.5px solid #E5E5EA; font-size: 15px; color: #1C1C1E; background: #F9F9F9; outline: none; font-family: -apple-system, sans-serif; }
-.fm-row { margin-bottom: 12px; }
-.submit-btn { width: 100%; padding: 15px; border-radius: 14px; border: none; background: #1C1C1E; color: #fff; font-size: 16px; font-weight: 700; cursor: pointer; margin-top: 8px; }
-.cat-pick { display: flex; flex-wrap: wrap; gap: 6px; }
-.cat-pick-btn { font-size: 11px; font-weight: 700; padding: 5px 10px; border-radius: 10px; cursor: pointer; }
-.empty { text-align: center; padding: 60px 0; }
-.empty-icon { font-size: 44px; margin-bottom: 10px; }
-.empty-text { color: #8E8E93; font-size: 15px; }
-.week-cards { padding: 4px 16px 40px; display: flex; flex-direction: column; gap: 20px; }
+.sheet { background: #fff; border-radius: 22px 22px 0 0; width: 100%; max-height: 88vh; overflow-y: auto; padding: 0 18px 30px; }
+.sheet-bar { height: 4px; margin: 0 -18px; }
+.handle { width: 34px; height: 4px; background: #E5E5EA; border-radius: 2px; margin: 11px auto 14px; }
+.sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; }
+.sheet-title { font-size: 18px; font-weight: 800; color: #1C1C1E; line-height: 1.3; margin-bottom: 14px; letter-spacing: -.3px; }
+.close-btn { background: #F2F2F7; border: none; border-radius: 14px; width: 26px; height: 26px; cursor: pointer; font-size: 11px; color: #8E8E93; font-weight: 700; }
+.divider { height: 1px; background: #F2F2F7; margin: 0 -18px 12px; }
+.info-row { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 11px; }
+.info-icon { font-size: 14px; width: 18px; flex-shrink: 0; }
+.info-lbl  { font-size: 12px; color: #8E8E93; width: 44px; flex-shrink: 0; font-weight: 500; }
+.info-val  { font-size: 13px; color: #1C1C1E; font-weight: 500; flex: 1; }
+.act-row { display: flex; gap: 9px; margin-top: 18px; }
+.act-btn { flex: 1; padding: 12px; border-radius: 13px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; }
+
+/* form */
+.fm-lbl { font-size: 10px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; display: block; }
+.fm-in  { width: 100%; padding: 10px 12px; border-radius: 11px; border: 1.5px solid #E5E5EA; font-size: 14px; color: #1C1C1E; background: #F9F9F9; outline: none; font-family: inherit; }
+.fm-row { margin-bottom: 11px; }
+.submit-btn { width: 100%; padding: 14px; border-radius: 13px; border: none; background: #1C1C1E; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; }
+.cat-pick { display: flex; flex-wrap: wrap; gap: 5px; }
+.cpbtn { font-size: 10px; font-weight: 700; padding: 5px 9px; border-radius: 9px; cursor: pointer; }
 </style>
 </head>
 <body>
 <div id="app">
   <div id="header">
-    <div class="header-top">
-      <div>
-        <div class="header-sub">중기 3기 · 14명</div>
-        <div class="header-title">1회차 프로그램</div>
+    <div class="hdr-top">
+      <div class="hdr-left">
+        <span class="hdr-sub">중기 3기 · 14명</span>
+        <span class="hdr-ttl">1회차 프로그램</span>
       </div>
-      <button id="plus-btn">＋</button>
-    </div>
-    <div class="prog-wrap">
-      <div class="prog-top"><span>완료 진행률</span><span class="prog-count" id="prog-label">0/12</span></div>
-      <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+      <div class="hdr-right">
+        <div class="prog-wrap">
+          <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+          <span class="prog-lbl" id="prog-lbl">0/12</span>
+        </div>
+        <button class="ibtn ibtn-dark" id="plus-btn" title="일정 추가">＋</button>
+      </div>
     </div>
     <div class="seg">
       <button class="seg-btn active" id="btn-month" onclick="setView('month')">📅 월간</button>
       <button class="seg-btn" id="btn-week" onclick="setView('week')">📋 주간</button>
     </div>
     <div class="legend" id="legend"></div>
+    <div id="header-cal"></div>
   </div>
   <div id="view"></div>
 </div>
@@ -130,8 +165,11 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F2
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
     <div class="sheet-head">
-      <span id="day-panel-title" style="font-weight:800;font-size:20px;color:#1C1C1E"></span>
-      <button class="close-btn" onclick="closeDayPanel()">✕</button>
+      <span id="day-panel-title" style="font-weight:800;font-size:19px;color:#1C1C1E"></span>
+      <div style="display:flex;gap:7px;align-items:center">
+        <button class="ibtn ibtn-dark" onclick="dayPanelAdd()" style="font-size:18px">＋</button>
+        <button class="close-btn" onclick="closeDayPanel()">✕</button>
+      </div>
     </div>
     <div class="divider"></div>
     <div id="day-panel-cards"></div>
@@ -143,12 +181,12 @@ body { font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F2
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
     <div class="sheet-head">
-      <span style="font-weight:700;font-size:18px;color:#1C1C1E">새 일정 추가</span>
+      <span style="font-weight:700;font-size:17px;color:#1C1C1E">새 일정 추가</span>
       <button class="close-btn" onclick="closeAdd()">✕</button>
     </div>
     <div class="fm-row"><label class="fm-lbl">날짜</label><input class="fm-in" type="date" id="f-date"></div>
     <div class="fm-row"><label class="fm-lbl">제목</label><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
-    <div style="display:flex;gap:8px;margin-bottom:12px">
+    <div style="display:flex;gap:8px;margin-bottom:11px">
       <div style="flex:1"><label class="fm-lbl">시작</label><input class="fm-in" type="time" id="f-start" value="09:00"></div>
       <div style="flex:1"><label class="fm-lbl">종료</label><input class="fm-in" type="time" id="f-end" value="10:00"></div>
     </div>
@@ -172,7 +210,7 @@ const CAT = {
   "개인":        { bg:"#F97316", light:"#FFF0E6", text:"#C2410C" },
   "기타":        { bg:"#64748B", light:"#F1F5F9", text:"#334155" },
 };
-const DAY_KR = ["일","월","화","수","목","금","토"];
+const DAY_KR   = ["일","월","화","수","목","금","토"];
 const MONTH_KR = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
 let events = [
@@ -190,16 +228,18 @@ let events = [
   { id:12, date:"2026-04-29", startTime:"15:00", endTime:"17:00", title:"나의 작은정원 나의 큰 성장(원예)",          module:"지역특화",    category:"지역맞춤형",  instructor:"김선재", room:"2층 교육실", location:"미래기술산업진흥원", done:false, note:"강사비20만원 재료비20" },
 ];
 
-const TODAY = new Date("2026-04-02");
+const TODAY    = new Date("2026-04-02");
 const todayStr = fmt(TODAY);
 let currentView = "month";
-let weekRef = weekStart(TODAY);
+let weekRef  = weekStart(TODAY);
 let monthRef = new Date(TODAY.getFullYear(), TODAY.getMonth(), 1);
 let nextId = 100;
 let selectedId = null;
 let dayPanelDate = null;
 let addCat = "기타";
+let showTitle = false; // 달력 제목 표시 토글
 
+/* ── helpers ── */
 function fmt(d){ return d.toISOString().split("T")[0]; }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 function weekStart(d){ const r=new Date(d); r.setDate(r.getDate()-r.getDay()); return r; }
@@ -207,20 +247,23 @@ function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
 function firstDayOfMonth(y,m){ return new Date(y,m,1).getDay(); }
 function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/>/g,"&gt;").replace(/"/g,"&quot;"); }
 function getEvs(ds){ return events.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime)); }
-function c(cat){ return CAT[cat]||CAT["기타"]; }
+function cat(k){ return CAT[k]||CAT["기타"]; }
 
+/* ── progress ── */
 function updateProgress(){
   const done=events.filter(e=>e.done).length, total=events.length;
-  document.getElementById("prog-label").textContent=done+"/"+total;
+  document.getElementById("prog-lbl").textContent=done+"/"+total;
   document.getElementById("prog-fill").style.width=(total?done/total*100:0)+"%";
 }
 
+/* ── legend ── */
 function renderLegend(){
   document.getElementById("legend").innerHTML=Object.entries(CAT).map(([k,v])=>
-    `<div class="legend-item"><div class="legend-dot" style="background:${v.bg}"></div><span class="legend-label">${k}</span></div>`
+    `<div class="legend-item"><div class="legend-dot" style="background:${v.bg}"></div><span class="legend-lbl">${k}</span></div>`
   ).join("");
 }
 
+/* ── view switch ── */
 function setView(v){
   currentView=v;
   document.getElementById("btn-month").className="seg-btn"+(v==="month"?" active":"");
@@ -233,14 +276,31 @@ function renderView(){
   currentView==="month" ? renderMonth() : renderWeek();
 }
 
+/* ── go today ── */
+function goToday(){
+  if(currentView==="month"){
+    monthRef=new Date(TODAY.getFullYear(),TODAY.getMonth(),1);
+  } else {
+    weekRef=weekStart(TODAY);
+  }
+  renderView();
+}
+
+/* ── title toggle ── */
+function toggleTitle(){
+  showTitle=!showTitle;
+  renderView();
+}
+
+/* ── card HTML ── */
 function cardHtml(ev, onclickStr){
-  const cat=c(ev.category);
-  const oc = onclickStr ? `onclick="${onclickStr}"` : "";
+  const ct=cat(ev.category);
+  const oc=onclickStr?`onclick="${onclickStr}"`:"";
   return `<div class="card" style="opacity:${ev.done?.55:1}" ${oc}>
-    <div class="card-line" style="background:${cat.bg}"></div>
+    <div class="card-line" style="background:${ct.bg}"></div>
     <div class="card-body">
       <div class="card-top">
-        <span class="cat-badge" style="background:${cat.light};color:${cat.text}">${esc(ev.category)}</span>
+        <span class="cat-badge" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
         <span class="time-tag">${esc(ev.startTime)}–${esc(ev.endTime)}</span>
       </div>
       <div class="card-title" style="${ev.done?"text-decoration:line-through;color:#AEAEB2":"color:#1C1C1E"}">${esc(ev.title)}</div>
@@ -251,27 +311,89 @@ function cardHtml(ev, onclickStr){
   </div>`;
 }
 
-/* WEEK */
+/* ── MONTH ── */
+function renderMonth(){
+  const y=monthRef.getFullYear(), m=monthRef.getMonth();
+  const total=daysInMonth(y,m), first=firstDayOfMonth(y,m);
+  const cells=Array.from({length:first+total},(_,i)=>i<first?null:i-first+1);
+  while(cells.length%7!==0) cells.push(null);
+  const rows=cells.length/7;
+
+  /* header-cal */
+  const isThisMonth = (y===TODAY.getFullYear()&&m===TODAY.getMonth());
+  let hh=`<div class="cal-nav">
+    <button class="nav-btn" onclick="monthPrev()">‹</button>
+    <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
+    <div style="display:flex;align-items:center;gap:5px">
+      <button class="ibtn ibtn-gray" onclick="toggleTitle()" title="제목 표시 토글" style="font-size:10px;width:auto;padding:0 7px;height:24px;border-radius:8px">${showTitle?"제목 숨김":"제목 표시"}</button>
+      ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
+      <button class="nav-btn" onclick="monthNext()">›</button>
+    </div>
+  </div><div class="dow-row">`;
+  DAY_KR.forEach((d,i)=>{ hh+=`<div class="dow-cell" style="color:${i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93"}">${d}</div>`; });
+  hh+=`</div>`;
+  document.getElementById("header-cal").innerHTML=hh;
+
+  /* compute cell height to fill view */
+  const viewH = document.getElementById("view").clientHeight || (window.innerHeight - document.getElementById("header").offsetHeight);
+  const cellH = Math.floor(viewH / rows);
+
+  /* view: grid */
+  let h=`<div class="month-grid">`;
+  cells.forEach((day,ci)=>{
+    if(!day){ h+=`<div class="month-cell" style="height:${cellH}px;cursor:default;border-right:1px solid #F2F2F7"></div>`; return; }
+    const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    const isT=ds===todayStr, dow=ci%7, evs=getEvs(ds);
+    const ct=cat;
+    h+=`<div class="month-cell" style="height:${cellH}px" onclick="openDayPanel('${ds}')">
+      <div class="month-num" style="background:${isT?"#FF6B6B":"transparent"};color:${isT?"#fff":dow===0?"#FF6B6B":dow===6?"#4D96FF":"#1C1C1E"}">${day}</div>`;
+    /* how many events can we fit? each ev ~14px, num ~20px, leaving room */
+    const maxEv = Math.max(0, Math.floor((cellH - 22) / 14) - (showTitle?0:0));
+    evs.slice(0, maxEv).forEach(ev=>{
+      const c=cat(ev.category);
+      h+=`<div class="month-ev" style="background:${c.bg};opacity:${ev.done?.5:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
+        <span class="month-ev-time">${esc(ev.startTime)}${showTitle?" "+esc(ev.title):""}</span>
+      </div>`;
+    });
+    if(evs.length>maxEv) h+=`<div class="month-more">+${evs.length-maxEv}개</div>`;
+    h+=`</div>`;
+  });
+  h+=`</div>`;
+  document.getElementById("view").innerHTML=h;
+}
+function monthPrev(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()-1,1); renderView(); }
+function monthNext(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()+1,1); renderView(); }
+
+/* ── WEEK ── */
 function renderWeek(){
   const days=Array.from({length:7},(_,i)=>addDays(weekRef,i));
-  let h=`<div class="week-nav">
+  const isThisWeek=days.some(d=>fmt(d)===todayStr);
+
+  /* header-cal */
+  let hh=`<div class="cal-nav">
     <button class="nav-btn" onclick="weekPrev()">‹</button>
-    <span class="nav-label">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
-    <button class="nav-btn" onclick="weekNext()">›</button>
-  </div><div class="mini-strip">`;
+    <span class="nav-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
+    <div style="display:flex;align-items:center;gap:5px">
+      ${!isThisWeek?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
+      <button class="nav-btn" onclick="weekNext()">›</button>
+    </div>
+  </div><div class="week-strip">`;
   days.forEach((d,i)=>{
-    const ds=fmt(d),isT=ds===todayStr,hasEv=events.some(e=>e.date===ds);
+    const ds=fmt(d), isT=ds===todayStr, hasEv=events.some(e=>e.date===ds);
     const dc=i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93";
-    h+=`<div class="mini-day">
-      <span class="mini-dow" style="color:${dc}">${DAY_KR[d.getDay()]}</span>
-      <div class="mini-num" style="background:${isT?"#FF6B6B":"transparent"};color:${isT?"#fff":i===0?"#FF6B6B":i===6?"#4D96FF":"#1C1C1E"}">${d.getDate()}</div>
-      <div class="mini-dot" style="background:${hasEv?(isT?"#FF6B6B":"#C7C7CC"):"transparent"}"></div>
+    hh+=`<div class="ws-day" onclick="openDayPanel('${ds}')">
+      <span class="ws-dow" style="color:${dc}">${DAY_KR[d.getDay()]}</span>
+      <div class="ws-num" style="background:${isT?"#FF6B6B":"transparent"};color:${isT?"#fff":i===0?"#FF6B6B":i===6?"#4D96FF":"#1C1C1E"}">${d.getDate()}</div>
+      <div class="ws-dot" style="background:${hasEv?(isT?"#FF6B6B":"#C7C7CC"):"transparent"}"></div>
     </div>`;
   });
-  h+=`</div><div class="week-cards">`;
-  let hasAny=false;
+  hh+=`</div>`;
+  document.getElementById("header-cal").innerHTML=hh;
+
+  /* view */
+  let h=`<div class="week-cards">`, hasAny=false;
   days.forEach(d=>{
-    const ds=fmt(d),evs=getEvs(ds),isT=ds===todayStr;
+    const ds=fmt(d), evs=getEvs(ds), isT=ds===todayStr;
     if(!evs.length) return;
     hasAny=true;
     h+=`<div><div class="day-hdr">
@@ -287,40 +409,7 @@ function renderWeek(){
 function weekPrev(){ weekRef=addDays(weekRef,-7); renderView(); }
 function weekNext(){ weekRef=addDays(weekRef,7); renderView(); }
 
-/* MONTH */
-function renderMonth(){
-  const y=monthRef.getFullYear(),m=monthRef.getMonth();
-  const total=daysInMonth(y,m),first=firstDayOfMonth(y,m);
-  const cells=Array.from({length:first+total},(_,i)=>i<first?null:i-first+1);
-  while(cells.length%7!==0) cells.push(null);
-  let h=`<div class="week-nav">
-    <button class="nav-btn" onclick="monthPrev()">‹</button>
-    <span class="nav-label">${y}년 ${MONTH_KR[m]}</span>
-    <button class="nav-btn" onclick="monthNext()">›</button>
-  </div><div class="month-dow-row">`;
-  DAY_KR.forEach((d,i)=>{ h+=`<div class="month-dow-cell" style="color:${i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93"}">${d}</div>`; });
-  h+=`</div><div class="month-grid">`;
-  cells.forEach((day,ci)=>{
-    if(!day){ h+=`<div class="month-cell" style="cursor:default"></div>`; return; }
-    const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
-    const isT=ds===todayStr,dow=ci%7,evs=getEvs(ds);
-    h+=`<div class="month-cell" style="background:${isT?"#FFF5F5":"transparent"}" onclick="openDayPanel('${ds}')">
-      <div class="month-num" style="background:${isT?"#FF6B6B":"transparent"};color:${isT?"#fff":dow===0?"#FF6B6B":dow===6?"#4D96FF":"#1C1C1E"}">${day}</div>`;
-    evs.slice(0,3).forEach(ev=>{
-      const cat=c(ev.category);
-      h+=`<div class="month-ev" style="background:${cat.bg};opacity:${ev.done?.5:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
-        <span class="month-ev-text">${esc(ev.startTime)}</span></div>`;
-    });
-    if(evs.length>3) h+=`<div class="month-more">+${evs.length-3}개</div>`;
-    h+=`</div>`;
-  });
-  h+=`</div>`;
-  document.getElementById("view").innerHTML=h;
-}
-function monthPrev(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()-1,1); renderView(); }
-function monthNext(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()+1,1); renderView(); }
-
-/* TOGGLE / DELETE */
+/* ── TOGGLE / DELETE ── */
 function toggleDone(id){
   events=events.map(e=>e.id===id?Object.assign({},e,{done:!e.done}):e);
   renderView();
@@ -329,14 +418,14 @@ function toggleDone(id){
 }
 function deleteDone(id){ events=events.filter(e=>e.id!==id); renderView(); }
 
-/* DETAIL */
+/* ── DETAIL ── */
 function openDetail(id){ selectedId=id; refreshDetail(); document.getElementById("detail-overlay").classList.add("show"); }
 function refreshDetail(){
   const ev=events.find(e=>e.id===selectedId); if(!ev) return;
-  const cat=c(ev.category);
-  document.getElementById("detail-bar").style.background=cat.bg;
+  const ct=cat(ev.category);
+  document.getElementById("detail-bar").style.background=ct.bg;
   const ce=document.getElementById("detail-cat");
-  ce.textContent=ev.category; ce.style.background=cat.light; ce.style.color=cat.text;
+  ce.textContent=ev.category; ce.style.background=ct.light; ce.style.color=ct.text;
   document.getElementById("detail-title").textContent=ev.title;
   document.getElementById("detail-rows").innerHTML=[
     ["🕐","시간",ev.startTime+" – "+ev.endTime],
@@ -357,23 +446,24 @@ function closeDetail(){ document.getElementById("detail-overlay").classList.remo
 function toggleFromDetail(){ if(selectedId) toggleDone(selectedId); }
 function deleteFromDetail(){ if(selectedId){ deleteDone(selectedId); closeDetail(); } }
 
-/* DAY PANEL */
+/* ── DAY PANEL ── */
 function openDayPanel(ds){ dayPanelDate=ds; refreshDayPanel(); document.getElementById("day-overlay").classList.add("show"); }
 function refreshDayPanel(){
-  const ds=dayPanelDate, d=new Date(ds), dow=d.getDay(), parts=ds.split("-");
+  const ds=dayPanelDate, d=new Date(ds), dow=d.getDay(), p=ds.split("-");
   document.getElementById("day-panel-title").innerHTML=
-    `${+parts[1]}월 ${+parts[2]}일 <span style="color:#8E8E93;font-weight:500;font-size:16px">${DAY_KR[dow]}요일</span>`;
+    `${+p[1]}월 ${+p[2]}일 <span style="color:#8E8E93;font-weight:500;font-size:15px">${DAY_KR[dow]}요일</span>`;
   const evs=getEvs(ds);
   document.getElementById("day-panel-cards").innerHTML=evs.length
-    ? evs.map(ev=>cardHtml(ev,`closeDayPanel();setTimeout(function(){openDetail(${ev.id})},100)`)).join("")
-    : `<div style="text-align:center;padding:30px 0;color:#8E8E93;font-size:14px">일정이 없어요</div>`;
+    ? evs.map(ev=>cardHtml(ev,`closeDayPanel();setTimeout(function(){openDetail(${ev.id})},80)`)).join("")
+    : `<div style="text-align:center;padding:28px 0;color:#8E8E93;font-size:13px">일정이 없어요</div>`;
 }
 function closeDayPanel(){ document.getElementById("day-overlay").classList.remove("show"); dayPanelDate=null; }
+function dayPanelAdd(){ const ds=dayPanelDate; closeDayPanel(); setTimeout(()=>openAdd(ds),80); }
 
-/* ADD */
-function openAdd(){
+/* ── ADD ── */
+function openAdd(dateStr){
   addCat="기타";
-  document.getElementById("f-date").value=todayStr;
+  document.getElementById("f-date").value=dateStr||todayStr;
   document.getElementById("f-title").value="";
   document.getElementById("f-start").value="09:00";
   document.getElementById("f-end").value="10:00";
@@ -386,14 +476,13 @@ function openAdd(){
 function renderCatPick(){
   document.getElementById("cat-pick").innerHTML=Object.entries(CAT).map(([k,v])=>{
     const sel=addCat===k;
-    return `<button class="cat-pick-btn" style="background:${sel?v.bg:v.light};color:${sel?"#fff":v.text};border:2px solid ${sel?v.bg:"transparent"}" onclick="pickCat('${k}')">${k}</button>`;
+    return `<button class="cpbtn" style="background:${sel?v.bg:v.light};color:${sel?"#fff":v.text};border:2px solid ${sel?v.bg:"transparent"}" onclick="pickCat('${k}')">${k}</button>`;
   }).join("");
 }
-function pickCat(cat){ addCat=cat; renderCatPick(); }
+function pickCat(c){ addCat=c; renderCatPick(); }
 function closeAdd(){ document.getElementById("add-overlay").classList.remove("show"); }
 function submitAdd(){
-  const title=document.getElementById("f-title").value.trim();
-  if(!title) return;
+  const title=document.getElementById("f-title").value.trim(); if(!title) return;
   events.push({ id:nextId++, done:false,
     date:document.getElementById("f-date").value,
     startTime:document.getElementById("f-start").value,
@@ -406,10 +495,13 @@ function submitAdd(){
   closeAdd(); renderView();
 }
 
-document.getElementById("plus-btn").onclick=openAdd;
+document.getElementById("plus-btn").onclick=()=>openAdd();
 
+/* ── init ── */
 renderLegend();
-renderView();
+// Wait for layout then render (so clientHeight is accurate)
+requestAnimationFrame(()=>{ requestAnimationFrame(renderView); });
+window.addEventListener("resize", renderView);
 </script>
 </body>
 </html>
