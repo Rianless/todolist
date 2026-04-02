@@ -130,8 +130,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
   <div id="header">
     <div class="hdr-top">
       <div class="hdr-left">
-        <span class="hdr-sub">중기 3기 · 14명</span>
-        <span class="hdr-ttl">1회차 프로그램</span>
+        <span class="hdr-ttl">To Do List</span>
       </div>
       <div class="hdr-right">
         <div class="prog-wrap">
@@ -239,19 +238,24 @@ let events = [
 ];
 
 function getToday(){ return new Date(); }
-function getTodayStr(){ return fmt(getToday()); }
+function getTodayStr(){ return fmtLocal(getToday()); }
 let currentView = "month";
-let weekRef  = weekStart(getToday());
-let monthRef = new Date(getToday().getFullYear(), getToday().getMonth(), 1);
+let weekRef  = weekStart(new Date("2026-04-01")); // 일정 시작 주
+let monthRef = new Date(2026, 3, 1); // 4월
 let nextId = 100;
 let selectedId = null;
 let dayPanelDate = null;
 let addCat = "기타";
 let showTitle = false;
-let selectedWeekDay = getTodayStr(); // 주간에서 선택된 날짜
+let selectedWeekDay = "2026-04-01"; // 주간 초기 선택일
 
 /* ── helpers ── */
-function fmt(d){ return d.toISOString().split("T")[0]; }
+function fmtLocal(d){
+  // UTC 대신 로컬 시간 기준으로 YYYY-MM-DD 반환
+  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
+  return `${y}-${m}-${day}`;
+}
+function fmt(d){ return fmtLocal(d); }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 function weekStart(d){ const r=new Date(d); r.setDate(r.getDate()-r.getDay()); return r; }
 function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
@@ -277,7 +281,11 @@ function renderLegend(){
 /* ── view switch ── */
 function setView(v){
   currentView=v;
-  if(v==="week"){ weekRef=weekStart(getToday()); selectedWeekDay=getTodayStr(); }
+  if(v==="week"){
+    const t=getToday();
+    weekRef=weekStart(t);
+    selectedWeekDay=getTodayStr();
+  }
   document.getElementById("btn-month").className="seg-btn"+(v==="month"?" active":"");
   document.getElementById("btn-week").className="seg-btn"+(v==="week"?" active":"");
   renderView();
@@ -383,9 +391,10 @@ function renderWeek(){
   const days=Array.from({length:7},(_,i)=>addDays(weekRef,i));
   const isThisWeek=days.some(d=>fmt(d)===todayStr);
 
-  // selectedWeekDay가 이 주에 없으면 오늘 or 첫째날로 초기화
+  // selectedWeekDay가 이 주에 없으면 오늘 or 일정있는 첫날 or 첫째날로
   if(!days.some(d=>fmt(d)===selectedWeekDay)){
-    selectedWeekDay = isThisWeek ? todayStr : fmt(days[0]);
+    const withEv=days.find(d=>events.some(e=>e.date===fmt(d)));
+    selectedWeekDay = isThisWeek ? todayStr : (withEv ? fmt(withEv) : fmt(days[0]));
   }
 
   /* header-cal: nav + strip */
