@@ -1,148 +1,421 @@
-<!DOCTYPE html>
-<html lang="ko">
-<head>
-    <meta charset='utf-8' />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>iOS Live Planner Full Data</title>
-    <script src='https://cdn.jsdelivr.net/npm/fullcalendar@6.1.10/index.global.min.js'></script>
-    <style>
-        :root {
-            --ios-blue: #0A84FF;
-            --glass-white: rgba(255, 255, 255, 0.1);
-        }
-        body {
-            margin: 0; padding: 0;
-            background-color: #000;
-            font-family: -apple-system, BlinkMacSystemFont, sans-serif;
-            display: flex; flex-direction: column; align-items: center;
-            color: #fff;
-        }
-        #app-wrapper {
-            width: 100%; max-width: 430px;
-            min-height: 100vh;
-            background: linear-gradient(180deg, #2C2C54 0%, #000000 100%);
-            padding: 20px 15px;
-            box-sizing: border-box;
-        }
-        #calendar-container {
-            background: var(--glass-white);
-            backdrop-filter: blur(30px);
-            -webkit-backdrop-filter: blur(30px);
-            border-radius: 28px;
-            padding: 20px 10px;
-            border: 1px solid rgba(255,255,255,0.1);
-        }
-        .fc { border: none !important; }
-        .fc td, .fc th { border: none !important; }
-        .fc-toolbar-title { font-size: 1.2rem !important; font-weight: 700; }
-        .fc-button { background: transparent !important; border: none !important; color: rgba(255,255,255,0.5) !important; font-size: 14px !important; }
-        .fc-button-active { color: var(--ios-blue) !important; font-weight: 700 !important; }
-        .fc-col-header-cell-cushion { font-size: 11px; color: rgba(255,255,255,0.4); text-decoration: none !important; }
-        .fc-daygrid-day-number { font-size: 15px; font-weight: 400; color: #fff; text-decoration: none !important; padding: 8px !important; }
+import { useState } from "react";
 
-        /* 오늘 날짜 자동 강조 */
-        .fc-day-today { background: transparent !important; }
-        .fc-day-today .fc-daygrid-day-number { 
-            background-color: var(--ios-blue) !important; 
-            border-radius: 50%; display: inline-block; 
-            width: 28px; height: 28px; line-height: 28px; 
-            text-align: center; padding: 0 !important; margin: 4px;
-        }
+const CATEGORY_COLORS = {
+  "밀착상담":    { bg: "#FF6B6B", light: "#FFE8E8", text: "#C0392B" },
+  "자신감회복":  { bg: "#FFD93D", light: "#FFF9E0", text: "#B8860B" },
+  "취업역량강화":{ bg: "#6BCB77", light: "#E8F8EA", text: "#1E7E34" },
+  "진로탐색":    { bg: "#4D96FF", light: "#E3EEFF", text: "#1A5DB8" },
+  "지역맞춤형":  { bg: "#FF6FC8", light: "#FFE3F3", text: "#B5006C" },
+  "사례관리":    { bg: "#A66CFF", light: "#EFE3FF", text: "#6A0DAD" },
+  "자율활동":    { bg: "#94A3B8", light: "#F1F5F9", text: "#475569" },
+  "개인":        { bg: "#F97316", light: "#FFF0E6", text: "#C2410C" },
+  "기타":        { bg: "#64748B", light: "#F1F5F9", text: "#334155" },
+};
 
-        .fc-daygrid-event-harness { display: none; }
-        .event-dot { width: 4px; height: 4px; background: rgba(255,255,255,0.5); border-radius: 50%; margin: 2px auto; }
+const INITIAL_EVENTS = [
+  { id:1,  date:"2026-04-01", startTime:"13:00", endTime:"15:00", title:"청년 도전! 비전 게임 시작!(OT)",             module:"대인관계이해", category:"자신감회복",  floor:2, instructor:"담당자", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:2,  date:"2026-04-01", startTime:"15:00", endTime:"17:00", title:"사회초년생을 위한 비즈니스 매너 및 에티켓", module:"구직기초",    category:"취업역량강화",floor:2, instructor:"한호원", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:3,  date:"2026-04-02", startTime:"12:30", endTime:"17:30", title:"기업탐방(포스코광양제철소)",                module:"직업탐색",    category:"진로탐색",    floor:4, instructor:"담당자", room:"", location:"포스코홍보관 | 광양 금로 187-7", done:false, note:"외부활동" },
+  { id:4,  date:"2026-04-06", startTime:"13:00", endTime:"17:00", title:"찬란한 순간 '스테인드글라스 트레이'(성장)", module:"동기부여",    category:"자신감회복",  floor:4, instructor:"재가람", room:"3층 1교육실", location:"미래기술산업진흥원", done:false, note:"외부활동" },
+  { id:5,  date:"2026-04-08", startTime:"14:00", endTime:"17:00", title:"집단심리상담(감정카드 및 미술치료)",         module:"심리상담",    category:"밀착상담",    floor:3, instructor:"최희정", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:6,  date:"2026-04-13", startTime:"13:00", endTime:"17:00", title:"이미지메이킹(퍼스널 컬러)으로 지역인재되기", module:"지역특화",    category:"지역맞춤형",  floor:4, instructor:"김은미", room:"CL미용학원", location:"중앙로 48-1 2층", done:false },
+  { id:7,  date:"2026-04-15", startTime:"13:00", endTime:"17:00", title:"경험과 강점으로 여는 나의 이야기(성장)",    module:"구직기초",    category:"취업역량강화",floor:4, instructor:"박지애", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:8,  date:"2026-04-20", startTime:"13:00", endTime:"17:00", title:"'나' 사용 설명서(TA자기분석 및 강점활용)",  module:"자기탐색",    category:"진로탐색",    floor:4, instructor:"장원진", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:9,  date:"2026-04-22", startTime:"14:00", endTime:"17:00", title:"직업선호도 검사 및 직업군 탐색으로 진로 로드맵", module:"지역특화", category:"지역맞춤형", floor:3, instructor:"장필경", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:10, date:"2026-04-27", startTime:"14:00", endTime:"17:00", title:"순천 청년 퍼실리테이션",                    module:"진로계획",    category:"진로탐색",    floor:3, instructor:"한호원", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:11, date:"2026-04-29", startTime:"13:00", endTime:"15:00", title:"중독예방교육(알코올,약물,게임등)",           module:"생활관리",    category:"사례관리",    floor:2, instructor:"이호빈", room:"2층 교육실", location:"미래기술산업진흥원", done:false },
+  { id:12, date:"2026-04-29", startTime:"15:00", endTime:"17:00", title:"나의 작은정원 나의 큰 성장(원예)",          module:"지역특화",    category:"지역맞춤형",  floor:2, instructor:"김선재", room:"2층 교육실", location:"미래기술산업진흥원", done:false, note:"강사비20만원 재료비20" },
+];
 
-        #list-title { margin: 25px 5px 15px; font-size: 18px; font-weight: 700; }
-        .event-card {
-            background: rgba(255, 255, 255, 0.07);
-            border-radius: 20px; padding: 18px; margin-bottom: 12px;
-            display: flex; align-items: center;
-            border: 1px solid rgba(255,255,255,0.05);
-        }
-        .check-circle { 
-            width: 24px; height: 24px; border-radius: 50%; 
-            border: 1.5px solid rgba(255,255,255,0.2); margin-right: 15px;
-            display: flex; align-items: center; justify-content: center;
-        }
-        .check-circle.done { background: var(--ios-blue); border-color: var(--ios-blue); }
-        .event-info { flex: 1; }
-        .event-info h4 { margin: 0 0 4px 0; font-size: 14px; font-weight: 600; }
-        .event-info p { margin: 0; font-size: 11px; color: rgba(255,255,255,0.5); }
-    </style>
-</head>
-<body>
+const DAY_KR = ["일","월","화","수","목","금","토"];
+const MONTH_KR = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
-<div id="app-wrapper">
-    <div id="calendar-container">
-        <div id='calendar'></div>
+function fmt(d){ return d.toISOString().split("T")[0]; }
+function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
+function weekStart(d){ const r=new Date(d); r.setDate(r.getDate()-r.getDay()); return r; }
+function daysInMonth(y,m){ return new Date(y,m+1,0).getDate(); }
+function firstDayOfMonth(y,m){ return new Date(y,m,1).getDay(); }
+
+function DetailModal({ ev, onClose, onToggle, onDelete }){
+  if(!ev) return null;
+  const cat = CATEGORY_COLORS[ev.category]||CATEGORY_COLORS["기타"];
+  return (
+    <div style={S.overlay} onClick={onClose}>
+      <div style={S.sheet} onClick={e=>e.stopPropagation()}>
+        <div style={{...S.sheetBar, background:cat.bg}}/>
+        <div style={S.handle}/>
+        <div style={S.sheetHead}>
+          <span style={{...S.catBadge, background:cat.light, color:cat.text}}>{ev.category}</span>
+          <button style={S.closeBtn} onClick={onClose}>✕</button>
+        </div>
+        <div style={S.sheetTitle}>{ev.title}</div>
+        <div style={S.divider}/>
+        {[
+          ["🕐","시간",`${ev.startTime} – ${ev.endTime}`],
+          ["📚","모듈", ev.module||"-"],
+          ["👤","강사", ev.instructor||"-"],
+          ["📍","장소", ev.location||"-"],
+          ["🚪","강의실",ev.room||"-"],
+          ...(ev.note?[["📝","비고",ev.note]]:[]),
+        ].map(([ic,lb,vl],i)=>(
+          <div key={i} style={S.infoRow}>
+            <span style={S.infoIcon}>{ic}</span>
+            <span style={S.infoLbl}>{lb}</span>
+            <span style={S.infoVal}>{vl}</span>
+          </div>
+        ))}
+        <div style={{display:"flex",gap:10,marginTop:20}}>
+          <button style={{...S.actBtn, background:ev.done?"#E5E5EA":"#34C759", color:ev.done?"#1C1C1E":"#fff"}} onClick={()=>onToggle(ev.id)}>
+            {ev.done?"✓ 완료됨 (취소)":"완료 처리"}
+          </button>
+          <button style={{...S.actBtn, background:"#FFE8E8", color:"#FF3B30"}} onClick={()=>onDelete(ev.id)}>삭제</button>
+        </div>
+      </div>
     </div>
-    <div id="list-title">오늘의 일정</div>
-    <div id="event-list"></div>
-</div>
+  );
+}
 
-<script>
-    let calendar;
-    const storageKey = 'ios_v5_full_data';
-    
-    // 이미지 1 표의 모든 데이터 완벽 반영
-    const fullData = [
-        { id: '1', title: '비전 게임 시작!(OT)', start: '2026-04-01T13:00', loc: '3층 1교육실', completed: false },
-        { id: '2', title: '비즈니스 매너 및 에티켓', start: '2026-04-01T15:00', loc: '3층 1교육실', completed: false },
-        { id: '3', title: '기업탐방(포스코광양제철소)', start: '2026-04-02T12:30', loc: '포스코홍보관', completed: false },
-        { id: '4', title: '스테인드글라스 트레이 만들기', start: '2026-04-06T13:00', loc: '3층 1교육실', completed: false },
-        { id: '5', title: '집단심리상담(미술치료)', start: '2026-04-08T14:00', loc: '3층 1교육실', completed: false },
-        { id: '6', title: '이미지메이킹(퍼스널 컬러)', start: '2026-04-13T13:00', loc: 'CL미용학원', completed: false },
-        { id: '7', title: '경험과 강점으로 여는 나의 이야기', start: '2026-04-15T13:00', loc: '시민공익활동지원센터', completed: false },
-        { id: '8', title: '나 사용 설명서(자기분석)', start: '2026-04-20T13:00', loc: '3층 1교육실', completed: false },
-        { id: '9', title: '직업선호도 검사 및 로드맵', start: '2026-04-22T14:00', loc: '시민공익활동지원센터', completed: false },
-        { id: '10', title: '순천 청년 퍼실리테이션', start: '2026-04-27T14:00', loc: '시민공익활동지원센터', completed: false },
-        { id: '11', title: '중독예방교육', start: '2026-04-29T13:00', loc: '2층 교육실', completed: false },
-        { id: '12', title: '나의 작은정원(원예)', start: '2026-04-29T15:00', loc: '2층 교육실', completed: false }
-    ];
-
-    let events = JSON.parse(localStorage.getItem(storageKey)) || fullData;
-
-    document.addEventListener('DOMContentLoaded', function() {
-        calendar = new FullCalendar.Calendar(document.getElementById('calendar'), {
-            initialView: 'dayGridMonth',
-            locale: 'ko',
-            headerToolbar: { left: 'title', center: '', right: 'prev,next dayGridMonth,dayGridWeek' },
-            fixedWeekCount: false,
-            events: events,
-            dateClick: (info) => renderList(info.dateStr),
-            dayCellContent: (arg) => {
-                const dateStr = arg.date.toISOString().split('T')[0];
-                const hasEvent = events.some(e => e.start.startsWith(dateStr));
-                return { html: `<div>${arg.dayNumberText.replace('일','')}</div>${hasEvent ? '<div class="event-dot"></div>' : ''}` };
-            }
-        });
-        calendar.render();
-        renderList(new Date().toISOString().split('T')[0]);
-    });
-
-    function renderList(dateStr) {
-        const listEl = document.getElementById('event-list');
-        const dayEvents = events.filter(e => e.start.startsWith(dateStr));
-        document.getElementById('list-title').innerText = dateStr === new Date().toISOString().split('T')[0] ? "오늘의 일정" : `${dateStr.split('-')[2]}일의 일정`;
-
-        listEl.innerHTML = dayEvents.length ? dayEvents.map(ev => `
-            <div class="event-card" onclick="toggleDone('${ev.id}', '${dateStr}')">
-                <div class="check-circle ${ev.completed ? 'done' : ''}">${ev.completed ? '✓' : ''}</div>
-                <div class="event-info">
-                    <h4 style="${ev.completed ? 'text-decoration:line-through; opacity:0.5;' : ''}">${ev.start.split('T')[1]} ${ev.title}</h4>
-                    <p>${ev.loc}</p>
-                </div>
+function AddModal({ initDate, onClose, onAdd }){
+  const [form, setForm] = useState({ title:"", date:initDate, startTime:"09:00", endTime:"10:00", category:"기타", instructor:"", location:"", note:"" });
+  const set = k => e => setForm(p=>({...p,[k]:e.target.value}));
+  return (
+    <div style={S.overlay} onClick={onClose}>
+      <div style={{...S.sheet, paddingBottom:32}} onClick={e=>e.stopPropagation()}>
+        <div style={S.handle}/>
+        <div style={S.sheetHead}>
+          <span style={{fontWeight:700,fontSize:18,color:"#1C1C1E"}}>새 일정 추가</span>
+          <button style={S.closeBtn} onClick={onClose}>✕</button>
+        </div>
+        {[["날짜","date","date"],["제목","title","text"]].map(([lb,k,tp])=>(
+          <div key={k} style={{marginBottom:12}}>
+            <div style={S.fmLbl}>{lb}</div>
+            <input type={tp} value={form[k]} onChange={set(k)} placeholder={lb+" 입력"} style={S.fmIn}/>
+          </div>
+        ))}
+        <div style={{display:"flex",gap:8,marginBottom:12}}>
+          {[["시작","startTime"],["종료","endTime"]].map(([lb,k])=>(
+            <div key={k} style={{flex:1}}>
+              <div style={S.fmLbl}>{lb}</div>
+              <input type="time" value={form[k]} onChange={set(k)} style={S.fmIn}/>
             </div>
-        `).join('') : '<div style="text-align:center; padding:30px; color:rgba(255,255,255,0.2);">일정이 없습니다.</div>';
-    }
+          ))}
+        </div>
+        <div style={{marginBottom:12}}>
+          <div style={S.fmLbl}>카테고리</div>
+          <div style={{display:"flex",flexWrap:"wrap",gap:6}}>
+            {Object.keys(CATEGORY_COLORS).map(c=>{
+              const col=CATEGORY_COLORS[c]; const sel=form.category===c;
+              return <button key={c} onClick={()=>setForm(p=>({...p,category:c}))}
+                style={{fontSize:11,fontWeight:700,padding:"5px 10px",borderRadius:10,border:sel?`2px solid ${col.bg}`:"2px solid transparent",background:sel?col.bg:col.light,color:sel?"#fff":col.text,cursor:"pointer"}}>{c}</button>;
+            })}
+          </div>
+        </div>
+        {[["강사","instructor","이름"],["장소","location","장소"],["메모","note","비고"]].map(([lb,k,ph])=>(
+          <div key={k} style={{marginBottom:12}}>
+            <div style={S.fmLbl}>{lb}</div>
+            <input value={form[k]} onChange={set(k)} placeholder={ph+" 입력"} style={S.fmIn}/>
+          </div>
+        ))}
+        <button style={S.submitBtn} onClick={()=>{ if(!form.title.trim()) return; onAdd(form); }}>추가하기</button>
+      </div>
+    </div>
+  );
+}
 
-    function toggleDone(id, dateStr) {
-        const idx = events.findIndex(e => e.id === id);
-        events[idx].completed = !events[idx].completed;
-        localStorage.setItem(storageKey, JSON.stringify(events));
-        renderList(dateStr);
-    }
-</script>
-</body>
-</html>
+function WeeklyView({ events, todayStr, weekRef, setWeekRef, onSelect, onToggle }){
+  const days = Array.from({length:7},(_,i)=>addDays(weekRef,i));
+  const getDay = ds => events.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+  const hasAny = days.some(d=>getDay(fmt(d)).length>0);
+  return (
+    <div>
+      <div style={S.weekNav}>
+        <button style={S.navBtn} onClick={()=>setWeekRef(d=>addDays(d,-7))}>‹</button>
+        <span style={S.navLabel}>{days[0].getMonth()+1}/{days[0].getDate()} – {days[6].getMonth()+1}/{days[6].getDate()}</span>
+        <button style={S.navBtn} onClick={()=>setWeekRef(d=>addDays(d,7))}>›</button>
+      </div>
+      {/* Mini week strip */}
+      <div style={S.miniStrip}>
+        {days.map((d,i)=>{
+          const ds=fmt(d); const isToday=ds===todayStr; const hasEv=events.some(e=>e.date===ds);
+          return (
+            <div key={i} style={{display:"flex",flexDirection:"column",alignItems:"center",gap:3}}>
+              <span style={{fontSize:10,fontWeight:600,color:i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93"}}>{DAY_KR[d.getDay()]}</span>
+              <div style={{...S.miniNum, background:isToday?"#FF6B6B":"transparent", color:isToday?"#fff":i===0?"#FF6B6B":i===6?"#4D96FF":"#1C1C1E"}}>{d.getDate()}</div>
+              <div style={{width:4,height:4,borderRadius:2,background:hasEv?(isToday?"#FF6B6B":"#C7C7CC"):"transparent"}}/>
+            </div>
+          );
+        })}
+      </div>
+      <div style={{padding:"4px 16px 40px",display:"flex",flexDirection:"column",gap:20}}>
+        {days.map((d,di)=>{
+          const ds=fmt(d); const evs=getDay(ds); const isToday=ds===todayStr;
+          if(!evs.length) return null;
+          return (
+            <div key={di}>
+              <div style={S.dayHdr}>
+                <span style={{...S.dayHdrDate, color:isToday?"#FF6B6B":"#1C1C1E"}}>{d.getMonth()+1}월 {d.getDate()}일</span>
+                <span style={S.dayHdrSub}>{DAY_KR[d.getDay()]}요일</span>
+                {isToday&&<span style={S.todayBadge}>오늘</span>}
+              </div>
+              {evs.map(ev=>{
+                const cat=CATEGORY_COLORS[ev.category]||CATEGORY_COLORS["기타"];
+                return (
+                  <div key={ev.id} style={{...S.card, opacity:ev.done?.55:1}} onClick={()=>onSelect(ev)}>
+                    <div style={{...S.cardLine, background:cat.bg}}/>
+                    <div style={{flex:1,padding:"10px 10px 10px 12px",minWidth:0}}>
+                      <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                        <span style={{...S.catBadge,background:cat.light,color:cat.text}}>{ev.category}</span>
+                        <span style={S.timeTag}>{ev.startTime}–{ev.endTime}</span>
+                      </div>
+                      <div style={{...S.cardTitle, textDecoration:ev.done?"line-through":"none", color:ev.done?"#AEAEB2":"#1C1C1E"}}>{ev.title}</div>
+                      {ev.instructor&&<div style={S.cardMeta}>👤 {ev.instructor}{ev.location&&`  📍 ${ev.location}`}</div>}
+                    </div>
+                    <button style={{...S.check, background:ev.done?"#34C759":"transparent", borderColor:ev.done?"#34C759":"#D1D1D6"}}
+                      onClick={e=>{e.stopPropagation();onToggle(ev.id);}}>
+                      {ev.done&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
+                    </button>
+                  </div>
+                );
+              })}
+            </div>
+          );
+        })}
+        {!hasAny&&(
+          <div style={{textAlign:"center",padding:"60px 0"}}>
+            <div style={{fontSize:44,marginBottom:10}}>📅</div>
+            <div style={{color:"#8E8E93",fontSize:15}}>이 주에는 일정이 없어요</div>
+          </div>
+        )}
+      </div>
+    </div>
+  );
+}
+
+function MonthlyView({ events, todayStr, monthRef, setMonthRef, onSelect, onDayClick }){
+  const y=monthRef.getFullYear(), m=monthRef.getMonth();
+  const total=daysInMonth(y,m), first=firstDayOfMonth(y,m);
+  const cells=Array.from({length:first+total},(_,i)=>i<first?null:i-first+1);
+  while(cells.length%7!==0) cells.push(null);
+
+  const getEvs = day=>{
+    if(!day) return [];
+    const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
+    return events.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+  };
+
+  return (
+    <div>
+      <div style={S.weekNav}>
+        <button style={S.navBtn} onClick={()=>setMonthRef(d=>{ const r=new Date(d); r.setMonth(r.getMonth()-1); return r; })}>‹</button>
+        <span style={S.navLabel}>{y}년 {MONTH_KR[m]}</span>
+        <button style={S.navBtn} onClick={()=>setMonthRef(d=>{ const r=new Date(d); r.setMonth(r.getMonth()+1); return r; })}>›</button>
+      </div>
+
+      {/* Day-of-week headers */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",padding:"0 12px",borderBottom:"1px solid #F2F2F7"}}>
+        {DAY_KR.map((d,i)=>(
+          <div key={d} style={{textAlign:"center",fontSize:11,fontWeight:700,padding:"6px 0",color:i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93",letterSpacing:0.3}}>{d}</div>
+        ))}
+      </div>
+
+      {/* Grid */}
+      <div style={{display:"grid",gridTemplateColumns:"repeat(7,1fr)",padding:"0 12px 40px"}}>
+        {cells.map((day,ci)=>{
+          const ds=day?`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`:null;
+          const isToday=ds===todayStr;
+          const evs=getEvs(day);
+          const dow=ci%7;
+          return (
+            <div key={ci}
+              style={{minHeight:80,borderBottom:"1px solid #F2F2F7",padding:"4px 2px 4px",cursor:day?"pointer":"default",background:isToday?"#FFF5F5":"transparent"}}
+              onClick={()=>ds&&onDayClick(ds)}>
+              {day&&(
+                <>
+                  <div style={{width:22,height:22,borderRadius:11,display:"flex",alignItems:"center",justifyContent:"center",fontSize:12,fontWeight:700,marginBottom:3,
+                    background:isToday?"#FF6B6B":"transparent",
+                    color:isToday?"#fff":dow===0?"#FF6B6B":dow===6?"#4D96FF":"#1C1C1E"}}>
+                    {day}
+                  </div>
+                  {evs.slice(0,2).map(ev=>{
+                    const cat=CATEGORY_COLORS[ev.category]||CATEGORY_COLORS["기타"];
+                    return (
+                      <div key={ev.id}
+                        style={{borderRadius:4,padding:"1px 3px",marginBottom:2,background:cat.bg,opacity:ev.done?.5:1,cursor:"pointer",overflow:"hidden"}}
+                        onClick={e=>{e.stopPropagation();onSelect(ev);}}>
+                        <span style={{fontSize:8,fontWeight:700,color:"#fff",display:"block",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"}}>
+                          {ev.startTime} {ev.title}
+                        </span>
+                      </div>
+                    );
+                  })}
+                  {evs.length>2&&<div style={{fontSize:9,color:"#8E8E93",paddingLeft:2}}>+{evs.length-2}개</div>}
+                </>
+              )}
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+function DayPanel({ dateStr, events, onClose, onSelect, onToggle }){
+  const evs=events.filter(e=>e.date===dateStr).sort((a,b)=>a.startTime.localeCompare(b.startTime));
+  const d=new Date(dateStr); const dow=d.getDay();
+  const [,m,day]=dateStr.split("-");
+  return (
+    <div style={S.overlay} onClick={onClose}>
+      <div style={{...S.sheet,paddingBottom:32}} onClick={e=>e.stopPropagation()}>
+        <div style={S.handle}/>
+        <div style={S.sheetHead}>
+          <span style={{fontWeight:800,fontSize:20,color:"#1C1C1E"}}>{+m}월 {+day}일 <span style={{color:"#8E8E93",fontWeight:500,fontSize:16}}>{DAY_KR[dow]}요일</span></span>
+          <button style={S.closeBtn} onClick={onClose}>✕</button>
+        </div>
+        <div style={S.divider}/>
+        {evs.length===0&&<div style={{textAlign:"center",padding:"30px 0",color:"#8E8E93",fontSize:14}}>일정이 없어요</div>}
+        {evs.map(ev=>{
+          const cat=CATEGORY_COLORS[ev.category]||CATEGORY_COLORS["기타"];
+          return (
+            <div key={ev.id} style={{...S.card,marginBottom:8,opacity:ev.done?.55:1}} onClick={()=>{ onClose(); setTimeout(()=>onSelect(ev),100); }}>
+              <div style={{...S.cardLine,background:cat.bg}}/>
+              <div style={{flex:1,padding:"10px 10px 10px 12px",minWidth:0}}>
+                <div style={{display:"flex",alignItems:"center",gap:6,marginBottom:4}}>
+                  <span style={{...S.catBadge,background:cat.light,color:cat.text}}>{ev.category}</span>
+                  <span style={S.timeTag}>{ev.startTime}–{ev.endTime}</span>
+                </div>
+                <div style={{...S.cardTitle,textDecoration:ev.done?"line-through":"none",color:ev.done?"#AEAEB2":"#1C1C1E"}}>{ev.title}</div>
+                {ev.instructor&&<div style={S.cardMeta}>👤 {ev.instructor}</div>}
+              </div>
+              <button style={{...S.check,background:ev.done?"#34C759":"transparent",borderColor:ev.done?"#34C759":"#D1D1D6"}}
+                onClick={e=>{e.stopPropagation();onToggle(ev.id);}}>
+                {ev.done&&<span style={{color:"#fff",fontSize:11}}>✓</span>}
+              </button>
+            </div>
+          );
+        })}
+      </div>
+    </div>
+  );
+}
+
+export default function App(){
+  const TODAY=new Date("2026-04-02");
+  const todayStr=fmt(TODAY);
+
+  const [view,setView]=useState("month");
+  const [events,setEvents]=useState(INITIAL_EVENTS);
+  const [weekRef,setWeekRef]=useState(weekStart(TODAY));
+  const [monthRef,setMonthRef]=useState(new Date(TODAY.getFullYear(),TODAY.getMonth(),1));
+  const [selected,setSelected]=useState(null);
+  const [dayPanel,setDayPanel]=useState(null);
+  const [showAdd,setShowAdd]=useState(false);
+  const [nextId,setNextId]=useState(100);
+
+  const toggle=id=>{ setEvents(p=>p.map(e=>e.id===id?{...e,done:!e.done}:e)); setSelected(p=>p?.id===id?{...p,done:!p.done}:p); };
+  const del=id=>{ setEvents(p=>p.filter(e=>e.id!==id)); setSelected(null); };
+  const addEv=form=>{ setEvents(p=>[...p,{...form,id:nextId,done:false,floor:"",room:"",module:""}]); setNextId(n=>n+1); setShowAdd(false); };
+
+  const doneCount=events.filter(e=>e.done).length;
+  const total=events.length;
+
+  return (
+    <div style={S.root}>
+      <div style={S.header}>
+        <div style={{display:"flex",justifyContent:"space-between",alignItems:"flex-start",marginBottom:4}}>
+          <div>
+            <div style={{fontSize:11,color:"#8E8E93",fontWeight:500,letterSpacing:0.3}}>중기 3기 · 14명</div>
+            <div style={{fontSize:23,fontWeight:800,color:"#1C1C1E",letterSpacing:-0.5}}>1회차 프로그램</div>
+          </div>
+          <button style={S.plusBtn} onClick={()=>setShowAdd(true)}>＋</button>
+        </div>
+
+        {/* Progress bar */}
+        <div style={{marginBottom:14}}>
+          <div style={{display:"flex",justifyContent:"space-between",marginBottom:5}}>
+            <span style={{fontSize:11,color:"#8E8E93"}}>완료 진행률</span>
+            <span style={{fontSize:11,fontWeight:700,color:"#34C759"}}>{doneCount}/{total}</span>
+          </div>
+          <div style={{height:5,background:"#E5E5EA",borderRadius:3,overflow:"hidden"}}>
+            <div style={{height:"100%",width:`${total?doneCount/total*100:0}%`,background:"linear-gradient(90deg,#34C759,#30D158)",borderRadius:3,transition:"width .4s ease"}}/>
+          </div>
+        </div>
+
+        {/* Segment control */}
+        <div style={S.segCtrl}>
+          {[["month","📅 월간"],["week","📋 주간"]].map(([v,lb])=>(
+            <button key={v} style={{...S.segBtn,...(view===v?S.segActive:{})}} onClick={()=>setView(v)}>{lb}</button>
+          ))}
+        </div>
+
+        {/* Category legend */}
+        <div style={{display:"flex",gap:8,overflowX:"auto",paddingBottom:12,scrollbarWidth:"none"}}>
+          {Object.entries(CATEGORY_COLORS).map(([k,c])=>(
+            <div key={k} style={{display:"flex",alignItems:"center",gap:3,flexShrink:0}}>
+              <div style={{width:7,height:7,borderRadius:3.5,background:c.bg}}/>
+              <span style={{fontSize:9,color:"#8E8E93",whiteSpace:"nowrap"}}>{k}</span>
+            </div>
+          ))}
+        </div>
+      </div>
+
+      <div style={{flex:1,overflowY:"auto"}}>
+        {view==="week"
+          ?<WeeklyView events={events} todayStr={todayStr} weekRef={weekRef} setWeekRef={setWeekRef} onSelect={setSelected} onToggle={toggle}/>
+          :<MonthlyView events={events} todayStr={todayStr} monthRef={monthRef} setMonthRef={setMonthRef} onSelect={setSelected} onDayClick={setDayPanel}/>
+        }
+      </div>
+
+      {selected&&<DetailModal ev={selected} onClose={()=>setSelected(null)} onToggle={toggle} onDelete={del}/>}
+      {dayPanel&&<DayPanel dateStr={dayPanel} events={events} onClose={()=>setDayPanel(null)} onSelect={setSelected} onToggle={toggle}/>}
+      {showAdd&&<AddModal initDate={todayStr} onClose={()=>setShowAdd(false)} onAdd={addEv}/>}
+    </div>
+  );
+}
+
+const S={
+  root:{fontFamily:"-apple-system,'SF Pro Display','Helvetica Neue',sans-serif",background:"#F2F2F7",minHeight:"100vh",maxWidth:430,margin:"0 auto",display:"flex",flexDirection:"column"},
+  header:{background:"#fff",padding:"48px 20px 0",boxShadow:"0 1px 0 rgba(0,0,0,0.07)",position:"sticky",top:0,zIndex:10},
+  plusBtn:{width:34,height:34,borderRadius:17,background:"#1C1C1E",border:"none",color:"#fff",fontSize:20,cursor:"pointer",display:"flex",alignItems:"center",justifyContent:"center",flexShrink:0},
+  segCtrl:{display:"flex",background:"#F2F2F7",borderRadius:12,padding:3,marginBottom:12},
+  segBtn:{flex:1,padding:"7px 0",borderRadius:9,border:"none",background:"transparent",fontSize:13,fontWeight:600,color:"#8E8E93",cursor:"pointer"},
+  segActive:{background:"#fff",color:"#1C1C1E",boxShadow:"0 1px 4px rgba(0,0,0,0.12)"},
+
+  weekNav:{display:"flex",alignItems:"center",justifyContent:"space-between",padding:"14px 20px 10px"},
+  navBtn:{background:"none",border:"none",fontSize:24,color:"#8E8E93",cursor:"pointer",padding:"0 10px",lineHeight:1},
+  navLabel:{fontSize:15,fontWeight:700,color:"#1C1C1E"},
+
+  miniStrip:{display:"flex",justifyContent:"space-around",padding:"0 16px 12px"},
+  miniNum:{width:24,height:24,borderRadius:12,display:"flex",alignItems:"center",justifyContent:"center",fontSize:13,fontWeight:700},
+
+  dayHdr:{display:"flex",alignItems:"center",gap:6,marginBottom:8,paddingLeft:4},
+  dayHdrDate:{fontSize:15,fontWeight:700},
+  dayHdrSub:{fontSize:13,color:"#8E8E93",fontWeight:500},
+  todayBadge:{fontSize:10,fontWeight:700,background:"#FF6B6B",color:"#fff",padding:"2px 7px",borderRadius:8},
+
+  card:{background:"#fff",borderRadius:14,display:"flex",alignItems:"center",overflow:"hidden",boxShadow:"0 1px 3px rgba(0,0,0,0.06)",cursor:"pointer",marginBottom:8},
+  cardLine:{width:4,alignSelf:"stretch",flexShrink:0},
+  cardTitle:{fontSize:14,fontWeight:600,lineHeight:1.35,marginBottom:4},
+  cardMeta:{fontSize:11,color:"#8E8E93",overflow:"hidden",textOverflow:"ellipsis",whiteSpace:"nowrap"},
+  timeTag:{fontSize:11,color:"#8E8E93",fontWeight:500,marginLeft:"auto",flexShrink:0},
+  check:{width:24,height:24,borderRadius:12,border:"2px solid",background:"transparent",cursor:"pointer",marginRight:12,flexShrink:0,display:"flex",alignItems:"center",justifyContent:"center"},
+  catBadge:{fontSize:10,fontWeight:700,padding:"2px 7px",borderRadius:8,letterSpacing:0.2,whiteSpace:"nowrap"},
+
+  overlay:{position:"fixed",inset:0,background:"rgba(0,0,0,0.45)",backdropFilter:"blur(4px)",zIndex:100,display:"flex",alignItems:"flex-end"},
+  sheet:{background:"#fff",borderRadius:"24px 24px 0 0",width:"100%",maxHeight:"88vh",overflowY:"auto",padding:"0 20px 20px"},
+  sheetBar:{height:4,margin:"0 -20px 0"},
+  handle:{width:36,height:4,background:"#E5E5EA",borderRadius:2,margin:"12px auto 16px"},
+  sheetHead:{display:"flex",justifyContent:"space-between",alignItems:"center",marginBottom:12},
+  sheetTitle:{fontSize:19,fontWeight:800,color:"#1C1C1E",lineHeight:1.3,marginBottom:16,letterSpacing:-0.3},
+  closeBtn:{background:"#F2F2F7",border:"none",borderRadius:16,width:28,height:28,cursor:"pointer",fontSize:12,color:"#8E8E93",fontWeight:700},
+  divider:{height:1,background:"#F2F2F7",margin:"0 -20px 14px"},
+  infoRow:{display:"flex",alignItems:"flex-start",gap:10,marginBottom:12},
+  infoIcon:{fontSize:15,width:20,flexShrink:0},
+  infoLbl:{fontSize:13,color:"#8E8E93",width:48,flexShrink:0,fontWeight:500},
+  infoVal:{fontSize:14,color:"#1C1C1E",fontWeight:500,flex:1},
+  actBtn:{flex:1,padding:13,borderRadius:14,border:"none",fontSize:15,fontWeight:700,cursor:"pointer"},
+
+  fmLbl:{fontSize:11,fontWeight:600,color:"#8E8E93",textTransform:"uppercase",letterSpacing:0.5,marginBottom:5,display:"block"},
+  fmIn:{width:"100%",padding:"11px 14px",borderRadius:12,border:"1.5px solid #E5E5EA",fontSize:15,color:"#1C1C1E",background:"#F9F9F9",outline:"none",boxSizing:"border-box",fontFamily:"-apple-system,sans-serif"},
+  submitBtn:{width:"100%",padding:15,borderRadius:14,border:"none",background:"#1C1C1E",color:"#fff",fontSize:16,fontWeight:700,cursor:"pointer",marginTop:8},
+};
 
