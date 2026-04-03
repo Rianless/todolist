@@ -78,13 +78,6 @@ html, body {
   box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.1);
 }
 
-/* legend */
-.legend { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
-.legend::-webkit-scrollbar { display: none; }
-.legend-item { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
-.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
-.legend-lbl { font-size: 10px; color: #8E8E93; font-weight: 500; white-space: nowrap; }
-
 /* cal nav */
 .cal-nav { display: flex; align-items: center; padding: 2px 0 8px; }
 .nav-btn {
@@ -201,10 +194,14 @@ html, body {
   background: #F2F2F7; border-radius: 22px 22px 0 0;
   width: 100%; max-height: 90vh; overflow-y: auto;
   padding-bottom: 34px;
+  touch-action: pan-y;
+  transition: transform 0.3s cubic-bezier(.32,0,.67,0);
+  will-change: transform;
 }
 .handle {
   width: 36px; height: 5px; background: rgba(0,0,0,.16);
   border-radius: 3px; margin: 10px auto 0;
+  cursor: grab;
 }
 
 /* detail */
@@ -225,6 +222,15 @@ html, body {
 }
 .act-btn:active { opacity: .75; }
 
+/* detail action row with 3 buttons */
+.act-row-3 { display: flex; gap: 8px; padding: 4px 16px 0; }
+.act-btn-sm {
+  flex: 1; padding: 14px 8px; border-radius: 14px; border: none;
+  font-size: 14px; font-weight: 600; cursor: pointer;
+  transition: opacity .15s;
+}
+.act-btn-sm:active { opacity: .75; }
+
 /* day panel */
 .day-panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
 .day-panel-title { font-size: 20px; font-weight: 700; color: #1C1C1E; }
@@ -239,7 +245,7 @@ html, body {
 }
 .close-btn:active { background: rgba(0,0,0,.15); }
 
-/* add sheet */
+/* add / edit sheet */
 .add-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
 .add-head-title { font-size: 17px; font-weight: 600; color: #1C1C1E; }
 .fm-group { background: #fff; border-radius: 14px; margin: 0 16px 12px; overflow: hidden; }
@@ -339,7 +345,6 @@ html, body {
       <button class="seg-btn active" id="btn-month" onclick="setView('month')">월간</button>
       <button class="seg-btn" id="btn-week" onclick="setView('week')">주간</button>
     </div>
-    <div class="legend" id="legend"></div>
     <div id="header-cal"></div>
   </div>
   <div id="view"></div>
@@ -347,7 +352,7 @@ html, body {
 
 <!-- Detail -->
 <div class="overlay" id="detail-overlay" onclick="closeDetail()">
-  <div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet" id="detail-sheet" onclick="event.stopPropagation()">
     <div class="detail-bar" id="detail-bar"></div>
     <div class="handle"></div>
     <div class="sheet-cat-row">
@@ -356,16 +361,17 @@ html, body {
     </div>
     <div class="detail-title" id="detail-title"></div>
     <div class="info-group" id="detail-rows"></div>
-    <div class="act-row">
-      <button class="act-btn" id="detail-done-btn" onclick="toggleFromDetail()"></button>
-      <button class="act-btn" style="background:#FFE5E5;color:#FF3B30" onclick="deleteFromDetail()">삭제</button>
+    <div class="act-row-3">
+      <button class="act-btn-sm" id="detail-done-btn" onclick="toggleFromDetail()"></button>
+      <button class="act-btn-sm" style="background:#E3EEFF;color:#007AFF" onclick="openEditFromDetail()">수정</button>
+      <button class="act-btn-sm" style="background:#FFE5E5;color:#FF3B30" onclick="deleteFromDetail()">삭제</button>
     </div>
   </div>
 </div>
 
 <!-- Day Panel -->
 <div class="overlay" id="day-overlay" onclick="closeDayPanel()">
-  <div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet" id="day-sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
     <div class="day-panel-head">
       <span class="day-panel-title" id="day-panel-title"></span>
@@ -381,7 +387,7 @@ html, body {
 
 <!-- Settings -->
 <div class="overlay" id="settings-overlay" onclick="closeSettings()">
-  <div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet" id="settings-sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
     <div class="settings-head">
       <span class="settings-title">카테고리 설정</span>
@@ -402,12 +408,12 @@ html, body {
   </div>
 </div>
 
-<!-- Add -->
+<!-- Add / Edit -->
 <div class="overlay" id="add-overlay" onclick="closeAdd()">
-  <div class="sheet" onclick="event.stopPropagation()">
+  <div class="sheet" id="add-sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
     <div class="add-head">
-      <span class="add-head-title">새 일정</span>
+      <span class="add-head-title" id="add-head-title">새 일정</span>
       <button class="close-btn" onclick="closeAdd()">✕</button>
     </div>
     <div class="fm-group">
@@ -415,13 +421,15 @@ html, body {
       <div class="fm-row-in"><span class="fm-lbl-in">제목</span><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">시작</span><input class="fm-in" type="time" id="f-start" value="09:00"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">종료</span><input class="fm-in" type="time" id="f-end" value="10:00"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">모듈</span><input class="fm-in" type="text" id="f-module" placeholder="모듈명"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">강사</span><input class="fm-in" type="text" id="f-instructor" placeholder="이름"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">장소</span><input class="fm-in" type="text" id="f-location" placeholder="장소"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">메모</span><input class="fm-in" type="text" id="f-note" placeholder="비고"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">강의실</span><input class="fm-in" type="text" id="f-room" placeholder="강의실"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">비고</span><input class="fm-in" type="text" id="f-note" placeholder="비고"></div>
     </div>
     <div class="fm-sec-lbl">카테고리</div>
     <div class="cat-pick" id="cat-pick"></div>
-    <button class="submit-btn" onclick="submitAdd()">추가</button>
+    <button class="submit-btn" id="submit-btn" onclick="submitAdd()">추가</button>
   </div>
 </div>
 
@@ -459,6 +467,7 @@ function getToday(){ return new Date(); }
 function getTodayStr(){ return fmtLocal(getToday()); }
 let currentView="month", weekRef=weekStart(new Date("2026-04-01")), monthRef=new Date(2026,3,1);
 let nextId=100, selectedId=null, dayPanelDate=null, addCat="기타", showTitle=false, selectedWeekDay="2026-04-01";
+let editingId=null; // null = 새 일정, id = 수정 중
 
 function fmtLocal(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
 function fmt(d){ return fmtLocal(d); }
@@ -475,12 +484,6 @@ function updateProgress(){
   document.getElementById("prog-lbl").textContent=done+"/"+total;
   const r=7, circ=2*Math.PI*r, pct=total?done/total:0;
   document.getElementById("prog-ring-fill").style.strokeDashoffset=circ*(1-pct);
-}
-
-function renderLegend(){
-  document.getElementById("legend").innerHTML=Object.entries(CAT).map(([k,v])=>
-    `<div class="legend-item"><div class="legend-dot" style="background:${v.bg}"></div><span class="legend-lbl">${k}</span></div>`
-  ).join("");
 }
 
 function setView(v){
@@ -635,16 +638,22 @@ function refreshDetail(){
   const ce=document.getElementById("detail-cat");
   ce.textContent=ev.category; ce.style.background=ct.light; ce.style.color=ct.text;
   document.getElementById("detail-title").textContent=ev.title;
-  document.getElementById("detail-rows").innerHTML=[
-    ["🕐","시간",ev.startTime+" – "+ev.endTime],
-    ["📚","모듈",ev.module||"-"],
-    ["👤","강사",ev.instructor||"-"],
-    ["📍","장소",ev.location||"-"],
-    ["🚪","강의실",ev.room||"-"],
-    ...(ev.note?[["📝","비고",ev.note]]:[]),
-  ].map(([ic,lb,vl])=>
-    `<div class="info-row"><span class="info-icon">${ic}</span><span class="info-lbl">${lb}</span><span class="info-val">${esc(vl)}</span></div>`
-  ).join("");
+
+  // 값이 있는 필드만 표시
+  const rows=[
+    ["🕐","시간", ev.startTime+" – "+ev.endTime, true], // 시간은 항상 표시
+    ["📚","모듈", ev.module||"", false],
+    ["👤","강사", ev.instructor||"", false],
+    ["📍","장소", ev.location||"", false],
+    ["🚪","강의실", ev.room||"", false],
+    ["📝","비고", ev.note||"", false],
+  ];
+  document.getElementById("detail-rows").innerHTML=rows
+    .filter(([,, val, always])=> always || val)
+    .map(([ic,lb,vl])=>
+      `<div class="info-row"><span class="info-icon">${ic}</span><span class="info-lbl">${lb}</span><span class="info-val">${esc(vl)}</span></div>`
+    ).join("");
+
   const btn=document.getElementById("detail-done-btn");
   btn.textContent=ev.done?"✓ 완료됨 (취소)":"완료 처리";
   btn.style.background=ev.done?"#E5E5EA":"#34C759";
@@ -653,6 +662,13 @@ function refreshDetail(){
 function closeDetail(){ document.getElementById("detail-overlay").classList.remove("show"); selectedId=null; }
 function toggleFromDetail(){ if(selectedId) toggleDone(selectedId); }
 function deleteFromDetail(){ if(selectedId){ deleteDone(selectedId); closeDetail(); } }
+
+/* 상세 → 수정 */
+function openEditFromDetail(){
+  const id=selectedId;
+  closeDetail();
+  setTimeout(()=>openEdit(id), 80);
+}
 
 /* DAY PANEL */
 function openDayPanel(ds){ dayPanelDate=ds; refreshDayPanel(); document.getElementById("day-overlay").classList.add("show"); }
@@ -670,17 +686,43 @@ function dayPanelAdd(){ const ds=dayPanelDate; closeDayPanel(); setTimeout(()=>o
 
 /* ADD */
 function openAdd(dateStr){
+  editingId=null;
   addCat="기타";
+  document.getElementById("add-head-title").textContent="새 일정";
+  document.getElementById("submit-btn").textContent="추가";
   document.getElementById("f-date").value=dateStr||getTodayStr();
   document.getElementById("f-title").value="";
   document.getElementById("f-start").value="09:00";
   document.getElementById("f-end").value="10:00";
+  document.getElementById("f-module").value="";
   document.getElementById("f-instructor").value="";
   document.getElementById("f-location").value="";
+  document.getElementById("f-room").value="";
   document.getElementById("f-note").value="";
   renderCatPick();
   document.getElementById("add-overlay").classList.add("show");
 }
+
+/* EDIT */
+function openEdit(id){
+  const ev=events.find(e=>e.id===id); if(!ev) return;
+  editingId=id;
+  addCat=ev.category||"기타";
+  document.getElementById("add-head-title").textContent="일정 수정";
+  document.getElementById("submit-btn").textContent="저장";
+  document.getElementById("f-date").value=ev.date||getTodayStr();
+  document.getElementById("f-title").value=ev.title||"";
+  document.getElementById("f-start").value=ev.startTime||"09:00";
+  document.getElementById("f-end").value=ev.endTime||"10:00";
+  document.getElementById("f-module").value=ev.module||"";
+  document.getElementById("f-instructor").value=ev.instructor||"";
+  document.getElementById("f-location").value=ev.location||"";
+  document.getElementById("f-room").value=ev.room||"";
+  document.getElementById("f-note").value=ev.note||"";
+  renderCatPick();
+  document.getElementById("add-overlay").classList.add("show");
+}
+
 function renderCatPick(){
   document.getElementById("cat-pick").innerHTML=Object.entries(CAT).map(([k,v])=>{
     const sel=addCat===k;
@@ -688,22 +730,73 @@ function renderCatPick(){
   }).join("");
 }
 function pickCat(c){ addCat=c; renderCatPick(); }
-function closeAdd(){ document.getElementById("add-overlay").classList.remove("show"); }
+function closeAdd(){ document.getElementById("add-overlay").classList.remove("show"); editingId=null; }
+
 function submitAdd(){
   const title=document.getElementById("f-title").value.trim(); if(!title) return;
-  events.push({ id:nextId++, done:false,
+  const data={
     date:document.getElementById("f-date").value,
     startTime:document.getElementById("f-start").value,
     endTime:document.getElementById("f-end").value,
-    title, category:addCat,
+    title,
+    category:addCat,
+    module:document.getElementById("f-module").value,
     instructor:document.getElementById("f-instructor").value,
     location:document.getElementById("f-location").value,
+    room:document.getElementById("f-room").value,
     note:document.getElementById("f-note").value,
-    module:"", room:"" });
-  closeAdd(); renderView();
+  };
+  if(editingId!==null){
+    events=events.map(e=>e.id===editingId?{...e,...data}:e);
+  } else {
+    events.push({id:nextId++, done:false, ...data});
+  }
+  closeAdd();
+  renderView();
 }
 
 document.getElementById("plus-btn").onclick=()=>openAdd();
+
+/* ── SWIPE TO CLOSE ── */
+function setupSwipe(overlayId, sheetId, closeFn){
+  const overlay=document.getElementById(overlayId);
+  const sheet=document.getElementById(sheetId);
+  let startY=0, currentY=0, dragging=false;
+
+  function onStart(e){
+    const clientY=e.touches?e.touches[0].clientY:e.clientY;
+    startY=clientY; currentY=0; dragging=true;
+    sheet.style.transition="none";
+  }
+  function onMove(e){
+    if(!dragging) return;
+    const clientY=e.touches?e.touches[0].clientY:e.clientY;
+    const dy=clientY-startY;
+    if(dy<0) return; // 위로는 안됨
+    currentY=dy;
+    sheet.style.transform=`translateY(${dy}px)`;
+  }
+  function onEnd(){
+    if(!dragging) return;
+    dragging=false;
+    sheet.style.transition="";
+    if(currentY>120){
+      sheet.style.transform=`translateY(100%)`;
+      setTimeout(()=>{ sheet.style.transform=""; closeFn(); }, 280);
+    } else {
+      sheet.style.transform="";
+    }
+  }
+
+  sheet.addEventListener("touchstart", onStart, {passive:true});
+  sheet.addEventListener("touchmove", onMove, {passive:true});
+  sheet.addEventListener("touchend", onEnd);
+}
+
+setupSwipe("detail-overlay","detail-sheet", closeDetail);
+setupSwipe("day-overlay","day-sheet", closeDayPanel);
+setupSwipe("settings-overlay","settings-sheet", closeSettings);
+setupSwipe("add-overlay","add-sheet", closeAdd);
 
 /* ── SETTINGS ── */
 const PALETTE = [
@@ -712,7 +805,6 @@ const PALETTE = [
   "#8E8E93","#636366","#1C1C1E","#00C7BE","#32ADE6","#BF5AF2"
 ];
 
-// 색상에서 light/text 자동 계산
 function hexToRgb(hex){ const r=parseInt(hex.slice(1,3),16),g=parseInt(hex.slice(3,5),16),b=parseInt(hex.slice(5,7),16); return {r,g,b}; }
 function lightenHex(hex, amt=0.85){
   const {r,g,b}=hexToRgb(hex);
@@ -732,18 +824,15 @@ function openSettings(){
   document.getElementById("settings-overlay").classList.add("show");
 }
 function closeSettings(){
-  // 이름 변경 사항 저장
   document.querySelectorAll(".cat-name-in").forEach(inp=>{
     const oldKey=inp.dataset.key, newKey=inp.value.trim();
     if(!newKey || newKey===oldKey) return;
-    if(CAT[newKey]) return; // 중복
+    if(CAT[newKey]) return;
     CAT[newKey]=CAT[oldKey];
     delete CAT[oldKey];
-    // 해당 카테고리 이름으로 등록된 이벤트 업데이트
     events=events.map(e=>e.category===oldKey?{...e,category:newKey}:e);
   });
   document.getElementById("settings-overlay").classList.remove("show");
-  renderLegend();
   renderView();
 }
 
@@ -768,31 +857,25 @@ function renderColorPresets(){
   ).join("");
 }
 
-// 색상 변경
 function updateCatColor(key, hex, idx){
   if(!CAT[key]) return;
   CAT[key]=makeCatColors(hex);
   const dot=document.querySelector(`#catrow-${idx} .cat-color-dot`);
   if(dot) dot.style.background=hex;
-  renderLegend();
 }
 
-// 팔레트 색상 클릭 — 마지막으로 포커스된 카테고리에 적용
 let focusedCatKey=null;
 document.addEventListener("focusin", e=>{ if(e.target.classList.contains("cat-name-in")) focusedCatKey=e.target.dataset.key; });
 
 function applyPresetColor(hex){
-  // 포커스된 카테고리가 없으면 첫 번째에 적용
   const key=focusedCatKey||Object.keys(CAT)[0];
   if(!CAT[key]) return;
   CAT[key]=makeCatColors(hex);
   renderCatList();
-  renderLegend();
 }
 
 function pickColorFor(key){ focusedCatKey=key; }
 
-// 새 카테고리 추가
 function addNewCat(){
   const names=["새카테고리","카테고리A","카테고리B","카테고리C","카테고리D"];
   let name=names.find(n=>!CAT[n])||"카테고리"+(Object.keys(CAT).length+1);
@@ -800,7 +883,6 @@ function addNewCat(){
   CAT[name]=makeCatColors(colors);
   focusedCatKey=name;
   renderCatList();
-  // 새로 추가된 input에 포커스
   setTimeout(()=>{
     const inputs=document.querySelectorAll(".cat-name-in");
     const last=inputs[inputs.length-1];
@@ -808,19 +890,15 @@ function addNewCat(){
   },50);
 }
 
-// 카테고리 삭제
 function deleteCat(key){
   if(Object.keys(CAT).length<=1) return;
-  // 해당 카테고리 이벤트는 "기타"로 변경
   const fallback=Object.keys(CAT).find(k=>k!==key)||"기타";
   events=events.map(e=>e.category===key?{...e,category:fallback}:e);
   delete CAT[key];
   if(focusedCatKey===key) focusedCatKey=null;
   renderCatList();
-  renderLegend();
 }
 
-renderLegend();
 requestAnimationFrame(()=>{ requestAnimationFrame(renderView); });
 window.addEventListener("resize", renderView);
 
