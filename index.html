@@ -698,13 +698,25 @@ function weekPrev(){ weekRef=addDays(weekRef,-7); renderView(); }
 function weekNext(){ weekRef=addDays(weekRef,7); renderView(); }
 
 /* TOGGLE / DELETE */
+function saveDoneState(){
+  const doneIds = events.filter(e=>e.done).map(e=>e.id);
+  try { localStorage.setItem("donedIds", JSON.stringify(doneIds)); } catch(e){}
+}
+function loadDoneState(){
+  try {
+    const saved = JSON.parse(localStorage.getItem("donedIds")||"[]");
+    events = events.map(e=>({...e, done: saved.includes(e.id)}));
+  } catch(e){}
+}
+
 function toggleDone(id){
   events=events.map(e=>e.id===id?Object.assign({},e,{done:!e.done}):e);
+  saveDoneState();
   renderView();
   if(selectedId===id) refreshDetail();
   if(dayPanelDate) refreshDayPanel();
 }
-function deleteDone(id){ events=events.filter(e=>e.id!==id); renderView(); }
+function deleteDone(id){ events=events.filter(e=>e.id!==id); saveDoneState(); renderView(); }
 
 /* DETAIL */
 function openDetail(id){ selectedId=id; refreshDetail(); document.getElementById("detail-overlay").classList.add("show"); }
@@ -733,7 +745,7 @@ function refreshDetail(){
     ).join("");
 
   const btn=document.getElementById("detail-done-btn");
-  btn.textContent=ev.done?"✓ 완료됨 (취소)":"완료 처리";
+  btn.innerHTML=ev.done?"완료됨<br><span style='font-size:11px;opacity:.7'>(취소)</span>":"완료 처리";
   btn.style.background=ev.done?"#E5E5EA":"#34C759";
   btn.style.color=ev.done?"#1C1C1E":"#fff";
 }
@@ -1125,7 +1137,7 @@ function deleteSub(groupName, subName){
   renderCatList();
 }
 
-requestAnimationFrame(()=>{ requestAnimationFrame(renderView); });
+requestAnimationFrame(()=>{ loadDoneState(); requestAnimationFrame(renderView); });
 window.addEventListener("resize", renderView);
 
 if('serviceWorker' in navigator){
