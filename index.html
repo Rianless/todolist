@@ -415,9 +415,9 @@ html, body {
     </div>
     <div style="height:.5px;background:rgba(0,0,0,.08);margin:0 16px 12px"></div>
     <div class="fm-sec-lbl" style="margin-bottom:4px">카테고리 목록</div>
-    <div class="info-group" id="cat-list" style="margin-bottom:0;border-radius:14px 14px 0 0"></div>
-    <div style="background:#fff;border-radius:0 0 14px 14px;margin:0 16px 16px;border-top:.5px solid #F2F2F7">
-      <button class="add-cat-btn" onclick="addSoloGroup()">
+    <div id="cat-list" style="margin-bottom:0"></div>
+    <div style="margin:0 16px 16px">
+      <button class="add-cat-btn" style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)" onclick="addSoloGroup()">
         <div class="add-cat-icon">＋</div>
         새 카테고리 추가
       </button>
@@ -964,24 +964,24 @@ function openSettings(){
   document.getElementById("settings-overlay").classList.add("show");
 }
 function closeSettings(){
-  // 이름 변경 저장 — data-group, data-key 기준으로 CAT_GROUPS 업데이트
   document.querySelectorAll(".cat-name-in").forEach(inp=>{
     const oldKey = inp.dataset.key;
-    const groupName = inp.dataset.group;
+    const groupName = inp.dataset.group; // 그룹 항목이면 그룹명, solo면 ""
     const newKey = inp.value.trim();
     if(!newKey || newKey===oldKey) return;
-    if(CAT[newKey]) return; // 중복 방지
-    // CAT_GROUPS 세부 항목 이름 변경
-    const g = CAT_GROUPS.find(g=>g.group===groupName);
-    if(g){
-      const s = g.subs.find(s=>s.name===oldKey);
-      if(s){ s.name=newKey; }
+    if(CAT[newKey]) return;
+    if(groupName){
+      // 청도활동 세부 항목 이름 변경
+      const g = CAT_GROUPS.find(g=>g.group===groupName);
+      if(g){ const s=g.subs.find(s=>s.name===oldKey); if(s) s.name=newKey; }
+    } else {
+      // solo 항목 이름 변경
+      const g = CAT_GROUPS.find(g=>!g.group && g.subs[0].name===oldKey);
+      if(g) g.subs[0].name=newKey;
     }
-    // CAT flat 맵 갱신
-    CAT[newKey] = CAT[oldKey];
+    CAT[newKey]=CAT[oldKey];
     delete CAT[oldKey];
-    // 이벤트 카테고리 갱신
-    events = events.map(e=>e.category===oldKey?{...e,category:newKey}:e);
+    events=events.map(e=>e.category===oldKey?{...e,category:newKey}:e);
   });
   document.getElementById("settings-overlay").classList.remove("show");
   renderView();
@@ -991,41 +991,35 @@ function renderCatList(){
   let html = "";
   CAT_GROUPS.forEach(g => {
     if(g.group){
-      // 그룹 헤더
-      html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:#8E8E93;letter-spacing:.4px;background:#F2F2F7">${g.group}</div>`;
-      // 세부 항목
+      // 청도활동 — 사각형 박스로 묶기
+      html += `
+        <div style="margin:0 16px 14px;border:1.5px solid #E5E5EA;border-radius:14px;overflow:hidden;background:#fff">
+          <div style="padding:9px 14px;font-size:12px;font-weight:700;color:#007AFF;background:#F0F6FF;border-bottom:1px solid #E5E5EA;letter-spacing:.3px">${g.group}</div>`;
       g.subs.forEach((s,i) => {
         const rowId = `catrow-${g.group}-${i}`;
-        const totalSubs = g.subs.length;
-        html += `<div class="cat-row" id="${rowId}">
+        const isLast = i === g.subs.length - 1;
+        html += `<div class="cat-row" id="${rowId}" style="border-bottom:${isLast?"none":".5px solid #F2F2F7"}">
           <div class="cat-color-dot" style="background:${s.color.bg}" onclick="focusedCatKey='${esc(s.name)}'">
             <input type="color" value="${s.color.bg}"
               oninput="updateSubColor('${esc(g.group)}','${esc(s.name)}',this.value,'${rowId}')"
               onchange="updateSubColor('${esc(g.group)}','${esc(s.name)}',this.value,'${rowId}')">
           </div>
           <input class="cat-name-in" data-group="${esc(g.group)}" data-key="${esc(s.name)}" value="${esc(s.name)}" placeholder="카테고리명">
-          <button class="cat-del-btn" onclick="deleteSub('${esc(g.group)}','${esc(s.name)}')" ${totalSubs>1?"":"disabled"}>−</button>
+          <button class="cat-del-btn" onclick="deleteSub('${esc(g.group)}','${esc(s.name)}')" ${g.subs.length>1?"":"disabled"}>−</button>
         </div>`;
       });
-      // 세부 항목 추가 버튼
-      html += `<div style="background:#fff;border-top:.5px solid #F2F2F7">
-        <button class="add-cat-btn" style="padding:9px 14px;font-size:13px" onclick="addSubCat('${esc(g.group)}')">
-          <div class="add-cat-icon" style="width:22px;height:22px;font-size:15px">＋</div>
-          ${g.group} 항목 추가
-        </button>
-      </div>`;
+      html += `</div>`;
     } else {
-      // 그룹 없는 항목 (개인, 기타)
+      // 독립 항목 — 박스 밖에 일반 행으로
       const s = g.subs[0];
       const rowId = `catrow-solo-${s.name}`;
-      html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:#8E8E93;letter-spacing:.4px;background:#F2F2F7">${s.name}</div>`;
-      html += `<div class="cat-row" id="${rowId}">
+      html += `<div class="cat-row" id="${rowId}" style="margin:0 16px 8px;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.07)">
         <div class="cat-color-dot" style="background:${s.color.bg}" onclick="focusedCatKey='${esc(s.name)}'">
           <input type="color" value="${s.color.bg}"
             oninput="updateSoloColor('${esc(s.name)}',this.value,'${rowId}')"
             onchange="updateSoloColor('${esc(s.name)}',this.value,'${rowId}')">
         </div>
-        <span style="flex:1;font-size:14px;font-weight:500;color:#1C1C1E;padding:0 4px">${esc(s.name)}</span>
+        <input class="cat-name-in" data-group="" data-key="${esc(s.name)}" value="${esc(s.name)}" placeholder="카테고리명">
         <button class="cat-del-btn" onclick="deleteSoloGroup('${esc(s.name)}')">−</button>
       </div>`;
     }
