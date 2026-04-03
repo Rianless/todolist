@@ -9,147 +9,282 @@
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
 <meta name="apple-mobile-web-app-title" content="To Do List">
-<meta name="theme-color" content="#ffffff">
+<meta name="theme-color" content="#F2F2F7">
 <style>
 * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
-html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvetica Neue', sans-serif; background: #F2F2F7; }
-
+html, body {
+  height: 100%; overflow: hidden;
+  font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+  background: #F2F2F7;
+  -webkit-font-smoothing: antialiased;
+}
 #app { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
 
 /* ── HEADER ── */
-#header { background: #fff; padding: 16px 14px 0; box-shadow: 0 1px 0 rgba(0,0,0,.08); flex-shrink: 0; }
-.hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
-.hdr-left { display: flex; align-items: baseline; gap: 5px; }
-.hdr-sub  { font-size: 11px; color: #8E8E93; font-weight: 500; }
-.hdr-ttl  { font-size: 17px; font-weight: 800; color: #1C1C1E; letter-spacing: -.5px; }
-.hdr-right { display: flex; align-items: center; gap: 7px; }
-.prog-wrap { display: flex; align-items: center; gap: 5px; }
-.prog-bar  { width: 54px; height: 4px; background: #E5E5EA; border-radius: 2px; overflow: hidden; }
-.prog-fill { height: 100%; background: linear-gradient(90deg,#34C759,#30D158); border-radius: 2px; transition: width .4s; }
-.prog-lbl  { font-size: 11px; font-weight: 700; color: #34C759; min-width: 28px; }
+#header {
+  background: rgba(242,242,247,0.94);
+  backdrop-filter: saturate(180%) blur(20px);
+  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  padding: 14px 16px 0;
+  flex-shrink: 0;
+  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+}
+.hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
+.hdr-ttl { font-size: 28px; font-weight: 700; color: #1C1C1E; letter-spacing: -0.5px; }
+.hdr-right { display: flex; align-items: center; gap: 8px; }
+
+/* progress pill */
+.prog-wrap {
+  display: flex; align-items: center; gap: 6px;
+  background: #fff; padding: 5px 10px 5px 8px;
+  border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+}
+.prog-ring { position: relative; width: 20px; height: 20px; flex-shrink: 0; }
+.prog-ring svg { transform: rotate(-90deg); }
+.prog-ring-bg { fill: none; stroke: #E5E5EA; stroke-width: 2.5; }
+.prog-ring-fill {
+  fill: none; stroke: #34C759; stroke-width: 2.5; stroke-linecap: round;
+  transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1);
+}
+.prog-lbl { font-size: 12px; font-weight: 600; color: #34C759; }
 
 /* icon buttons */
-.ibtn { width: 28px; height: 28px; border-radius: 14px; border: none; cursor: pointer; display: flex; align-items: center; justify-content: center; font-size: 13px; flex-shrink: 0; }
-.ibtn-dark { background: #1C1C1E; color: #fff; font-size: 20px; }
-.ibtn-gray { background: #F2F2F7; color: #8E8E93; font-weight: 700; }
-.ibtn-today { background: #FF6B6B; color: #fff; font-size: 10px; font-weight: 800; letter-spacing: -.3px; width: auto; padding: 0 7px; border-radius: 8px; height: 24px; }
+.ibtn {
+  width: 32px; height: 32px; border-radius: 50%; border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+  transition: transform .1s, opacity .15s;
+}
+.ibtn:active { transform: scale(.9); opacity: .6; }
+.ibtn-dark { background: #1C1C1E; color: #fff; font-size: 20px; font-weight: 300; }
+.ibtn-gray { background: #E5E5EA; color: #636366; font-size: 14px; font-weight: 600; }
+.ibtn-refresh { background: #E5E5EA; color: #636366; font-size: 16px; }
+.ibtn-today {
+  background: #FF3B30; color: #fff; font-size: 10px; font-weight: 700;
+  width: auto; padding: 0 9px; border-radius: 10px; height: 28px;
+}
 
-/* seg */
-.seg { display: flex; background: #F2F2F7; border-radius: 10px; padding: 3px; margin-bottom: 10px; }
-.seg-btn { flex: 1; padding: 8px 0; border-radius: 8px; border: none; background: transparent; font-size: 12px; font-weight: 600; color: #8E8E93; cursor: pointer; }
-.seg-btn.active { background: #fff; color: #1C1C1E; box-shadow: 0 1px 4px rgba(0,0,0,.12); }
+/* seg control */
+.seg {
+  display: flex; background: rgba(118,118,128,.12);
+  border-radius: 10px; padding: 2px; margin-bottom: 12px;
+}
+.seg-btn {
+  flex: 1; padding: 7px 0; border-radius: 8px; border: none;
+  background: transparent; font-size: 13px; font-weight: 500; color: #3C3C43;
+  cursor: pointer; transition: all .2s;
+}
+.seg-btn.active {
+  background: #fff; color: #1C1C1E; font-weight: 600;
+  box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.1);
+}
 
 /* legend */
-.legend { display: flex; gap: 7px; overflow-x: auto; padding-bottom: 10px; scrollbar-width: none; }
+.legend { display: flex; gap: 8px; overflow-x: auto; padding-bottom: 12px; scrollbar-width: none; }
 .legend::-webkit-scrollbar { display: none; }
-.legend-item { display: flex; align-items: center; gap: 2px; flex-shrink: 0; }
-.legend-dot  { width: 6px; height: 6px; border-radius: 3px; }
-.legend-lbl  { font-size: 9px; color: #8E8E93; white-space: nowrap; }
+.legend-item { display: flex; align-items: center; gap: 3px; flex-shrink: 0; }
+.legend-dot { width: 7px; height: 7px; border-radius: 50%; }
+.legend-lbl { font-size: 10px; color: #8E8E93; font-weight: 500; white-space: nowrap; }
 
-/* cal nav (inside header) */
-.cal-nav { display: flex; align-items: center; justify-content: space-between; padding: 4px 0 6px; }
-.nav-btn  { background: none; border: none; font-size: 22px; color: #8E8E93; cursor: pointer; padding: 0 6px; line-height: 1; }
-.nav-lbl  { font-size: 14px; font-weight: 700; color: #1C1C1E; }
+/* cal nav */
+.cal-nav { display: flex; align-items: center; padding: 2px 0 8px; }
+.nav-btn {
+  background: none; border: none; cursor: pointer; padding: 4px 8px;
+  color: #007AFF; font-size: 18px; line-height: 1;
+  border-radius: 8px; transition: background .15s;
+}
+.nav-btn:active { background: rgba(0,122,255,.1); }
+.nav-lbl { font-size: 15px; font-weight: 600; color: #1C1C1E; letter-spacing: -.3px; }
 
 /* dow row */
-.dow-row { display: grid; grid-template-columns: repeat(7,1fr); background: #F9F9F9; border-bottom: 1px solid #F2F2F7; border-radius: 16px 16px 0 0; }
-.dow-cell { text-align: center; font-size: 10px; font-weight: 700; padding: 6px 0; letter-spacing: .3px; }
+.dow-row {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  padding: 4px 0; border-bottom: 0.5px solid rgba(0,0,0,.07);
+}
+.dow-cell { text-align: center; font-size: 11px; font-weight: 600; padding: 4px 0; color: #8E8E93; }
 
 /* week strip */
-.week-strip { display: grid; grid-template-columns: repeat(7,1fr); border-top: 1px solid #F2F2F7; padding: 5px 0 7px; }
-.ws-day { display: flex; flex-direction: column; align-items: center; gap: 2px; cursor: pointer; }
-.ws-dow { font-size: 10px; font-weight: 600; }
-.ws-num { width: 24px; height: 24px; border-radius: 12px; display: flex; align-items: center; justify-content: center; font-size: 13px; font-weight: 700; }
-.ws-dot { width: 4px; height: 4px; border-radius: 2px; }
+.week-strip {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  padding: 6px 0 8px; border-top: 0.5px solid rgba(0,0,0,.06);
+}
+.ws-day { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 2px 0; }
+.ws-dow { font-size: 11px; font-weight: 500; }
+.ws-num {
+  width: 28px; height: 28px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px; font-weight: 500; transition: all .15s;
+}
+.ws-dot { width: 4px; height: 4px; border-radius: 50%; }
 
 /* ── MONTH GRID ── */
 #view { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .month-wrap {
-  flex: 1;
-  margin: 6px 14px 14px;
-  background: #fff;
-  border-radius: 16px;
-  box-shadow: 0 1px 6px rgba(0,0,0,.07);
-  overflow: hidden;
-  display: flex;
-  flex-direction: column;
-  max-height: 68vh;
+  flex: 1; margin: 8px 12px 12px;
+  background: #fff; border-radius: 16px;
+  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  overflow: hidden; display: flex; flex-direction: column; max-height: 68vh;
 }
-.month-grid { display: grid; grid-template-columns: repeat(7,1fr); flex: 1; }
-.month-cell { border-bottom: 1px solid #F2F2F7; border-right: 1px solid #F2F2F7; padding: 3px 3px 2px; cursor: pointer; overflow: hidden; display: flex; flex-direction: column; }
+.month-grid { display: grid; grid-template-columns: repeat(7,1fr); flex: 1; overflow: hidden; }
+.month-cell {
+  border-bottom: 0.5px solid #F2F2F7; border-right: 0.5px solid #F2F2F7;
+  padding: 4px 3px 3px; cursor: pointer; overflow: hidden;
+  display: flex; flex-direction: column; transition: background .12s;
+}
+.month-cell:active { background: #F2F2F7; }
 .month-cell:nth-child(7n) { border-right: none; }
-.month-num { width: 20px; height: 20px; border-radius: 10px; display: flex; align-items: center; justify-content: center; font-size: 11px; font-weight: 700; flex-shrink: 0; margin-bottom: 1px; align-self: flex-start; }
-.month-ev { border-radius: 3px; padding: 1px 4px; margin-bottom: 1px; overflow: hidden; cursor: pointer; flex-shrink: 0; width: fit-content; max-width: 100%; }
-.month-ev-time { font-size: 8px; font-weight: 700; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.month-num {
+  width: 22px; height: 22px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 12px; font-weight: 500;
+  flex-shrink: 0; margin-bottom: 2px; align-self: flex-start;
+}
+.month-ev {
+  border-radius: 4px; padding: 1px 4px; margin-bottom: 1px;
+  overflow: hidden; cursor: pointer; flex-shrink: 0; width: 100%;
+}
+.month-ev-time { font-size: 8px; font-weight: 600; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
 .month-ev-title { font-size: 8px; color: rgba(255,255,255,.9); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; }
-.month-more { font-size: 8px; color: #8E8E93; padding-left: 1px; }
 
 /* ── WEEK CARDS ── */
-.week-cards { padding: 10px 14px 40px; display: flex; flex-direction: column; gap: 14px; }
-.day-hdr { display: flex; align-items: center; gap: 6px; margin-bottom: 6px; padding-left: 2px; }
-.day-hdr-date { font-size: 14px; font-weight: 700; }
-.day-hdr-sub { font-size: 12px; color: #8E8E93; font-weight: 500; }
-.today-badge { font-size: 9px; font-weight: 800; background: #FF6B6B; color: #fff; padding: 2px 6px; border-radius: 7px; }
+.week-cards { padding: 12px 12px 48px; display: flex; flex-direction: column; }
+.day-hdr { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; padding: 0 2px; }
+.day-hdr-date { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
+.day-hdr-dow { font-size: 15px; color: #8E8E93; font-weight: 400; }
+.today-pill { font-size: 11px; font-weight: 600; background: #FF3B30; color: #fff; padding: 2px 8px; border-radius: 10px; }
+.add-day-btn {
+  margin-left: auto; background: transparent; border: none;
+  font-size: 14px; font-weight: 500; color: #007AFF; cursor: pointer;
+  padding: 4px 2px;
+}
 
 /* cards */
-.card { background: #fff; border-radius: 12px; display: flex; align-items: center; overflow: hidden; box-shadow: 0 1px 3px rgba(0,0,0,.06); cursor: pointer; margin-bottom: 7px; }
-.card-line { width: 4px; align-self: stretch; flex-shrink: 0; }
-.card-body { flex: 1; padding: 9px 8px 9px 11px; min-width: 0; }
-.card-top  { display: flex; align-items: center; gap: 5px; margin-bottom: 3px; }
-.cat-badge { font-size: 9px; font-weight: 700; padding: 2px 6px; border-radius: 7px; white-space: nowrap; }
-.time-tag  { font-size: 10px; color: #8E8E93; font-weight: 500; margin-left: auto; flex-shrink: 0; }
-.card-title { font-size: 13px; font-weight: 600; line-height: 1.3; margin-bottom: 3px; }
-.card-meta  { font-size: 10px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.check-btn  { width: 22px; height: 22px; border-radius: 11px; border: 2px solid #D1D1D6; background: transparent; cursor: pointer; margin-right: 10px; flex-shrink: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; color: #fff; }
-.empty { text-align: center; padding: 40px 0; }
-.empty-icon { font-size: 38px; margin-bottom: 8px; }
-.empty-text { color: #8E8E93; font-size: 13px; }
+.card {
+  background: #fff; border-radius: 14px;
+  display: flex; align-items: stretch; overflow: hidden;
+  box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.06);
+  cursor: pointer; margin-bottom: 8px;
+  transition: transform .12s, box-shadow .12s;
+}
+.card:active { transform: scale(.984); box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+.card-accent { width: 4px; flex-shrink: 0; }
+.card-body { flex: 1; padding: 11px 10px 11px 13px; min-width: 0; }
+.card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
+.cat-pill { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 8px; white-space: nowrap; }
+.time-lbl { font-size: 11px; color: #8E8E93; font-weight: 500; margin-left: auto; flex-shrink: 0; }
+.card-title { font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 3px; color: #1C1C1E; }
+.card-title.done { text-decoration: line-through; color: #AEAEB2; }
+.card-meta { font-size: 11px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.check-wrap { display: flex; align-items: center; padding-right: 14px; }
+.check-btn {
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 2px solid #C7C7CC; background: transparent;
+  cursor: pointer; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 11px; color: #fff;
+  transition: all .2s cubic-bezier(.34,1.56,.64,1);
+}
+.check-btn.checked { background: #34C759; border-color: #34C759; transform: scale(1.08); }
+
+.empty { text-align: center; padding: 52px 0 32px; }
+.empty-icon { font-size: 44px; margin-bottom: 10px; }
+.empty-text { color: #C7C7CC; font-size: 14px; font-weight: 500; }
 
 /* ── OVERLAYS ── */
-.overlay { position: fixed; inset: 0; background: rgba(0,0,0,.45); backdrop-filter: blur(4px); z-index: 100; display: none; align-items: flex-end; }
+.overlay {
+  position: fixed; inset: 0;
+  background: rgba(0,0,0,.38);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  z-index: 100; display: none; align-items: flex-end;
+}
 .overlay.show { display: flex; }
-.sheet { background: #fff; border-radius: 22px 22px 0 0; width: 100%; max-height: 88vh; overflow-y: auto; padding: 0 18px 30px; }
-.sheet-bar { height: 4px; margin: 0 -18px; }
-.handle { width: 34px; height: 4px; background: #E5E5EA; border-radius: 2px; margin: 11px auto 14px; }
-.sheet-head { display: flex; justify-content: space-between; align-items: center; margin-bottom: 11px; }
-.sheet-title { font-size: 18px; font-weight: 800; color: #1C1C1E; line-height: 1.3; margin-bottom: 14px; letter-spacing: -.3px; }
-.close-btn { background: #F2F2F7; border: none; border-radius: 14px; width: 26px; height: 26px; cursor: pointer; font-size: 11px; color: #8E8E93; font-weight: 700; }
-.divider { height: 1px; background: #F2F2F7; margin: 0 -18px 12px; }
-.info-row { display: flex; align-items: flex-start; gap: 9px; margin-bottom: 11px; }
-.info-icon { font-size: 14px; width: 18px; flex-shrink: 0; }
-.info-lbl  { font-size: 12px; color: #8E8E93; width: 44px; flex-shrink: 0; font-weight: 500; }
-.info-val  { font-size: 13px; color: #1C1C1E; font-weight: 500; flex: 1; }
-.act-row { display: flex; gap: 9px; margin-top: 18px; }
-.act-btn { flex: 1; padding: 12px; border-radius: 13px; border: none; font-size: 14px; font-weight: 700; cursor: pointer; }
+.sheet {
+  background: #F2F2F7; border-radius: 22px 22px 0 0;
+  width: 100%; max-height: 90vh; overflow-y: auto;
+  padding-bottom: 34px;
+}
+.handle {
+  width: 36px; height: 5px; background: rgba(0,0,0,.16);
+  border-radius: 3px; margin: 10px auto 0;
+}
 
-/* form */
-.fm-lbl { font-size: 10px; font-weight: 600; color: #8E8E93; text-transform: uppercase; letter-spacing: .5px; margin-bottom: 4px; display: block; }
-.fm-in  { width: 100%; padding: 10px 12px; border-radius: 11px; border: 1.5px solid #E5E5EA; font-size: 14px; color: #1C1C1E; background: #F9F9F9; outline: none; font-family: inherit; }
-.fm-row { margin-bottom: 11px; }
-.submit-btn { width: 100%; padding: 14px; border-radius: 13px; border: none; background: #1C1C1E; color: #fff; font-size: 15px; font-weight: 700; cursor: pointer; margin-top: 6px; }
-.cat-pick { display: flex; flex-wrap: wrap; gap: 5px; }
-.cpbtn { font-size: 10px; font-weight: 700; padding: 5px 9px; border-radius: 9px; cursor: pointer; }
+/* detail */
+.detail-bar { height: 5px; border-radius: 0; }
+.sheet-cat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 6px; }
+.detail-title { font-size: 20px; font-weight: 700; color: #1C1C1E; line-height: 1.3; letter-spacing: -.3px; padding: 4px 16px 16px; }
+.info-group { background: #fff; border-radius: 14px; margin: 0 16px 10px; overflow: hidden; }
+.info-row { display: flex; align-items: flex-start; padding: 11px 14px; gap: 10px; border-bottom: 0.5px solid #F2F2F7; }
+.info-row:last-child { border-bottom: none; }
+.info-icon { font-size: 15px; width: 20px; flex-shrink: 0; margin-top: 1px; }
+.info-lbl { font-size: 13px; color: #8E8E93; width: 46px; flex-shrink: 0; font-weight: 500; padding-top: 1px; }
+.info-val { font-size: 14px; color: #1C1C1E; font-weight: 400; flex: 1; line-height: 1.4; }
+.act-row { display: flex; gap: 8px; padding: 4px 16px 0; }
+.act-btn {
+  flex: 1; padding: 14px; border-radius: 14px; border: none;
+  font-size: 15px; font-weight: 600; cursor: pointer;
+  transition: opacity .15s;
+}
+.act-btn:active { opacity: .75; }
+
+/* day panel */
+.day-panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
+.day-panel-title { font-size: 20px; font-weight: 700; color: #1C1C1E; }
+.day-panel-cards { padding: 0 12px; }
+
+/* close */
+.close-btn {
+  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(0,0,0,.08); border: none; cursor: pointer;
+  font-size: 12px; color: #636366; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+}
+.close-btn:active { background: rgba(0,0,0,.15); }
+
+/* add sheet */
+.add-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
+.add-head-title { font-size: 17px; font-weight: 600; color: #1C1C1E; }
+.fm-group { background: #fff; border-radius: 14px; margin: 0 16px 12px; overflow: hidden; }
+.fm-row-in { display: flex; align-items: center; padding: 12px 14px; gap: 10px; border-bottom: 0.5px solid #F2F2F7; }
+.fm-row-in:last-child { border-bottom: none; }
+.fm-lbl-in { font-size: 14px; font-weight: 500; color: #1C1C1E; width: 44px; flex-shrink: 0; }
+.fm-in { flex: 1; border: none; background: transparent; font-size: 14px; color: #8E8E93; outline: none; font-family: inherit; text-align: right; }
+.fm-in::placeholder { color: #C7C7CC; }
+.fm-in:focus { color: #1C1C1E; }
+.fm-sec-lbl { font-size: 12px; font-weight: 500; color: #8E8E93; padding: 0 16px 6px; text-transform: uppercase; letter-spacing: .5px; }
+.cat-pick { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 14px; }
+.cpbtn { font-size: 11px; font-weight: 600; padding: 6px 11px; border-radius: 10px; cursor: pointer; border: none; transition: transform .1s; }
+.cpbtn:active { transform: scale(.93); }
+.submit-btn {
+  width: calc(100% - 32px); margin: 0 16px;
+  padding: 15px; border-radius: 14px; border: none;
+  background: #007AFF; color: #fff; font-size: 16px; font-weight: 600;
+  cursor: pointer; transition: opacity .15s;
+}
+.submit-btn:active { opacity: .8; }
 </style>
 </head>
 <body>
 <div id="app">
   <div id="header">
     <div class="hdr-top">
-      <div class="hdr-left">
-        <span class="hdr-ttl">To Do List</span>
-      </div>
+      <span class="hdr-ttl">일정</span>
       <div class="hdr-right">
         <div class="prog-wrap">
-          <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
+          <div class="prog-ring">
+            <svg viewBox="0 0 20 20" width="20" height="20">
+              <circle class="prog-ring-bg" cx="10" cy="10" r="7"/>
+              <circle class="prog-ring-fill" id="prog-ring-fill" cx="10" cy="10" r="7"
+                stroke-dasharray="43.98" stroke-dashoffset="43.98"/>
+            </svg>
+          </div>
           <span class="prog-lbl" id="prog-lbl">0/12</span>
         </div>
-        <button class="ibtn ibtn-gray" onclick="location.reload()" title="새로고침" style="font-size:16px">↺</button>
+        <button class="ibtn ibtn-refresh" onclick="location.reload()" title="새로고침">↺</button>
         <button class="ibtn ibtn-dark" id="plus-btn" title="일정 추가">＋</button>
       </div>
     </div>
     <div class="seg">
-      <button class="seg-btn active" id="btn-month" onclick="setView('month')">📅 월간</button>
-      <button class="seg-btn" id="btn-week" onclick="setView('week')">📋 주간</button>
+      <button class="seg-btn active" id="btn-month" onclick="setView('month')">월간</button>
+      <button class="seg-btn" id="btn-week" onclick="setView('week')">주간</button>
     </div>
     <div class="legend" id="legend"></div>
     <div id="header-cal"></div>
@@ -157,21 +292,20 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
   <div id="view"></div>
 </div>
 
-<!-- Detail Modal -->
+<!-- Detail -->
 <div class="overlay" id="detail-overlay" onclick="closeDetail()">
   <div class="sheet" onclick="event.stopPropagation()">
-    <div class="sheet-bar" id="detail-bar"></div>
+    <div class="detail-bar" id="detail-bar"></div>
     <div class="handle"></div>
-    <div class="sheet-head">
-      <span class="cat-badge" id="detail-cat"></span>
+    <div class="sheet-cat-row">
+      <span class="cat-pill" id="detail-cat"></span>
       <button class="close-btn" onclick="closeDetail()">✕</button>
     </div>
-    <div class="sheet-title" id="detail-title"></div>
-    <div class="divider"></div>
-    <div id="detail-rows"></div>
+    <div class="detail-title" id="detail-title"></div>
+    <div class="info-group" id="detail-rows"></div>
     <div class="act-row">
       <button class="act-btn" id="detail-done-btn" onclick="toggleFromDetail()"></button>
-      <button class="act-btn" style="background:#FFE8E8;color:#FF3B30" onclick="deleteFromDetail()">삭제</button>
+      <button class="act-btn" style="background:#FFE5E5;color:#FF3B30" onclick="deleteFromDetail()">삭제</button>
     </div>
   </div>
 </div>
@@ -180,37 +314,38 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 <div class="overlay" id="day-overlay" onclick="closeDayPanel()">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
-    <div class="sheet-head">
-      <span id="day-panel-title" style="font-weight:800;font-size:19px;color:#1C1C1E"></span>
-      <div style="display:flex;gap:7px;align-items:center">
+    <div class="day-panel-head">
+      <span class="day-panel-title" id="day-panel-title"></span>
+      <div style="display:flex;gap:8px;align-items:center">
         <button class="ibtn ibtn-dark" onclick="dayPanelAdd()" style="font-size:18px">＋</button>
         <button class="close-btn" onclick="closeDayPanel()">✕</button>
       </div>
     </div>
-    <div class="divider"></div>
-    <div id="day-panel-cards"></div>
+    <div style="height:.5px;background:rgba(0,0,0,.08);margin:0 16px 10px"></div>
+    <div class="day-panel-cards" id="day-panel-cards"></div>
   </div>
 </div>
 
-<!-- Add Modal -->
+<!-- Add -->
 <div class="overlay" id="add-overlay" onclick="closeAdd()">
   <div class="sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
-    <div class="sheet-head">
-      <span style="font-weight:700;font-size:17px;color:#1C1C1E">새 일정 추가</span>
+    <div class="add-head">
+      <span class="add-head-title">새 일정</span>
       <button class="close-btn" onclick="closeAdd()">✕</button>
     </div>
-    <div class="fm-row"><label class="fm-lbl">날짜</label><input class="fm-in" type="date" id="f-date"></div>
-    <div class="fm-row"><label class="fm-lbl">제목</label><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
-    <div style="display:flex;gap:8px;margin-bottom:11px">
-      <div style="flex:1"><label class="fm-lbl">시작</label><input class="fm-in" type="time" id="f-start" value="09:00"></div>
-      <div style="flex:1"><label class="fm-lbl">종료</label><input class="fm-in" type="time" id="f-end" value="10:00"></div>
+    <div class="fm-group">
+      <div class="fm-row-in"><span class="fm-lbl-in">날짜</span><input class="fm-in" type="date" id="f-date"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">제목</span><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">시작</span><input class="fm-in" type="time" id="f-start" value="09:00"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">종료</span><input class="fm-in" type="time" id="f-end" value="10:00"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">강사</span><input class="fm-in" type="text" id="f-instructor" placeholder="이름"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">장소</span><input class="fm-in" type="text" id="f-location" placeholder="장소"></div>
+      <div class="fm-row-in"><span class="fm-lbl-in">메모</span><input class="fm-in" type="text" id="f-note" placeholder="비고"></div>
     </div>
-    <div class="fm-row"><label class="fm-lbl">카테고리</label><div class="cat-pick" id="cat-pick"></div></div>
-    <div class="fm-row"><label class="fm-lbl">강사</label><input class="fm-in" type="text" id="f-instructor" placeholder="이름 입력"></div>
-    <div class="fm-row"><label class="fm-lbl">장소</label><input class="fm-in" type="text" id="f-location" placeholder="장소 입력"></div>
-    <div class="fm-row"><label class="fm-lbl">메모</label><input class="fm-in" type="text" id="f-note" placeholder="비고 입력"></div>
-    <button class="submit-btn" onclick="submitAdd()">추가하기</button>
+    <div class="fm-sec-lbl">카테고리</div>
+    <div class="cat-pick" id="cat-pick"></div>
+    <button class="submit-btn" onclick="submitAdd()">추가</button>
   </div>
 </div>
 
@@ -218,13 +353,13 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
 const CAT = {
   "밀착상담":    { bg:"#FF6B6B", light:"#FFE8E8", text:"#C0392B" },
   "자신감회복":  { bg:"#FFD93D", light:"#FFF9E0", text:"#B8860B" },
-  "취업역량강화":{ bg:"#6BCB77", light:"#E8F8EA", text:"#1E7E34" },
-  "진로탐색":    { bg:"#4D96FF", light:"#E3EEFF", text:"#1A5DB8" },
-  "지역맞춤형":  { bg:"#FF6FC8", light:"#FFE3F3", text:"#B5006C" },
-  "사례관리":    { bg:"#A66CFF", light:"#EFE3FF", text:"#6A0DAD" },
-  "자율활동":    { bg:"#94A3B8", light:"#F1F5F9", text:"#475569" },
-  "개인":        { bg:"#F97316", light:"#FFF0E6", text:"#C2410C" },
-  "기타":        { bg:"#64748B", light:"#F1F5F9", text:"#334155" },
+  "취업역량강화":{ bg:"#34C759", light:"#E3F9EA", text:"#1A7A35" },
+  "진로탐색":    { bg:"#007AFF", light:"#E3EEFF", text:"#0055CC" },
+  "지역맞춤형":  { bg:"#FF2D55", light:"#FFE3EA", text:"#C0002F" },
+  "사례관리":    { bg:"#AF52DE", light:"#F0E3FF", text:"#7B1FA2" },
+  "자율활동":    { bg:"#8E8E93", light:"#F1F1F3", text:"#48484A" },
+  "개인":        { bg:"#FF9500", light:"#FFF3E0", text:"#C06800" },
+  "기타":        { bg:"#636366", light:"#EFEFEF", text:"#3A3A3C" },
 };
 const DAY_KR   = ["일","월","화","수","목","금","토"];
 const MONTH_KR = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
@@ -246,21 +381,10 @@ let events = [
 
 function getToday(){ return new Date(); }
 function getTodayStr(){ return fmtLocal(getToday()); }
-let currentView = "month";
-let weekRef  = weekStart(new Date("2026-04-01"));
-let monthRef = new Date(2026, 3, 1);
-let nextId = 100;
-let selectedId = null;
-let dayPanelDate = null;
-let addCat = "기타";
-let showTitle = false;
-let selectedWeekDay = "2026-04-01";
+let currentView="month", weekRef=weekStart(new Date("2026-04-01")), monthRef=new Date(2026,3,1);
+let nextId=100, selectedId=null, dayPanelDate=null, addCat="기타", showTitle=false, selectedWeekDay="2026-04-01";
 
-/* ── helpers ── */
-function fmtLocal(d){
-  const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
-  return `${y}-${m}-${day}`;
-}
+function fmtLocal(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
 function fmt(d){ return fmtLocal(d); }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
 function weekStart(d){ const r=new Date(d); r.setDate(r.getDate()-r.getDay()); return r; }
@@ -270,113 +394,87 @@ function esc(s){ return String(s||"").replace(/&/g,"&amp;").replace(/</g,"&lt;")
 function getEvs(ds){ return events.filter(e=>e.date===ds).sort((a,b)=>a.startTime.localeCompare(b.startTime)); }
 function cat(k){ return CAT[k]||CAT["기타"]; }
 
-/* ── progress ── */
 function updateProgress(){
   const done=events.filter(e=>e.done).length, total=events.length;
   document.getElementById("prog-lbl").textContent=done+"/"+total;
-  document.getElementById("prog-fill").style.width=(total?done/total*100:0)+"%";
+  const r=7, circ=2*Math.PI*r, pct=total?done/total:0;
+  document.getElementById("prog-ring-fill").style.strokeDashoffset=circ*(1-pct);
 }
 
-/* ── legend ── */
 function renderLegend(){
   document.getElementById("legend").innerHTML=Object.entries(CAT).map(([k,v])=>
     `<div class="legend-item"><div class="legend-dot" style="background:${v.bg}"></div><span class="legend-lbl">${k}</span></div>`
   ).join("");
 }
 
-/* ── view switch ── */
 function setView(v){
   currentView=v;
-  if(v==="week"){
-    const t=getToday();
-    weekRef=weekStart(t);
-    selectedWeekDay=getTodayStr();
-  }
+  if(v==="week"){ const t=getToday(); weekRef=weekStart(t); selectedWeekDay=getTodayStr(); }
   document.getElementById("btn-month").className="seg-btn"+(v==="month"?" active":"");
   document.getElementById("btn-week").className="seg-btn"+(v==="week"?" active":"");
   renderView();
 }
+function renderView(){ updateProgress(); currentView==="month"?renderMonth():renderWeek(); }
 
-function renderView(){
-  updateProgress();
-  currentView==="month" ? renderMonth() : renderWeek();
-}
-
-/* ── go today ── */
 function goToday(){
   const t=getToday();
-  if(currentView==="month"){
-    monthRef=new Date(t.getFullYear(),t.getMonth(),1);
-  } else {
-    weekRef=weekStart(t);
-    selectedWeekDay=getTodayStr();
-  }
+  if(currentView==="month"){ monthRef=new Date(t.getFullYear(),t.getMonth(),1); }
+  else { weekRef=weekStart(t); selectedWeekDay=getTodayStr(); }
   renderView();
 }
+function toggleTitle(){ showTitle=!showTitle; renderView(); }
 
-/* ── title toggle ── */
-function toggleTitle(){
-  showTitle=!showTitle;
-  renderView();
-}
-
-/* ── card HTML ── */
 function cardHtml(ev, onclickStr){
-  const ct=cat(ev.category);
-  const oc=onclickStr?`onclick="${onclickStr}"`:"";
-  return `<div class="card" style="opacity:${ev.done?.55:1}" ${oc}>
-    <div class="card-line" style="background:${ct.bg}"></div>
+  const ct=cat(ev.category), oc=onclickStr?`onclick="${onclickStr}"`:"";
+  return `<div class="card" style="opacity:${ev.done?.5:1}" ${oc}>
+    <div class="card-accent" style="background:${ct.bg}"></div>
     <div class="card-body">
       <div class="card-top">
-        <span class="cat-badge" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
-        <span class="time-tag">${esc(ev.startTime)}–${esc(ev.endTime)}</span>
+        <span class="cat-pill" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
+        <span class="time-lbl">${esc(ev.startTime)}–${esc(ev.endTime)}</span>
       </div>
-      <div class="card-title" style="${ev.done?"text-decoration:line-through;color:#AEAEB2":"color:#1C1C1E"}">${esc(ev.title)}</div>
+      <div class="card-title${ev.done?" done":""}">${esc(ev.title)}</div>
       ${ev.instructor?`<div class="card-meta">👤 ${esc(ev.instructor)}${ev.location?"  📍 "+esc(ev.location):""}</div>`:""}
     </div>
-    <button class="check-btn" style="background:${ev.done?"#34C759":"transparent"};border-color:${ev.done?"#34C759":"#D1D1D6"}"
-      onclick="event.stopPropagation();toggleDone(${ev.id})">${ev.done?"✓":""}</button>
+    <div class="check-wrap">
+      <button class="check-btn${ev.done?" checked":""}" onclick="event.stopPropagation();toggleDone(${ev.id})">${ev.done?"✓":""}</button>
+    </div>
   </div>`;
 }
 
-/* ── MONTH ── */
+/* MONTH */
 function renderMonth(){
-  const v=document.getElementById("view");
-  v.style.overflowY="hidden";
-  v.style.padding="0";
+  const v=document.getElementById("view"); v.style.overflowY="hidden"; v.style.padding="0";
   const y=monthRef.getFullYear(), m=monthRef.getMonth();
   const total=daysInMonth(y,m), first=firstDayOfMonth(y,m);
   const cells=Array.from({length:first+total},(_,i)=>i<first?null:i-first+1);
   while(cells.length%7!==0) cells.push(null);
+  const todayStr=getTodayStr(), isThisMonth=(new Date().getFullYear()===y&&new Date().getMonth()===m);
 
-  const todayStr=getTodayStr();
-  const isThisMonth=(new Date().getFullYear()===y&&new Date().getMonth()===m);
-  let hh=`<div class="cal-nav">
+  document.getElementById("header-cal").innerHTML=`<div class="cal-nav">
     <button class="nav-btn" onclick="monthPrev()">‹</button>
     <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
       <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
       <div style="position:absolute;right:0;display:flex;align-items:center;gap:5px">
-        <button class="ibtn ibtn-gray" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 7px;height:24px;border-radius:8px">${showTitle?"제목 숨김":"제목 표시"}</button>
+        <button class="ibtn ibtn-gray" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 8px;height:26px;border-radius:10px">${showTitle?"숨김":"제목"}</button>
         ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
       </div>
     </div>
     <button class="nav-btn" onclick="monthNext()">›</button>
   </div>`;
-  document.getElementById("header-cal").innerHTML=hh;
 
   let h=`<div class="month-wrap"><div class="dow-row">`;
-  DAY_KR.forEach((d,i)=>{ h+=`<div class="dow-cell" style="color:${i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93"}">${d}</div>`; });
+  DAY_KR.forEach((d,i)=>{ h+=`<div class="dow-cell" style="color:${i===0?"#FF3B30":i===6?"#007AFF":"#8E8E93"}">${d}</div>`; });
   h+=`</div><div class="month-grid">`;
-
   cells.forEach((day,ci)=>{
-    if(!day){ h+=`<div class="month-cell" style="cursor:default"></div>`; return; }
+    if(!day){ h+=`<div class="month-cell" style="cursor:default;background:#FAFAFA"></div>`; return; }
     const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
     const isT=ds===todayStr, dow=ci%7, evs=getEvs(ds);
     h+=`<div class="month-cell" onclick="openDayPanel('${ds}')">
-      <div class="month-num" style="background:${isT?"#FF6B6B":"transparent"};color:${isT?"#fff":dow===0?"#FF6B6B":dow===6?"#4D96FF":"#1C1C1E"}">${day}</div>`;
+      <div class="month-num" style="background:${isT?"#FF3B30":"transparent"};color:${isT?"#fff":dow===0?"#FF3B30":dow===6?"#007AFF":"#1C1C1E"};font-weight:${isT?"700":"500"}">${day}</div>`;
     evs.forEach(ev=>{
       const c=cat(ev.category);
-      h+=`<div class="month-ev" style="background:${c.bg};opacity:${ev.done?.5:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
+      h+=`<div class="month-ev" style="background:${c.bg};opacity:${ev.done?.45:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
         <span class="month-ev-time">${esc(ev.startTime)}</span>${showTitle?`<span class="month-ev-title">${esc(ev.title)}</span>`:""}
       </div>`;
     });
@@ -388,25 +486,22 @@ function renderMonth(){
 function monthPrev(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()-1,1); renderView(); }
 function monthNext(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()+1,1); renderView(); }
 
-/* ── WEEK ── */
+/* WEEK */
 function renderWeek(){
   const todayStr=getTodayStr();
-  const v=document.getElementById("view");
-  v.style.overflowY="auto";
-  v.style.padding="0";
+  const v=document.getElementById("view"); v.style.overflowY="auto"; v.style.padding="0";
   const days=Array.from({length:7},(_,i)=>addDays(weekRef,i));
   const isThisWeek=days.some(d=>fmt(d)===todayStr);
-
   if(!days.some(d=>fmt(d)===selectedWeekDay)){
     const withEv=days.find(d=>events.some(e=>e.date===fmt(d)));
-    selectedWeekDay = isThisWeek ? todayStr : (withEv ? fmt(withEv) : fmt(days[0]));
+    selectedWeekDay=isThisWeek?todayStr:(withEv?fmt(withEv):fmt(days[0]));
   }
 
   let hh=`<div class="cal-nav">
     <button class="nav-btn" onclick="weekPrev()">‹</button>
     <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
       <span class="nav-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
-      <div style="position:absolute;right:0;display:flex;align-items:center;gap:5px">
+      <div style="position:absolute;right:0">
         ${!isThisWeek?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
       </div>
     </div>
@@ -415,13 +510,13 @@ function renderWeek(){
   days.forEach((d,i)=>{
     const ds=fmt(d), isT=ds===todayStr, isSel=ds===selectedWeekDay;
     const hasEv=events.some(e=>e.date===ds);
-    const dc=i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93";
-    const numBg=isT?"#FF6B6B":isSel?"#1C1C1E":"transparent";
-    const numColor=isT||isSel?"#fff":i===0?"#FF6B6B":i===6?"#4D96FF":"#1C1C1E";
+    const dc=i===0?"#FF3B30":i===6?"#007AFF":"#8E8E93";
+    const numBg=isT?"#FF3B30":isSel?"#1C1C1E":"transparent";
+    const numCol=isT||isSel?"#fff":i===0?"#FF3B30":i===6?"#007AFF":"#1C1C1E";
     hh+=`<div class="ws-day" onclick="selectWeekDay('${ds}')">
-      <span class="ws-dow" style="color:${isSel&&!isT?"#1C1C1E":dc}">${DAY_KR[d.getDay()]}</span>
-      <div class="ws-num" style="background:${numBg};color:${numColor}">${d.getDate()}</div>
-      <div class="ws-dot" style="background:${hasEv?(isT?"#FF6B6B":"#C7C7CC"):"transparent"}"></div>
+      <span class="ws-dow" style="color:${isSel&&!isT?"#1C1C1E":dc};font-weight:${isSel?"600":"500"}">${DAY_KR[d.getDay()]}</span>
+      <div class="ws-num" style="background:${numBg};color:${numCol}">${d.getDate()}</div>
+      <div class="ws-dot" style="background:${hasEv?(isT?"#FF3B30":"#C7C7CC"):"transparent"}"></div>
     </div>`;
   });
   hh+=`</div>`;
@@ -429,18 +524,16 @@ function renderWeek(){
 
   const selD=days.find(d=>fmt(d)===selectedWeekDay)||days[0];
   const selDs=fmt(selD), selEvs=getEvs(selDs), isSelT=selDs===todayStr;
-  let h=`<div class="week-cards">`;
-  h+=`<div class="day-hdr">
-    <span class="day-hdr-date" style="color:${isSelT?"#FF6B6B":"#1C1C1E"}">${selD.getMonth()+1}월 ${selD.getDate()}일</span>
-    <span class="day-hdr-sub">${DAY_KR[selD.getDay()]}요일</span>
-    ${isSelT?`<span class="today-badge">오늘</span>`:""}
-    <button onclick="openAdd('${selDs}')" style="margin-left:auto;background:#F2F2F7;border:none;border-radius:8px;padding:4px 10px;font-size:11px;font-weight:700;color:#1C1C1E;cursor:pointer">+ 추가</button>
-  </div>`;
-  if(selEvs.length){
-    h+=selEvs.map(ev=>cardHtml(ev,`openDetail(${ev.id})`)).join("");
-  } else {
-    h+=`<div class="empty"><div class="empty-icon">📅</div><div class="empty-text">이 날은 일정이 없어요</div></div>`;
-  }
+  let h=`<div class="week-cards">
+    <div class="day-hdr">
+      <span class="day-hdr-date" style="color:${isSelT?"#FF3B30":"#1C1C1E"}">${selD.getMonth()+1}월 ${selD.getDate()}일</span>
+      <span class="day-hdr-dow">${DAY_KR[selD.getDay()]}요일</span>
+      ${isSelT?`<span class="today-pill">오늘</span>`:""}
+      <button class="add-day-btn" onclick="openAdd('${selDs}')">+ 추가</button>
+    </div>`;
+  h+=selEvs.length
+    ? selEvs.map(ev=>cardHtml(ev,`openDetail(${ev.id})`)).join("")
+    : `<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">일정이 없어요</div></div>`;
   h+=`</div>`;
   document.getElementById("view").innerHTML=h;
 }
@@ -448,7 +541,7 @@ function selectWeekDay(ds){ selectedWeekDay=ds; renderWeek(); }
 function weekPrev(){ weekRef=addDays(weekRef,-7); renderView(); }
 function weekNext(){ weekRef=addDays(weekRef,7); renderView(); }
 
-/* ── TOGGLE / DELETE ── */
+/* TOGGLE / DELETE */
 function toggleDone(id){
   events=events.map(e=>e.id===id?Object.assign({},e,{done:!e.done}):e);
   renderView();
@@ -457,7 +550,7 @@ function toggleDone(id){
 }
 function deleteDone(id){ events=events.filter(e=>e.id!==id); renderView(); }
 
-/* ── DETAIL ── */
+/* DETAIL */
 function openDetail(id){ selectedId=id; refreshDetail(); document.getElementById("detail-overlay").classList.add("show"); }
 function refreshDetail(){
   const ev=events.find(e=>e.id===selectedId); if(!ev) return;
@@ -485,21 +578,21 @@ function closeDetail(){ document.getElementById("detail-overlay").classList.remo
 function toggleFromDetail(){ if(selectedId) toggleDone(selectedId); }
 function deleteFromDetail(){ if(selectedId){ deleteDone(selectedId); closeDetail(); } }
 
-/* ── DAY PANEL ── */
+/* DAY PANEL */
 function openDayPanel(ds){ dayPanelDate=ds; refreshDayPanel(); document.getElementById("day-overlay").classList.add("show"); }
 function refreshDayPanel(){
-  const ds=dayPanelDate, d=new Date(ds), dow=d.getDay(), p=ds.split("-");
+  const ds=dayPanelDate, d=new Date(ds), p=ds.split("-");
   document.getElementById("day-panel-title").innerHTML=
-    `${+p[1]}월 ${+p[2]}일 <span style="color:#8E8E93;font-weight:500;font-size:15px">${DAY_KR[dow]}요일</span>`;
+    `${+p[1]}월 ${+p[2]}일 <span style="color:#8E8E93;font-weight:400;font-size:16px">${DAY_KR[d.getDay()]}요일</span>`;
   const evs=getEvs(ds);
   document.getElementById("day-panel-cards").innerHTML=evs.length
     ? evs.map(ev=>cardHtml(ev,`closeDayPanel();setTimeout(function(){openDetail(${ev.id})},80)`)).join("")
-    : `<div style="text-align:center;padding:28px 0;color:#8E8E93;font-size:13px">일정이 없어요</div>`;
+    : `<div style="text-align:center;padding:32px 0;color:#C7C7CC;font-size:14px;font-weight:500">일정이 없어요</div>`;
 }
 function closeDayPanel(){ document.getElementById("day-overlay").classList.remove("show"); dayPanelDate=null; }
 function dayPanelAdd(){ const ds=dayPanelDate; closeDayPanel(); setTimeout(()=>openAdd(ds),80); }
 
-/* ── ADD ── */
+/* ADD */
 function openAdd(dateStr){
   addCat="기타";
   document.getElementById("f-date").value=dateStr||getTodayStr();
@@ -536,17 +629,15 @@ function submitAdd(){
 
 document.getElementById("plus-btn").onclick=()=>openAdd();
 
-/* ── init ── */
 renderLegend();
 requestAnimationFrame(()=>{ requestAnimationFrame(renderView); });
 window.addEventListener("resize", renderView);
 
-// PWA 서비스워커 등록
-if ('serviceWorker' in navigator) {
-  window.addEventListener('load', () => {
+if('serviceWorker' in navigator){
+  window.addEventListener('load',()=>{
     navigator.serviceWorker.register('./sw.js')
-      .then(() => console.log('SW 등록 완료'))
-      .catch(err => console.log('SW 등록 실패:', err));
+      .then(()=>console.log('SW 등록 완료'))
+      .catch(err=>console.log('SW 등록 실패:',err));
   });
 }
 </script>
