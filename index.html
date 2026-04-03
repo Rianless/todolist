@@ -353,12 +353,14 @@ function renderMonth(){
   const isThisMonth=(new Date().getFullYear()===y&&new Date().getMonth()===m);
   let hh=`<div class="cal-nav">
     <button class="nav-btn" onclick="monthPrev()">‹</button>
-    <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
-    <div style="display:flex;align-items:center;gap:5px">
-      <button class="ibtn ibtn-gray" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 7px;height:24px;border-radius:8px">${showTitle?"제목 숨김":"제목 표시"}</button>
-      ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
-      <button class="nav-btn" onclick="monthNext()">›</button>
+    <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
+      <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
+      <div style="position:absolute;right:0;display:flex;align-items:center;gap:5px">
+        <button class="ibtn ibtn-gray" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 7px;height:24px;border-radius:8px">${showTitle?"제목 숨김":"제목 표시"}</button>
+        ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
+      </div>
     </div>
+    <button class="nav-btn" onclick="monthNext()">›</button>
   </div>`;
   document.getElementById("header-cal").innerHTML=hh;
 
@@ -402,11 +404,13 @@ function renderWeek(){
 
   let hh=`<div class="cal-nav">
     <button class="nav-btn" onclick="weekPrev()">‹</button>
-    <span class="nav-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
-    <div style="display:flex;align-items:center;gap:5px">
-      ${!isThisWeek?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
-      <button class="nav-btn" onclick="weekNext()">›</button>
+    <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
+      <span class="nav-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
+      <div style="position:absolute;right:0;display:flex;align-items:center;gap:5px">
+        ${!isThisWeek?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
+      </div>
     </div>
+    <button class="nav-btn" onclick="weekNext()">›</button>
   </div><div class="week-strip">`;
   days.forEach((d,i)=>{
     const ds=fmt(d), isT=ds===todayStr, isSel=ds===selectedWeekDay;
