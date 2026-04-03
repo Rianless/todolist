@@ -417,7 +417,7 @@ html, body {
     <div class="fm-sec-lbl" style="margin-bottom:4px">카테고리 목록</div>
     <div class="info-group" id="cat-list" style="margin-bottom:0;border-radius:14px 14px 0 0"></div>
     <div style="background:#fff;border-radius:0 0 14px 14px;margin:0 16px 16px;border-top:.5px solid #F2F2F7">
-      <button class="add-cat-btn" onclick="addNewCat()">
+      <button class="add-cat-btn" onclick="addSoloGroup()">
         <div class="add-cat-icon">＋</div>
         새 카테고리 추가
       </button>
@@ -964,31 +964,73 @@ function openSettings(){
   document.getElementById("settings-overlay").classList.add("show");
 }
 function closeSettings(){
+  // 이름 변경 저장 — data-group, data-key 기준으로 CAT_GROUPS 업데이트
   document.querySelectorAll(".cat-name-in").forEach(inp=>{
-    const oldKey=inp.dataset.key, newKey=inp.value.trim();
+    const oldKey = inp.dataset.key;
+    const groupName = inp.dataset.group;
+    const newKey = inp.value.trim();
     if(!newKey || newKey===oldKey) return;
-    if(CAT[newKey]) return;
-    CAT[newKey]=CAT[oldKey];
+    if(CAT[newKey]) return; // 중복 방지
+    // CAT_GROUPS 세부 항목 이름 변경
+    const g = CAT_GROUPS.find(g=>g.group===groupName);
+    if(g){
+      const s = g.subs.find(s=>s.name===oldKey);
+      if(s){ s.name=newKey; }
+    }
+    // CAT flat 맵 갱신
+    CAT[newKey] = CAT[oldKey];
     delete CAT[oldKey];
-    events=events.map(e=>e.category===oldKey?{...e,category:newKey}:e);
+    // 이벤트 카테고리 갱신
+    events = events.map(e=>e.category===oldKey?{...e,category:newKey}:e);
   });
   document.getElementById("settings-overlay").classList.remove("show");
   renderView();
 }
 
 function renderCatList(){
-  const keys=Object.keys(CAT);
-  document.getElementById("cat-list").innerHTML=keys.map((k,i)=>{
-    const v=CAT[k];
-    const canDel=keys.length>1;
-    return `<div class="cat-row" id="catrow-${i}">
-      <div class="cat-color-dot" style="background:${v.bg}" onclick="pickColorFor('${esc(k)}')">
-        <input type="color" value="${v.bg}" oninput="updateCatColor('${esc(k)}',this.value,${i})" onchange="updateCatColor('${esc(k)}',this.value,${i})">
-      </div>
-      <input class="cat-name-in" data-key="${esc(k)}" value="${esc(k)}" placeholder="카테고리명">
-      <button class="cat-del-btn" onclick="deleteCat('${esc(k)}')" ${canDel?"":"disabled"}>−</button>
-    </div>`;
-  }).join("");
+  let html = "";
+  CAT_GROUPS.forEach(g => {
+    if(g.group){
+      // 그룹 헤더
+      html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:#8E8E93;letter-spacing:.4px;background:#F2F2F7">${g.group}</div>`;
+      // 세부 항목
+      g.subs.forEach((s,i) => {
+        const rowId = `catrow-${g.group}-${i}`;
+        const totalSubs = g.subs.length;
+        html += `<div class="cat-row" id="${rowId}">
+          <div class="cat-color-dot" style="background:${s.color.bg}" onclick="focusedCatKey='${esc(s.name)}'">
+            <input type="color" value="${s.color.bg}"
+              oninput="updateSubColor('${esc(g.group)}','${esc(s.name)}',this.value,'${rowId}')"
+              onchange="updateSubColor('${esc(g.group)}','${esc(s.name)}',this.value,'${rowId}')">
+          </div>
+          <input class="cat-name-in" data-group="${esc(g.group)}" data-key="${esc(s.name)}" value="${esc(s.name)}" placeholder="카테고리명">
+          <button class="cat-del-btn" onclick="deleteSub('${esc(g.group)}','${esc(s.name)}')" ${totalSubs>1?"":"disabled"}>−</button>
+        </div>`;
+      });
+      // 세부 항목 추가 버튼
+      html += `<div style="background:#fff;border-top:.5px solid #F2F2F7">
+        <button class="add-cat-btn" style="padding:9px 14px;font-size:13px" onclick="addSubCat('${esc(g.group)}')">
+          <div class="add-cat-icon" style="width:22px;height:22px;font-size:15px">＋</div>
+          ${g.group} 항목 추가
+        </button>
+      </div>`;
+    } else {
+      // 그룹 없는 항목 (개인, 기타)
+      const s = g.subs[0];
+      const rowId = `catrow-solo-${s.name}`;
+      html += `<div style="padding:8px 14px 4px;font-size:11px;font-weight:600;color:#8E8E93;letter-spacing:.4px;background:#F2F2F7">${s.name}</div>`;
+      html += `<div class="cat-row" id="${rowId}">
+        <div class="cat-color-dot" style="background:${s.color.bg}" onclick="focusedCatKey='${esc(s.name)}'">
+          <input type="color" value="${s.color.bg}"
+            oninput="updateSoloColor('${esc(s.name)}',this.value,'${rowId}')"
+            onchange="updateSoloColor('${esc(s.name)}',this.value,'${rowId}')">
+        </div>
+        <span style="flex:1;font-size:14px;font-weight:500;color:#1C1C1E;padding:0 4px">${esc(s.name)}</span>
+        <button class="cat-del-btn" onclick="deleteSoloGroup('${esc(s.name)}')">−</button>
+      </div>`;
+    }
+  });
+  document.getElementById("cat-list").innerHTML = html;
 }
 
 function renderColorPresets(){
@@ -997,45 +1039,95 @@ function renderColorPresets(){
   ).join("");
 }
 
-function updateCatColor(key, hex, idx){
-  if(!CAT[key]) return;
-  CAT[key]=makeCatColors(hex);
-  const dot=document.querySelector(`#catrow-${idx} .cat-color-dot`);
-  if(dot) dot.style.background=hex;
-}
-
-let focusedCatKey=null;
+let focusedCatKey = null;
 document.addEventListener("focusin", e=>{ if(e.target.classList.contains("cat-name-in")) focusedCatKey=e.target.dataset.key; });
 
-function applyPresetColor(hex){
-  const key=focusedCatKey||Object.keys(CAT)[0];
-  if(!CAT[key]) return;
-  CAT[key]=makeCatColors(hex);
-  renderCatList();
+// 청도활동 세부 항목 색상 변경
+function updateSubColor(groupName, subName, hex, rowId){
+  const g = CAT_GROUPS.find(g=>g.group===groupName);
+  const s = g && g.subs.find(s=>s.name===subName);
+  if(!s) return;
+  s.color = makeCatColors(hex);
+  CAT[subName] = s.color;
+  const dot = document.querySelector(`#${rowId} .cat-color-dot`);
+  if(dot) dot.style.background = hex;
 }
 
-function pickColorFor(key){ focusedCatKey=key; }
+// 개인/기타 색상 변경
+function updateSoloColor(name, hex, rowId){
+  const g = CAT_GROUPS.find(g=>!g.group && g.subs[0].name===name);
+  if(!g) return;
+  g.subs[0].color = makeCatColors(hex);
+  CAT[name] = g.subs[0].color;
+  const dot = document.querySelector(`#${rowId} .cat-color-dot`);
+  if(dot) dot.style.background = hex;
+}
 
-function addNewCat(){
-  const names=["새카테고리","카테고리A","카테고리B","카테고리C","카테고리D"];
-  let name=names.find(n=>!CAT[n])||"카테고리"+(Object.keys(CAT).length+1);
-  const colors=PALETTE[Object.keys(CAT).length % PALETTE.length];
-  CAT[name]=makeCatColors(colors);
-  focusedCatKey=name;
+// 팔레트 클릭 → 포커스된 카테고리에 적용
+function applyPresetColor(hex){
+  if(!focusedCatKey) return;
+  // 세부 항목인지 solo인지 찾기
+  for(const g of CAT_GROUPS){
+    if(g.group){
+      const s = g.subs.find(s=>s.name===focusedCatKey);
+      if(s){ s.color=makeCatColors(hex); CAT[s.name]=s.color; renderCatList(); return; }
+    } else {
+      if(g.subs[0].name===focusedCatKey){ g.subs[0].color=makeCatColors(hex); CAT[focusedCatKey]=g.subs[0].color; renderCatList(); return; }
+    }
+  }
+}
+
+// 청도활동 세부 항목 추가
+function addSubCat(groupName){
+  const g = CAT_GROUPS.find(g=>g.group===groupName);
+  if(!g) return;
+  const usedNames = g.subs.map(s=>s.name);
+  const newName = ["새항목","항목A","항목B","항목C","항목D"].find(n=>!usedNames.includes(n)) || "항목"+(g.subs.length+1);
+  const color = makeCatColors(PALETTE[g.subs.length % PALETTE.length]);
+  g.subs.push({ name:newName, color });
+  CAT[newName] = color;
+  focusedCatKey = newName;
   renderCatList();
   setTimeout(()=>{
-    const inputs=document.querySelectorAll(".cat-name-in");
-    const last=inputs[inputs.length-1];
+    const inputs = document.querySelectorAll(".cat-name-in");
+    const last = inputs[inputs.length-1];
     if(last){ last.focus(); last.select(); }
-  },50);
+  }, 50);
 }
 
-function deleteCat(key){
-  if(Object.keys(CAT).length<=1) return;
-  const fallback=Object.keys(CAT).find(k=>k!==key)||"기타";
-  events=events.map(e=>e.category===key?{...e,category:fallback}:e);
-  delete CAT[key];
-  if(focusedCatKey===key) focusedCatKey=null;
+// 독립 카테고리 추가
+function addSoloGroup(){
+  const existing = CAT_GROUPS.flatMap(g=>g.subs.map(s=>s.name));
+  const newName = ["새카테고리","카테고리A","카테고리B","카테고리C","카테고리D"]
+    .find(n=>!existing.includes(n)) || "카테고리"+(CAT_GROUPS.length+1);
+  const color = makeCatColors(PALETTE[CAT_GROUPS.length % PALETTE.length]);
+  CAT_GROUPS.push({ group:null, subs:[{ name:newName, color }] });
+  CAT[newName] = color;
+  focusedCatKey = newName;
+  renderCatList();
+}
+
+// 독립 카테고리 삭제
+function deleteSoloGroup(name){
+  const idx = CAT_GROUPS.findIndex(g=>!g.group && g.subs[0].name===name);
+  if(idx===-1) return;
+  const fallback = CAT_GROUPS.find(g=>g.subs.some(s=>s.name!==name))?.subs[0]?.name || "기타";
+  events = events.map(e=>e.category===name?{...e,category:fallback}:e);
+  CAT_GROUPS.splice(idx,1);
+  delete CAT[name];
+  if(focusedCatKey===name) focusedCatKey=null;
+  renderCatList();
+}
+
+// 청도활동 세부 항목 삭제
+function deleteSub(groupName, subName){
+  const g = CAT_GROUPS.find(g=>g.group===groupName);
+  if(!g || g.subs.length<=1) return;
+  const fallback = g.subs.find(s=>s.name!==subName)?.name || "기타";
+  events = events.map(e=>e.category===subName?{...e,category:fallback}:e);
+  g.subs = g.subs.filter(s=>s.name!==subName);
+  delete CAT[subName];
+  if(focusedCatKey===subName) focusedCatKey=null;
   renderCatList();
 }
 
