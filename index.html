@@ -517,26 +517,13 @@ CAT_GROUPS.forEach(g => {
 const DAY_KR   = ["일","월","화","수","목","금","토"];
 const MONTH_KR = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
-let events = [
-  { id:1,  date:"2026-04-01", startTime:"13:00", endTime:"15:00", title:"청년 도전! 비전 게임 시작!(OT)",             module:"대인관계이해", category:"자신감회복",  instructor:"담당자", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:2,  date:"2026-04-01", startTime:"15:00", endTime:"17:00", title:"사회초년생을 위한 비즈니스 매너 및 에티켓", module:"구직기초",    category:"취업역량강화", instructor:"한호원", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:3,  date:"2026-04-02", startTime:"12:30", endTime:"17:30", title:"기업탐방(포스코광양제철소)",                module:"직업탐색",    category:"진로탐색",    instructor:"담당자", room:"", location:"포스코홍보관 | 광양 금로 187-7", done:false, note:"외부활동" },
-  { id:4,  date:"2026-04-06", startTime:"13:00", endTime:"17:00", title:"찬란한 순간 '스테인드글라스 트레이'(성장)", module:"동기부여",    category:"자신감회복",  instructor:"재가람", room:"3층 1교육실", location:"미래기술산업진흥원", done:false, note:"외부활동" },
-  { id:5,  date:"2026-04-08", startTime:"14:00", endTime:"17:00", title:"집단심리상담(감정카드 및 미술치료)",         module:"심리상담",    category:"밀착상담",    instructor:"최희정", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:6,  date:"2026-04-13", startTime:"13:00", endTime:"17:00", title:"이미지메이킹(퍼스널 컬러)으로 지역인재되기", module:"지역특화",   category:"지역맞춤형",  instructor:"김은미", room:"CL미용학원", location:"중앙로 48-1 2층", done:false },
-  { id:7,  date:"2026-04-15", startTime:"13:00", endTime:"17:00", title:"경험과 강점으로 여는 나의 이야기(성장)",    module:"구직기초",    category:"취업역량강화", instructor:"박지애", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
-  { id:8,  date:"2026-04-20", startTime:"13:00", endTime:"17:00", title:"'나' 사용 설명서(TA자기분석 및 강점활용)",  module:"자기탐색",    category:"진로탐색",    instructor:"장원진", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:9,  date:"2026-04-22", startTime:"14:00", endTime:"17:00", title:"직업선호도 검사 및 직업군 탐색으로 진로 로드맵", module:"지역특화", category:"지역맞춤형", instructor:"장필경", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
-  { id:10, date:"2026-04-27", startTime:"14:00", endTime:"17:00", title:"순천 청년 퍼실리테이션",                    module:"진로계획",    category:"진로탐색",    instructor:"한호원", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
-  { id:11, date:"2026-04-29", startTime:"13:00", endTime:"15:00", title:"중독예방교육(알코올,약물,게임등)",           module:"생활관리",    category:"사례관리",    instructor:"이호빈", room:"2층 교육실", location:"미래기술산업진흥원", done:false },
-  { id:12, date:"2026-04-29", startTime:"15:00", endTime:"17:00", title:"나의 작은정원 나의 큰 성장(원예)",          module:"지역특화",    category:"지역맞춤형",  instructor:"김선재", room:"2층 교육실", location:"미래기술산업진흥원", done:false, note:"강사비20만원 재료비20" },
-];
+let events = [];
 
 function getToday(){ return new Date(); }
 function getTodayStr(){ return fmtLocal(getToday()); }
-let currentView="month", weekRef=weekStart(new Date("2026-04-01")), monthRef=new Date(2026,3,1);
+let currentView="month", weekRef, monthRef;
 let nextId=100, selectedId=null, dayPanelDate=null, addCat="기타", showTitle=false, selectedWeekDay="2026-04-01";
-let editingId=null; // null = 새 일정, id = 수정 중
+let editingId=null;
 
 function fmtLocal(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
 function fmt(d){ return fmtLocal(d); }
@@ -698,25 +685,48 @@ function weekPrev(){ weekRef=addDays(weekRef,-7); renderView(); }
 function weekNext(){ weekRef=addDays(weekRef,7); renderView(); }
 
 /* TOGGLE / DELETE */
-function saveDoneState(){
-  const doneIds = events.filter(e=>e.done).map(e=>e.id);
-  try { localStorage.setItem("donedIds", JSON.stringify(doneIds)); } catch(e){}
+const DEFAULT_EVENTS = [
+  { id:1,  date:"2026-04-01", startTime:"13:00", endTime:"15:00", title:"청년 도전! 비전 게임 시작!(OT)",             module:"대인관계이해", category:"자신감회복",  instructor:"담당자", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:2,  date:"2026-04-01", startTime:"15:00", endTime:"17:00", title:"사회초년생을 위한 비즈니스 매너 및 에티켓", module:"구직기초",    category:"취업역량강화", instructor:"한호원", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:3,  date:"2026-04-02", startTime:"12:30", endTime:"17:30", title:"기업탐방(포스코광양제철소)",                module:"직업탐색",    category:"진로탐색",    instructor:"담당자", room:"", location:"포스코홍보관 | 광양 금로 187-7", done:false, note:"외부활동" },
+  { id:4,  date:"2026-04-06", startTime:"13:00", endTime:"17:00", title:"찬란한 순간 '스테인드글라스 트레이'(성장)", module:"동기부여",    category:"자신감회복",  instructor:"재가람", room:"3층 1교육실", location:"미래기술산업진흥원", done:false, note:"외부활동" },
+  { id:5,  date:"2026-04-08", startTime:"14:00", endTime:"17:00", title:"집단심리상담(감정카드 및 미술치료)",         module:"심리상담",    category:"밀착상담",    instructor:"최희정", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:6,  date:"2026-04-13", startTime:"13:00", endTime:"17:00", title:"이미지메이킹(퍼스널 컬러)으로 지역인재되기", module:"지역특화",   category:"지역맞춤형",  instructor:"김은미", room:"CL미용학원", location:"중앙로 48-1 2층", done:false },
+  { id:7,  date:"2026-04-15", startTime:"13:00", endTime:"17:00", title:"경험과 강점으로 여는 나의 이야기(성장)",    module:"구직기초",    category:"취업역량강화", instructor:"박지애", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:8,  date:"2026-04-20", startTime:"13:00", endTime:"17:00", title:"'나' 사용 설명서(TA자기분석 및 강점활용)",  module:"자기탐색",    category:"진로탐색",    instructor:"장원진", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:9,  date:"2026-04-22", startTime:"14:00", endTime:"17:00", title:"직업선호도 검사 및 직업군 탐색으로 진로 로드맵", module:"지역특화", category:"지역맞춤형", instructor:"장필경", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:10, date:"2026-04-27", startTime:"14:00", endTime:"17:00", title:"순천 청년 퍼실리테이션",                    module:"진로계획",    category:"진로탐색",    instructor:"한호원", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:11, date:"2026-04-29", startTime:"13:00", endTime:"15:00", title:"중독예방교육(알코올,약물,게임등)",           module:"생활관리",    category:"사례관리",    instructor:"이호빈", room:"2층 교육실", location:"미래기술산업진흥원", done:false },
+  { id:12, date:"2026-04-29", startTime:"15:00", endTime:"17:00", title:"나의 작은정원 나의 큰 성장(원예)",          module:"지역특화",    category:"지역맞춤형",  instructor:"김선재", room:"2층 교육실", location:"미래기술산업진흥원", done:false, note:"강사비20만원 재료비20" },
+];
+
+function saveEvents(){
+  try { localStorage.setItem("events_v1", JSON.stringify(events)); } catch(e){}
 }
-function loadDoneState(){
+function loadEvents(){
+  weekRef = weekStart(new Date("2026-04-01"));
+  monthRef = new Date(2026,3,1);
   try {
-    const saved = JSON.parse(localStorage.getItem("donedIds")||"[]");
-    events = events.map(e=>({...e, done: saved.includes(e.id)}));
-  } catch(e){}
+    const saved = localStorage.getItem("events_v1");
+    if(saved){
+      events = JSON.parse(saved);
+      nextId = Math.max(...events.map(e=>e.id), 99) + 1;
+    } else {
+      events = DEFAULT_EVENTS.map(e=>({...e}));
+    }
+  } catch(e){
+    events = DEFAULT_EVENTS.map(e=>({...e}));
+  }
 }
 
 function toggleDone(id){
   events=events.map(e=>e.id===id?Object.assign({},e,{done:!e.done}):e);
-  saveDoneState();
+  saveEvents();
   renderView();
   if(selectedId===id) refreshDetail();
   if(dayPanelDate) refreshDayPanel();
 }
-function deleteDone(id){ events=events.filter(e=>e.id!==id); saveDoneState(); renderView(); }
+function deleteDone(id){ events=events.filter(e=>e.id!==id); saveEvents(); renderView(); }
 
 /* DETAIL */
 function openDetail(id){ selectedId=id; refreshDetail(); document.getElementById("detail-overlay").classList.add("show"); }
@@ -905,6 +915,7 @@ function submitAdd(){
   } else {
     events.push({id:nextId++, done:false, ...data});
   }
+  saveEvents();
   closeAdd();
   renderView();
 }
@@ -1137,7 +1148,7 @@ function deleteSub(groupName, subName){
   renderCatList();
 }
 
-requestAnimationFrame(()=>{ loadDoneState(); requestAnimationFrame(renderView); });
+requestAnimationFrame(()=>{ loadEvents(); requestAnimationFrame(renderView); });
 window.addEventListener("resize", renderView);
 
 if('serviceWorker' in navigator){
