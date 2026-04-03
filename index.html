@@ -137,6 +137,7 @@ html, body { height: 100%; overflow: hidden; font-family: -apple-system, 'Helvet
           <div class="prog-bar"><div class="prog-fill" id="prog-fill" style="width:0%"></div></div>
           <span class="prog-lbl" id="prog-lbl">0/12</span>
         </div>
+        <button class="ibtn ibtn-gray" onclick="location.reload()" title="새로고침" style="font-size:16px">↺</button>
         <button class="ibtn ibtn-dark" id="plus-btn" title="일정 추가">＋</button>
       </div>
     </div>
@@ -240,18 +241,17 @@ let events = [
 function getToday(){ return new Date(); }
 function getTodayStr(){ return fmtLocal(getToday()); }
 let currentView = "month";
-let weekRef  = weekStart(new Date("2026-04-01")); // 일정 시작 주
-let monthRef = new Date(2026, 3, 1); // 4월
+let weekRef  = weekStart(new Date("2026-04-01"));
+let monthRef = new Date(2026, 3, 1);
 let nextId = 100;
 let selectedId = null;
 let dayPanelDate = null;
 let addCat = "기타";
 let showTitle = false;
-let selectedWeekDay = "2026-04-01"; // 주간 초기 선택일
+let selectedWeekDay = "2026-04-01";
 
 /* ── helpers ── */
 function fmtLocal(d){
-  // UTC 대신 로컬 시간 기준으로 YYYY-MM-DD 반환
   const y=d.getFullYear(), m=String(d.getMonth()+1).padStart(2,"0"), day=String(d.getDate()).padStart(2,"0");
   return `${y}-${m}-${day}`;
 }
@@ -343,7 +343,6 @@ function renderMonth(){
   const cells=Array.from({length:first+total},(_,i)=>i<first?null:i-first+1);
   while(cells.length%7!==0) cells.push(null);
 
-  /* header-cal: nav only */
   const todayStr=getTodayStr();
   const isThisMonth=(new Date().getFullYear()===y&&new Date().getMonth()===m);
   let hh=`<div class="cal-nav">
@@ -357,7 +356,6 @@ function renderMonth(){
   </div>`;
   document.getElementById("header-cal").innerHTML=hh;
 
-  /* view: wrap > dow-row + grid */
   let h=`<div class="month-wrap"><div class="dow-row">`;
   DAY_KR.forEach((d,i)=>{ h+=`<div class="dow-cell" style="color:${i===0?"#FF6B6B":i===6?"#4D96FF":"#8E8E93"}">${d}</div>`; });
   h+=`</div><div class="month-grid">`;
@@ -391,13 +389,11 @@ function renderWeek(){
   const days=Array.from({length:7},(_,i)=>addDays(weekRef,i));
   const isThisWeek=days.some(d=>fmt(d)===todayStr);
 
-  // selectedWeekDay가 이 주에 없으면 오늘 or 일정있는 첫날 or 첫째날로
   if(!days.some(d=>fmt(d)===selectedWeekDay)){
     const withEv=days.find(d=>events.some(e=>e.date===fmt(d)));
     selectedWeekDay = isThisWeek ? todayStr : (withEv ? fmt(withEv) : fmt(days[0]));
   }
 
-  /* header-cal: nav + strip */
   let hh=`<div class="cal-nav">
     <button class="nav-btn" onclick="weekPrev()">‹</button>
     <span class="nav-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
@@ -421,7 +417,6 @@ function renderWeek(){
   hh+=`</div>`;
   document.getElementById("header-cal").innerHTML=hh;
 
-  /* view: 선택된 날짜의 카드만 */
   const selD=days.find(d=>fmt(d)===selectedWeekDay)||days[0];
   const selDs=fmt(selD), selEvs=getEvs(selDs), isSelT=selDs===todayStr;
   let h=`<div class="week-cards">`;
@@ -497,7 +492,7 @@ function dayPanelAdd(){ const ds=dayPanelDate; closeDayPanel(); setTimeout(()=>o
 /* ── ADD ── */
 function openAdd(dateStr){
   addCat="기타";
-  document.getElementById("f-date").value=dateStr||todayStr;
+  document.getElementById("f-date").value=dateStr||getTodayStr();
   document.getElementById("f-title").value="";
   document.getElementById("f-start").value="09:00";
   document.getElementById("f-end").value="10:00";
@@ -533,10 +528,8 @@ document.getElementById("plus-btn").onclick=()=>openAdd();
 
 /* ── init ── */
 renderLegend();
-// Wait for layout then render (so clientHeight is accurate)
 requestAnimationFrame(()=>{ requestAnimationFrame(renderView); });
 window.addEventListener("resize", renderView);
 </script>
 </body>
 </html>
-
