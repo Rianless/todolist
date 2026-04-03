@@ -700,23 +700,56 @@ const DEFAULT_EVENTS = [
   { id:12, date:"2026-04-29", startTime:"15:00", endTime:"17:00", title:"나의 작은정원 나의 큰 성장(원예)",          module:"지역특화",    category:"지역맞춤형",  instructor:"김선재", room:"2층 교육실", location:"미래기술산업진흥원", done:false, note:"강사비20만원 재료비20" },
 ];
 
-function saveEvents(){
-  try { localStorage.setItem("events_v1", JSON.stringify(events)); } catch(e){}
+// ── IndexedDB 저장소 (안드로이드 file:// 포함 모든 환경에서 동작) ──
+const DB_NAME = "TodoApp", DB_VER = 1, STORE = "kv";
+let _db = null;
+
+function openDB(){
+  return new Promise((res, rej) => {
+    if(_db){ res(_db); return; }
+    const req = indexedDB.open(DB_NAME, DB_VER);
+    req.onupgradeneeded = e => e.target.result.createObjectStore(STORE);
+    req.onsuccess = e => { _db = e.target.result; res(_db); };
+    req.onerror = () => rej(req.error);
+  });
 }
+function idbSet(key, val){
+  return openDB().then(db => new Promise((res, rej) => {
+    const tx = db.transaction(STORE, "readwrite");
+    tx.objectStore(STORE).put(val, key);
+    tx.oncomplete = res; tx.onerror = () => rej(tx.error);
+  }));
+}
+function idbGet(key){
+  return openDB().then(db => new Promise((res, rej) => {
+    const req = db.transaction(STORE, "readonly").objectStore(STORE).get(key);
+    req.onsuccess = () => res(req.result); req.onerror = () => rej(req.error);
+  }));
+}
+
+function saveEvents(){
+  idbSet("events_v1", JSON.stringify(events)).catch(e => console.warn("IDB 저장 실패", e));
+}
+
 function loadEvents(){
   weekRef = weekStart(new Date("2026-04-01"));
   monthRef = new Date(2026,3,1);
-  try {
-    const saved = localStorage.getItem("events_v1");
+  idbGet("events_v1").then(saved => {
     if(saved){
-      events = JSON.parse(saved);
-      nextId = Math.max(...events.map(e=>e.id), 99) + 1;
+      try {
+        events = JSON.parse(saved);
+        nextId = Math.max(...events.map(e=>e.id), 99) + 1;
+      } catch(e){
+        events = DEFAULT_EVENTS.map(e=>({...e}));
+      }
     } else {
       events = DEFAULT_EVENTS.map(e=>({...e}));
     }
-  } catch(e){
+    renderView();
+  }).catch(() => {
     events = DEFAULT_EVENTS.map(e=>({...e}));
-  }
+    renderView();
+  });
 }
 
 function toggleDone(id){
@@ -1148,7 +1181,7 @@ function deleteSub(groupName, subName){
   renderCatList();
 }
 
-requestAnimationFrame(()=>{ loadEvents(); requestAnimationFrame(renderView); });
+loadEvents(); // IDB는 비동기 - loadEvents 내부에서 renderView 호출
 window.addEventListener("resize", renderView);
 
 if('serviceWorker' in navigator){
@@ -1161,3 +1194,4 @@ if('serviceWorker' in navigator){
 </script>
 </body>
 </html>
+
