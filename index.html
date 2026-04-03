@@ -267,6 +267,26 @@ html, body {
 }
 .submit-btn:active { opacity: .8; }
 
+/* 추가 정보 토글 */
+.extra-toggle {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 14px; cursor: pointer; background: #fff;
+  border-radius: 14px; margin: 0 16px 12px;
+  box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
+  border: none; width: calc(100% - 32px);
+  transition: opacity .15s;
+}
+.extra-toggle:active { opacity: .7; }
+.extra-toggle-lbl { font-size: 14px; font-weight: 500; color: #007AFF; }
+.extra-toggle-arr { font-size: 12px; color: #C7C7CC; transition: transform .25s; }
+.extra-toggle-arr.open { transform: rotate(180deg); }
+.extra-box {
+  overflow: hidden;
+  max-height: 0;
+  transition: max-height .3s cubic-bezier(.4,0,.2,1);
+}
+.extra-box.open { max-height: 600px; }
+
 /* ── SETTINGS ── */
 .settings-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
 .settings-title { font-size: 17px; font-weight: 600; color: #1C1C1E; }
@@ -416,56 +436,100 @@ html, body {
       <span class="add-head-title" id="add-head-title">새 일정</span>
       <button class="close-btn" onclick="closeAdd()">✕</button>
     </div>
+
+    <!-- 기본 필드 -->
     <div class="fm-group">
       <div class="fm-row-in"><span class="fm-lbl-in">날짜</span><input class="fm-in" type="date" id="f-date"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">제목</span><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">시작</span><input class="fm-in" type="time" id="f-start" value="09:00"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">종료</span><input class="fm-in" type="time" id="f-end" value="10:00"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">모듈</span><input class="fm-in" type="text" id="f-module" placeholder="모듈명"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">강사</span><input class="fm-in" type="text" id="f-instructor" placeholder="이름"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">장소</span><input class="fm-in" type="text" id="f-location" placeholder="장소"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">강의실</span><input class="fm-in" type="text" id="f-room" placeholder="강의실"></div>
-      <div class="fm-row-in"><span class="fm-lbl-in">비고</span><input class="fm-in" type="text" id="f-note" placeholder="비고"></div>
-      <div class="fm-row-in" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
-        <span class="fm-lbl-in" style="padding-top:1px">내용</span>
-        <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3"
-          style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:#8E8E93"></textarea>
+      <div class="fm-row-in" style="gap:0" id="time-row">
+        <span class="fm-lbl-in">시간</span>
+        <input class="fm-in" type="time" id="f-start" style="flex:1;text-align:center">
+        <span style="color:#C7C7CC;font-size:13px;padding:0 4px">–</span>
+        <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center">
+      </div>
+      <div class="fm-row-in">
+        <span class="fm-lbl-in" style="color:#8E8E93">하루종일</span>
+        <div style="margin-left:auto">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)"
+              style="width:18px;height:18px;accent-color:#007AFF;cursor:pointer">
+          </label>
+        </div>
       </div>
     </div>
+
+    <!-- 카테고리 -->
     <div class="fm-sec-lbl">카테고리</div>
     <div class="cat-pick" id="cat-pick"></div>
+
+    <!-- 추가 정보 토글 -->
+    <button class="extra-toggle" id="extra-toggle-btn" onclick="toggleExtraFields()">
+      <span class="extra-toggle-lbl" id="extra-toggle-lbl">＋ 추가 정보</span>
+      <span class="extra-toggle-arr" id="extra-toggle-arr">▼</span>
+    </button>
+
+    <!-- 추가 필드 (숨김) -->
+    <div class="extra-box" id="extra-box">
+      <div class="fm-group">
+        <div class="fm-row-in"><span class="fm-lbl-in">모듈</span><input class="fm-in" type="text" id="f-module" placeholder="모듈명"></div>
+        <div class="fm-row-in"><span class="fm-lbl-in">강사</span><input class="fm-in" type="text" id="f-instructor" placeholder="이름"></div>
+        <div class="fm-row-in"><span class="fm-lbl-in">장소</span><input class="fm-in" type="text" id="f-location" placeholder="장소"></div>
+        <div class="fm-row-in"><span class="fm-lbl-in">강의실</span><input class="fm-in" type="text" id="f-room" placeholder="강의실"></div>
+        <div class="fm-row-in"><span class="fm-lbl-in">비고</span><input class="fm-in" type="text" id="f-note" placeholder="비고"></div>
+        <div class="fm-row-in" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
+          <span class="fm-lbl-in" style="padding-top:1px">내용</span>
+          <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3"
+            style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:#8E8E93"></textarea>
+        </div>
+      </div>
+    </div>
+
     <button class="submit-btn" id="submit-btn" onclick="submitAdd()">추가</button>
   </div>
 </div>
 
 <script>
-let CAT = {
-  "밀착상담":    { bg:"#FF6B6B", light:"#FFE8E8", text:"#C0392B" },
-  "자신감회복":  { bg:"#FFD93D", light:"#FFF9E0", text:"#B8860B" },
-  "취업역량강화":{ bg:"#34C759", light:"#E3F9EA", text:"#1A7A35" },
-  "진로탐색":    { bg:"#007AFF", light:"#E3EEFF", text:"#0055CC" },
-  "지역맞춤형":  { bg:"#FF2D55", light:"#FFE3EA", text:"#C0002F" },
-  "사례관리":    { bg:"#AF52DE", light:"#F0E3FF", text:"#7B1FA2" },
-  "자율활동":    { bg:"#8E8E93", light:"#F1F1F3", text:"#48484A" },
-  "개인":        { bg:"#FF9500", light:"#FFF3E0", text:"#C06800" },
-  "기타":        { bg:"#636366", light:"#EFEFEF", text:"#3A3A3C" },
-};
+// 카테고리: 그룹 없는 항목은 group 생략
+const CAT_GROUPS = [
+  {
+    group: "청도활동",
+    color: { bg:"#007AFF", light:"#E3EEFF", text:"#0055CC" },
+    subs: [
+      { name:"밀착상담",    color:{ bg:"#FF6B6B", light:"#FFE8E8", text:"#C0392B" } },
+      { name:"자신감회복",  color:{ bg:"#FFD93D", light:"#FFF9E0", text:"#B8860B" } },
+      { name:"취업역량강화",color:{ bg:"#34C759", light:"#E3F9EA", text:"#1A7A35" } },
+      { name:"진로탐색",   color:{ bg:"#5856D6", light:"#EEEEFF", text:"#3634A3" } },
+      { name:"지역맞춤형", color:{ bg:"#FF2D55", light:"#FFE3EA", text:"#C0002F" } },
+      { name:"사례관리",   color:{ bg:"#AF52DE", light:"#F0E3FF", text:"#7B1FA2" } },
+      { name:"자율활동",   color:{ bg:"#8E8E93", light:"#F1F1F3", text:"#48484A" } },
+    ],
+  },
+  { group: null, subs: [{ name:"개인", color:{ bg:"#FF9500", light:"#FFF3E0", text:"#C06800" } }] },
+  { group: null, subs: [{ name:"기타", color:{ bg:"#636366", light:"#EFEFEF", text:"#3A3A3C" } }] },
+];
+
+// 카테고리명 → 색상 조회용 flat 맵
+let CAT = {};
+CAT_GROUPS.forEach(g => {
+  g.subs.forEach(s => { CAT[s.name] = s.color; });
+  if(g.group) CAT[g.group] = g.color;
+});
 const DAY_KR   = ["일","월","화","수","목","금","토"];
 const MONTH_KR = ["1월","2월","3월","4월","5월","6월","7월","8월","9월","10월","11월","12월"];
 
 let events = [
-  { id:1,  date:"2026-04-01", startTime:"13:00", endTime:"15:00", title:"청년 도전! 비전 게임 시작!(OT)",             module:"대인관계이해", category:"자신감회복",  instructor:"담당자", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:2,  date:"2026-04-01", startTime:"15:00", endTime:"17:00", title:"사회초년생을 위한 비즈니스 매너 및 에티켓", module:"구직기초",    category:"취업역량강화", instructor:"한호원", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:3,  date:"2026-04-02", startTime:"12:30", endTime:"17:30", title:"기업탐방(포스코광양제철소)",                module:"직업탐색",    category:"진로탐색",    instructor:"담당자", room:"", location:"포스코홍보관 | 광양 금로 187-7", done:false, note:"외부활동" },
-  { id:4,  date:"2026-04-06", startTime:"13:00", endTime:"17:00", title:"찬란한 순간 '스테인드글라스 트레이'(성장)", module:"동기부여",    category:"자신감회복",  instructor:"재가람", room:"3층 1교육실", location:"미래기술산업진흥원", done:false, note:"외부활동" },
-  { id:5,  date:"2026-04-08", startTime:"14:00", endTime:"17:00", title:"집단심리상담(감정카드 및 미술치료)",         module:"심리상담",    category:"밀착상담",    instructor:"최희정", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:6,  date:"2026-04-13", startTime:"13:00", endTime:"17:00", title:"이미지메이킹(퍼스널 컬러)으로 지역인재되기", module:"지역특화",   category:"지역맞춤형",  instructor:"김은미", room:"CL미용학원", location:"중앙로 48-1 2층", done:false },
-  { id:7,  date:"2026-04-15", startTime:"13:00", endTime:"17:00", title:"경험과 강점으로 여는 나의 이야기(성장)",    module:"구직기초",    category:"취업역량강화", instructor:"박지애", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
-  { id:8,  date:"2026-04-20", startTime:"13:00", endTime:"17:00", title:"'나' 사용 설명서(TA자기분석 및 강점활용)",  module:"자기탐색",    category:"진로탐색",    instructor:"장원진", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
-  { id:9,  date:"2026-04-22", startTime:"14:00", endTime:"17:00", title:"직업선호도 검사 및 직업군 탐색으로 진로 로드맵", module:"지역특화", category:"지역맞춤형", instructor:"장필경", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
-  { id:10, date:"2026-04-27", startTime:"14:00", endTime:"17:00", title:"순천 청년 퍼실리테이션",                    module:"진로계획",    category:"진로탐색",    instructor:"한호원", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
-  { id:11, date:"2026-04-29", startTime:"13:00", endTime:"15:00", title:"중독예방교육(알코올,약물,게임등)",           module:"생활관리",    category:"사례관리",    instructor:"이호빈", room:"2층 교육실", location:"미래기술산업진흥원", done:false },
-  { id:12, date:"2026-04-29", startTime:"15:00", endTime:"17:00", title:"나의 작은정원 나의 큰 성장(원예)",          module:"지역특화",    category:"지역맞춤형",  instructor:"김선재", room:"2층 교육실", location:"미래기술산업진흥원", done:false, note:"강사비20만원 재료비20" },
+  { id:1,  date:"2026-04-01", startTime:"13:00", endTime:"15:00", title:"청년 도전! 비전 게임 시작!(OT)",             module:"대인관계이해", category:"청도활동",  instructor:"담당자", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:2,  date:"2026-04-01", startTime:"15:00", endTime:"17:00", title:"사회초년생을 위한 비즈니스 매너 및 에티켓", module:"구직기초",    category:"청도활동", instructor:"한호원", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:3,  date:"2026-04-02", startTime:"12:30", endTime:"17:30", title:"기업탐방(포스코광양제철소)",                module:"직업탐색",    category:"청도활동",    instructor:"담당자", room:"", location:"포스코홍보관 | 광양 금로 187-7", done:false, note:"외부활동" },
+  { id:4,  date:"2026-04-06", startTime:"13:00", endTime:"17:00", title:"찬란한 순간 '스테인드글라스 트레이'(성장)", module:"동기부여",    category:"청도활동",  instructor:"재가람", room:"3층 1교육실", location:"미래기술산업진흥원", done:false, note:"외부활동" },
+  { id:5,  date:"2026-04-08", startTime:"14:00", endTime:"17:00", title:"집단심리상담(감정카드 및 미술치료)",         module:"심리상담",    category:"청도활동",    instructor:"최희정", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:6,  date:"2026-04-13", startTime:"13:00", endTime:"17:00", title:"이미지메이킹(퍼스널 컬러)으로 지역인재되기", module:"지역특화",   category:"청도활동",  instructor:"김은미", room:"CL미용학원", location:"중앙로 48-1 2층", done:false },
+  { id:7,  date:"2026-04-15", startTime:"13:00", endTime:"17:00", title:"경험과 강점으로 여는 나의 이야기(성장)",    module:"구직기초",    category:"청도활동", instructor:"박지애", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:8,  date:"2026-04-20", startTime:"13:00", endTime:"17:00", title:"'나' 사용 설명서(TA자기분석 및 강점활용)",  module:"자기탐색",    category:"청도활동",    instructor:"장원진", room:"3층 1교육실", location:"미래기술산업진흥원", done:false },
+  { id:9,  date:"2026-04-22", startTime:"14:00", endTime:"17:00", title:"직업선호도 검사 및 직업군 탐색으로 진로 로드맵", module:"지역특화", category:"청도활동", instructor:"장필경", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:10, date:"2026-04-27", startTime:"14:00", endTime:"17:00", title:"순천 청년 퍼실리테이션",                    module:"진로계획",    category:"청도활동",    instructor:"한호원", room:"시민공익활동지원센터", location:"중앙시장길 31 2층", done:false },
+  { id:11, date:"2026-04-29", startTime:"13:00", endTime:"15:00", title:"중독예방교육(알코올,약물,게임등)",           module:"생활관리",    category:"청도활동",    instructor:"이호빈", room:"2층 교육실", location:"미래기술산업진흥원", done:false },
+  { id:12, date:"2026-04-29", startTime:"15:00", endTime:"17:00", title:"나의 작은정원 나의 큰 성장(원예)",          module:"지역특화",    category:"청도활동",  instructor:"김선재", room:"2층 교육실", location:"미래기술산업진흥원", done:false, note:"강사비20만원 재료비20" },
 ];
 
 function getToday(){ return new Date(); }
@@ -508,14 +572,22 @@ function goToday(){
 }
 function toggleTitle(){ showTitle=!showTitle; renderView(); }
 
+function timeLbl(ev){
+  if(ev.allDay) return "하루종일";
+  if(!ev.startTime && !ev.endTime) return "";
+  if(!ev.endTime) return ev.startTime;
+  return ev.startTime+"–"+ev.endTime;
+}
+
 function cardHtml(ev, onclickStr){
   const ct=cat(ev.category), oc=onclickStr?`onclick="${onclickStr}"`:"";
+  const tl=timeLbl(ev);
   return `<div class="card" style="opacity:${ev.done?.5:1}" ${oc}>
     <div class="card-accent" style="background:${ct.bg}"></div>
     <div class="card-body">
       <div class="card-top">
         <span class="cat-pill" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
-        <span class="time-lbl">${esc(ev.startTime)}–${esc(ev.endTime)}</span>
+        ${tl?`<span class="time-lbl">${esc(tl)}</span>`:""}
       </div>
       <div class="card-title${ev.done?" done":""}">${esc(ev.title)}</div>
       ${ev.instructor?`<div class="card-meta">👤 ${esc(ev.instructor)}${ev.location?"  📍 "+esc(ev.location):""}</div>`:""}
@@ -646,7 +718,7 @@ function refreshDetail(){
 
   // 값이 있는 필드만 표시
   const rows=[
-    ["🕐","시간", ev.startTime+" – "+ev.endTime, true], // 시간은 항상 표시
+    ["🕐","시간", ev.allDay?"하루종일":(ev.startTime||ev.endTime)?(ev.startTime||"")+(ev.endTime?" – "+ev.endTime:""):"", !!(ev.allDay||ev.startTime||ev.endTime)],
     ["📚","모듈", ev.module||"", false],
     ["👤","강사", ev.instructor||"", false],
     ["📍","장소", ev.location||"", false],
@@ -694,18 +766,22 @@ function dayPanelAdd(){ const ds=dayPanelDate; closeDayPanel(); setTimeout(()=>o
 function openAdd(dateStr){
   editingId=null;
   addCat="기타";
+  addGroup=null;
   document.getElementById("add-head-title").textContent="새 일정";
   document.getElementById("submit-btn").textContent="추가";
   document.getElementById("f-date").value=dateStr||getTodayStr();
   document.getElementById("f-title").value="";
   document.getElementById("f-start").value="09:00";
   document.getElementById("f-end").value="10:00";
+  document.getElementById("f-allday").checked=false;
+  toggleAllDay(false);
   document.getElementById("f-module").value="";
   document.getElementById("f-instructor").value="";
   document.getElementById("f-location").value="";
   document.getElementById("f-room").value="";
   document.getElementById("f-note").value="";
   document.getElementById("f-content").value="";
+  setExtraOpen(false); // 새 일정은 추가정보 닫힌 채로
   renderCatPick();
   document.getElementById("add-overlay").classList.add("show");
 }
@@ -715,37 +791,94 @@ function openEdit(id){
   const ev=events.find(e=>e.id===id); if(!ev) return;
   editingId=id;
   addCat=ev.category||"기타";
+  const _g = CAT_GROUPS.find(g => g.subs.some(s => s.name === addCat));
+  addGroup = (_g && _g.group) ? _g.group : null;
   document.getElementById("add-head-title").textContent="일정 수정";
   document.getElementById("submit-btn").textContent="저장";
   document.getElementById("f-date").value=ev.date||getTodayStr();
   document.getElementById("f-title").value=ev.title||"";
   document.getElementById("f-start").value=ev.startTime||"09:00";
   document.getElementById("f-end").value=ev.endTime||"10:00";
+  document.getElementById("f-allday").checked=!!ev.allDay;
+  toggleAllDay(!!ev.allDay);
   document.getElementById("f-module").value=ev.module||"";
   document.getElementById("f-instructor").value=ev.instructor||"";
   document.getElementById("f-location").value=ev.location||"";
   document.getElementById("f-room").value=ev.room||"";
   document.getElementById("f-note").value=ev.note||"";
   document.getElementById("f-content").value=ev.content||"";
+  // 수정 시 추가정보가 하나라도 있으면 열어두기
+  const hasExtra=ev.module||ev.instructor||ev.location||ev.room||ev.note||ev.content;
+  setExtraOpen(!!hasExtra);
   renderCatPick();
   document.getElementById("add-overlay").classList.add("show");
 }
 
-function renderCatPick(){
-  document.getElementById("cat-pick").innerHTML=Object.entries(CAT).map(([k,v])=>{
-    const sel=addCat===k;
-    return `<button class="cpbtn" style="background:${sel?v.bg:v.light};color:${sel?"#fff":v.text};border:2px solid ${sel?v.bg:"transparent"}" onclick="pickCat('${k}')">${k}</button>`;
-  }).join("");
+function setExtraOpen(open){
+  document.getElementById("extra-box").classList.toggle("open", open);
+  document.getElementById("extra-toggle-arr").classList.toggle("open", open);
+  document.getElementById("extra-toggle-lbl").textContent=
+    open ? "− 추가 정보 접기" : "＋ 추가 정보";
 }
-function pickCat(c){ addCat=c; renderCatPick(); }
+function toggleExtraFields(){
+  const box=document.getElementById("extra-box");
+  setExtraOpen(!box.classList.contains("open"));
+}
+
+function toggleAllDay(on){
+  const row=document.getElementById("time-row");
+  row.style.display=on?"none":"flex";
+}
+
+function renderCatPick(){
+  let html = "";
+  CAT_GROUPS.forEach(g => {
+    if(g.group){
+      const groupActive = g.subs.some(s => s.name === addCat);
+      const groupOpen = addGroup === g.group;
+      html += `<button class="cpbtn" style="background:${groupActive||groupOpen ? g.color.bg : g.color.light};color:${groupActive||groupOpen ? "#fff" : g.color.text};border:2px solid ${groupActive||groupOpen ? g.color.bg : "transparent"}" onclick="toggleGroup('${g.group}')">
+        ${g.group} ${groupOpen ? "▲" : "▼"}
+      </button>`;
+      if(groupOpen){
+        html += `<div style="display:flex;flex-wrap:wrap;gap:6px;width:100%;padding:2px 0 4px 8px;border-left:3px solid ${g.color.bg};margin-left:2px">`;
+        g.subs.forEach(s => {
+          const sel = addCat === s.name;
+          html += `<button class="cpbtn" style="background:${sel ? s.color.bg : s.color.light};color:${sel ? "#fff" : s.color.text};border:2px solid ${sel ? s.color.bg : "transparent"}" onclick="pickCat('${s.name}')">${s.name}</button>`;
+        });
+        html += `</div>`;
+      }
+    } else {
+      const s = g.subs[0];
+      const sel = addCat === s.name;
+      html += `<button class="cpbtn" style="background:${sel ? s.color.bg : s.color.light};color:${sel ? "#fff" : s.color.text};border:2px solid ${sel ? s.color.bg : "transparent"}" onclick="pickCat('${s.name}')">${s.name}</button>`;
+    }
+  });
+  document.getElementById("cat-pick").innerHTML = html;
+}
+
+let addGroup = null;
+
+function toggleGroup(g){
+  addGroup = addGroup === g ? null : g;
+  renderCatPick();
+}
+
+function pickCat(c){
+  addCat = c;
+  const g = CAT_GROUPS.find(g => g.subs.some(s => s.name === c));
+  if(g && g.group) addGroup = g.group;
+  renderCatPick();
+}
 function closeAdd(){ document.getElementById("add-overlay").classList.remove("show"); editingId=null; }
 
 function submitAdd(){
   const title=document.getElementById("f-title").value.trim(); if(!title) return;
+  const allDay=document.getElementById("f-allday").checked;
   const data={
     date:document.getElementById("f-date").value,
-    startTime:document.getElementById("f-start").value,
-    endTime:document.getElementById("f-end").value,
+    allDay,
+    startTime:allDay?"":document.getElementById("f-start").value,
+    endTime:allDay?"":document.getElementById("f-end").value,
     title,
     category:addCat,
     module:document.getElementById("f-module").value,
