@@ -426,6 +426,11 @@ html, body {
       <div class="fm-row-in"><span class="fm-lbl-in">장소</span><input class="fm-in" type="text" id="f-location" placeholder="장소"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">강의실</span><input class="fm-in" type="text" id="f-room" placeholder="강의실"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">비고</span><input class="fm-in" type="text" id="f-note" placeholder="비고"></div>
+      <div class="fm-row-in" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
+        <span class="fm-lbl-in" style="padding-top:1px">내용</span>
+        <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3"
+          style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:#8E8E93"></textarea>
+      </div>
     </div>
     <div class="fm-sec-lbl">카테고리</div>
     <div class="cat-pick" id="cat-pick"></div>
@@ -647,11 +652,12 @@ function refreshDetail(){
     ["📍","장소", ev.location||"", false],
     ["🚪","강의실", ev.room||"", false],
     ["📝","비고", ev.note||"", false],
+    ["📋","내용", ev.content||"", false],
   ];
   document.getElementById("detail-rows").innerHTML=rows
     .filter(([,, val, always])=> always || val)
     .map(([ic,lb,vl])=>
-      `<div class="info-row"><span class="info-icon">${ic}</span><span class="info-lbl">${lb}</span><span class="info-val">${esc(vl)}</span></div>`
+      `<div class="info-row"><span class="info-icon">${ic}</span><span class="info-lbl">${lb}</span><span class="info-val" style="white-space:pre-wrap">${esc(vl)}</span></div>`
     ).join("");
 
   const btn=document.getElementById("detail-done-btn");
@@ -699,6 +705,7 @@ function openAdd(dateStr){
   document.getElementById("f-location").value="";
   document.getElementById("f-room").value="";
   document.getElementById("f-note").value="";
+  document.getElementById("f-content").value="";
   renderCatPick();
   document.getElementById("add-overlay").classList.add("show");
 }
@@ -719,6 +726,7 @@ function openEdit(id){
   document.getElementById("f-location").value=ev.location||"";
   document.getElementById("f-room").value=ev.room||"";
   document.getElementById("f-note").value=ev.note||"";
+  document.getElementById("f-content").value=ev.content||"";
   renderCatPick();
   document.getElementById("add-overlay").classList.add("show");
 }
@@ -745,6 +753,7 @@ function submitAdd(){
     location:document.getElementById("f-location").value,
     room:document.getElementById("f-room").value,
     note:document.getElementById("f-note").value,
+    content:document.getElementById("f-content").value,
   };
   if(editingId!==null){
     events=events.map(e=>e.id===editingId?{...e,...data}:e);
