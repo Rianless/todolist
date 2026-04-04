@@ -506,6 +506,47 @@ html, body {
 .copy-btns { display:flex; gap:8px; }
 .copy-btn { flex:1; padding:13px; border-radius:12px; border:none; font-size:14px; font-weight:600; cursor:pointer; transition:opacity .15s; }
 .copy-btn:active { opacity:.75; }
+
+/* ── HEATMAP ── */
+.heatmap-outer { padding:0 16px 16px; overflow-x:auto; -webkit-overflow-scrolling:touch; }
+.heatmap-inner { display:flex; gap:0; min-width:max-content; }
+.heatmap-dow-col { display:flex; flex-direction:column; gap:3px; margin-right:4px; padding-top:16px; }
+.heatmap-dow-lbl { font-size:9px; color:rgba(255,255,255,0.35); height:12px; line-height:12px; width:14px; }
+.heatmap-weeks { display:flex; flex-direction:column; gap:0; }
+.heatmap-month-row { display:flex; gap:3px; margin-bottom:4px; }
+.heatmap-month-lbl { font-size:10px; color:rgba(255,255,255,0.45); }
+.heatmap-grid { display:flex; gap:3px; }
+.heatmap-col { display:flex; flex-direction:column; gap:3px; }
+.heatmap-cell { width:12px; height:12px; border-radius:2px; cursor:default; }
+
+/* ── ROUTINE ── */
+.freq-btns { display:flex; gap:6px; padding:4px 14px 10px; }
+.freq-btn { flex:1; padding:8px 4px; border-radius:10px; border:1.5px solid transparent; background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.55); font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:all .15s; }
+.freq-btn.on { background:rgba(0,122,255,0.18); border-color:#007AFF; color:#007AFF; }
+.routine-badge { font-size:11px; margin-left:2px; opacity:.8; }
+
+/* ── TODOMATE WEEK STYLE ── */
+.todo-item { display:flex; align-items:center; gap:12px; padding:13px 14px; background:rgba(255,255,255,0.08); border-radius:16px; margin-bottom:8px; border:0.5px solid rgba(255,255,255,0.13); cursor:pointer; transition:opacity .15s, transform .1s; position:relative; overflow:hidden; }
+.todo-item:active { opacity:.75; transform:scale(.98); }
+.todo-left-bar { position:absolute; left:0; top:0; bottom:0; width:4px; }
+.todo-check { width:26px; height:26px; border-radius:50%; border:2px solid rgba(255,255,255,0.3); background:transparent; cursor:pointer; display:flex; align-items:center; justify-content:center; font-size:13px; color:#fff; flex-shrink:0; transition:all .2s cubic-bezier(.34,1.56,.64,1); }
+.todo-check.done { background:#34C759; border-color:#34C759; }
+.todo-body { flex:1; min-width:0; }
+.todo-title { font-size:14px; font-weight:600; color:#fff; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
+.todo-title.done { text-decoration:line-through; color:rgba(255,255,255,0.38); }
+.todo-meta { display:flex; align-items:center; gap:5px; margin-top:4px; flex-wrap:wrap; }
+.todo-cat-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; }
+.todo-cat-lbl { font-size:11px; color:rgba(255,255,255,0.5); }
+.todo-time-lbl { font-size:11px; color:rgba(255,255,255,0.38); }
+.todo-right { display:flex; flex-direction:column; align-items:flex-end; gap:4px; flex-shrink:0; }
+/* Day header with progress ring */
+.day-hdr-prog { position:relative; width:36px; height:36px; flex-shrink:0; }
+.day-hdr-prog svg { transform:rotate(-90deg); }
+.day-hdr-prog-bg { fill:none; stroke:rgba(255,255,255,0.15); stroke-width:3; }
+.day-hdr-prog-fill { fill:none; stroke:#34C759; stroke-width:3; stroke-linecap:round; transition:stroke-dashoffset .5s ease; }
+.day-hdr-prog-txt { position:absolute; inset:0; display:flex; align-items:center; justify-content:center; font-size:9px; font-weight:700; color:#fff; }
+/* Week strip dots → completion arcs */
+.ws-arc { position:relative; width:6px; height:6px; }
 </style>
 </head>
 <body>
@@ -662,6 +703,28 @@ html, body {
         <input type="checkbox" id="f-showtitle"
           style="width:20px;height:20px;accent-color:#007AFF;cursor:pointer">
       </div>
+      <!-- 루틴 -->
+      <div class="fm-row-in" style="border-bottom:none">
+        <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6);font-size:13px;width:auto;flex:1">🔁 루틴으로 설정</span>
+        <input type="checkbox" id="f-routine" onchange="toggleRoutine(this.checked)"
+          style="width:20px;height:20px;accent-color:#007AFF;cursor:pointer">
+      </div>
+    </div>
+    <!-- 루틴 주기 선택 (숨김) -->
+    <div id="routine-freq-box" style="display:none;margin:0 16px 12px">
+      <div style="font-size:12px;color:rgba(255,255,255,0.45);margin-bottom:6px;font-weight:500">반복 주기</div>
+      <div class="freq-btns">
+        <button type="button" class="freq-btn on" id="freq-daily" onclick="setRoutineFreq('daily')">매일</button>
+        <button type="button" class="freq-btn" id="freq-weekly" onclick="setRoutineFreq('weekly')">매주</button>
+        <button type="button" class="freq-btn" id="freq-monthly" onclick="setRoutineFreq('monthly')">매달</button>
+      </div>
+      <div style="display:flex;align-items:center;gap:10px;padding:0 0 4px">
+        <span style="font-size:12px;color:rgba(255,255,255,0.45);font-weight:500">종료일</span>
+        <input type="date" id="f-routine-end" class="fm-in" style="flex:1;text-align:right;font-size:13px;color:rgba(255,255,255,0.7);background:rgba(255,255,255,0.06);border:0.5px solid rgba(255,255,255,0.12);border-radius:10px;padding:8px 10px">
+      </div>
+    </div>
+    <!-- 기본 필드 재개 (내용/사진/링크) -->
+    <div class="fm-group" style="margin-top:0">
       <!-- 내용 -->
       <div class="fm-row-in" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
         <span class="fm-lbl-in" style="padding-top:1px">내용</span>
@@ -741,6 +804,7 @@ html, body {
     <div class="stats-seg">
       <button class="stats-seg-btn active" id="stats-btn-week" onclick="setStatsMode('week')">주별</button>
       <button class="stats-seg-btn" id="stats-btn-month" onclick="setStatsMode('month')">월별</button>
+      <button class="stats-seg-btn" id="stats-btn-heatmap" onclick="setStatsMode('heatmap')">잔디</button>
     </div>
     <div class="stats-chart" id="stats-chart"></div>
     <div class="stats-summary" id="stats-summary"></div>
@@ -955,15 +1019,29 @@ function renderWeek(){
 
   const selD=days.find(d=>fmt(d)===selectedWeekDay)||days[0];
   const selDs=fmt(selD), selEvs=getEvs(selDs), isSelT=selDs===todayStr;
+  const selDone=selEvs.filter(e=>e.done).length, selTotal=selEvs.length;
+  const selPct=selTotal?selDone/selTotal:0;
+  const circ=2*Math.PI*15, offset=circ*(1-selPct);
   let h=stripHtml+`<div class="week-cards">
     <div class="day-hdr">
-      <span class="day-hdr-date" style="color:${isSelT?"#FF6B6B":"#fff"}">${selD.getMonth()+1}월 ${selD.getDate()}일</span>
-      <span class="day-hdr-dow">${DAY_KR[selD.getDay()]}요일</span>
-      ${isSelT?`<span class="today-pill">오늘</span>`:""}
-      <button class="add-day-btn" onclick="openAdd('${selDs}')">+ 추가</button>
+      <div style="display:flex;flex-direction:column;gap:1px">
+        <span class="day-hdr-date" style="color:${isSelT?"#FF6B6B":"#fff"}">${selD.getMonth()+1}월 ${selD.getDate()}일 <span class="day-hdr-dow" style="font-size:14px;font-weight:400">${DAY_KR[selD.getDay()]}요일</span>${isSelT?`<span class="today-pill" style="font-size:10px;padding:2px 7px;margin-left:4px">오늘</span>`:""}</span>
+        <span style="font-size:12px;color:rgba(255,255,255,0.45)">${selTotal?selDone+"/"+selTotal+" 완료":"일정 없음"}</span>
+      </div>
+      <div style="display:flex;align-items:center;gap:8px;margin-left:auto">
+        <div class="day-hdr-prog">
+          <svg width="36" height="36" viewBox="0 0 36 36">
+            <circle class="day-hdr-prog-bg" cx="18" cy="18" r="15"/>
+            <circle class="day-hdr-prog-fill" cx="18" cy="18" r="15"
+              stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
+          </svg>
+          <div class="day-hdr-prog-txt">${selTotal?Math.round(selPct*100)+"%" :""}</div>
+        </div>
+        <button class="add-day-btn" onclick="openAdd('${selDs}')">+ 추가</button>
+      </div>
     </div>`;
   h+=selEvs.length
-    ? selEvs.map(ev=>cardHtml(ev,`openDetail(${ev.id})`)).join("")
+    ? selEvs.map(ev=>todoItemHtml(ev)).join("")
     : `<div class="empty"><div class="empty-icon">📭</div><div class="empty-text">일정이 없어요</div></div>`;
   h+=`</div>`;
   document.getElementById("view").innerHTML=h;
@@ -1101,7 +1179,18 @@ function refreshDetail(){
 }
 function closeDetail(){ document.getElementById("detail-overlay").classList.remove("show"); selectedId=null; }
 function toggleFromDetail(){ if(selectedId) toggleDone(selectedId); }
-function deleteFromDetail(){ if(selectedId){ deleteDone(selectedId); closeDetail(); } }
+function deleteFromDetail(){
+  if(!selectedId) return;
+  const ev=events.find(e=>e.id===selectedId);
+  if(ev&&ev.routineId){
+    const choice=confirm("이 루틴 일정 전체를 삭제할까요?\n확인: 전체 삭제 / 취소: 이 일정만 삭제");
+    if(choice){ events=events.filter(e=>e.routineId!==ev.routineId); }
+    else { events=events.filter(e=>e.id!==selectedId); }
+  } else {
+    events=events.filter(e=>e.id!==selectedId);
+  }
+  saveEvents(); closeDetail(); renderView();
+}
 
 /* 상세 → 수정 */
 function openEditFromDetail(){
@@ -1139,6 +1228,11 @@ function openAdd(dateStr){
   toggleAllDay(false);
   document.getElementById("f-showtitle").checked=false;
   setPrio('none');
+  addRoutine=false; addRoutineFreq='daily';
+  document.getElementById("f-routine").checked=false;
+  document.getElementById("f-routine-end").value="";
+  document.getElementById("routine-freq-box").style.display="none";
+  setRoutineFreq('daily');
   formPhotos=[]; formLinks=[];
   renderFormAttachPreview();
   document.getElementById("f-module").value="";
@@ -1169,6 +1263,10 @@ function openEdit(id){
   toggleAllDay(!!ev.allDay);
   document.getElementById("f-showtitle").checked=!!ev.showTitle;
   setPrio(ev.priority||'none');
+  addRoutine=false; // editing: don't re-trigger routine generation
+  document.getElementById("f-routine").checked=false;
+  document.getElementById("routine-freq-box").style.display="none";
+  setRoutineFreq(ev.routineFreq||'daily');
   formPhotos=ev.images?[...ev.images]:[];
   formLinks=ev.links?[...ev.links]:[];
   renderFormAttachPreview();
@@ -1268,7 +1366,17 @@ function submitAdd(){
   if(editingId!==null){
     events=events.map(e=>e.id===editingId?{...e,...data}:e);
   } else {
-    events.push({id:nextId++, done:false, ...data});
+    if(addRoutine){
+      const routineId='r_'+Date.now();
+      const endDate=document.getElementById('f-routine-end').value||null;
+      const firstEv={id:nextId++, done:false, routineId, routineFreq:addRoutineFreq, ...data};
+      events.push(firstEv);
+      generateRoutineDates(data.date, addRoutineFreq, endDate).forEach(date=>{
+        events.push({...firstEv, id:nextId++, done:false, date});
+      });
+    } else {
+      events.push({id:nextId++, done:false, ...data});
+    }
   }
   saveEvents();
   closeAdd();
@@ -1504,6 +1612,136 @@ function deleteSub(groupName, subName){
   renderCatList();
 }
 
+/* ── TODOMATE STYLE ITEM ── */
+function todoItemHtml(ev){
+  const ct=cat(ev.category);
+  const prio=ev.priority||'none';
+  const tl=timeLbl(ev);
+  const leftColor=prio!=='none'?PRIO_COLORS[prio]:ct.bg;
+  const hasImg=ev.images&&ev.images.length, hasLnk=ev.links&&ev.links.length;
+  return `<div class="todo-item" onclick="openDetail(${ev.id})" style="opacity:${ev.done?.55:1}">
+    <div class="todo-left-bar" style="background:${leftColor}"></div>
+    <button class="todo-check${ev.done?" done":""}" onclick="event.stopPropagation();toggleDone(${ev.id})">${ev.done?"✓":""}</button>
+    <div class="todo-body">
+      <div class="todo-title${ev.done?" done":""}">${esc(ev.title)}${ev.routineId?`<span class="routine-badge">🔁</span>`:""}</div>
+      <div class="todo-meta">
+        <div class="todo-cat-dot" style="background:${ct.bg}"></div>
+        <span class="todo-cat-lbl">${esc(ev.category)}</span>
+        ${tl?`<span style="color:rgba(255,255,255,0.2)">·</span><span class="todo-time-lbl">${esc(tl)}</span>`:""}
+        ${hasImg?`<span class="todo-time-lbl">📷${ev.images.length}</span>`:""}
+        ${hasLnk?`<span class="todo-time-lbl">🔗${ev.links.length}</span>`:""}
+      </div>
+    </div>
+  </div>`;
+}
+
+/* ── ROUTINE ── */
+let addRoutine=false, addRoutineFreq='daily';
+
+function toggleRoutine(on){
+  addRoutine=on;
+  document.getElementById('routine-freq-box').style.display=on?'block':'none';
+}
+function setRoutineFreq(freq){
+  addRoutineFreq=freq;
+  ['daily','weekly','monthly'].forEach(f=>{
+    const btn=document.getElementById('freq-'+f);
+    if(btn) btn.classList.toggle('on', f===freq);
+  });
+}
+function generateRoutineDates(startDate, freq, endDate){
+  const dates=[];
+  let d=new Date(startDate);
+  const end=endDate?new Date(endDate):null;
+  const maxCount=freq==='daily'?60:freq==='weekly'?24:12;
+  for(let i=1;i<=maxCount;i++){
+    if(freq==='daily') d=new Date(new Date(startDate).setDate(new Date(startDate).getDate()+i));
+    else if(freq==='weekly') d=new Date(new Date(startDate).setDate(new Date(startDate).getDate()+i*7));
+    else { d=new Date(startDate); d.setMonth(d.getMonth()+i); }
+    if(end && d>end) break;
+    dates.push(fmtLocal(d));
+  }
+  return dates;
+}
+
+/* ── HEATMAP ── */
+function renderHeatmap(){
+  const chart=document.getElementById('stats-chart');
+  const summary=document.getElementById('stats-summary');
+  if(!chart||!summary) return;
+
+  const today=new Date(getTodayStr());
+  // Build 53 weeks × 7 days ending today
+  const endDay=new Date(today);
+  const startDay=new Date(today); startDay.setDate(startDay.getDate()-364);
+  // Pad to start on Sunday
+  const startDow=startDay.getDay();
+  startDay.setDate(startDay.getDate()-startDow);
+
+  // Group events by date for fast lookup
+  const dayMap={};
+  events.forEach(e=>{
+    if(!dayMap[e.date]) dayMap[e.date]={total:0,done:0};
+    dayMap[e.date].total++;
+    if(e.done) dayMap[e.date].done++;
+  });
+
+  const heatColor=(entry)=>{
+    if(!entry||entry.total===0) return 'rgba(255,255,255,0.06)';
+    const pct=entry.done/entry.total;
+    if(pct===0) return 'rgba(100,180,120,0.15)';
+    if(pct<0.5)  return 'rgba(52,200,89,0.35)';
+    if(pct<1)    return 'rgba(52,200,89,0.65)';
+    return '#34C759';
+  };
+
+  // Build columns (weeks)
+  let cols=[], monthLabels=[], curMonth=-1;
+  let d=new Date(startDay);
+  while(d<=endDay || d.getDay()!==0){
+    const weekCells=[];
+    for(let dow=0;dow<7;dow++){
+      const ds=fmtLocal(d);
+      const isFuture=d>today;
+      weekCells.push(isFuture?'rgba(255,255,255,0.03)':heatColor(dayMap[ds]));
+      d.setDate(d.getDate()+1);
+      if(d>endDay && d.getDay()===0) break;
+    }
+    // Month label for the week's Monday (dow=1)
+    const weekStart=new Date(d); weekStart.setDate(weekStart.getDate()-7+1);
+    const mo=weekStart.getMonth();
+    if(mo!==curMonth){ monthLabels.push({mo, idx:cols.length}); curMonth=mo; }
+    else monthLabels.push(null);
+    cols.push(weekCells);
+  }
+
+  const MO_KR=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+  const DOW_SH=['일','월','화','수','목','금','토'];
+
+  let html=`<div class="heatmap-outer"><div class="heatmap-inner">
+    <div class="heatmap-dow-col">
+      <div style="height:16px"></div>
+      ${DOW_SH.map(d=>`<div class="heatmap-dow-lbl">${d}</div>`).join('')}
+    </div>
+    <div class="heatmap-weeks">
+      <div class="heatmap-month-row">${
+        cols.map((c,i)=>{ const m=monthLabels[i]; return `<div style="width:12px;margin-right:3px;font-size:10px;color:rgba(255,255,255,0.45);white-space:nowrap;overflow:visible">${m?MO_KR[m.mo]:''}</div>`; }).join('')
+      }</div>
+      <div class="heatmap-grid">${
+        cols.map(cells=>`<div class="heatmap-col">${cells.map(c=>`<div class="heatmap-cell" style="background:${c}"></div>`).join('')}</div>`).join('')
+      }</div>
+    </div>
+  </div></div>`;
+
+  chart.innerHTML=html;
+
+  const totalAll=events.length, doneAll=events.filter(e=>e.done).length, streak=calcStreak();
+  summary.innerHTML=`
+    <div class="stats-card"><div class="stats-card-num">${doneAll}</div><div class="stats-card-lbl">완료된 일정</div></div>
+    <div class="stats-card"><div class="stats-card-num">${streak}🔥</div><div class="stats-card-lbl">연속 달성</div></div>
+    <div class="stats-card"><div class="stats-card-num">${totalAll?Math.round(doneAll/totalAll*100):0}%</div><div class="stats-card-lbl">전체 완료율</div></div>`;
+}
+
 /* ── PRIORITY ── */
 function setPrio(p){
   addPrio=p;
@@ -1608,7 +1846,8 @@ function setStatsMode(mode){
   statsMode=mode;
   document.getElementById('stats-btn-week').classList.toggle('active', mode==='week');
   document.getElementById('stats-btn-month').classList.toggle('active', mode==='month');
-  renderStats();
+  document.getElementById('stats-btn-heatmap').classList.toggle('active', mode==='heatmap');
+  if(mode==='heatmap') renderHeatmap(); else renderStats();
 }
 function renderStats(){
   const today=new Date(getTodayStr());
