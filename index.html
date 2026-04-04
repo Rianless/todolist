@@ -148,7 +148,7 @@ html, body {
 /* ── MONTH GRID (Glass) ── */
 #view { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .month-wrap {
-  flex: 1; margin: 8px 12px 12px;
+  flex: 1; margin: 10px 12px 12px;
   background: rgba(255,255,255,0.12);
   backdrop-filter: blur(24px) saturate(180%);
   -webkit-backdrop-filter: blur(24px) saturate(180%);
@@ -732,19 +732,22 @@ function renderMonth(){
   while(cells.length%7!==0) cells.push(null);
   const todayStr=getTodayStr(), isThisMonth=(new Date().getFullYear()===y&&new Date().getMonth()===m);
 
-  document.getElementById("header-cal").innerHTML=`<div class="cal-nav">
-    <button class="nav-btn" onclick="monthPrev()">‹</button>
-    <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
-      <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
-      <div style="position:absolute;right:0;display:flex;align-items:center;gap:5px">
-        <button class="ibtn ibtn-gray" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 8px;height:26px;border-radius:10px">${showTitle?"숨김":"제목"}</button>
-        ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
-      </div>
-    </div>
-    <button class="nav-btn" onclick="monthNext()">›</button>
-  </div>`;
+  // 월간 뷰: header-cal 비움 (네비+그리드를 카드로 view에 렌더)
+  document.getElementById("header-cal").innerHTML="";
 
-  let h=`<div class="month-wrap"><div class="dow-row">`;
+  let h=`<div class="month-wrap">
+    <div class="cal-nav" style="padding:6px 4px 2px">
+      <button class="nav-btn" onclick="monthPrev()">‹</button>
+      <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
+        <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
+        <div style="position:absolute;right:0;display:flex;align-items:center;gap:5px">
+          <button class="ibtn ibtn-glass" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 8px;height:26px;border-radius:10px">${showTitle?"숨김":"제목"}</button>
+          ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
+        </div>
+      </div>
+      <button class="nav-btn" onclick="monthNext()">›</button>
+    </div>
+    <div class="dow-row">`;
   DAY_KR.forEach((d,i)=>{ h+=`<div class="dow-cell" style="color:${i===0?"rgba(255,100,100,0.9)":i===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.55)"}">${d}</div>`; });
   h+=`</div><div class="month-grid">`;
   cells.forEach((day,ci)=>{
