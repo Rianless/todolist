@@ -775,20 +775,22 @@ function renderWeek(){
     selectedWeekDay=isThisWeek?todayStr:(withEv?fmt(withEv):fmt(days[0]));
   }
 
-  let hh=`<div class="cal-nav">
-    <button class="nav-btn" onclick="weekPrev()">‹</button>
-    <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
-      <span class="nav-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
-      <div style="position:absolute;right:0">
-        ${!isThisWeek?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
-      </div>
-    </div>
-    <button class="nav-btn" onclick="weekNext()">›</button>
-  </div>`;
-  document.getElementById("header-cal").innerHTML=hh;
+  // 주간 뷰: header-cal 비움 (네비+스트립을 카드로 view에 렌더)
+  document.getElementById("header-cal").innerHTML="";
 
-  // week-strip을 #view 상단에 카드로 렌더링
-  let stripHtml=`<div class="week-strip-card"><div class="week-strip">`;
+  // 네비 + 요일 스트립을 하나의 글래스 카드로
+  let stripHtml=`<div class="week-strip-card">
+    <div class="cal-nav" style="padding:2px 4px 0">
+      <button class="nav-btn" onclick="weekPrev()">‹</button>
+      <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
+        <span class="nav-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
+        <div style="position:absolute;right:0">
+          ${!isThisWeek?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
+        </div>
+      </div>
+      <button class="nav-btn" onclick="weekNext()">›</button>
+    </div>
+    <div class="week-strip">`;
   days.forEach((d,i)=>{
     const ds=fmt(d), isT=ds===todayStr, isSel=ds===selectedWeekDay;
     const hasEv=events.some(e=>e.date===ds);
