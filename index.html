@@ -644,43 +644,42 @@ html, body {
     <div class="fm-group">
       <div class="fm-row-in"><span class="fm-lbl-in">날짜</span><input class="fm-in" type="date" id="f-date"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">제목</span><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
-      <!-- 시간 + 하루종일 한 줄 -->
+      <!-- 시간 행 -->
       <div class="fm-row-in" style="gap:0" id="time-row">
         <span class="fm-lbl-in">시간</span>
         <div id="time-inputs" style="display:flex;flex:1;align-items:center">
           <input class="fm-in" type="time" id="f-start" style="flex:1;text-align:center">
-          <span style="color:#C7C7CC;font-size:13px;padding:0 4px">–</span>
+          <span style="color:#C7C7CC;font-size:13px;padding:0 3px">–</span>
           <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center">
         </div>
-        <span id="allday-txt" style="display:none;flex:1;font-size:14px;color:rgba(255,255,255,0.45);text-align:right;padding-right:6px">하루종일</span>
-        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding-left:10px;border-left:0.5px solid rgba(255,255,255,0.1);margin-left:8px;flex-shrink:0">
-          <span style="font-size:11px;color:rgba(255,255,255,0.4);white-space:nowrap">하루종일</span>
-          <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)"
-            style="width:16px;height:16px;accent-color:#007AFF;cursor:pointer;flex-shrink:0">
-        </label>
+        <span id="allday-txt" style="display:none;flex:1;color:rgba(255,255,255,0.45);font-size:14px;text-align:right;padding-right:8px">하루종일</span>
       </div>
+      <!-- 하루종일 토글 (별도 행) -->
+      <div class="fm-row-in">
+        <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6);font-size:13px">하루종일</span>
+        <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)"
+          style="width:20px;height:20px;accent-color:#007AFF;cursor:pointer;margin-left:auto">
+      </div>
+      <!-- 달력에 제목 표시 -->
       <div class="fm-row-in">
         <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6);font-size:13px;width:auto;flex:1">달력에 제목 표시</span>
-        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-          <input type="checkbox" id="f-showtitle"
-            style="width:18px;height:18px;accent-color:#007AFF;cursor:pointer">
-        </label>
+        <input type="checkbox" id="f-showtitle"
+          style="width:20px;height:20px;accent-color:#007AFF;cursor:pointer">
       </div>
+      <!-- 내용 -->
       <div class="fm-row-in" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
         <span class="fm-lbl-in" style="padding-top:1px">내용</span>
         <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3"
           style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:#8E8E93"></textarea>
       </div>
-    </div>
-
-    <!-- 사진 / 링크 -->
-    <div class="fm-group">
+      <!-- 사진 -->
       <div class="fm-row-in" style="flex-wrap:wrap;gap:6px">
         <span class="fm-lbl-in" style="font-size:13px">사진</span>
         <div id="form-photo-preview" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-items:center"></div>
         <button type="button" onclick="document.getElementById('f-photo').click()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">📷 추가</button>
         <input type="file" id="f-photo" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this)">
       </div>
+      <!-- 링크 -->
       <div class="fm-row-in" style="gap:6px">
         <span class="fm-lbl-in" style="font-size:13px">링크</span>
         <input class="fm-in" type="url" id="f-link-in" placeholder="https://" style="flex:1;text-align:left">
@@ -1205,7 +1204,7 @@ function toggleAllDay(on){
   const ti=document.getElementById("time-inputs");
   const at=document.getElementById("allday-txt");
   if(ti) ti.style.display=on?"none":"flex";
-  if(at) at.style.display=on?"block":"none";
+  if(at) at.style.display=on?"inline":"none";
 }
 
 function renderCatPick(){
