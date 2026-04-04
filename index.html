@@ -531,14 +531,14 @@ html, body {
         <button class="ibtn ibtn-glass" onclick="openStats()" title="통계">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </button>
-        <button class="ibtn ibtn-glass" onclick="location.reload()" title="새로고침">
-          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
-        </button>
         <button class="ibtn ibtn-glass" onclick="openSettings()" title="설정">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
         </button>
         <button class="ibtn ibtn-blue" id="plus-btn" title="일정 추가">
           <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
+        <button class="ibtn ibtn-glass" onclick="location.reload()" title="새로고침">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
         </button>
       </div>
     </div>
@@ -644,21 +644,17 @@ html, body {
     <div class="fm-group">
       <div class="fm-row-in"><span class="fm-lbl-in">날짜</span><input class="fm-in" type="date" id="f-date"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">제목</span><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
-      <!-- 시간 행 -->
+      <!-- 시간 + 하루종일 체크박스 한 줄 -->
       <div class="fm-row-in" style="gap:0" id="time-row">
         <span class="fm-lbl-in">시간</span>
-        <div id="time-inputs" style="display:flex;flex:1;align-items:center">
-          <input class="fm-in" type="time" id="f-start" style="flex:1;text-align:center">
-          <span style="color:#C7C7CC;font-size:13px;padding:0 3px">–</span>
-          <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center">
+        <div id="time-inputs" style="display:flex;flex:1;align-items:center;min-width:0">
+          <input class="fm-in" type="time" id="f-start" style="flex:1;text-align:center;min-width:0">
+          <span style="color:#C7C7CC;font-size:13px;padding:0 3px;flex-shrink:0">–</span>
+          <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center;min-width:0">
         </div>
-        <span id="allday-txt" style="display:none;flex:1;color:rgba(255,255,255,0.45);font-size:14px;text-align:right;padding-right:8px">하루종일</span>
-      </div>
-      <!-- 하루종일 토글 (별도 행) -->
-      <div class="fm-row-in">
-        <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6);font-size:13px">하루종일</span>
+        <span id="allday-txt" style="display:none;flex:1;color:rgba(255,255,255,0.45);font-size:14px;text-align:right;padding-right:6px">하루종일</span>
         <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)"
-          style="width:20px;height:20px;accent-color:#007AFF;cursor:pointer;margin-left:auto">
+          style="width:20px;height:20px;accent-color:#007AFF;cursor:pointer;flex-shrink:0;margin-left:10px">
       </div>
       <!-- 달력에 제목 표시 -->
       <div class="fm-row-in">
@@ -685,7 +681,7 @@ html, body {
         <input class="fm-in" type="url" id="f-link-in" placeholder="https://" style="flex:1;text-align:left">
         <button type="button" onclick="addFormLink()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">추가</button>
       </div>
-      <div id="form-link-preview" style="padding:0 14px 4px"></div>
+      <div id="form-link-preview"></div>
     </div>
 
     <!-- 카테고리 -->
@@ -1545,12 +1541,12 @@ function renderFormAttachPreview(){
        <button class="attach-del-btn" onclick="formPhotos.splice(${i},1);renderFormAttachPreview()">✕</button>
      </div>`
   ).join('');
-  lp.innerHTML=formLinks.map((url,i)=>
+  lp.innerHTML=formLinks.length ? `<div style="padding:4px 14px 4px">`+formLinks.map((url,i)=>
     `<div class="link-item">
        <span class="link-item-url">${esc(url)}</span>
        <button onclick="formLinks.splice(${i},1);renderFormAttachPreview()" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:14px;flex-shrink:0">✕</button>
      </div>`
-  ).join('');
+  ).join('')+`</div>` : '';
 }
 
 /* ── STREAK ── */
