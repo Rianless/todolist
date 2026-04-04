@@ -118,10 +118,20 @@ html, body {
 }
 .dow-cell { text-align: center; font-size: 11px; font-weight: 600; padding: 4px 0; color: rgba(255,255,255,0.55); }
 
-/* week strip */
+/* week strip card */
+.week-strip-card {
+  margin: 8px 12px 4px;
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid rgba(255,255,255,0.22);
+  border-radius: 18px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15), 0 1px 0 rgba(255,255,255,.12) inset;
+  overflow: hidden;
+}
 .week-strip {
   display: grid; grid-template-columns: repeat(7,1fr);
-  padding: 6px 0 8px; border-top: 0.5px solid rgba(255,255,255,0.1);
+  padding: 8px 4px 10px;
 }
 .ws-day { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 2px 0; }
 .ws-dow { font-size: 11px; font-weight: 500; }
@@ -160,7 +170,7 @@ html, body {
   color: rgba(255,255,255,0.9);
 }
 .month-ev {
-  border-radius: 6px; padding: 2px 4px; margin-bottom: 2px;
+  border-radius: 10px; padding: 2px 5px; margin-bottom: 2px;
   overflow: hidden; cursor: pointer; flex-shrink: 0; width: 100%;
 }
 .month-ev-time { font-size: 8px; font-weight: 600; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -774,27 +784,30 @@ function renderWeek(){
       </div>
     </div>
     <button class="nav-btn" onclick="weekNext()">›</button>
-  </div><div class="week-strip">`;
+  </div>`;
+  document.getElementById("header-cal").innerHTML=hh;
+
+  // week-strip을 #view 상단에 카드로 렌더링
+  let stripHtml=`<div class="week-strip-card"><div class="week-strip">`;
   days.forEach((d,i)=>{
     const ds=fmt(d), isT=ds===todayStr, isSel=ds===selectedWeekDay;
     const hasEv=events.some(e=>e.date===ds);
-    const dc=i===0?"rgba(255,100,100,0.9)":i===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.6)";
+    const dc=i===0?"rgba(255,100,100,0.9)":i===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.65)";
     const numBg=isT?"#FF3B30":isSel?"rgba(255,255,255,0.88)":"transparent";
     const numCol=isT?"#fff":isSel?"#1C1C1E":i===0?"rgba(255,100,100,0.9)":i===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.9)";
-    hh+=`<div class="ws-day" onclick="selectWeekDay('${ds}')">
-      <span class="ws-dow" style="color:${isSel&&!isT?"#1C1C1E":dc};font-weight:${isSel?"600":"500"}">${DAY_KR[d.getDay()]}</span>
+    stripHtml+=`<div class="ws-day" onclick="selectWeekDay('${ds}')">
+      <span class="ws-dow" style="color:${dc};font-weight:${isSel?"700":"500"}">${DAY_KR[d.getDay()]}</span>
       <div class="ws-num" style="background:${numBg};color:${numCol}">${d.getDate()}</div>
-      <div class="ws-dot" style="background:${hasEv?(isT?"#FF3B30":"#C7C7CC"):"transparent"}"></div>
+      <div class="ws-dot" style="background:${hasEv?(isT?"#FF3B30":"rgba(255,255,255,0.5)"):"transparent"}"></div>
     </div>`;
   });
-  hh+=`</div>`;
-  document.getElementById("header-cal").innerHTML=hh;
+  stripHtml+=`</div></div>`;
 
   const selD=days.find(d=>fmt(d)===selectedWeekDay)||days[0];
   const selDs=fmt(selD), selEvs=getEvs(selDs), isSelT=selDs===todayStr;
-  let h=`<div class="week-cards">
+  let h=stripHtml+`<div class="week-cards">
     <div class="day-hdr">
-      <span class="day-hdr-date" style="color:${isSelT?"#FF3B30":"#1C1C1E"}">${selD.getMonth()+1}월 ${selD.getDate()}일</span>
+      <span class="day-hdr-date" style="color:${isSelT?"#FF6B6B":"#fff"}">${selD.getMonth()+1}월 ${selD.getDate()}일</span>
       <span class="day-hdr-dow">${DAY_KR[selD.getDay()]}요일</span>
       ${isSelT?`<span class="today-pill">오늘</span>`:""}
       <button class="add-day-btn" onclick="openAdd('${selDs}')">+ 추가</button>
