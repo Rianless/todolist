@@ -29,14 +29,17 @@ html, body {
 
 #app { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
 
-/* ── HEADER (Frosted Glass) ── */
+/* ── HEADER (Frosted Glass Card) ── */
 #header {
   background: rgba(255,255,255,0.12);
   backdrop-filter: saturate(200%) blur(30px);
   -webkit-backdrop-filter: saturate(200%) blur(30px);
   padding: 14px 16px 0;
   flex-shrink: 0;
-  border-bottom: 0.5px solid rgba(255,255,255,0.18);
+  margin: 10px 12px 0;
+  border-radius: 20px;
+  border: 0.5px solid rgba(255,255,255,0.22);
+  box-shadow: 0 4px 20px rgba(0,0,0,.18), 0 1px 0 rgba(255,255,255,.12) inset;
 }
 .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
 .hdr-ttl { font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.5px; text-shadow: 0 1px 8px rgba(0,0,0,.3); }
@@ -1394,7 +1397,7 @@ function applyPanelOpacity(val){
   s.textContent = `
     .card { background: rgba(255,255,255,${op/100}) !important; }
     .month-wrap { background: rgba(255,255,255,${op/100}) !important; }
-    #header { background: rgba(255,255,255,${Math.max(op-4,4)/100}) !important; }
+    #header { background: rgba(255,255,255,${Math.max(op-4,4)/100}) !important; border-radius: 20px; }
   `;
 }
 
