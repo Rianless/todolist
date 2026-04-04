@@ -15,33 +15,44 @@
 html, body {
   height: 100%; overflow: hidden;
   font-family: -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
-  background: #F2F2F7;
+  background: transparent;
   -webkit-font-smoothing: antialiased;
 }
+
+/* ── BACKGROUND LAYER ── */
+#bg-layer {
+  position: fixed; inset: 0; z-index: -1;
+  background: linear-gradient(135deg, #1a1a2e 0%, #16213e 45%, #0f3460 80%, #533483 100%);
+  background-size: cover; background-position: center;
+  transition: background 0.5s ease;
+}
+
 #app { max-width: 430px; margin: 0 auto; height: 100%; display: flex; flex-direction: column; }
 
-/* ── HEADER ── */
+/* ── HEADER (Frosted Glass) ── */
 #header {
-  background: rgba(242,242,247,0.94);
-  backdrop-filter: saturate(180%) blur(20px);
-  -webkit-backdrop-filter: saturate(180%) blur(20px);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: saturate(200%) blur(30px);
+  -webkit-backdrop-filter: saturate(200%) blur(30px);
   padding: 14px 16px 0;
   flex-shrink: 0;
-  border-bottom: 0.5px solid rgba(0,0,0,0.1);
+  border-bottom: 0.5px solid rgba(255,255,255,0.18);
 }
 .hdr-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 14px; }
-.hdr-ttl { font-size: 28px; font-weight: 700; color: #1C1C1E; letter-spacing: -0.5px; }
+.hdr-ttl { font-size: 28px; font-weight: 700; color: #fff; letter-spacing: -0.5px; text-shadow: 0 1px 8px rgba(0,0,0,.3); }
 .hdr-right { display: flex; align-items: center; gap: 8px; }
 
 /* progress pill */
 .prog-wrap {
   display: flex; align-items: center; gap: 6px;
-  background: #fff; padding: 5px 10px 5px 8px;
-  border-radius: 20px; box-shadow: 0 1px 3px rgba(0,0,0,.08);
+  background: rgba(255,255,255,0.2); padding: 5px 10px 5px 8px;
+  border-radius: 20px;
+  border: 0.5px solid rgba(255,255,255,0.3);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
 }
 .prog-ring { position: relative; width: 20px; height: 20px; flex-shrink: 0; }
 .prog-ring svg { transform: rotate(-90deg); }
-.prog-ring-bg { fill: none; stroke: #E5E5EA; stroke-width: 2.5; }
+.prog-ring-bg { fill: none; stroke: rgba(255,255,255,0.25); stroke-width: 2.5; }
 .prog-ring-fill {
   fill: none; stroke: #34C759; stroke-width: 2.5; stroke-linecap: round;
   transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1);
@@ -55,9 +66,9 @@ html, body {
   transition: transform .1s, opacity .15s;
 }
 .ibtn:active { transform: scale(.9); opacity: .6; }
-.ibtn-dark { background: #1C1C1E; color: #fff; font-size: 20px; font-weight: 300; }
-.ibtn-gray { background: #E5E5EA; color: #636366; font-size: 14px; font-weight: 600; }
-.ibtn-refresh { background: #E5E5EA; color: #636366; font-size: 16px; }
+.ibtn-dark { background: rgba(255,255,255,0.22); color: #fff; font-size: 20px; font-weight: 300; border: 0.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
+.ibtn-gray { background: rgba(255,255,255,0.18); color: #fff; font-size: 14px; font-weight: 600; border: 0.5px solid rgba(255,255,255,0.25); }
+.ibtn-refresh { background: rgba(255,255,255,0.18); color: #fff; font-size: 16px; border: 0.5px solid rgba(255,255,255,0.25); }
 .ibtn-today {
   background: #FF3B30; color: #fff; font-size: 10px; font-weight: 700;
   width: auto; padding: 0 9px; border-radius: 10px; height: 28px;
@@ -65,40 +76,41 @@ html, body {
 
 /* seg control */
 .seg {
-  display: flex; background: rgba(118,118,128,.12);
+  display: flex; background: rgba(255,255,255,0.12);
   border-radius: 10px; padding: 2px; margin-bottom: 12px;
+  border: 0.5px solid rgba(255,255,255,0.15);
 }
 .seg-btn {
   flex: 1; padding: 7px 0; border-radius: 8px; border: none;
-  background: transparent; font-size: 13px; font-weight: 500; color: #3C3C43;
+  background: transparent; font-size: 13px; font-weight: 500; color: rgba(255,255,255,0.65);
   cursor: pointer; transition: all .2s;
 }
 .seg-btn.active {
-  background: #fff; color: #1C1C1E; font-weight: 600;
-  box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.1);
+  background: rgba(255,255,255,0.9); color: #1C1C1E; font-weight: 600;
+  box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.15);
 }
 
 /* cal nav */
 .cal-nav { display: flex; align-items: center; padding: 2px 0 8px; }
 .nav-btn {
   background: none; border: none; cursor: pointer; padding: 4px 8px;
-  color: #007AFF; font-size: 18px; line-height: 1;
+  color: rgba(255,255,255,0.8); font-size: 18px; line-height: 1;
   border-radius: 8px; transition: background .15s;
 }
-.nav-btn:active { background: rgba(0,122,255,.1); }
-.nav-lbl { font-size: 15px; font-weight: 600; color: #1C1C1E; letter-spacing: -.3px; }
+.nav-btn:active { background: rgba(255,255,255,0.15); }
+.nav-lbl { font-size: 15px; font-weight: 600; color: #fff; letter-spacing: -.3px; text-shadow: 0 1px 4px rgba(0,0,0,.2); }
 
 /* dow row */
 .dow-row {
   display: grid; grid-template-columns: repeat(7,1fr);
-  padding: 4px 0; border-bottom: 0.5px solid rgba(0,0,0,.07);
+  padding: 4px 0; border-bottom: 0.5px solid rgba(255,255,255,0.1);
 }
-.dow-cell { text-align: center; font-size: 11px; font-weight: 600; padding: 4px 0; color: #8E8E93; }
+.dow-cell { text-align: center; font-size: 11px; font-weight: 600; padding: 4px 0; color: rgba(255,255,255,0.55); }
 
 /* week strip */
 .week-strip {
   display: grid; grid-template-columns: repeat(7,1fr);
-  padding: 6px 0 8px; border-top: 0.5px solid rgba(0,0,0,.06);
+  padding: 6px 0 8px; border-top: 0.5px solid rgba(255,255,255,0.1);
 }
 .ws-day { display: flex; flex-direction: column; align-items: center; gap: 3px; cursor: pointer; padding: 2px 0; }
 .ws-dow { font-size: 11px; font-weight: 500; }
@@ -109,27 +121,32 @@ html, body {
 }
 .ws-dot { width: 4px; height: 4px; border-radius: 50%; }
 
-/* ── MONTH GRID ── */
+/* ── MONTH GRID (Glass) ── */
 #view { flex: 1; overflow: hidden; display: flex; flex-direction: column; }
 .month-wrap {
   flex: 1; margin: 8px 12px 12px;
-  background: #fff; border-radius: 16px;
-  box-shadow: 0 2px 12px rgba(0,0,0,.08);
+  background: rgba(255,255,255,0.12);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid rgba(255,255,255,0.22);
+  border-radius: 20px;
+  box-shadow: 0 8px 32px rgba(0,0,0,.2), 0 1px 0 rgba(255,255,255,.15) inset;
   overflow: hidden; display: flex; flex-direction: column; max-height: 68vh;
 }
 .month-grid { display: grid; grid-template-columns: repeat(7,1fr); flex: 1; overflow: hidden; }
 .month-cell {
-  border-bottom: 0.5px solid #F2F2F7; border-right: 0.5px solid #F2F2F7;
+  border-bottom: 0.5px solid rgba(255,255,255,0.1); border-right: 0.5px solid rgba(255,255,255,0.1);
   padding: 4px 3px 3px; cursor: pointer; overflow: hidden;
   display: flex; flex-direction: column; transition: background .12s;
 }
-.month-cell:active { background: #F2F2F7; }
+.month-cell:active { background: rgba(255,255,255,0.12); }
 .month-cell:nth-child(7n) { border-right: none; }
 .month-num {
   width: 22px; height: 22px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
   font-size: 12px; font-weight: 500;
   flex-shrink: 0; margin-bottom: 2px; align-self: flex-start;
+  color: rgba(255,255,255,0.9);
 }
 .month-ev {
   border-radius: 4px; padding: 1px 4px; margin-bottom: 1px;
@@ -141,36 +158,40 @@ html, body {
 /* ── WEEK CARDS ── */
 .week-cards { padding: 12px 12px 48px; display: flex; flex-direction: column; }
 .day-hdr { display: flex; align-items: center; gap: 7px; margin-bottom: 10px; padding: 0 2px; }
-.day-hdr-date { font-size: 20px; font-weight: 700; letter-spacing: -.5px; }
-.day-hdr-dow { font-size: 15px; color: #8E8E93; font-weight: 400; }
+.day-hdr-date { font-size: 20px; font-weight: 700; letter-spacing: -.5px; color: #fff; text-shadow: 0 1px 6px rgba(0,0,0,.25); }
+.day-hdr-dow { font-size: 15px; color: rgba(255,255,255,0.65); font-weight: 400; }
 .today-pill { font-size: 11px; font-weight: 600; background: #FF3B30; color: #fff; padding: 2px 8px; border-radius: 10px; }
 .add-day-btn {
-  margin-left: auto; background: transparent; border: none;
-  font-size: 14px; font-weight: 500; color: #007AFF; cursor: pointer;
-  padding: 4px 2px;
+  margin-left: auto; background: rgba(255,255,255,0.15); border: 0.5px solid rgba(255,255,255,0.25);
+  font-size: 13px; font-weight: 500; color: #fff; cursor: pointer;
+  padding: 5px 10px; border-radius: 10px; backdrop-filter: blur(10px);
 }
 
-/* cards */
+/* cards (Glass) */
 .card {
-  background: #fff; border-radius: 14px;
+  background: rgba(255,255,255,0.16);
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border: 0.5px solid rgba(255,255,255,0.28);
+  border-radius: 16px;
   display: flex; align-items: stretch; overflow: hidden;
-  box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 8px rgba(0,0,0,.06);
-  cursor: pointer; margin-bottom: 8px;
+  box-shadow: 0 4px 20px rgba(0,0,0,.15), 0 1px 0 rgba(255,255,255,.2) inset;
+  cursor: pointer; margin-bottom: 10px;
   transition: transform .12s, box-shadow .12s;
 }
-.card:active { transform: scale(.984); box-shadow: 0 1px 4px rgba(0,0,0,.07); }
+.card:active { transform: scale(.984); box-shadow: 0 2px 10px rgba(0,0,0,.12); }
 .card-accent { width: 4px; flex-shrink: 0; }
 .card-body { flex: 1; padding: 11px 10px 11px 13px; min-width: 0; }
 .card-top { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; }
 .cat-pill { font-size: 10px; font-weight: 600; padding: 2px 7px; border-radius: 8px; white-space: nowrap; }
-.time-lbl { font-size: 11px; color: #8E8E93; font-weight: 500; margin-left: auto; flex-shrink: 0; }
-.card-title { font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 3px; color: #1C1C1E; }
-.card-title.done { text-decoration: line-through; color: #AEAEB2; }
-.card-meta { font-size: 11px; color: #8E8E93; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.time-lbl { font-size: 11px; color: rgba(255,255,255,0.65); font-weight: 500; margin-left: auto; flex-shrink: 0; }
+.card-title { font-size: 14px; font-weight: 600; line-height: 1.35; margin-bottom: 3px; color: #fff; }
+.card-title.done { text-decoration: line-through; color: rgba(255,255,255,0.45); }
+.card-meta { font-size: 11px; color: rgba(255,255,255,0.6); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .check-wrap { display: flex; align-items: center; padding-right: 14px; }
 .check-btn {
   width: 24px; height: 24px; border-radius: 50%;
-  border: 2px solid #C7C7CC; background: transparent;
+  border: 2px solid rgba(255,255,255,0.4); background: rgba(255,255,255,0.1);
   cursor: pointer; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
   font-size: 11px; color: #fff;
@@ -180,18 +201,22 @@ html, body {
 
 .empty { text-align: center; padding: 52px 0 32px; }
 .empty-icon { font-size: 44px; margin-bottom: 10px; }
-.empty-text { color: #C7C7CC; font-size: 14px; font-weight: 500; }
+.empty-text { color: rgba(255,255,255,0.45); font-size: 14px; font-weight: 500; }
 
 /* ── OVERLAYS ── */
 .overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,.38);
-  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+  background: rgba(0,0,0,.45);
+  backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px);
   z-index: 100; display: none; align-items: flex-end;
 }
 .overlay.show { display: flex; }
 .sheet {
-  background: #F2F2F7; border-radius: 22px 22px 0 0;
+  background: rgba(22,22,30,0.8);
+  backdrop-filter: blur(40px) saturate(200%);
+  -webkit-backdrop-filter: blur(40px) saturate(200%);
+  border: 0.5px solid rgba(255,255,255,0.15);
+  border-radius: 28px 28px 0 0;
   width: 100%; max-height: 90vh; overflow-y: auto;
   padding-bottom: 34px;
   touch-action: pan-y;
@@ -199,7 +224,7 @@ html, body {
   will-change: transform;
 }
 .handle {
-  width: 36px; height: 5px; background: rgba(0,0,0,.16);
+  width: 36px; height: 5px; background: rgba(255,255,255,0.22);
   border-radius: 3px; margin: 10px auto 0;
   cursor: grab;
 }
@@ -207,13 +232,17 @@ html, body {
 /* detail */
 .detail-bar { height: 5px; border-radius: 0; }
 .sheet-cat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 16px 6px; }
-.detail-title { font-size: 20px; font-weight: 700; color: #1C1C1E; line-height: 1.3; letter-spacing: -.3px; padding: 4px 16px 16px; }
-.info-group { background: #fff; border-radius: 14px; margin: 0 16px 10px; overflow: hidden; }
-.info-row { display: flex; align-items: flex-start; padding: 11px 14px; gap: 10px; border-bottom: 0.5px solid #F2F2F7; }
+.detail-title { font-size: 20px; font-weight: 700; color: #fff; line-height: 1.3; letter-spacing: -.3px; padding: 4px 16px 16px; }
+.info-group {
+  background: rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 16px; margin: 0 16px 10px; overflow: hidden;
+}
+.info-row { display: flex; align-items: flex-start; padding: 11px 14px; gap: 10px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
 .info-row:last-child { border-bottom: none; }
 .info-icon { font-size: 15px; width: 20px; flex-shrink: 0; margin-top: 1px; }
-.info-lbl { font-size: 13px; color: #8E8E93; width: 46px; flex-shrink: 0; font-weight: 500; padding-top: 1px; }
-.info-val { font-size: 14px; color: #1C1C1E; font-weight: 400; flex: 1; line-height: 1.4; }
+.info-lbl { font-size: 13px; color: rgba(255,255,255,0.5); width: 46px; flex-shrink: 0; font-weight: 500; padding-top: 1px; }
+.info-val { font-size: 14px; color: rgba(255,255,255,0.9); font-weight: 400; flex: 1; line-height: 1.4; }
 .act-row { display: flex; gap: 8px; padding: 4px 16px 0; }
 .act-btn {
   flex: 1; padding: 14px; border-radius: 14px; border: none;
@@ -227,58 +256,64 @@ html, body {
 .act-btn-sm {
   flex: 1; padding: 14px 8px; border-radius: 14px; border: none;
   font-size: 14px; font-weight: 600; cursor: pointer;
-  transition: opacity .15s;
+  transition: opacity .15s; backdrop-filter: blur(10px);
 }
 .act-btn-sm:active { opacity: .75; }
 
 /* day panel */
 .day-panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
-.day-panel-title { font-size: 20px; font-weight: 700; color: #1C1C1E; }
+.day-panel-title { font-size: 20px; font-weight: 700; color: #fff; }
 .day-panel-cards { padding: 0 12px; }
 
 /* close */
 .close-btn {
   width: 28px; height: 28px; border-radius: 50%;
-  background: rgba(0,0,0,.08); border: none; cursor: pointer;
-  font-size: 12px; color: #636366; font-weight: 700;
+  background: rgba(255,255,255,0.14); border: 0.5px solid rgba(255,255,255,0.2); cursor: pointer;
+  font-size: 12px; color: rgba(255,255,255,0.8); font-weight: 700;
   display: flex; align-items: center; justify-content: center;
 }
-.close-btn:active { background: rgba(0,0,0,.15); }
+.close-btn:active { background: rgba(255,255,255,0.22); }
 
 /* add / edit sheet */
 .add-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
-.add-head-title { font-size: 17px; font-weight: 600; color: #1C1C1E; }
-.fm-group { background: #fff; border-radius: 14px; margin: 0 16px 12px; overflow: hidden; }
-.fm-row-in { display: flex; align-items: center; padding: 12px 14px; gap: 10px; border-bottom: 0.5px solid #F2F2F7; }
+.add-head-title { font-size: 17px; font-weight: 600; color: #fff; }
+.fm-group {
+  background: rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(255,255,255,0.12);
+  border-radius: 16px; margin: 0 16px 12px; overflow: hidden;
+}
+.fm-row-in { display: flex; align-items: center; padding: 12px 14px; gap: 10px; border-bottom: 0.5px solid rgba(255,255,255,0.08); }
 .fm-row-in:last-child { border-bottom: none; }
-.fm-lbl-in { font-size: 14px; font-weight: 500; color: #1C1C1E; width: 44px; flex-shrink: 0; }
-.fm-in { flex: 1; border: none; background: transparent; font-size: 14px; color: #8E8E93; outline: none; font-family: inherit; text-align: right; }
-.fm-in::placeholder { color: #C7C7CC; }
-.fm-in:focus { color: #1C1C1E; }
-.fm-sec-lbl { font-size: 12px; font-weight: 500; color: #8E8E93; padding: 0 16px 6px; text-transform: uppercase; letter-spacing: .5px; }
+.fm-lbl-in { font-size: 14px; font-weight: 500; color: rgba(255,255,255,0.9); width: 44px; flex-shrink: 0; }
+.fm-in { flex: 1; border: none; background: transparent; font-size: 14px; color: rgba(255,255,255,0.6); outline: none; font-family: inherit; text-align: right; }
+.fm-in::placeholder { color: rgba(255,255,255,0.3); }
+.fm-in:focus { color: #fff; }
+.fm-sec-lbl { font-size: 12px; font-weight: 500; color: rgba(255,255,255,0.45); padding: 0 16px 6px; text-transform: uppercase; letter-spacing: .5px; }
 .cat-pick { display: flex; flex-wrap: wrap; gap: 6px; padding: 10px 16px 14px; }
 .cpbtn { font-size: 11px; font-weight: 600; padding: 6px 11px; border-radius: 10px; cursor: pointer; border: none; transition: transform .1s; }
 .cpbtn:active { transform: scale(.93); }
 .submit-btn {
   width: calc(100% - 32px); margin: 0 16px;
-  padding: 15px; border-radius: 14px; border: none;
+  padding: 15px; border-radius: 16px; border: none;
   background: #007AFF; color: #fff; font-size: 16px; font-weight: 600;
   cursor: pointer; transition: opacity .15s;
+  box-shadow: 0 4px 20px rgba(0,122,255,.4);
 }
 .submit-btn:active { opacity: .8; }
 
 /* 추가 정보 토글 */
 .extra-toggle {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 12px 14px; cursor: pointer; background: #fff;
+  padding: 12px 14px; cursor: pointer;
+  background: rgba(255,255,255,0.08);
+  border: 0.5px solid rgba(255,255,255,0.12);
   border-radius: 14px; margin: 0 16px 12px;
-  box-shadow: 0 1px 0 rgba(0,0,0,.04), 0 2px 6px rgba(0,0,0,.06);
-  border: none; width: calc(100% - 32px);
+  width: calc(100% - 32px);
   transition: opacity .15s;
 }
 .extra-toggle:active { opacity: .7; }
-.extra-toggle-lbl { font-size: 14px; font-weight: 500; color: #007AFF; }
-.extra-toggle-arr { font-size: 12px; color: #C7C7CC; transition: transform .25s; }
+.extra-toggle-lbl { font-size: 14px; font-weight: 500; color: #64AFFF; }
+.extra-toggle-arr { font-size: 12px; color: rgba(255,255,255,0.35); transition: transform .25s; }
 .extra-toggle-arr.open { transform: rotate(180deg); }
 .extra-box {
   overflow: hidden;
@@ -289,15 +324,16 @@ html, body {
 
 /* ── SETTINGS ── */
 .settings-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 16px 10px; }
-.settings-title { font-size: 17px; font-weight: 600; color: #1C1C1E; }
+.settings-title { font-size: 17px; font-weight: 600; color: #fff; }
 .cat-row {
   display: flex; align-items: center; padding: 11px 14px; gap: 12px;
-  border-bottom: 0.5px solid #F2F2F7; background: #fff;
+  border-bottom: 0.5px solid rgba(255,255,255,0.08);
+  background: transparent;
 }
 .cat-row:last-child { border-bottom: none; }
 .cat-color-dot {
   width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0;
-  cursor: pointer; border: 2.5px solid rgba(0,0,0,.08);
+  cursor: pointer; border: 2.5px solid rgba(255,255,255,0.25);
   transition: transform .15s;
   position: relative; overflow: hidden;
 }
@@ -307,7 +343,7 @@ html, body {
 }
 .cat-name-in {
   flex: 1; border: none; background: transparent;
-  font-size: 14px; font-weight: 500; color: #1C1C1E;
+  font-size: 14px; font-weight: 500; color: #fff;
   outline: none; font-family: inherit;
 }
 .cat-del-btn {
@@ -318,12 +354,13 @@ html, body {
   transition: transform .1s, opacity .1s;
 }
 .cat-del-btn:active { transform: scale(.88); }
-.cat-del-btn:disabled { background: #E5E5EA; color: #C7C7CC; cursor: default; }
+.cat-del-btn:disabled { background: rgba(255,255,255,0.15); color: rgba(255,255,255,0.35); cursor: default; }
 .add-cat-btn {
   display: flex; align-items: center; gap: 10px;
-  padding: 12px 14px; background: #fff;
+  padding: 12px 14px;
+  background: rgba(255,255,255,0.06);
   border: none; cursor: pointer; width: 100%;
-  font-size: 14px; font-weight: 500; color: #007AFF;
+  font-size: 14px; font-weight: 500; color: #64AFFF;
   transition: opacity .15s;
 }
 .add-cat-btn:active { opacity: .6; }
@@ -334,13 +371,59 @@ html, body {
 }
 .color-presets { display: flex; flex-wrap: wrap; gap: 8px; padding: 10px 16px 14px; }
 .color-preset {
-  width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 50%; border: 2px solid rgba(255,255,255,0.2); cursor: pointer;
   transition: transform .12s; flex-shrink: 0;
 }
 .color-preset:active { transform: scale(.88); }
+
+/* ── BACKGROUND SETTINGS ── */
+.bg-section-lbl {
+  font-size: 12px; font-weight: 600; color: rgba(255,255,255,0.5);
+  padding: 0 16px 6px; text-transform: uppercase; letter-spacing: .6px;
+}
+.bg-gradient-grid {
+  display: grid; grid-template-columns: repeat(4,1fr); gap: 8px;
+  padding: 0 16px 16px;
+}
+.bg-swatch {
+  aspect-ratio: 1; border-radius: 12px; border: 2.5px solid transparent;
+  cursor: pointer; transition: transform .12s, border-color .15s;
+  box-shadow: 0 2px 8px rgba(0,0,0,.25);
+}
+.bg-swatch.selected { border-color: #fff; transform: scale(1.07); }
+.bg-swatch:active { transform: scale(.94); }
+.bg-custom-row {
+  display: flex; gap: 10px; padding: 0 16px 16px; align-items: center;
+}
+.bg-color-btn {
+  flex: 1; padding: 12px; border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08); color: #fff; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: opacity .15s; text-align: center;
+  position: relative; overflow: hidden;
+}
+.bg-color-btn input[type=color] {
+  position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%;
+}
+.bg-img-btn {
+  flex: 1; padding: 12px; border-radius: 14px; border: 0.5px solid rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08); color: #fff; font-size: 14px; font-weight: 500;
+  cursor: pointer; transition: opacity .15s; text-align: center;
+}
+.bg-img-btn:active, .bg-color-btn:active { opacity: .7; }
+.bg-opacity-row {
+  display: flex; align-items: center; gap: 12px; padding: 0 16px 16px;
+}
+.bg-opacity-lbl { font-size: 13px; color: rgba(255,255,255,0.6); font-weight: 500; white-space: nowrap; }
+.bg-opacity-slider {
+  flex: 1; accent-color: #007AFF; cursor: pointer;
+}
+.settings-divider {
+  height: 0.5px; background: rgba(255,255,255,0.1); margin: 4px 16px 14px;
+}
 </style>
 </head>
 <body>
+<div id="bg-layer"></div>
 <div id="app">
   <div id="header">
     <div class="hdr-top">
@@ -410,10 +493,31 @@ html, body {
   <div class="sheet" id="settings-sheet" onclick="event.stopPropagation()">
     <div class="handle"></div>
     <div class="settings-head">
-      <span class="settings-title">카테고리 설정</span>
+      <span class="settings-title">설정</span>
       <button class="close-btn" onclick="closeSettings()">✕</button>
     </div>
-    <div style="height:.5px;background:rgba(0,0,0,.08);margin:0 16px 12px"></div>
+    <div class="settings-divider"></div>
+
+    <!-- 배경 설정 -->
+    <div class="bg-section-lbl">배경 설정</div>
+    <div class="bg-gradient-grid" id="bg-gradient-grid"></div>
+    <div class="bg-custom-row">
+      <button class="bg-color-btn">
+        🎨 단색 선택
+        <input type="color" id="bg-color-input" value="#1a1a2e" oninput="applyBgSolid(this.value)" onchange="applyBgSolid(this.value)">
+      </button>
+      <button class="bg-img-btn" onclick="document.getElementById('bg-img-input').click()">
+        🖼️ 사진 선택
+        <input type="file" id="bg-img-input" accept="image/*" style="display:none" onchange="applyBgImage(this)">
+      </button>
+    </div>
+    <div class="bg-opacity-row">
+      <span class="bg-opacity-lbl">패널 투명도</span>
+      <input type="range" class="bg-opacity-slider" id="bg-opacity-slider" min="5" max="40" value="16"
+        oninput="applyPanelOpacity(this.value)" onchange="saveBgSettings()">
+    </div>
+    <div class="settings-divider"></div>
+
     <div class="fm-sec-lbl" style="margin-bottom:4px">카테고리 목록</div>
     <div id="cat-list" style="margin-bottom:0"></div>
     <div style="margin:0 16px 16px">
@@ -607,14 +711,14 @@ function renderMonth(){
   </div>`;
 
   let h=`<div class="month-wrap"><div class="dow-row">`;
-  DAY_KR.forEach((d,i)=>{ h+=`<div class="dow-cell" style="color:${i===0?"#FF3B30":i===6?"#007AFF":"#8E8E93"}">${d}</div>`; });
+  DAY_KR.forEach((d,i)=>{ h+=`<div class="dow-cell" style="color:${i===0?"rgba(255,100,100,0.9)":i===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.55)"}">${d}</div>`; });
   h+=`</div><div class="month-grid">`;
   cells.forEach((day,ci)=>{
-    if(!day){ h+=`<div class="month-cell" style="cursor:default;background:#FAFAFA"></div>`; return; }
+    if(!day){ h+=`<div class="month-cell" style="cursor:default;background:rgba(0,0,0,0.08)"></div>`; return; }
     const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
     const isT=ds===todayStr, dow=ci%7, evs=getEvs(ds);
     h+=`<div class="month-cell" onclick="openDayPanel('${ds}')">
-      <div class="month-num" style="background:${isT?"#FF3B30":"transparent"};color:${isT?"#fff":dow===0?"#FF3B30":dow===6?"#007AFF":"#1C1C1E"};font-weight:${isT?"700":"500"}">${day}</div>`;
+      <div class="month-num" style="background:${isT?"#FF3B30":"transparent"};color:${isT?"#fff":dow===0?"rgba(255,100,100,0.9)":dow===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.9)"};font-weight:${isT?"700":"500"}">${day}</div>`;
     evs.forEach(ev=>{
       const c=cat(ev.category);
       h+=`<div class="month-ev" style="background:${c.bg};opacity:${ev.done?.45:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
@@ -653,9 +757,9 @@ function renderWeek(){
   days.forEach((d,i)=>{
     const ds=fmt(d), isT=ds===todayStr, isSel=ds===selectedWeekDay;
     const hasEv=events.some(e=>e.date===ds);
-    const dc=i===0?"#FF3B30":i===6?"#007AFF":"#8E8E93";
-    const numBg=isT?"#FF3B30":isSel?"#1C1C1E":"transparent";
-    const numCol=isT||isSel?"#fff":i===0?"#FF3B30":i===6?"#007AFF":"#1C1C1E";
+    const dc=i===0?"rgba(255,100,100,0.9)":i===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.6)";
+    const numBg=isT?"#FF3B30":isSel?"rgba(255,255,255,0.88)":"transparent";
+    const numCol=isT?"#fff":isSel?"#1C1C1E":i===0?"rgba(255,100,100,0.9)":i===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.9)";
     hh+=`<div class="ws-day" onclick="selectWeekDay('${ds}')">
       <span class="ws-dow" style="color:${isSel&&!isT?"#1C1C1E":dc};font-weight:${isSel?"600":"500"}">${DAY_KR[d.getDay()]}</span>
       <div class="ws-num" style="background:${numBg};color:${numCol}">${d.getDate()}</div>
@@ -1181,6 +1285,117 @@ function deleteSub(groupName, subName){
   renderCatList();
 }
 
+/* ── BACKGROUND SETTINGS ── */
+const BG_PRESETS = [
+  { name:"심우주",  css:"linear-gradient(135deg,#1a1a2e 0%,#16213e 45%,#0f3460 80%,#533483 100%)" },
+  { name:"오로라",  css:"linear-gradient(135deg,#0d324d 0%,#7f5a83 50%,#a64ba2 100%)" },
+  { name:"선셋",    css:"linear-gradient(135deg,#c94b4b 0%,#4b134f 100%)" },
+  { name:"오션",    css:"linear-gradient(135deg,#005c97 0%,#363795 100%)" },
+  { name:"포레스트",css:"linear-gradient(135deg,#0f2027 0%,#203a43 50%,#2c5364 100%)" },
+  { name:"코랄",    css:"linear-gradient(135deg,#f7971e 0%,#ffd200 50%,#f7971e 100%)" },
+  { name:"로즈",    css:"linear-gradient(135deg,#ee0979 0%,#ff6a00 100%)" },
+  { name:"민트",    css:"linear-gradient(135deg,#11998e 0%,#38ef7d 100%)" },
+];
+let currentBgType = "preset"; // "preset" | "solid" | "image"
+let currentBgValue = BG_PRESETS[0].css;
+let currentBgPresetIdx = 0;
+let currentPanelOpacity = 16; // percentage (8-40)
+
+function renderBgGradientGrid(){
+  const el = document.getElementById("bg-gradient-grid"); if(!el) return;
+  el.innerHTML = BG_PRESETS.map((p,i)=>
+    `<div class="bg-swatch${currentBgType==="preset"&&currentBgPresetIdx===i?" selected":""}"
+      style="background:${p.css}"
+      title="${p.name}"
+      onclick="applyBgPreset(${i})"></div>`
+  ).join("");
+}
+
+function applyBgPreset(idx){
+  currentBgType = "preset";
+  currentBgPresetIdx = idx;
+  currentBgValue = BG_PRESETS[idx].css;
+  document.getElementById("bg-layer").style.background = currentBgValue;
+  document.getElementById("bg-layer").style.backgroundSize = "cover";
+  renderBgGradientGrid();
+  saveBgSettings();
+}
+
+function applyBgSolid(hex){
+  currentBgType = "solid";
+  currentBgValue = hex;
+  document.getElementById("bg-layer").style.background = hex;
+  renderBgGradientGrid();
+  saveBgSettings();
+}
+
+function applyBgImage(input){
+  const file = input.files[0]; if(!file) return;
+  const reader = new FileReader();
+  reader.onload = e => {
+    currentBgType = "image";
+    currentBgValue = e.target.result;
+    const layer = document.getElementById("bg-layer");
+    layer.style.background = `url(${e.target.result}) center/cover no-repeat`;
+    renderBgGradientGrid();
+    saveBgSettings();
+  };
+  reader.readAsDataURL(file);
+}
+
+function applyPanelOpacity(val){
+  currentPanelOpacity = parseInt(val);
+  const op = currentPanelOpacity;
+  document.documentElement.style.setProperty("--panel-opacity", op/100);
+  // Update card/month-wrap opacity dynamically
+  const styleId = "dynamic-panel-style";
+  let s = document.getElementById(styleId);
+  if(!s){ s = document.createElement("style"); s.id=styleId; document.head.appendChild(s); }
+  s.textContent = `
+    .card { background: rgba(255,255,255,${op/100}) !important; }
+    .month-wrap { background: rgba(255,255,255,${op/100}) !important; }
+    #header { background: rgba(255,255,255,${Math.max(op-4,4)/100}) !important; }
+  `;
+}
+
+function saveBgSettings(){
+  const settings = { type:currentBgType, value:currentBgValue, presetIdx:currentBgPresetIdx, opacity:currentPanelOpacity };
+  idbSet("bg_settings_v1", JSON.stringify(settings)).catch(()=>{});
+}
+
+function loadBgSettings(){
+  idbGet("bg_settings_v1").then(saved => {
+    if(saved){
+      try {
+        const s = JSON.parse(saved);
+        currentBgType = s.type || "preset";
+        currentBgValue = s.value || BG_PRESETS[0].css;
+        currentBgPresetIdx = s.presetIdx || 0;
+        currentPanelOpacity = s.opacity || 16;
+        const layer = document.getElementById("bg-layer");
+        if(currentBgType === "image"){
+          layer.style.background = `url(${currentBgValue}) center/cover no-repeat`;
+        } else {
+          layer.style.background = currentBgValue;
+          layer.style.backgroundSize = "cover";
+        }
+        if(document.getElementById("bg-opacity-slider"))
+          document.getElementById("bg-opacity-slider").value = currentPanelOpacity;
+        applyPanelOpacity(currentPanelOpacity);
+      } catch(e){}
+    }
+  }).catch(()=>{});
+}
+
+const _origOpenSettings = openSettings;
+openSettings = function(){
+  _origOpenSettings();
+  renderBgGradientGrid();
+  if(document.getElementById("bg-opacity-slider"))
+    document.getElementById("bg-opacity-slider").value = currentPanelOpacity;
+};
+
+loadBgSettings();
 loadEvents(); // IDB는 비동기 - loadEvents 내부에서 renderView 호출
 window.addEventListener("resize", renderView);
 
