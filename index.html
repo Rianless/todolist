@@ -444,6 +444,68 @@ html, body {
 .settings-divider {
   height: 0.5px; background: rgba(255,255,255,0.1); margin: 4px 16px 14px;
 }
+
+/* ── PRIORITY ── */
+.prio-row { display:flex; gap:6px; padding:2px 14px 12px; }
+.prio-btn {
+  flex:1; padding:9px 4px; border-radius:11px; border:1.5px solid transparent;
+  background:rgba(255,255,255,0.08); color:rgba(255,255,255,0.55);
+  font-size:12px; font-weight:600; cursor:pointer; text-align:center; transition:all .15s;
+}
+.prio-btn.p-none.on { background:rgba(255,255,255,.15); border-color:rgba(255,255,255,.5); color:#fff; }
+.prio-btn.p-low.on  { background:rgba(52,199,89,.2); border-color:#34C759; color:#34C759; }
+.prio-btn.p-mid.on  { background:rgba(255,149,0,.2); border-color:#FF9500; color:#FF9500; }
+.prio-btn.p-high.on { background:rgba(255,59,48,.2); border-color:#FF3B30; color:#FF3B30; }
+.prio-dot { width:7px; height:7px; border-radius:50%; flex-shrink:0; margin-right:2px; }
+
+/* ── STREAK ── */
+.streak-pill {
+  display:flex; align-items:center; gap:3px;
+  background:rgba(255,149,0,0.18); border:0.5px solid rgba(255,149,0,0.4);
+  padding:4px 9px 4px 7px; border-radius:14px;
+}
+.streak-num { font-size:12px; font-weight:700; color:#FF9500; }
+
+/* ── STATS ── */
+.stats-seg { display:flex; background:rgba(255,255,255,0.1); border-radius:10px; padding:2px; margin:0 16px 16px; border:0.5px solid rgba(255,255,255,0.12); }
+.stats-seg-btn { flex:1; padding:6px 0; border-radius:8px; border:none; background:transparent; font-size:13px; font-weight:500; color:rgba(255,255,255,0.55); cursor:pointer; transition:all .2s; }
+.stats-seg-btn.active { background:rgba(255,255,255,0.88); color:#1C1C1E; font-weight:600; }
+.stats-chart { padding:0 16px 8px; display:flex; flex-direction:column; gap:10px; }
+.stats-row { display:flex; align-items:center; gap:10px; }
+.stats-lbl { font-size:11px; color:rgba(255,255,255,0.55); width:30px; flex-shrink:0; text-align:right; }
+.stats-bar-bg { flex:1; height:9px; background:rgba(255,255,255,0.1); border-radius:6px; overflow:hidden; }
+.stats-bar-fill { height:100%; border-radius:6px; background:linear-gradient(90deg,#007AFF,#34C759); transition:width .5s cubic-bezier(.4,0,.2,1); }
+.stats-pct { font-size:11px; color:rgba(255,255,255,0.7); font-weight:600; width:30px; flex-shrink:0; }
+.stats-summary { display:flex; gap:10px; padding:0 16px 16px; }
+.stats-card { flex:1; background:rgba(255,255,255,0.08); border-radius:14px; padding:12px; text-align:center; border:0.5px solid rgba(255,255,255,0.12); }
+.stats-card-num { font-size:22px; font-weight:700; color:#fff; }
+.stats-card-lbl { font-size:11px; color:rgba(255,255,255,0.5); margin-top:2px; }
+
+/* ── DRAG ── */
+.month-cell.drag-over { background:rgba(0,122,255,0.18) !important; outline:2px dashed rgba(100,175,255,0.7); outline-offset:-3px; border-radius:4px; }
+.month-ev[draggable] { cursor:grab; }
+.month-ev.dragging { opacity:0.35 !important; transform:scale(0.96); }
+.card[draggable] { cursor:grab; }
+.card.dragging { opacity:0.4; }
+
+/* ── PHOTO/LINK ── */
+.attach-section { padding:8px 14px 4px; }
+.attach-thumbs { display:flex; flex-wrap:wrap; gap:8px; margin-bottom:8px; }
+.attach-thumb-wrap { position:relative; }
+.attach-thumb { width:64px; height:64px; border-radius:10px; object-fit:cover; border:1px solid rgba(255,255,255,0.2); cursor:pointer; display:block; }
+.attach-del-btn { position:absolute; top:-5px; right:-5px; width:18px; height:18px; border-radius:50%; background:#FF3B30; border:none; color:#fff; font-size:10px; cursor:pointer; display:flex; align-items:center; justify-content:center; }
+.link-item { display:flex; align-items:center; gap:8px; padding:8px 10px; background:rgba(255,255,255,0.06); border-radius:10px; border:0.5px solid rgba(255,255,255,0.12); margin-bottom:6px; }
+.link-item-url { font-size:12px; color:#64AFFF; flex:1; overflow:hidden; text-overflow:ellipsis; white-space:nowrap; }
+
+/* ── COPY MODAL ── */
+#copy-modal { position:fixed; inset:0; z-index:200; display:none; align-items:center; justify-content:center; background:rgba(0,0,0,0.55); backdrop-filter:blur(12px); }
+#copy-modal.show { display:flex; }
+.copy-box { background:rgba(24,24,32,0.95); border:0.5px solid rgba(255,255,255,0.15); border-radius:22px; padding:24px 20px; width:290px; backdrop-filter:blur(40px); }
+.copy-box h3 { font-size:16px; font-weight:600; color:#fff; margin-bottom:16px; text-align:center; }
+.copy-date-in { width:100%; padding:13px; border-radius:12px; border:0.5px solid rgba(255,255,255,0.15); background:rgba(255,255,255,0.08); color:#fff; font-size:15px; text-align:center; margin-bottom:14px; outline:none; font-family:inherit; }
+.copy-btns { display:flex; gap:8px; }
+.copy-btn { flex:1; padding:13px; border-radius:12px; border:none; font-size:14px; font-weight:600; cursor:pointer; transition:opacity .15s; }
+.copy-btn:active { opacity:.75; }
 </style>
 </head>
 <body>
@@ -463,6 +525,12 @@ html, body {
           </div>
           <span class="prog-lbl" id="prog-lbl">0/12</span>
         </div>
+        <div class="streak-pill" id="streak-pill" style="display:none">
+          <span>🔥</span><span class="streak-num" id="streak-num">0</span>
+        </div>
+        <button class="ibtn ibtn-glass" onclick="openStats()" title="통계">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+        </button>
         <button class="ibtn ibtn-glass" onclick="location.reload()" title="새로고침">
           <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
         </button>
@@ -497,6 +565,7 @@ html, body {
     <div class="act-row-3">
       <button class="act-btn-sm" id="detail-done-btn" onclick="toggleFromDetail()"></button>
       <button class="act-btn-sm" style="background:#E3EEFF;color:#007AFF" onclick="openEditFromDetail()">수정</button>
+      <button class="act-btn-sm" style="background:#E8F5E9;color:#2E7D32" onclick="copyFromDetail()">복사</button>
       <button class="act-btn-sm" style="background:#FFE5E5;color:#FF3B30" onclick="deleteFromDetail()">삭제</button>
     </div>
   </div>
@@ -605,6 +674,15 @@ html, body {
     <div class="fm-sec-lbl">카테고리</div>
     <div class="cat-pick" id="cat-pick"></div>
 
+    <!-- 우선순위 -->
+    <div class="fm-sec-lbl">우선순위</div>
+    <div class="prio-row">
+      <button type="button" class="prio-btn p-none on" id="prio-none" onclick="setPrio('none')">없음</button>
+      <button type="button" class="prio-btn p-low" id="prio-low" onclick="setPrio('low')">🟢 낮음</button>
+      <button type="button" class="prio-btn p-mid" id="prio-mid" onclick="setPrio('mid')">🟡 중간</button>
+      <button type="button" class="prio-btn p-high" id="prio-high" onclick="setPrio('high')">🔴 높음</button>
+    </div>
+
     <!-- 추가 정보 토글 -->
     <button class="extra-toggle" id="extra-toggle-btn" onclick="toggleExtraFields()">
       <span class="extra-toggle-lbl" id="extra-toggle-lbl">＋ 추가 정보</span>
@@ -624,10 +702,51 @@ html, body {
           <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3"
             style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:#8E8E93"></textarea>
         </div>
+        <div class="fm-row-in" style="flex-wrap:wrap;gap:6px">
+          <span class="fm-lbl-in" style="font-size:13px">사진</span>
+          <div id="form-photo-preview" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-items:center"></div>
+          <button type="button" onclick="document.getElementById('f-photo').click()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">📷 추가</button>
+          <input type="file" id="f-photo" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this)">
+        </div>
+        <div class="fm-row-in" style="gap:6px">
+          <span class="fm-lbl-in" style="font-size:13px">링크</span>
+          <input class="fm-in" type="url" id="f-link-in" placeholder="https://" style="flex:1;text-align:left">
+          <button type="button" onclick="addFormLink()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">추가</button>
+        </div>
+        <div id="form-link-preview" style="padding:0 14px 4px"></div>
       </div>
     </div>
 
     <button class="submit-btn" id="submit-btn" onclick="submitAdd()">추가</button>
+  </div>
+</div>
+
+<!-- Copy Modal -->
+<div id="copy-modal">
+  <div class="copy-box">
+    <h3>📋 일정 복사</h3>
+    <input type="date" class="copy-date-in" id="copy-date-in">
+    <div class="copy-btns">
+      <button class="copy-btn" style="background:rgba(255,255,255,0.12);color:rgba(255,255,255,0.75)" onclick="closeCopyModal()">취소</button>
+      <button class="copy-btn" style="background:#007AFF;color:#fff" onclick="confirmCopy()">복사</button>
+    </div>
+  </div>
+</div>
+
+<!-- Stats Overlay -->
+<div class="overlay" id="stats-overlay" onclick="closeStats()">
+  <div class="sheet" id="stats-sheet" onclick="event.stopPropagation()">
+    <div class="handle"></div>
+    <div class="settings-head">
+      <span class="settings-title">완료율 통계</span>
+      <button class="close-btn" onclick="closeStats()">✕</button>
+    </div>
+    <div class="stats-seg">
+      <button class="stats-seg-btn active" id="stats-btn-week" onclick="setStatsMode('week')">주별</button>
+      <button class="stats-seg-btn" id="stats-btn-month" onclick="setStatsMode('month')">월별</button>
+    </div>
+    <div class="stats-chart" id="stats-chart"></div>
+    <div class="stats-summary" id="stats-summary"></div>
   </div>
 </div>
 
@@ -668,6 +787,15 @@ let currentView="month", weekRef, monthRef;
 let nextId=100, selectedId=null, dayPanelDate=null, addCat="기타", showTitle=false, selectedWeekDay="2026-04-01";
 let editingId=null;
 
+// ── NEW FEATURE GLOBALS ──
+const PRIO_COLORS = { none:'', low:'#34C759', mid:'#FF9500', high:'#FF3B30' };
+const PRIO_LABELS = { none:'없음', low:'낮음', mid:'중간', high:'높음' };
+let addPrio = 'none';
+let formPhotos = []; // base64 strings
+let formLinks = []; // url strings
+let copyingId = null;
+let statsMode = 'week';
+
 function fmtLocal(d){ const y=d.getFullYear(),m=String(d.getMonth()+1).padStart(2,"0"),day=String(d.getDate()).padStart(2,"0"); return `${y}-${m}-${day}`; }
 function fmt(d){ return fmtLocal(d); }
 function addDays(d,n){ const r=new Date(d); r.setDate(r.getDate()+n); return r; }
@@ -683,6 +811,7 @@ function updateProgress(){
   document.getElementById("prog-lbl").textContent=done+"/"+total;
   const r=7, circ=2*Math.PI*r, pct=total?done/total:0;
   document.getElementById("prog-ring-fill").style.strokeDashoffset=circ*(1-pct);
+  updateStreakUI();
 }
 
 function setView(v){
@@ -716,15 +845,20 @@ function timeLbl(ev){
 function cardHtml(ev, onclickStr){
   const ct=cat(ev.category), oc=onclickStr?`onclick="${onclickStr}"`:"";
   const tl=timeLbl(ev);
+  const prio=ev.priority||'none';
+  const prioDot=prio!=='none'?`<span class="prio-dot" style="background:${PRIO_COLORS[prio]}"></span>`:'';
+  const hasImg=ev.images&&ev.images.length, hasLnk=ev.links&&ev.links.length;
+  const attachLine=(hasImg||hasLnk)?`<div class="card-meta">${hasImg?'📷 '+ev.images.length+'장 ':''}${hasLnk?'🔗 '+ev.links.length+'개':''}</div>`:'';
   return `<div class="card" style="opacity:${ev.done?.5:1}" ${oc}>
     <div class="card-accent" style="background:${ct.bg}"></div>
     <div class="card-body">
       <div class="card-top">
-        <span class="cat-pill" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
+        ${prioDot}<span class="cat-pill" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
         ${tl?`<span class="time-lbl">${esc(tl)}</span>`:""}
       </div>
       <div class="card-title${ev.done?" done":""}">${esc(ev.title)}</div>
       ${ev.instructor?`<div class="card-meta">👤 ${esc(ev.instructor)}${ev.location?"  📍 "+esc(ev.location):""}</div>`:""}
+      ${attachLine}
     </div>
     <div class="check-wrap">
       <button class="check-btn${ev.done?" checked":""}" onclick="event.stopPropagation();toggleDone(${ev.id})">${ev.done?"✓":""}</button>
@@ -766,7 +900,9 @@ function renderMonth(){
       <div class="month-num" style="background:${isT?"#FF3B30":"transparent"};color:${isT?"#fff":dow===0?"rgba(255,100,100,0.9)":dow===6?"rgba(100,175,255,0.9)":"rgba(255,255,255,0.9)"};font-weight:${isT?"700":"500"}">${day}</div>`;
     evs.forEach(ev=>{
       const c=cat(ev.category);
-      h+=`<div class="month-ev" style="background:${c.bg};opacity:${ev.done?.45:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
+      const prio=ev.priority||'none';
+      const prioStyle=prio!=='none'?`border-left:3px solid ${PRIO_COLORS[prio]};padding-left:2px`:'';
+      h+=`<div class="month-ev" draggable="true" data-evid="${ev.id}" style="background:${c.bg};opacity:${ev.done?.45:1};${prioStyle}" onclick="event.stopPropagation();openDetail(${ev.id})">
         <span class="month-ev-time">${esc(ev.startTime)}</span>${ev.showTitle?`<span class="month-ev-title">${esc(ev.title)}</span>`:""}
       </div>`;
     });
@@ -774,6 +910,7 @@ function renderMonth(){
   });
   h+=`</div></div>`;
   document.getElementById("view").innerHTML=h;
+  setupMonthDrag();
 }
 function monthPrev(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()-1,1); renderView(); }
 function monthNext(){ monthRef=new Date(monthRef.getFullYear(),monthRef.getMonth()+1,1); renderView(); }
@@ -930,8 +1067,10 @@ function refreshDetail(){
   document.getElementById("detail-title").textContent=ev.title;
 
   // 값이 있는 필드만 표시
+  const prio=ev.priority||'none';
   const rows=[
     ["🕐","시간", ev.allDay?"하루종일":(ev.startTime||ev.endTime)?(ev.startTime||"")+(ev.endTime?" – "+ev.endTime:""):"", !!(ev.allDay||ev.startTime||ev.endTime)],
+    ["🏷️","우선순위", prio!=='none'?`<span style="color:${PRIO_COLORS[prio]};font-weight:600">${PRIO_LABELS[prio]}</span>`:"", prio!=='none'],
     ["📚","모듈", ev.module||"", false],
     ["👤","강사", ev.instructor||"", false],
     ["📍","장소", ev.location||"", false],
@@ -939,11 +1078,24 @@ function refreshDetail(){
     ["📝","비고", ev.note||"", false],
     ["📋","내용", ev.content||"", false],
   ];
-  document.getElementById("detail-rows").innerHTML=rows
+  let detailHtml=rows
     .filter(([,, val, always])=> always || val)
     .map(([ic,lb,vl])=>
-      `<div class="info-row"><span class="info-icon">${ic}</span><span class="info-lbl">${lb}</span><span class="info-val" style="white-space:pre-wrap">${esc(vl)}</span></div>`
+      `<div class="info-row"><span class="info-icon">${ic}</span><span class="info-lbl">${lb}</span><span class="info-val" style="white-space:pre-wrap">${typeof vl==='string'?esc(vl):vl}</span></div>`
     ).join("");
+  if(ev.images&&ev.images.length){
+    detailHtml+=`<div class="info-row" style="flex-wrap:wrap"><span class="info-icon">📷</span><span class="info-lbl">사진</span><div class="attach-thumbs" style="flex:1">`;
+    ev.images.forEach(src=>{
+      detailHtml+=`<div class="attach-thumb-wrap"><img class="attach-thumb" src="${src}" onclick="window.open(this.src)"></div>`;
+    });
+    detailHtml+=`</div></div>`;
+  }
+  if(ev.links&&ev.links.length){
+    ev.links.forEach(url=>{
+      detailHtml+=`<div class="info-row"><span class="info-icon">🔗</span><span class="info-lbl">링크</span><a class="info-val" href="${esc(url)}" target="_blank" style="color:#64AFFF;word-break:break-all">${esc(url)}</a></div>`;
+    });
+  }
+  document.getElementById("detail-rows").innerHTML=detailHtml;
 
   const btn=document.getElementById("detail-done-btn");
   btn.innerHTML=ev.done?"완료됨<br><span style='font-size:11px;opacity:.7'>(취소)</span>":"완료 처리";
@@ -989,6 +1141,9 @@ function openAdd(dateStr){
   document.getElementById("f-allday").checked=false;
   toggleAllDay(false);
   document.getElementById("f-showtitle").checked=false;
+  setPrio('none');
+  formPhotos=[]; formLinks=[];
+  renderFormAttachPreview();
   document.getElementById("f-module").value="";
   document.getElementById("f-instructor").value="";
   document.getElementById("f-location").value="";
@@ -1016,6 +1171,10 @@ function openEdit(id){
   document.getElementById("f-allday").checked=!!ev.allDay;
   toggleAllDay(!!ev.allDay);
   document.getElementById("f-showtitle").checked=!!ev.showTitle;
+  setPrio(ev.priority||'none');
+  formPhotos=ev.images?[...ev.images]:[];
+  formLinks=ev.links?[...ev.links]:[];
+  renderFormAttachPreview();
   document.getElementById("f-module").value=ev.module||"";
   document.getElementById("f-instructor").value=ev.instructor||"";
   document.getElementById("f-location").value=ev.location||"";
@@ -1093,6 +1252,7 @@ function submitAdd(){
   const data={
     date:document.getElementById("f-date").value,
     allDay, showTitle,
+    priority:addPrio,
     startTime:allDay?"":document.getElementById("f-start").value,
     endTime:allDay?"":document.getElementById("f-end").value,
     title,
@@ -1103,6 +1263,8 @@ function submitAdd(){
     room:document.getElementById("f-room").value,
     note:document.getElementById("f-note").value,
     content:document.getElementById("f-content").value,
+    images:[...formPhotos],
+    links:[...formLinks],
   };
   if(editingId!==null){
     events=events.map(e=>e.id===editingId?{...e,...data}:e);
@@ -1154,6 +1316,7 @@ setupSwipe("detail-overlay","detail-sheet", closeDetail);
 setupSwipe("day-overlay","day-sheet", closeDayPanel);
 setupSwipe("settings-overlay","settings-sheet", closeSettings);
 setupSwipe("add-overlay","add-sheet", closeAdd);
+setupSwipe("stats-overlay","stats-sheet", closeStats);
 
 /* ── SETTINGS ── */
 const PALETTE = [
@@ -1340,6 +1503,180 @@ function deleteSub(groupName, subName){
   delete CAT[subName];
   if(focusedCatKey===subName) focusedCatKey=null;
   renderCatList();
+}
+
+/* ── PRIORITY ── */
+function setPrio(p){
+  addPrio=p;
+  ['none','low','mid','high'].forEach(k=>{
+    const btn=document.getElementById('prio-'+k);
+    if(btn) btn.classList.toggle('on', k===p);
+  });
+}
+
+/* ── PHOTO / LINK ── */
+function handlePhotoSelect(input){
+  const files=Array.from(input.files);
+  files.forEach(f=>{
+    const reader=new FileReader();
+    reader.onload=e=>{ formPhotos.push(e.target.result); renderFormAttachPreview(); };
+    reader.readAsDataURL(f);
+  });
+  input.value='';
+}
+function addFormLink(){
+  const inp=document.getElementById('f-link-in');
+  const url=(inp.value||'').trim();
+  if(!url) return;
+  formLinks.push(url);
+  inp.value='';
+  renderFormAttachPreview();
+}
+function renderFormAttachPreview(){
+  const pp=document.getElementById('form-photo-preview');
+  const lp=document.getElementById('form-link-preview');
+  if(!pp||!lp) return;
+  pp.innerHTML=formPhotos.map((src,i)=>
+    `<div class="attach-thumb-wrap">
+       <img class="attach-thumb" src="${src}" style="width:48px;height:48px;border-radius:8px;object-fit:cover;cursor:pointer" onclick="window.open(this.src)">
+       <button class="attach-del-btn" onclick="formPhotos.splice(${i},1);renderFormAttachPreview()">✕</button>
+     </div>`
+  ).join('');
+  lp.innerHTML=formLinks.map((url,i)=>
+    `<div class="link-item">
+       <span class="link-item-url">${esc(url)}</span>
+       <button onclick="formLinks.splice(${i},1);renderFormAttachPreview()" style="background:none;border:none;color:rgba(255,255,255,0.4);cursor:pointer;font-size:14px;flex-shrink:0">✕</button>
+     </div>`
+  ).join('');
+}
+
+/* ── STREAK ── */
+function calcStreak(){
+  const todayStr=getTodayStr();
+  let streak=0, d=new Date(todayStr);
+  while(true){
+    const ds=fmtLocal(d);
+    const dayEvs=events.filter(e=>e.date===ds);
+    if(dayEvs.length===0){ if(ds===todayStr){ d=addDays(d,-1); continue; } else break; }
+    if(!dayEvs.every(e=>e.done)) break;
+    streak++;
+    d=addDays(d,-1);
+    if(streak>365) break;
+  }
+  return streak;
+}
+function updateStreakUI(){
+  const s=calcStreak();
+  const pill=document.getElementById('streak-pill');
+  const num=document.getElementById('streak-num');
+  if(!pill||!num) return;
+  if(s>=1){ pill.style.display='flex'; num.textContent=s+'일'; }
+  else { pill.style.display='none'; }
+}
+
+/* ── COPY EVENT ── */
+function copyFromDetail(){
+  if(!selectedId) return;
+  copyingId=selectedId;
+  const ev=events.find(e=>e.id===copyingId);
+  document.getElementById('copy-date-in').value=ev?ev.date:getTodayStr();
+  closeDetail();
+  setTimeout(()=>{ document.getElementById('copy-modal').classList.add('show'); }, 80);
+}
+function closeCopyModal(){
+  document.getElementById('copy-modal').classList.remove('show');
+  copyingId=null;
+}
+function confirmCopy(){
+  if(!copyingId) return;
+  const ev=events.find(e=>e.id===copyingId);
+  if(!ev){ closeCopyModal(); return; }
+  const newDate=document.getElementById('copy-date-in').value;
+  if(!newDate){ alert('날짜를 선택해주세요'); return; }
+  events.push({...ev, id:nextId++, date:newDate, done:false});
+  saveEvents(); renderView(); closeCopyModal();
+}
+
+/* ── STATS ── */
+function openStats(){
+  renderStats();
+  document.getElementById('stats-overlay').classList.add('show');
+}
+function closeStats(){
+  document.getElementById('stats-overlay').classList.remove('show');
+}
+function setStatsMode(mode){
+  statsMode=mode;
+  document.getElementById('stats-btn-week').classList.toggle('active', mode==='week');
+  document.getElementById('stats-btn-month').classList.toggle('active', mode==='month');
+  renderStats();
+}
+function renderStats(){
+  const today=new Date(getTodayStr());
+  const chart=document.getElementById('stats-chart');
+  const summary=document.getElementById('stats-summary');
+  if(!chart||!summary) return;
+  let bars=[];
+  if(statsMode==='week'){
+    for(let w=6;w>=0;w--){
+      const end=new Date(today); end.setDate(end.getDate()-w*7);
+      const start=new Date(end); start.setDate(start.getDate()-6);
+      const label=(start.getMonth()+1)+'/'+(start.getDate());
+      const dayEvs=events.filter(e=>{ const ed=new Date(e.date); return ed>=start&&ed<=end; });
+      const done=dayEvs.filter(e=>e.done).length, total=dayEvs.length;
+      bars.push({label, done, total, pct:total?Math.round(done/total*100):0});
+    }
+  } else {
+    for(let mo=5;mo>=0;mo--){
+      const d=new Date(today.getFullYear(),today.getMonth()-mo,1);
+      const y=d.getFullYear(), m=d.getMonth();
+      const dayEvs=events.filter(e=>{ const [ey,em]=e.date.split('-').map(Number); return ey===y&&em-1===m; });
+      const done=dayEvs.filter(e=>e.done).length, total=dayEvs.length;
+      bars.push({label:(m+1)+'월', done, total, pct:total?Math.round(done/total*100):0});
+    }
+  }
+  chart.innerHTML=bars.map(b=>
+    `<div class="stats-row">
+       <span class="stats-lbl">${b.label}</span>
+       <div class="stats-bar-bg"><div class="stats-bar-fill" style="width:${b.pct}%"></div></div>
+       <span class="stats-pct">${b.total?b.pct+'%':'–'}</span>
+     </div>`
+  ).join('');
+  const totalAll=events.length, doneAll=events.filter(e=>e.done).length, streak=calcStreak();
+  summary.innerHTML=`
+    <div class="stats-card"><div class="stats-card-num">${doneAll}</div><div class="stats-card-lbl">완료된 일정</div></div>
+    <div class="stats-card"><div class="stats-card-num">${totalAll?Math.round(doneAll/totalAll*100):0}%</div><div class="stats-card-lbl">전체 완료율</div></div>
+    <div class="stats-card"><div class="stats-card-num">${streak}🔥</div><div class="stats-card-lbl">연속 달성</div></div>`;
+}
+
+/* ── DRAG TO MOVE (MONTH GRID) ── */
+let _dragEvId=null;
+function setupMonthDrag(){
+  const view=document.getElementById('view');
+  if(!view) return;
+  view.querySelectorAll('.month-ev[draggable]').forEach(el=>{
+    el.addEventListener('dragstart', e=>{
+      _dragEvId=parseInt(el.dataset.evid);
+      el.classList.add('dragging');
+      e.dataTransfer.effectAllowed='move';
+    });
+    el.addEventListener('dragend', ()=>el.classList.remove('dragging'));
+  });
+  view.querySelectorAll('.month-cell').forEach(cell=>{
+    cell.addEventListener('dragover', e=>{ e.preventDefault(); cell.classList.add('drag-over'); });
+    cell.addEventListener('dragleave', ()=>cell.classList.remove('drag-over'));
+    cell.addEventListener('drop', e=>{
+      e.preventDefault(); e.stopPropagation();
+      cell.classList.remove('drag-over');
+      if(!_dragEvId) return;
+      const clickAttr=cell.getAttribute('onclick')||'';
+      const m=clickAttr.match(/openDayPanel\('([^']+)'\)/);
+      if(!m) return;
+      events=events.map(ev=>ev.id===_dragEvId?{...ev,date:m[1]}:ev);
+      _dragEvId=null;
+      saveEvents(); renderView();
+    });
+  });
 }
 
 /* ── BACKGROUND SETTINGS ── */
