@@ -69,6 +69,17 @@ html, body {
 .ibtn-dark { background: rgba(255,255,255,0.22); color: #fff; font-size: 20px; font-weight: 300; border: 0.5px solid rgba(255,255,255,0.3); backdrop-filter: blur(10px); }
 .ibtn-gray { background: rgba(255,255,255,0.18); color: #fff; font-size: 14px; font-weight: 600; border: 0.5px solid rgba(255,255,255,0.25); }
 .ibtn-refresh { background: rgba(255,255,255,0.18); color: #fff; font-size: 16px; border: 0.5px solid rgba(255,255,255,0.25); }
+/* 통일된 아이콘 버튼 스타일 */
+.ibtn-glass {
+  background: rgba(255,255,255,0.16); color: rgba(255,255,255,0.9);
+  border: 0.5px solid rgba(255,255,255,0.28);
+  backdrop-filter: blur(10px); -webkit-backdrop-filter: blur(10px);
+}
+.ibtn-blue {
+  background: #007AFF; color: #fff;
+  border: none;
+  box-shadow: 0 3px 14px rgba(0,122,255,.4);
+}
 .ibtn-today {
   background: #FF3B30; color: #fff; font-size: 10px; font-weight: 700;
   width: auto; padding: 0 9px; border-radius: 10px; height: 28px;
@@ -149,7 +160,7 @@ html, body {
   color: rgba(255,255,255,0.9);
 }
 .month-ev {
-  border-radius: 4px; padding: 1px 4px; margin-bottom: 1px;
+  border-radius: 6px; padding: 2px 4px; margin-bottom: 2px;
   overflow: hidden; cursor: pointer; flex-shrink: 0; width: 100%;
 }
 .month-ev-time { font-size: 8px; font-weight: 600; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -439,9 +450,15 @@ html, body {
           </div>
           <span class="prog-lbl" id="prog-lbl">0/12</span>
         </div>
-        <button class="ibtn ibtn-refresh" onclick="location.reload()" title="새로고침">↺</button>
-        <button class="ibtn ibtn-gray" onclick="openSettings()" title="설정" style="font-size:15px">⚙︎</button>
-        <button class="ibtn ibtn-dark" id="plus-btn" title="일정 추가">＋</button>
+        <button class="ibtn ibtn-glass" onclick="location.reload()" title="새로고침">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="1 4 1 10 7 10"/><path d="M3.51 15a9 9 0 1 0 .49-4"/></svg>
+        </button>
+        <button class="ibtn ibtn-glass" onclick="openSettings()" title="설정">
+          <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round"><line x1="4" y1="21" x2="4" y2="14"/><line x1="4" y1="10" x2="4" y2="3"/><line x1="12" y1="21" x2="12" y2="12"/><line x1="12" y1="8" x2="12" y2="3"/><line x1="20" y1="21" x2="20" y2="16"/><line x1="20" y1="12" x2="20" y2="3"/><line x1="1" y1="14" x2="7" y2="14"/><line x1="9" y1="8" x2="15" y2="8"/><line x1="17" y1="16" x2="23" y2="16"/></svg>
+        </button>
+        <button class="ibtn ibtn-blue" id="plus-btn" title="일정 추가">
+          <svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        </button>
       </div>
     </div>
     <div class="seg">
@@ -521,7 +538,7 @@ html, body {
     <div class="fm-sec-lbl" style="margin-bottom:4px">카테고리 목록</div>
     <div id="cat-list" style="margin-bottom:0"></div>
     <div style="margin:0 16px 16px">
-      <button class="add-cat-btn" style="background:#fff;border-radius:12px;box-shadow:0 1px 4px rgba(0,0,0,.07)" onclick="addSoloGroup()">
+      <button class="add-cat-btn" style="border-radius:12px;border:1px solid rgba(255,255,255,0.14)" onclick="addSoloGroup()">
         <div class="add-cat-icon">＋</div>
         새 카테고리 추가
       </button>
@@ -661,7 +678,11 @@ function goToday(){
   else { weekRef=weekStart(t); selectedWeekDay=getTodayStr(); }
   renderView();
 }
-function toggleTitle(){ showTitle=!showTitle; renderView(); }
+function toggleTitle(){
+  showTitle=!showTitle;
+  idbSet("ui_prefs_v1", JSON.stringify({showTitle})).catch(()=>{});
+  renderView();
+}
 
 function timeLbl(ev){
   if(ev.allDay) return "하루종일";
@@ -838,6 +859,10 @@ function saveEvents(){
 function loadEvents(){
   weekRef = weekStart(new Date("2026-04-01"));
   monthRef = new Date(2026,3,1);
+  // UI 설정(제목 표시 여부 등) 먼저 불러오기
+  idbGet("ui_prefs_v1").then(p => {
+    if(p){ try{ const prefs=JSON.parse(p); if(typeof prefs.showTitle==="boolean") showTitle=prefs.showTitle; }catch(e){} }
+  }).catch(()=>{});
   idbGet("events_v1").then(saved => {
     if(saved){
       try {
@@ -1062,27 +1087,27 @@ document.getElementById("plus-btn").onclick=()=>openAdd();
 /* ── SWIPE TO CLOSE ── */
 function setupSwipe(overlayId, sheetId, closeFn){
   const sheet=document.getElementById(sheetId);
-  let startY=0, currentY=0, dragging=false, fromHandle=false;
+  let startY=0, currentY=0, dragging=false;
 
-  // 핸들(.handle)에서 시작한 터치만 드래그로 처리
   sheet.addEventListener("touchstart", e=>{
-    fromHandle = !!e.target.closest(".handle");
-    if(!fromHandle) return;
+    const isHandle = !!e.target.closest(".handle");
+    // 핸들: 언제나 / 그 외: 스크롤이 맨 위일 때만 (스크롤과 충돌 방지)
+    if(!isHandle && sheet.scrollTop > 0) return;
     startY=e.touches[0].clientY; currentY=0; dragging=true;
     sheet.style.transition="none";
   }, {passive:true});
 
   sheet.addEventListener("touchmove", e=>{
-    if(!dragging || !fromHandle) return;
+    if(!dragging) return;
     const dy=e.touches[0].clientY - startY;
-    if(dy < 0) return;
+    if(dy < 0){ dragging=false; sheet.style.transform=""; return; }
     currentY=dy;
     sheet.style.transform=`translateY(${dy}px)`;
   }, {passive:true});
 
   sheet.addEventListener("touchend", ()=>{
-    if(!dragging || !fromHandle) return;
-    dragging=false; fromHandle=false;
+    if(!dragging) return;
+    dragging=false;
     sheet.style.transition="";
     if(currentY > 80){
       sheet.style.transform=`translateY(100%)`;
@@ -1153,12 +1178,12 @@ function renderCatList(){
     if(g.group){
       // 청도활동 — 사각형 박스로 묶기
       html += `
-        <div style="margin:0 16px 14px;border:1.5px solid #E5E5EA;border-radius:14px;overflow:hidden;background:#fff">
-          <div style="padding:9px 14px;font-size:12px;font-weight:700;color:#007AFF;background:#F0F6FF;border-bottom:1px solid #E5E5EA;letter-spacing:.3px">${g.group}</div>`;
+        <div style="margin:0 16px 14px;border:1px solid rgba(255,255,255,0.14);border-radius:14px;overflow:hidden;background:rgba(255,255,255,0.07)">
+          <div style="padding:9px 14px;font-size:12px;font-weight:700;color:#64AFFF;background:rgba(255,255,255,0.06);border-bottom:0.5px solid rgba(255,255,255,0.1);letter-spacing:.3px">${g.group}</div>`;
       g.subs.forEach((s,i) => {
         const rowId = `catrow-${g.group}-${i}`;
         const isLast = i === g.subs.length - 1;
-        html += `<div class="cat-row" id="${rowId}" style="border-bottom:${isLast?"none":".5px solid #F2F2F7"}">
+        html += `<div class="cat-row" id="${rowId}" style="border-bottom:${isLast?"none":".5px solid rgba(255,255,255,0.08)"}">
           <div class="cat-color-dot" style="background:${s.color.bg}" onclick="focusedCatKey='${esc(s.name)}'">
             <input type="color" value="${s.color.bg}"
               oninput="updateSubColor('${esc(g.group)}','${esc(s.name)}',this.value,'${rowId}')"
@@ -1173,7 +1198,7 @@ function renderCatList(){
       // 독립 항목 — 박스 밖에 일반 행으로
       const s = g.subs[0];
       const rowId = `catrow-solo-${s.name}`;
-      html += `<div class="cat-row" id="${rowId}" style="margin:0 16px 8px;border-radius:12px;background:#fff;box-shadow:0 1px 4px rgba(0,0,0,.07)">
+      html += `<div class="cat-row" id="${rowId}" style="margin:0 16px 8px;border-radius:12px;background:rgba(255,255,255,0.07);border:1px solid rgba(255,255,255,0.14)">
         <div class="cat-color-dot" style="background:${s.color.bg}" onclick="focusedCatKey='${esc(s.name)}'">
           <input type="color" value="${s.color.bg}"
             oninput="updateSoloColor('${esc(s.name)}',this.value,'${rowId}')"
