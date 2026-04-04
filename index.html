@@ -582,10 +582,19 @@ html, body {
         <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center">
       </div>
       <div class="fm-row-in">
-        <span class="fm-lbl-in" style="color:#8E8E93">하루종일</span>
+        <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6)">하루종일</span>
         <div style="margin-left:auto">
           <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
             <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)"
+              style="width:18px;height:18px;accent-color:#007AFF;cursor:pointer">
+          </label>
+        </div>
+      </div>
+      <div class="fm-row-in">
+        <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6);font-size:13px;width:auto;flex:1">달력에 제목 표시</span>
+        <div style="margin-left:auto">
+          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+            <input type="checkbox" id="f-showtitle"
               style="width:18px;height:18px;accent-color:#007AFF;cursor:pointer">
           </label>
         </div>
@@ -741,7 +750,6 @@ function renderMonth(){
       <div style="display:flex;flex:1;align-items:center;justify-content:center;position:relative">
         <span class="nav-lbl">${y}년 ${MONTH_KR[m]}</span>
         <div style="position:absolute;right:0;display:flex;align-items:center;gap:5px">
-          <button class="ibtn ibtn-glass" onclick="toggleTitle()" style="font-size:10px;width:auto;padding:0 8px;height:26px;border-radius:10px">${showTitle?"숨김":"제목"}</button>
           ${!isThisMonth?`<button class="ibtn ibtn-today" onclick="goToday()">오늘</button>`:""}
         </div>
       </div>
@@ -759,7 +767,7 @@ function renderMonth(){
     evs.forEach(ev=>{
       const c=cat(ev.category);
       h+=`<div class="month-ev" style="background:${c.bg};opacity:${ev.done?.45:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
-        <span class="month-ev-time">${esc(ev.startTime)}</span>${showTitle?`<span class="month-ev-title">${esc(ev.title)}</span>`:""}
+        <span class="month-ev-time">${esc(ev.startTime)}</span>${ev.showTitle?`<span class="month-ev-title">${esc(ev.title)}</span>`:""}
       </div>`;
     });
     h+=`</div>`;
@@ -980,6 +988,7 @@ function openAdd(dateStr){
   document.getElementById("f-end").value="10:00";
   document.getElementById("f-allday").checked=false;
   toggleAllDay(false);
+  document.getElementById("f-showtitle").checked=false;
   document.getElementById("f-module").value="";
   document.getElementById("f-instructor").value="";
   document.getElementById("f-location").value="";
@@ -1006,6 +1015,7 @@ function openEdit(id){
   document.getElementById("f-end").value=ev.endTime||"10:00";
   document.getElementById("f-allday").checked=!!ev.allDay;
   toggleAllDay(!!ev.allDay);
+  document.getElementById("f-showtitle").checked=!!ev.showTitle;
   document.getElementById("f-module").value=ev.module||"";
   document.getElementById("f-instructor").value=ev.instructor||"";
   document.getElementById("f-location").value=ev.location||"";
@@ -1079,9 +1089,10 @@ function closeAdd(){ document.getElementById("add-overlay").classList.remove("sh
 function submitAdd(){
   const title=document.getElementById("f-title").value.trim(); if(!title) return;
   const allDay=document.getElementById("f-allday").checked;
+  const showTitle=document.getElementById("f-showtitle").checked;
   const data={
     date:document.getElementById("f-date").value,
-    allDay,
+    allDay, showTitle,
     startTime:allDay?"":document.getElementById("f-start").value,
     endTime:allDay?"":document.getElementById("f-end").value,
     title,
