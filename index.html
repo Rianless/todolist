@@ -644,30 +644,49 @@ html, body {
     <div class="fm-group">
       <div class="fm-row-in"><span class="fm-lbl-in">날짜</span><input class="fm-in" type="date" id="f-date"></div>
       <div class="fm-row-in"><span class="fm-lbl-in">제목</span><input class="fm-in" type="text" id="f-title" placeholder="제목 입력"></div>
+      <!-- 시간 + 하루종일 한 줄 -->
       <div class="fm-row-in" style="gap:0" id="time-row">
         <span class="fm-lbl-in">시간</span>
-        <input class="fm-in" type="time" id="f-start" style="flex:1;text-align:center">
-        <span style="color:#C7C7CC;font-size:13px;padding:0 4px">–</span>
-        <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center">
-      </div>
-      <div class="fm-row-in">
-        <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6)">하루종일</span>
-        <div style="margin-left:auto">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)"
-              style="width:18px;height:18px;accent-color:#007AFF;cursor:pointer">
-          </label>
+        <div id="time-inputs" style="display:flex;flex:1;align-items:center">
+          <input class="fm-in" type="time" id="f-start" style="flex:1;text-align:center">
+          <span style="color:#C7C7CC;font-size:13px;padding:0 4px">–</span>
+          <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center">
         </div>
+        <span id="allday-txt" style="display:none;flex:1;font-size:14px;color:rgba(255,255,255,0.45);text-align:right;padding-right:6px">하루종일</span>
+        <label style="display:flex;align-items:center;gap:5px;cursor:pointer;padding-left:10px;border-left:0.5px solid rgba(255,255,255,0.1);margin-left:8px;flex-shrink:0">
+          <span style="font-size:11px;color:rgba(255,255,255,0.4);white-space:nowrap">하루종일</span>
+          <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)"
+            style="width:16px;height:16px;accent-color:#007AFF;cursor:pointer;flex-shrink:0">
+        </label>
       </div>
       <div class="fm-row-in">
         <span class="fm-lbl-in" style="color:rgba(255,255,255,0.6);font-size:13px;width:auto;flex:1">달력에 제목 표시</span>
-        <div style="margin-left:auto">
-          <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
-            <input type="checkbox" id="f-showtitle"
-              style="width:18px;height:18px;accent-color:#007AFF;cursor:pointer">
-          </label>
-        </div>
+        <label style="display:flex;align-items:center;gap:8px;cursor:pointer">
+          <input type="checkbox" id="f-showtitle"
+            style="width:18px;height:18px;accent-color:#007AFF;cursor:pointer">
+        </label>
       </div>
+      <div class="fm-row-in" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
+        <span class="fm-lbl-in" style="padding-top:1px">내용</span>
+        <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3"
+          style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:#8E8E93"></textarea>
+      </div>
+    </div>
+
+    <!-- 사진 / 링크 -->
+    <div class="fm-group">
+      <div class="fm-row-in" style="flex-wrap:wrap;gap:6px">
+        <span class="fm-lbl-in" style="font-size:13px">사진</span>
+        <div id="form-photo-preview" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-items:center"></div>
+        <button type="button" onclick="document.getElementById('f-photo').click()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">📷 추가</button>
+        <input type="file" id="f-photo" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this)">
+      </div>
+      <div class="fm-row-in" style="gap:6px">
+        <span class="fm-lbl-in" style="font-size:13px">링크</span>
+        <input class="fm-in" type="url" id="f-link-in" placeholder="https://" style="flex:1;text-align:left">
+        <button type="button" onclick="addFormLink()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">추가</button>
+      </div>
+      <div id="form-link-preview" style="padding:0 14px 4px"></div>
     </div>
 
     <!-- 카테고리 -->
@@ -683,13 +702,13 @@ html, body {
       <button type="button" class="prio-btn p-high" id="prio-high" onclick="setPrio('high')">🔴 높음</button>
     </div>
 
-    <!-- 추가 정보 토글 -->
+    <!-- 청도활동 정보 (접힘) -->
     <button class="extra-toggle" id="extra-toggle-btn" onclick="toggleExtraFields()">
-      <span class="extra-toggle-lbl" id="extra-toggle-lbl">＋ 추가 정보</span>
+      <span class="extra-toggle-lbl" id="extra-toggle-lbl">＋ 청도활동 정보</span>
       <span class="extra-toggle-arr" id="extra-toggle-arr">▼</span>
     </button>
 
-    <!-- 추가 필드 (숨김) -->
+    <!-- 청도활동 필드 (숨김) -->
     <div class="extra-box" id="extra-box">
       <div class="fm-group">
         <div class="fm-row-in"><span class="fm-lbl-in">모듈</span><input class="fm-in" type="text" id="f-module" placeholder="모듈명"></div>
@@ -697,23 +716,6 @@ html, body {
         <div class="fm-row-in"><span class="fm-lbl-in">장소</span><input class="fm-in" type="text" id="f-location" placeholder="장소"></div>
         <div class="fm-row-in"><span class="fm-lbl-in">강의실</span><input class="fm-in" type="text" id="f-room" placeholder="강의실"></div>
         <div class="fm-row-in"><span class="fm-lbl-in">비고</span><input class="fm-in" type="text" id="f-note" placeholder="비고"></div>
-        <div class="fm-row-in" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
-          <span class="fm-lbl-in" style="padding-top:1px">내용</span>
-          <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3"
-            style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:#8E8E93"></textarea>
-        </div>
-        <div class="fm-row-in" style="flex-wrap:wrap;gap:6px">
-          <span class="fm-lbl-in" style="font-size:13px">사진</span>
-          <div id="form-photo-preview" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-items:center"></div>
-          <button type="button" onclick="document.getElementById('f-photo').click()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">📷 추가</button>
-          <input type="file" id="f-photo" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this)">
-        </div>
-        <div class="fm-row-in" style="gap:6px">
-          <span class="fm-lbl-in" style="font-size:13px">링크</span>
-          <input class="fm-in" type="url" id="f-link-in" placeholder="https://" style="flex:1;text-align:left">
-          <button type="button" onclick="addFormLink()" style="background:rgba(255,255,255,0.1);border:0.5px solid rgba(255,255,255,0.2);color:#64AFFF;font-size:12px;padding:6px 10px;border-radius:8px;cursor:pointer;flex-shrink:0">추가</button>
-        </div>
-        <div id="form-link-preview" style="padding:0 14px 4px"></div>
       </div>
     </div>
 
@@ -1181,8 +1183,8 @@ function openEdit(id){
   document.getElementById("f-room").value=ev.room||"";
   document.getElementById("f-note").value=ev.note||"";
   document.getElementById("f-content").value=ev.content||"";
-  // 수정 시 추가정보가 하나라도 있으면 열어두기
-  const hasExtra=ev.module||ev.instructor||ev.location||ev.room||ev.note||ev.content;
+  // 수정 시 청도활동 필드가 하나라도 있으면 열어두기
+  const hasExtra=ev.module||ev.instructor||ev.location||ev.room||ev.note;
   setExtraOpen(!!hasExtra);
   renderCatPick();
   document.getElementById("add-overlay").classList.add("show");
@@ -1192,7 +1194,7 @@ function setExtraOpen(open){
   document.getElementById("extra-box").classList.toggle("open", open);
   document.getElementById("extra-toggle-arr").classList.toggle("open", open);
   document.getElementById("extra-toggle-lbl").textContent=
-    open ? "− 추가 정보 접기" : "＋ 추가 정보";
+    open ? "− 청도활동 정보 접기" : "＋ 청도활동 정보";
 }
 function toggleExtraFields(){
   const box=document.getElementById("extra-box");
@@ -1200,8 +1202,10 @@ function toggleExtraFields(){
 }
 
 function toggleAllDay(on){
-  const row=document.getElementById("time-row");
-  row.style.display=on?"none":"flex";
+  const ti=document.getElementById("time-inputs");
+  const at=document.getElementById("allday-txt");
+  if(ti) ti.style.display=on?"none":"flex";
+  if(at) at.style.display=on?"block":"none";
 }
 
 function renderCatPick(){
