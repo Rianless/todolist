@@ -235,15 +235,16 @@ html, body {
   padding: 6px 0; color: var(--text3);
 }
 
-.month-grid-wrap { flex: 1; overflow-y: auto; padding: 4px; }
-.month-grid { display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.month-grid-wrap { flex: 1; overflow-y: hidden; padding: 4px; display: flex; flex-direction: column; }
+.month-grid { flex: 1; display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
 .month-cell {
   background: var(--surface); border-radius: 10px;
-  padding: 4px 3px 3px; cursor: pointer; min-height: 72px;
+  padding: 4px 3px 3px; cursor: pointer;
   display: flex; flex-direction: column; transition: background .12s;
+  overflow: hidden;
 }
 .month-cell:active { background: var(--accent-light); }
-.month-cell.empty-cell { background: transparent; cursor: default; min-height: 72px; }
+.month-cell.empty-cell { background: transparent; cursor: default; }
 .month-num {
   width: 24px; height: 24px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
@@ -506,19 +507,95 @@ body.custom-bg {
   background: transparent;
 }
 body.custom-bg #app { background: transparent; }
-body.custom-bg #topbar,
-body.custom-bg #bottom-nav,
-body.custom-bg .todo-item,
-body.custom-bg .month-container,
-body.custom-bg .month-cell,
-body.custom-bg .week-strip-wrap,
+
+/* iOS frosted glass: panels are translucent, bg shines through */
+body.custom-bg #topbar {
+  background: rgba(255,255,255,0.55) !important;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-bottom: 1px solid rgba(255,255,255,0.3);
+}
+body.custom-bg #bottom-nav {
+  background: rgba(255,255,255,0.55) !important;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+  border-top: 1px solid rgba(255,255,255,0.3);
+}
+body.custom-bg .month-container {
+  background: transparent !important;
+}
+body.custom-bg .month-nav,
+body.custom-bg .dow-row {
+  background: transparent !important;
+}
+body.custom-bg .month-grid-wrap {
+  background: transparent !important;
+}
+body.custom-bg .month-cell {
+  background: rgba(255,255,255,0.38) !important;
+  backdrop-filter: blur(12px) saturate(150%);
+  -webkit-backdrop-filter: blur(12px) saturate(150%);
+  border: 1px solid rgba(255,255,255,0.45);
+}
+body.custom-bg .month-cell.empty-cell {
+  background: transparent !important;
+  backdrop-filter: none !important;
+  border: none !important;
+}
 body.custom-bg .week-nav-bar,
+body.custom-bg .week-strip-wrap {
+  background: rgba(255,255,255,0.55) !important;
+  backdrop-filter: blur(28px) saturate(180%);
+  -webkit-backdrop-filter: blur(28px) saturate(180%);
+}
+body.custom-bg .todo-item {
+  background: rgba(255,255,255,0.52) !important;
+  backdrop-filter: blur(16px) saturate(160%);
+  -webkit-backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.5);
+}
 body.custom-bg .sheet {
-  background: rgba(255,255,255,0.88);
-  backdrop-filter: blur(20px);
+  background: rgba(255,255,255,0.6) !important;
+  backdrop-filter: blur(36px) saturate(200%);
+  -webkit-backdrop-filter: blur(36px) saturate(200%);
 }
 body.custom-bg #view { background: transparent; }
 body.custom-bg .day-hdr-bar { background: transparent; }
+
+/* 텍스트 가시성: 어두운 배경에서도 잘 보이게 */
+body.custom-bg .tb-title,
+body.custom-bg .month-nav-lbl,
+body.custom-bg .month-num,
+body.custom-bg .wn-lbl,
+body.custom-bg .ws-dow,
+body.custom-bg .ws-num,
+body.custom-bg .dow-cell,
+body.custom-bg .dh-date,
+body.custom-bg .dh-sub,
+body.custom-bg .todo-title,
+body.custom-bg .todo-time,
+body.custom-bg .bnav-label,
+body.custom-bg .bnav-btn,
+body.custom-bg .seg-btn {
+  text-shadow: 0 1px 4px rgba(0,0,0,0.35);
+}
+body.custom-bg .month-num:not(.today-num) {
+  color: var(--text) !important;
+}
+body.custom-bg .seg-btn { color: rgba(30,30,30,0.75); }
+body.custom-bg .seg-btn.active { color: var(--accent); }
+body.custom-bg .mnav-btn,
+body.custom-bg .wn-btn {
+  background: rgba(255,255,255,0.5) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
+body.custom-bg .prog-lbl { color: var(--accent); }
+body.custom-bg .tb-btn {
+  background: rgba(255,255,255,0.5) !important;
+  backdrop-filter: blur(8px);
+  -webkit-backdrop-filter: blur(8px);
+}
 </style>
 </head>
 <body>
@@ -551,9 +628,12 @@ body.custom-bg .day-hdr-bar { background: transparent; }
         </button>
       </div>
     </div>
-    <div class="seg">
-      <button class="seg-btn active" id="btn-month" onclick="setView('month')">월간</button>
-      <button class="seg-btn" id="btn-week" onclick="setView('week')">주간</button>
+    <div class="seg" style="display:flex;align-items:center;justify-content:space-between">
+      <div style="display:flex">
+        <button class="seg-btn active" id="btn-month" onclick="setView('month')">월간</button>
+        <button class="seg-btn" id="btn-week" onclick="setView('week')">주간</button>
+      </div>
+      <div id="today-btn-wrap" style="padding-right:8px;padding-bottom:4px"></div>
     </div>
   </div>
 
@@ -829,7 +909,14 @@ function setView(v){
   document.getElementById("btn-week").className="seg-btn"+(v==="week"?" active":"");
   renderView();
 }
-function renderView(){ updateProgress(); currentView==="month"?renderMonth():renderWeek(); }
+function renderView(){ updateProgress(); currentView==="month"?renderMonth():renderWeek(); updateTodayBtn(); }
+function updateTodayBtn(){
+  const wrap=document.getElementById("today-btn-wrap"); if(!wrap) return;
+  const t=getToday(); let show=false;
+  if(currentView==="month"){ show=!(monthRef.getFullYear()===t.getFullYear()&&monthRef.getMonth()===t.getMonth()); }
+  else { const days=Array.from({length:7},(_,i)=>addDays(weekRef,i)); show=!days.some(d=>fmt(d)===getTodayStr()); }
+  wrap.innerHTML=show?`<button class="today-chip" onclick="goToday()">오늘</button>`:"";
+}
 
 function goToday(){
   const t=getToday();
@@ -886,10 +973,7 @@ function renderMonth(){
       <div class="month-nav-side">
         <button class="mnav-btn" onclick="monthPrev()">‹</button>
       </div>
-      <div style="display:flex;align-items:center;gap:8px">
-        <span class="month-nav-lbl">${y}년 ${MONTH_KR[m]}</span>
-        ${!isThisMonth?`<button class="today-chip" onclick="goToday()">오늘</button>`:""}
-      </div>
+      <span class="month-nav-lbl">${y}년 ${MONTH_KR[m]}</span>
       <div class="month-nav-side">
         <button class="mnav-btn" onclick="monthNext()">›</button>
       </div>
@@ -899,7 +983,8 @@ function renderMonth(){
     const col = i===0?"var(--red)":i===6?"var(--blue)":"var(--text3)";
     h+=`<div class="dow-cell" style="color:${col}">${d}</div>`;
   });
-  h+=`</div><div class="month-grid-wrap"><div class="month-grid">`;
+  const numWeeks = cells.length / 7;
+  h+=`</div><div class="month-grid-wrap"><div class="month-grid" style="grid-template-rows:repeat(${numWeeks},1fr)">`;
   cells.forEach((day,ci)=>{
     if(!day){ h+=`<div class="month-cell empty-cell"></div>`; return; }
     const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
@@ -936,10 +1021,7 @@ function renderWeek(){
 
   let stripHtml=`<div class="week-nav-bar" style="flex-shrink:0">
     <button class="wn-btn" onclick="weekPrev()">‹</button>
-    <div style="display:flex;align-items:center;gap:8px">
-      <span class="wn-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
-      ${!isThisWeek?`<button class="today-chip" onclick="goToday()">오늘</button>`:""}
-    </div>
+    <span class="wn-lbl">${days[0].getMonth()+1}/${days[0].getDate()} – ${days[6].getMonth()+1}/${days[6].getDate()}</span>
     <button class="wn-btn" onclick="weekNext()">›</button>
   </div>
   <div class="week-strip-wrap" style="flex-shrink:0"><div class="week-strip">`;
@@ -1308,12 +1390,19 @@ function applyBgImage(input){
 }
 function applyPanelOpacity(val){
   currentPanelOpacity=parseInt(val);
-  // opacity affects backdrop in custom-bg mode
   const op=currentPanelOpacity/100;
+  const panelOp=Math.min(op*0.6,0.75);   // 패널 투명도 (최대 75%)
+  const cellOp=Math.min(op*0.42,0.55);   // 셀 투명도
+  const blur=Math.round(12+op*20);        // 블러값
   const styleId="dynamic-panel-style";
   let s=document.getElementById(styleId);
   if(!s){s=document.createElement("style");s.id=styleId;document.head.appendChild(s);}
-  s.textContent=`body.custom-bg #topbar,body.custom-bg #bottom-nav,body.custom-bg .todo-item,body.custom-bg .month-container,body.custom-bg .month-cell,body.custom-bg .week-strip-wrap,body.custom-bg .week-nav-bar{background:rgba(255,255,255,${op})!important;backdrop-filter:blur(${Math.round(20*op)}px);}`;
+  s.textContent=`
+    body.custom-bg #topbar,body.custom-bg #bottom-nav,body.custom-bg .week-nav-bar,body.custom-bg .week-strip-wrap{background:rgba(255,255,255,${panelOp})!important;backdrop-filter:blur(${blur}px) saturate(180%);-webkit-backdrop-filter:blur(${blur}px) saturate(180%);}
+    body.custom-bg .month-cell{background:rgba(255,255,255,${cellOp})!important;backdrop-filter:blur(${Math.round(blur*0.5)}px) saturate(150%);-webkit-backdrop-filter:blur(${Math.round(blur*0.5)}px) saturate(150%);}
+    body.custom-bg .todo-item{background:rgba(255,255,255,${panelOp*0.9})!important;backdrop-filter:blur(${blur}px) saturate(160%);-webkit-backdrop-filter:blur(${blur}px) saturate(160%);}
+    body.custom-bg .sheet{background:rgba(255,255,255,${Math.min(panelOp*1.1,0.82)})!important;backdrop-filter:blur(${blur+8}px) saturate(200%);-webkit-backdrop-filter:blur(${blur+8}px) saturate(200%);}
+  `;
 }
 function saveBgSettings(){ idbSet("bg_settings_v2",JSON.stringify({type:currentBgType,value:currentBgValue,presetIdx:currentBgPresetIdx,opacity:currentPanelOpacity})).catch(()=>{}); }
 function loadBgSettings(){
