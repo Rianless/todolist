@@ -1551,6 +1551,75 @@ function adjustAppHeight(){
 }
 window.addEventListener("resize",()=>{ adjustAppHeight(); renderView(); });
 setTimeout(adjustAppHeight, 0);
+
+/* ── BACK BUTTON (History API) ── */
+// 오버레이가 열릴 때 history에 쌓고, 뒤로가기 시 닫음
+const OVERLAYS = [
+  { id: 'detail-overlay',   close: ()=>closeDetail() },
+  { id: 'day-overlay',      close: ()=>closeDayPanel() },
+  { id: 'settings-overlay', close: ()=>closeSettings() },
+  { id: 'add-overlay',      close: ()=>closeAdd() },
+  { id: 'stats-overlay',    close: ()=>closeStats() },
+  { id: 'copy-modal',       close: ()=>closeCopyModal() },
+];
+
+// 초기 상태 설정
+history.replaceState({ overlay: null }, '');
+
+function pushOverlayHistory(id) {
+  history.pushState({ overlay: id }, '');
+}
+
+// 각 열기 함수에 history push 연결
+const _origOpenDetail    = openDetail;
+const _origOpenDayPanel  = openDayPanel;
+const _origOpenSettings  = openSettings;
+const _origOpenAdd       = openAdd;
+const _origOpenEdit      = openEdit;
+const _origOpenStats     = openStats;
+const _origCopyFromDetail= copyFromDetail;
+
+openDetail = function(id){ _origOpenDetail(id); pushOverlayHistory('detail-overlay'); };
+openDayPanel = function(ds){ _origOpenDayPanel(ds); pushOverlayHistory('day-overlay'); };
+openSettings = function(){ _origOpenSettings(); pushOverlayHistory('settings-overlay'); };
+openAdd = function(ds){ _origOpenAdd(ds); pushOverlayHistory('add-overlay'); };
+openEdit = function(id){ _origOpenEdit(id); pushOverlayHistory('add-overlay'); };
+openStats = function(){ _origOpenStats(); pushOverlayHistory('stats-overlay'); };
+copyFromDetail = function(){ _origCopyFromDetail(); pushOverlayHistory('copy-modal'); };
+
+// 닫기 함수들: 이미 popstate로 닫히는 경우 중복 pushState 방지를 위해 state 확인
+function isTopOverlay(id){ return history.state && history.state.overlay === id; }
+const _origCloseDetail    = closeDetail;
+const _origCloseDayPanel  = closeDayPanel;
+const _origCloseSettings  = closeSettings;
+const _origCloseAdd       = closeAdd;
+const _origCloseStats     = closeStats;
+const _origCloseCopyModal = closeCopyModal;
+
+closeDetail    = function(){ _origCloseDetail();    if(isTopOverlay('detail-overlay'))   history.back(); };
+closeDayPanel  = function(){ _origCloseDayPanel();  if(isTopOverlay('day-overlay'))      history.back(); };
+closeSettings  = function(){ _origCloseSettings();  if(isTopOverlay('settings-overlay')) history.back(); };
+closeAdd       = function(){ _origCloseAdd();        if(isTopOverlay('add-overlay'))      history.back(); };
+closeStats     = function(){ _origCloseStats();      if(isTopOverlay('stats-overlay'))    history.back(); };
+closeCopyModal = function(){ _origCloseCopyModal();  if(isTopOverlay('copy-modal'))       history.back(); };
+
+// 뒤로가기 이벤트
+window.addEventListener('popstate', e => {
+  // 어떤 오버레이가 현재 열려있는지 찾아서 닫기
+  for(const ov of OVERLAYS){
+    const el=document.getElementById(ov.id);
+    if(el && (el.classList.contains('show') || el.style.display==='flex')){
+      // 원본 닫기 함수 직접 호출 (history.back() 루프 방지)
+      if(ov.id==='detail-overlay')   _origCloseDetail();
+      else if(ov.id==='day-overlay') _origCloseDayPanel();
+      else if(ov.id==='settings-overlay') _origCloseSettings();
+      else if(ov.id==='add-overlay') _origCloseAdd();
+      else if(ov.id==='stats-overlay') _origCloseStats();
+      else if(ov.id==='copy-modal')  _origCloseCopyModal();
+      return;
+    }
+  }
+});
 </script>
 </body>
 </html>
