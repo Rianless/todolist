@@ -7,596 +7,807 @@
 <meta name="mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-capable" content="yes">
 <meta name="apple-mobile-web-app-status-bar-style" content="default">
-<meta name="apple-mobile-web-app-title" content="To Do List">
-<meta name="theme-color" content="#ffffff">
-<link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<meta name="apple-mobile-web-app-title" content="일정">
+<meta name="theme-color" content="#f2f2f7">
+<link href="https://fonts.googleapis.com/css2?family=Pretendard:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
 <style>
+/* ══ iOS System Design Tokens ══ */
 :root {
-  --bg: #F7F7FA;
-  --surface: #FFFFFF;
-  --surface2: #F2F2F7;
-  --border: rgba(0,0,0,0.07);
-  --text: #1C1C1E;
-  --text2: #8E8E93;
-  --text3: #C7C7CC;
-  --accent: #7B61FF;
-  --accent-light: #EEE9FF;
-  --green: #34C759;
-  --red: #FF3B30;
-  --orange: #FF9500;
-  --blue: #007AFF;
-  --radius: 20px;
-  --radius-sm: 14px;
-  --shadow: 0 2px 16px rgba(0,0,0,0.08);
-  --shadow-lg: 0 8px 40px rgba(0,0,0,0.14);
+  /* Colors — iOS 17 Semantic */
+  --ios-bg:          #F2F2F7;
+  --ios-bg2:         #FFFFFF;
+  --ios-grouped-bg:  #F2F2F7;
+  --ios-surface:     #FFFFFF;
+  --ios-surface2:    #F2F2F7;
+  --ios-surface3:    #E5E5EA;
+  --ios-separator:   rgba(60,60,67,0.12);
+  --ios-separator2:  rgba(60,60,67,0.06);
+
+  /* Labels */
+  --ios-label:       #000000;
+  --ios-label2:      rgba(60,60,67,0.60);
+  --ios-label3:      rgba(60,60,67,0.30);
+  --ios-label4:      rgba(60,60,67,0.18);
+
+  /* System Colors */
+  --ios-blue:        #007AFF;
+  --ios-green:       #34C759;
+  --ios-red:         #FF3B30;
+  --ios-orange:      #FF9500;
+  --ios-purple:      #AF52DE;
+  --ios-indigo:      #5856D6;
+  --ios-teal:        #5AC8FA;
+  --ios-pink:        #FF2D55;
+  --ios-yellow:      #FFCC00;
+
+  /* Accent — Keep original brand */
+  --accent:          #007AFF;
+  --accent-light:    #EAF4FF;
+
+  /* Typography */
+  --font: 'Pretendard', -apple-system, 'SF Pro Display', 'Helvetica Neue', sans-serif;
+
+  /* Geometry */
+  --radius-xs:  8px;
+  --radius-sm:  12px;
+  --radius-md:  16px;
+  --radius-lg:  20px;
+  --radius-xl:  28px;
+
+  /* Shadows — iOS style (extremely subtle) */
+  --shadow-xs:  0 1px 3px rgba(0,0,0,0.06), 0 1px 2px rgba(0,0,0,0.04);
+  --shadow-sm:  0 2px 8px rgba(0,0,0,0.08), 0 1px 3px rgba(0,0,0,0.04);
+  --shadow-md:  0 4px 16px rgba(0,0,0,0.10), 0 2px 6px rgba(0,0,0,0.06);
+  --shadow-lg:  0 8px 32px rgba(0,0,0,0.14), 0 4px 12px rgba(0,0,0,0.08);
+  --shadow-xl:  0 20px 60px rgba(0,0,0,0.20), 0 8px 24px rgba(0,0,0,0.12);
 }
 
-* { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+/* ══ Reset & Base ══ */
+*, *::before, *::after {
+  box-sizing: border-box; margin: 0; padding: 0;
+  -webkit-tap-highlight-color: transparent;
+}
 html, body {
   height: 100%; overflow: hidden;
-  font-family: 'Nunito', -apple-system, 'Helvetica Neue', sans-serif;
-  background: var(--bg);
+  font-family: var(--font);
+  background: var(--ios-bg);
   -webkit-font-smoothing: antialiased;
-  color: var(--text);
+  -moz-osx-font-smoothing: grayscale;
+  color: var(--ios-label);
 }
 
+/* ══ App Shell ══ */
 #app {
   max-width: 430px; margin: 0 auto;
-  height: calc(100% - 70px); display: flex; flex-direction: column;
+  height: calc(100% - 83px);
+  display: flex; flex-direction: column;
   overflow: hidden; position: relative;
+  background: var(--ios-bg);
 }
 
-/* ── TOP BAR ── */
+/* ══ NAV BAR — iOS Large Title Style ══ */
 #topbar {
-  background: var(--surface);
-  padding: 36px 20px 0;
+  background: rgba(242,242,247,0.92);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  padding: env(safe-area-inset-top, 44px) 16px 0;
   flex-shrink: 0;
-  border-bottom: 1px solid var(--border);
+  border-bottom: 0.5px solid var(--ios-separator);
+  position: relative; z-index: 10;
 }
 
 .tb-row1 {
   display: flex; align-items: center; justify-content: space-between;
-  margin-bottom: 10px;
+  height: 44px; padding: 0 4px;
 }
 .tb-title {
-  font-size: 22px; font-weight: 900; color: var(--text);
-  letter-spacing: -0.5px;
+  font-size: 17px; font-weight: 600;
+  color: var(--ios-label); letter-spacing: -0.4px;
 }
-.tb-actions { display: flex; align-items: center; gap: 8px; }
+.tb-actions { display: flex; align-items: center; gap: 4px; }
 
+/* iOS nav bar button */
 .tb-btn {
-  width: 36px; height: 36px; border-radius: 50%; border: none;
-  cursor: pointer; display: flex; align-items: center; justify-content: center;
-  transition: transform .1s, background .15s;
-  background: var(--surface2); color: var(--text2);
+  width: 34px; height: 34px; border-radius: 50%;
+  border: none; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.15s ease;
+  background: transparent; color: var(--accent);
+  font-size: 20px; font-weight: 400;
 }
-.tb-btn:active { transform: scale(.88); }
-.tb-btn.accent { background: var(--accent); color: #fff; box-shadow: 0 4px 14px rgba(123,97,255,0.4); }
+.tb-btn:active { background: rgba(0,0,0,0.06); }
+.tb-btn svg { color: var(--accent); }
 
-/* progress pill */
+/* Progress pill — iOS pill style */
 .prog-pill {
-  display: flex; align-items: center; gap: 6px;
-  background: var(--accent-light); padding: 6px 12px 6px 8px;
-  border-radius: 20px;
+  display: flex; align-items: center; gap: 5px;
+  background: rgba(0,122,255,0.10);
+  padding: 5px 10px 5px 7px; border-radius: 20px;
 }
-.prog-ring { width: 22px; height: 22px; flex-shrink: 0; }
+.prog-ring { width: 20px; height: 20px; flex-shrink: 0; }
 .prog-ring svg { transform: rotate(-90deg); display: block; }
-.prog-ring-bg { fill: none; stroke: rgba(123,97,255,0.2); stroke-width: 3; }
-.prog-ring-fill { fill: none; stroke: var(--accent); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset .5s cubic-bezier(.4,0,.2,1); }
-.prog-lbl { font-size: 12px; font-weight: 800; color: var(--accent); }
+.prog-ring-bg { fill: none; stroke: rgba(0,122,255,0.2); stroke-width: 2.5; }
+.prog-ring-fill {
+  fill: none; stroke: var(--accent); stroke-width: 2.5;
+  stroke-linecap: round;
+  transition: stroke-dashoffset 0.6s cubic-bezier(0.4,0,0.2,1);
+}
+.prog-lbl { font-size: 12px; font-weight: 600; color: var(--accent); letter-spacing: -0.2px; }
 
+/* Streak badge */
 .streak-badge {
   display: none; align-items: center; gap: 3px;
-  background: #FFF3E0; padding: 5px 10px; border-radius: 20px;
-  font-size: 12px; font-weight: 800; color: #F57C00;
+  background: rgba(255,149,0,0.12); padding: 5px 9px;
+  border-radius: 20px; font-size: 12px; font-weight: 600; color: var(--ios-orange);
 }
 
-/* seg tabs */
+/* Segment control — iOS native style */
+.seg-wrap {
+  padding: 8px 16px 0;
+}
 .seg {
-  display: flex; gap: 0;
-  margin-bottom: -1px;
+  display: inline-flex; gap: 0;
+  background: rgba(118,118,128,0.12);
+  border-radius: 9px; padding: 2px;
 }
 .seg-btn {
-  flex: none; padding: 7px 18px; border: none; background: transparent;
-  font-size: 14px; font-weight: 700; color: var(--text3); cursor: pointer;
-  border-bottom: 3px solid transparent; transition: all .2s;
-  font-family: 'Nunito', sans-serif;
+  padding: 5px 16px; border: none; background: transparent;
+  font-size: 13px; font-weight: 500; color: var(--ios-label2);
+  cursor: pointer; border-radius: 7px;
+  transition: all 0.2s cubic-bezier(0.4,0,0.2,1);
+  font-family: var(--font); letter-spacing: -0.2px;
 }
-.seg-btn.active { color: var(--accent); border-bottom-color: var(--accent); }
+.seg-btn.active {
+  background: #FFFFFF;
+  color: var(--ios-label);
+  font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12), 0 1px 2px rgba(0,0,0,0.08);
+}
+.seg-row {
+  display: flex; align-items: flex-end; justify-content: space-between;
+  padding-bottom: 8px; padding-top: 4px;
+}
+#today-btn-wrap .today-chip {
+  background: var(--accent); color: #fff; border: none; cursor: pointer;
+  font-size: 12px; font-weight: 600; padding: 5px 12px;
+  border-radius: 20px; font-family: var(--font); letter-spacing: -0.2px;
+  transition: opacity 0.15s;
+}
+#today-btn-wrap .today-chip:active { opacity: 0.75; }
 
-/* ── MAIN VIEW ── */
+/* ══ MAIN VIEW ══ */
 #view {
   flex: 1; overflow-y: auto; overflow-x: hidden;
-  background: var(--bg);
+  background: var(--ios-bg);
   -webkit-overflow-scrolling: touch;
   min-height: 0;
 }
+#view::-webkit-scrollbar { display: none; }
 
-/* ── WEEK STRIP ── */
+/* ══ WEEK STRIP ══ */
 .week-nav-bar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px 10px; background: var(--surface);
-  border-bottom: 1px solid var(--border);
+  padding: 12px 16px 8px;
+  background: rgba(242,242,247,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--ios-separator);
   flex-shrink: 0;
 }
-.wn-lbl { font-size: 14px; font-weight: 700; color: var(--text); }
-.wn-btn { background: none; border: none; cursor: pointer; color: var(--text2); font-size: 18px; padding: 4px 8px; border-radius: 8px; }
-.wn-btn:active { background: var(--surface2); }
+.wn-lbl { font-size: 15px; font-weight: 600; color: var(--ios-label); letter-spacing: -0.3px; }
+.wn-btn {
+  background: rgba(118,118,128,0.12); border: none; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; color: var(--ios-label2); font-weight: 500;
+  transition: background 0.12s;
+}
+.wn-btn:active { background: var(--ios-surface3); }
 
 .week-strip-wrap {
-  background: var(--surface); padding: 0 12px 14px;
-  flex-shrink: 0; border-bottom: 1px solid var(--border);
+  background: rgba(242,242,247,0.92);
+  backdrop-filter: blur(20px);
+  -webkit-backdrop-filter: blur(20px);
+  padding: 4px 12px 10px;
+  flex-shrink: 0;
+  border-bottom: 0.5px solid var(--ios-separator);
 }
 .week-strip { display: grid; grid-template-columns: repeat(7,1fr); gap: 4px; }
-.ws-day { display: flex; flex-direction: column; align-items: center; gap: 6px; cursor: pointer; padding: 4px 2px; }
-.ws-dow { font-size: 11px; font-weight: 700; color: var(--text3); }
-.ws-num {
-  width: 34px; height: 34px; border-radius: 50%;
-  display: flex; align-items: center; justify-content: center;
-  font-size: 15px; font-weight: 800; color: var(--text2);
-  transition: all .15s;
+.ws-day {
+  display: flex; flex-direction: column; align-items: center; gap: 5px;
+  cursor: pointer; padding: 4px 0; border-radius: var(--radius-sm);
+  transition: background 0.15s;
 }
-.ws-num.today { background: var(--red); color: #fff; }
-.ws-num.selected { background: var(--accent); color: #fff; box-shadow: 0 4px 12px rgba(123,97,255,0.4); }
-.ws-dot-row { display: flex; gap: 2px; min-height: 6px; align-items: center; justify-content: center; }
-.ws-dot { width: 5px; height: 5px; border-radius: 50%; }
+.ws-day:active { background: rgba(0,0,0,0.04); }
+.ws-dow { font-size: 11px; font-weight: 500; color: var(--ios-label3); letter-spacing: 0.2px; }
+.ws-num {
+  width: 32px; height: 32px; border-radius: 50%;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 16px; font-weight: 400; color: var(--ios-label2);
+  transition: all 0.15s;
+}
+.ws-num.today { background: var(--ios-red); color: #fff; font-weight: 600; }
+.ws-num.selected { background: var(--accent); color: #fff; font-weight: 600; box-shadow: 0 2px 8px rgba(0,122,255,0.35); }
+.ws-dot-row { display: flex; gap: 2px; min-height: 5px; align-items: center; justify-content: center; }
+.ws-dot { width: 4px; height: 4px; border-radius: 50%; }
 
-/* ── DAY HEADER ── */
+/* ══ DAY HEADER ══ */
 .day-hdr-bar {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 16px 20px 12px;
+  padding: 16px 16px 12px;
 }
-.dh-left {}
-.dh-date { font-size: 22px; font-weight: 900; color: var(--text); letter-spacing: -0.5px; }
-.dh-sub { font-size: 12px; font-weight: 600; color: var(--text3); margin-top: 1px; }
+.dh-date { font-size: 20px; font-weight: 700; color: var(--ios-label); letter-spacing: -0.5px; }
+.dh-sub { font-size: 12px; font-weight: 400; color: var(--ios-label3); margin-top: 2px; letter-spacing: -0.1px; }
 .dh-right { display: flex; align-items: center; gap: 10px; }
-.dh-prog-ring { position: relative; width: 42px; height: 42px; }
+.dh-prog-ring { position: relative; width: 38px; height: 38px; }
 .dh-prog-ring svg { transform: rotate(-90deg); display: block; }
-.dh-prog-bg { fill: none; stroke: var(--surface2); stroke-width: 3.5; }
-.dh-prog-fill { fill: none; stroke: var(--green); stroke-width: 3.5; stroke-linecap: round; transition: stroke-dashoffset .5s ease; }
-.dh-prog-txt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 10px; font-weight: 800; color: var(--text2); }
+.dh-prog-bg { fill: none; stroke: var(--ios-surface3); stroke-width: 3; }
+.dh-prog-fill { fill: none; stroke: var(--ios-green); stroke-width: 3; stroke-linecap: round; transition: stroke-dashoffset 0.5s ease; }
+.dh-prog-txt { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; font-size: 9px; font-weight: 600; color: var(--ios-label2); }
 .add-day-btn {
   background: var(--accent); color: #fff; border: none; cursor: pointer;
-  font-size: 13px; font-weight: 800; padding: 8px 16px; border-radius: 22px;
-  box-shadow: 0 4px 12px rgba(123,97,255,0.35); font-family: 'Nunito', sans-serif;
-  transition: transform .1s;
+  font-size: 13px; font-weight: 600; padding: 8px 14px; border-radius: 20px;
+  font-family: var(--font); transition: opacity 0.12s; letter-spacing: -0.2px;
 }
-.add-day-btn:active { transform: scale(.94); }
+.add-day-btn:active { opacity: 0.75; }
 
-/* ── TODO ITEM ── */
-.todo-list { padding: 0 16px 80px; }
+/* ══ TODO ITEM — iOS grouped list style ══ */
+.todo-list { padding: 0 0 16px; }
+
+/* Section header iOS style */
+.todo-section-hdr {
+  font-size: 13px; font-weight: 600; color: var(--ios-label2);
+  padding: 20px 20px 8px; letter-spacing: -0.1px;
+  text-transform: uppercase; font-size: 11px;
+  color: var(--ios-label3); letter-spacing: 0.5px;
+}
+
+.todo-group {
+  margin: 0 16px 12px;
+  background: var(--ios-surface);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow: var(--shadow-xs);
+}
+
 .todo-item {
-  background: var(--surface); border-radius: var(--radius-sm);
-  margin-bottom: 10px; display: flex; align-items: center; gap: 12px;
-  padding: 14px 14px 14px 0; cursor: pointer;
-  box-shadow: var(--shadow); overflow: hidden;
-  transition: transform .1s, box-shadow .1s; position: relative;
+  background: transparent;
+  display: flex; align-items: center; gap: 0;
+  cursor: pointer; position: relative;
+  transition: background 0.12s;
+  min-height: 58px;
 }
-.todo-item:active { transform: scale(.98); box-shadow: 0 1px 6px rgba(0,0,0,0.06); }
-.todo-item.done-item { opacity: .55; }
-.todo-color-bar { width: 5px; height: 100%; flex-shrink: 0; align-self: stretch; border-radius: 0 4px 4px 0; min-height: 46px; }
-.todo-check-area { flex-shrink: 0; }
+.todo-item:not(:last-child)::after {
+  content: '';
+  position: absolute; bottom: 0; left: 52px; right: 0;
+  height: 0.5px; background: var(--ios-separator2);
+}
+.todo-item:active { background: rgba(0,0,0,0.04); }
+.todo-item.done-item { opacity: 0.5; }
+
+.todo-color-accent {
+  width: 4px; height: 100%; align-self: stretch;
+  min-height: 58px; flex-shrink: 0; border-radius: 0;
+}
+.todo-check-area { padding: 0 12px 0 14px; flex-shrink: 0; }
 .todo-check {
-  width: 28px; height: 28px; border-radius: 50%;
-  border: 2.5px solid var(--text3); background: transparent; cursor: pointer;
+  width: 24px; height: 24px; border-radius: 50%;
+  border: 1.5px solid var(--ios-label3); background: transparent; cursor: pointer;
   display: flex; align-items: center; justify-content: center;
-  font-size: 13px; color: #fff; transition: all .2s cubic-bezier(.34,1.56,.64,1);
+  font-size: 11px; color: #fff;
+  transition: all 0.2s cubic-bezier(0.34,1.56,0.64,1);
 }
-.todo-check.checked { background: var(--green); border-color: var(--green); }
-.todo-body { flex: 1; min-width: 0; }
-.todo-title { font-size: 14px; font-weight: 700; color: var(--text); line-height: 1.35; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.todo-title.done { text-decoration: line-through; color: var(--text3); }
-.todo-meta { display: flex; align-items: center; gap: 6px; margin-top: 5px; flex-wrap: wrap; }
+.todo-check.checked { background: var(--ios-green); border-color: var(--ios-green); }
+@keyframes ios-check-pop {
+  0%   { transform: scale(0.5); opacity: 0; }
+  60%  { transform: scale(1.15); }
+  100% { transform: scale(1); opacity: 1; }
+}
+.todo-check.checked { animation: ios-check-pop 0.25s cubic-bezier(0.34,1.56,0.64,1); }
+
+.todo-body { flex: 1; min-width: 0; padding: 12px 0; }
+.todo-title {
+  font-size: 15px; font-weight: 500; color: var(--ios-label);
+  line-height: 1.35; letter-spacing: -0.3px;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+}
+.todo-title.done { text-decoration: line-through; color: var(--ios-label3); }
+.todo-meta { display: flex; align-items: center; gap: 5px; margin-top: 3px; flex-wrap: wrap; }
 .todo-cat-chip {
-  font-size: 10px; font-weight: 800; padding: 2px 8px; border-radius: 20px;
+  font-size: 10px; font-weight: 600; padding: 1px 7px; border-radius: 20px;
+  letter-spacing: 0.1px;
 }
-.todo-time { font-size: 11px; font-weight: 600; color: var(--text3); }
-.todo-right { display: flex; align-items: center; gap: 6px; flex-shrink: 0; padding-right: 4px; }
-.prio-dot-sm { width: 8px; height: 8px; border-radius: 50%; flex-shrink: 0; }
-
-/* empty state */
-.empty-state {
-  text-align: center; padding: 60px 0 40px;
+.todo-time { font-size: 12px; font-weight: 400; color: var(--ios-label3); letter-spacing: -0.1px; }
+.todo-right {
+  display: flex; align-items: center; gap: 6px;
+  padding-right: 14px; flex-shrink: 0;
 }
-.empty-icon { font-size: 52px; margin-bottom: 12px; }
-.empty-text { font-size: 15px; font-weight: 700; color: var(--text3); }
-.empty-sub { font-size: 12px; font-weight: 600; color: var(--text3); margin-top: 4px; opacity: .6; }
+.prio-dot-sm { width: 7px; height: 7px; border-radius: 50%; flex-shrink: 0; }
 
-/* ── MONTH GRID ── */
+/* Chevron */
+.todo-chevron {
+  color: var(--ios-label4); font-size: 13px; font-weight: 600; margin-left: 2px;
+}
+
+/* Empty state */
+.empty-state { text-align: center; padding: 56px 0 40px; }
+.empty-icon { font-size: 48px; margin-bottom: 12px; }
+.empty-text { font-size: 15px; font-weight: 500; color: var(--ios-label2); letter-spacing: -0.2px; }
+.empty-sub { font-size: 13px; font-weight: 400; color: var(--ios-label3); margin-top: 4px; }
+
+/* ══ MONTH GRID ══ */
 .month-container {
-  padding: 0; background: var(--surface);
+  background: var(--ios-bg);
   flex: 1; display: flex; flex-direction: column; overflow: hidden;
 }
 .month-nav {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 8px 16px 6px;
+  padding: 10px 16px 8px;
+  background: rgba(242,242,247,0.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
 }
-.month-nav-lbl { font-size: 16px; font-weight: 900; color: var(--text); }
+.month-nav-lbl {
+  font-size: 17px; font-weight: 600; color: var(--ios-label);
+  letter-spacing: -0.4px;
+}
 .month-nav-side { display: flex; align-items: center; gap: 4px; }
 .mnav-btn {
-  background: var(--surface2); border: none; cursor: pointer;
-  width: 28px; height: 28px; border-radius: 50%;
+  background: rgba(118,118,128,0.12); border: none; cursor: pointer;
+  width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 15px; color: var(--text2); font-weight: 700;
-  transition: background .12s;
+  font-size: 17px; color: var(--ios-label2); font-weight: 400;
+  transition: background 0.12s;
 }
-.mnav-btn:active { background: var(--border); }
+.mnav-btn:active { background: var(--ios-surface3); }
 .today-chip {
-  background: var(--red); color: #fff; border: none; cursor: pointer;
-  font-size: 10px; font-weight: 800; padding: 4px 10px;
-  border-radius: 20px; font-family: 'Nunito', sans-serif;
+  background: var(--ios-red); color: #fff; border: none; cursor: pointer;
+  font-size: 11px; font-weight: 600; padding: 4px 10px;
+  border-radius: 20px; font-family: var(--font); letter-spacing: -0.1px;
 }
 
 .dow-row {
   display: grid; grid-template-columns: repeat(7,1fr);
-  padding: 0 4px; border-bottom: 1px solid var(--border);
+  padding: 0 4px; border-bottom: 0.5px solid var(--ios-separator);
+  background: rgba(242,242,247,0.92);
+  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
 }
 .dow-cell {
-  text-align: center; font-size: 11px; font-weight: 800;
-  padding: 4px 0; color: var(--text3);
+  text-align: center; font-size: 11px; font-weight: 500;
+  padding: 5px 0; color: var(--ios-label3); letter-spacing: 0.2px;
 }
 
-.month-grid-wrap { flex: 1; overflow-y: hidden; padding: 3px; display: flex; flex-direction: column; }
+.month-grid-wrap {
+  flex: 1; overflow-y: hidden; padding: 2px 4px; display: flex; flex-direction: column;
+}
+.month-grid-wrap::-webkit-scrollbar { display: none; }
 .month-grid { flex: 1; display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
 .month-cell {
-  background: var(--surface); border-radius: 10px;
+  background: var(--ios-surface);
+  border-radius: var(--radius-sm);
   padding: 4px 3px 3px; cursor: pointer;
-  display: flex; flex-direction: column; transition: background .12s;
-  overflow: hidden;
+  display: flex; flex-direction: column;
+  transition: background 0.12s; overflow: hidden;
+  box-shadow: var(--shadow-xs);
 }
-.month-cell:active { background: var(--accent-light); }
-.month-cell.empty-cell { background: transparent; cursor: default; }
+.month-cell:active { background: rgba(0,122,255,0.06); }
+.month-cell.empty-cell { background: transparent; cursor: default; box-shadow: none; }
 .month-num {
-  width: 24px; height: 24px; border-radius: 50%;
+  width: 22px; height: 22px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 800; color: var(--text2);
-  flex-shrink: 0; margin-bottom: 3px; align-self: flex-start;
+  font-size: 12px; font-weight: 400; color: var(--ios-label2);
+  flex-shrink: 0; margin-bottom: 2px; align-self: flex-start;
 }
-.month-num.today-num { background: var(--red); color: #fff; }
+.month-num.today-num { background: var(--ios-red); color: #fff; font-weight: 600; }
 .month-ev {
-  border-radius: 6px; padding: 2px 5px; margin-bottom: 2px;
+  border-radius: 5px; padding: 2px 4px; margin-bottom: 1px;
   overflow: hidden; cursor: pointer; flex-shrink: 0; width: 100%;
 }
-.month-ev-time { font-size: 8px; font-weight: 800; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.month-ev-title { font-size: 8px; color: rgba(255,255,255,.9); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; font-weight: 600; }
+.month-ev-time { font-size: 7px; font-weight: 600; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.month-ev-title { font-size: 8px; color: rgba(255,255,255,.9); display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; line-height: 1.3; font-weight: 500; }
 
-/* ── BOTTOM NAV ── */
+/* ══ BOTTOM NAV — iOS Tab Bar ══ */
 #bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 430px;
-  background: var(--surface); border-top: 1px solid var(--border);
-  display: flex; padding: 8px 0 env(safe-area-inset-bottom,0);
+  background: rgba(249,249,249,0.94);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  border-top: 0.5px solid var(--ios-separator);
+  display: flex; padding: 8px 0 0;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
   z-index: 50;
 }
 .bnav-btn {
   flex: 1; display: flex; flex-direction: column; align-items: center;
-  gap: 3px; border: none; background: transparent; cursor: pointer;
-  padding: 6px 0; color: var(--text3); font-family: 'Nunito', sans-serif;
-  transition: color .15s;
+  gap: 2px; border: none; background: transparent; cursor: pointer;
+  padding: 4px 0 4px; color: var(--ios-label3); font-family: var(--font);
+  transition: color 0.15s;
 }
 .bnav-btn.active { color: var(--accent); }
-.bnav-btn svg { transition: transform .15s; }
-.bnav-btn.active svg { transform: scale(1.1); }
-.bnav-label { font-size: 10px; font-weight: 800; }
+.bnav-btn svg { transition: transform 0.15s; }
+.bnav-btn.active svg { transform: scale(1.08); }
+.bnav-label { font-size: 10px; font-weight: 500; letter-spacing: 0.1px; }
+
+/* FAB in tab bar */
 .bnav-fab {
   flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center;
   border: none; background: transparent; cursor: pointer; padding: 0;
+  gap: 2px; position: relative; padding-bottom: 2px;
 }
 .bnav-fab-inner {
-  width: 52px; height: 52px; background: var(--accent); border-radius: 50%;
+  width: 48px; height: 48px;
+  background: var(--accent); border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  box-shadow: 0 6px 20px rgba(123,97,255,0.5);
-  transform: translateY(-12px); transition: transform .1s;
-  flex-shrink: 0;
+  box-shadow: 0 4px 16px rgba(0,122,255,0.4), 0 2px 6px rgba(0,122,255,0.25);
+  transform: translateY(-14px);
+  transition: transform 0.12s, box-shadow 0.12s;
 }
-.bnav-fab:active .bnav-fab-inner { transform: translateY(-12px) scale(.9); }
+.bnav-fab:active .bnav-fab-inner {
+  transform: translateY(-14px) scale(0.92);
+  box-shadow: 0 2px 8px rgba(0,122,255,0.3);
+}
+.bnav-fab-label {
+  font-size: 10px; font-weight: 500; letter-spacing: 0.1px;
+  color: var(--accent); margin-top: -6px;
+}
 
-/* ── OVERLAYS ── */
+/* ══ OVERLAYS ══ */
 .overlay {
   position: fixed; inset: 0;
-  background: rgba(0,0,0,0.4);
-  backdrop-filter: blur(8px);
+  background: rgba(0,0,0,0.35);
+  backdrop-filter: blur(0px);
   z-index: 100; display: none; align-items: flex-end;
+  transition: backdrop-filter 0.3s;
 }
-.overlay.show { display: flex; }
+.overlay.show { display: flex; backdrop-filter: blur(2px); }
 
+/* iOS Sheet */
 .sheet {
-  background: var(--surface);
-  border-radius: 28px 28px 0 0;
+  background: var(--ios-surface);
+  border-radius: 12px 12px 0 0;
   width: 100%; max-height: 92vh; overflow-y: auto;
-  padding-bottom: env(safe-area-inset-bottom, 24px);
+  padding-bottom: env(safe-area-inset-bottom, 20px);
   touch-action: pan-y;
-  box-shadow: 0 -8px 40px rgba(0,0,0,0.15);
-  will-change: transform;
-  transition: transform 0.3s cubic-bezier(.32,0,.67,0);
+  box-shadow: 0 -2px 24px rgba(0,0,0,0.12), 0 -1px 4px rgba(0,0,0,0.06);
 }
+.sheet::-webkit-scrollbar { display: none; }
+
+/* Sheet handle */
 .handle {
-  width: 40px; height: 5px; background: var(--border);
-  border-radius: 3px; margin: 12px auto 0;
+  width: 36px; height: 4px;
+  background: var(--ios-separator);
+  border-radius: 2px; margin: 8px auto 0;
 }
 
 /* Sheet header */
 .sheet-hdr {
   display: flex; align-items: center; justify-content: space-between;
-  padding: 14px 20px 12px;
+  padding: 14px 20px 10px;
 }
-.sheet-title { font-size: 17px; font-weight: 900; color: var(--text); }
+.sheet-title { font-size: 17px; font-weight: 600; color: var(--ios-label); letter-spacing: -0.3px; }
 .sheet-close {
-  width: 30px; height: 30px; border-radius: 50%;
-  background: var(--surface2); border: none; cursor: pointer;
-  font-size: 13px; color: var(--text2); font-weight: 800;
+  width: 28px; height: 28px; border-radius: 50%;
+  background: var(--ios-surface2); border: none; cursor: pointer;
+  font-size: 12px; color: var(--ios-label2); font-weight: 500;
   display: flex; align-items: center; justify-content: center;
+  transition: background 0.12s;
 }
-.sheet-close:active { background: var(--border); }
-.sheet-divider { height: 1px; background: var(--border); margin: 0 20px; }
+.sheet-close:active { background: var(--ios-surface3); }
+.sheet-divider { height: 0.5px; background: var(--ios-separator); margin: 0 20px; }
 
 /* Detail sheet */
-.detail-color-bar { height: 6px; border-radius: 0; }
-.detail-cat-row { display: flex; justify-content: space-between; align-items: center; padding: 12px 20px 6px; }
-.detail-cat-chip { font-size: 11px; font-weight: 800; padding: 4px 12px; border-radius: 20px; }
-.detail-title { font-size: 20px; font-weight: 900; color: var(--text); line-height: 1.3; letter-spacing: -0.3px; padding: 4px 20px 16px; }
+.detail-color-bar { height: 4px; border-radius: 0; }
+.detail-cat-row { display: flex; justify-content: space-between; align-items: center; padding: 10px 20px 4px; }
+.detail-cat-chip { font-size: 11px; font-weight: 600; padding: 3px 10px; border-radius: 20px; letter-spacing: 0.1px; }
+.detail-title {
+  font-size: 20px; font-weight: 700; color: var(--ios-label);
+  line-height: 1.3; letter-spacing: -0.5px; padding: 6px 20px 14px;
+}
 
-.info-group { background: var(--surface2); border-radius: var(--radius-sm); margin: 0 16px 12px; overflow: hidden; }
-.info-row { display: flex; align-items: flex-start; padding: 12px 14px; gap: 10px; border-bottom: 1px solid var(--border); }
-.info-row:last-child { border-bottom: none; }
-.info-icon { font-size: 15px; width: 20px; flex-shrink: 0; margin-top: 1px; }
-.info-lbl { font-size: 12px; color: var(--text3); width: 46px; flex-shrink: 0; font-weight: 700; padding-top: 2px; }
-.info-val { font-size: 14px; color: var(--text); font-weight: 600; flex: 1; line-height: 1.4; }
+.info-group {
+  background: var(--ios-surface2); border-radius: var(--radius-md);
+  margin: 0 16px 10px; overflow: hidden;
+}
+.info-row {
+  display: flex; align-items: flex-start; padding: 11px 14px; gap: 10px;
+  position: relative;
+}
+.info-row:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 44px; right: 0;
+  height: 0.5px; background: var(--ios-separator2);
+}
+.info-icon { font-size: 14px; width: 20px; flex-shrink: 0; margin-top: 1px; }
+.info-lbl { font-size: 12px; color: var(--ios-label3); width: 44px; flex-shrink: 0; font-weight: 500; padding-top: 2px; letter-spacing: -0.1px; }
+.info-val { font-size: 14px; color: var(--ios-label); font-weight: 400; flex: 1; line-height: 1.4; letter-spacing: -0.2px; }
 
 .act-row { display: flex; gap: 8px; padding: 4px 16px 0; }
-.act-btn { flex: 1; padding: 14px; border-radius: var(--radius-sm); border: none; font-size: 14px; font-weight: 800; cursor: pointer; transition: opacity .15s; font-family: 'Nunito', sans-serif; }
-.act-btn:active { opacity: .7; }
+.act-btn {
+  flex: 1; padding: 13px; border-radius: var(--radius-md);
+  border: none; font-size: 14px; font-weight: 600;
+  cursor: pointer; transition: opacity 0.12s;
+  font-family: var(--font); letter-spacing: -0.2px;
+}
+.act-btn:active { opacity: 0.7; }
 
 /* Day Panel */
-.day-panel-head { display: flex; justify-content: space-between; align-items: center; padding: 14px 20px 10px; }
-.day-panel-title { font-size: 18px; font-weight: 900; color: var(--text); }
-.day-panel-cards { padding: 0 14px; }
+.day-panel-head {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 14px 20px 10px;
+}
+.day-panel-title { font-size: 17px; font-weight: 600; color: var(--ios-label); letter-spacing: -0.3px; }
+.day-panel-cards { padding: 0 16px; }
 
-/* Form */
-.fm-section-lbl { font-size: 11px; font-weight: 800; color: var(--text3); padding: 6px 20px 6px; text-transform: uppercase; letter-spacing: .5px; }
-.fm-group { background: var(--surface2); border-radius: var(--radius-sm); margin: 0 16px 12px; overflow: hidden; }
-.fm-row { display: flex; align-items: center; padding: 13px 14px; gap: 10px; border-bottom: 1px solid var(--border); }
-.fm-row:last-child { border-bottom: none; }
-.fm-lbl { font-size: 14px; font-weight: 700; color: var(--text); width: 44px; flex-shrink: 0; }
+/* ══ FORM — iOS Grouped Table Style ══ */
+.fm-section-lbl {
+  font-size: 11px; font-weight: 500; color: var(--ios-label3);
+  padding: 16px 20px 5px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.fm-group {
+  background: var(--ios-surface2); border-radius: var(--radius-md);
+  margin: 0 16px 8px; overflow: hidden;
+}
+.fm-row {
+  display: flex; align-items: center; padding: 12px 14px; gap: 10px;
+  position: relative; min-height: 44px;
+}
+.fm-row:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 44px; right: 0;
+  height: 0.5px; background: var(--ios-separator2);
+}
+.fm-lbl { font-size: 15px; font-weight: 400; color: var(--ios-label); width: 52px; flex-shrink: 0; letter-spacing: -0.2px; }
 .fm-in {
   flex: 1; border: none; background: transparent;
-  font-size: 14px; color: var(--text2); outline: none;
-  font-family: 'Nunito', sans-serif; text-align: right;
-  font-weight: 600;
+  font-size: 15px; color: var(--ios-label2); outline: none;
+  font-family: var(--font); text-align: right;
+  font-weight: 400; letter-spacing: -0.2px;
 }
-.fm-in::placeholder { color: var(--text3); }
-.fm-in:focus { color: var(--text); }
+.fm-in::placeholder { color: var(--ios-label3); }
+.fm-in:focus { color: var(--ios-label); }
+textarea.fm-in { text-align: left; resize: none; line-height: 1.5; }
 
 .submit-btn {
-  width: calc(100% - 32px); margin: 8px 16px 4px;
-  padding: 16px; border-radius: var(--radius-sm);
-  border: none; cursor: pointer; font-size: 16px; font-weight: 900;
+  width: calc(100% - 32px); margin: 12px 16px 4px;
+  padding: 15px; border-radius: var(--radius-md);
+  border: none; cursor: pointer; font-size: 17px; font-weight: 600;
   background: var(--accent); color: #fff;
-  box-shadow: 0 6px 20px rgba(123,97,255,0.4);
-  font-family: 'Nunito', sans-serif; transition: opacity .15s;
+  font-family: var(--font); transition: opacity 0.12s;
+  letter-spacing: -0.3px;
 }
-.submit-btn:active { opacity: .8; }
+.submit-btn:active { opacity: 0.8; }
 
 /* cat pick */
 .cat-pick { display: flex; flex-wrap: wrap; gap: 7px; padding: 10px 16px 14px; }
-.cpbtn { font-size: 11px; font-weight: 800; padding: 6px 12px; border-radius: 20px; cursor: pointer; border: 2px solid transparent; transition: transform .1s; font-family: 'Nunito', sans-serif; }
-.cpbtn:active { transform: scale(.93); }
+.cpbtn {
+  font-size: 12px; font-weight: 500; padding: 6px 12px;
+  border-radius: 20px; cursor: pointer;
+  border: 1.5px solid transparent; transition: transform 0.1s;
+  font-family: var(--font); letter-spacing: -0.1px;
+}
+.cpbtn:active { transform: scale(0.94); }
 
 /* priority */
-.prio-row { display: flex; gap: 7px; padding: 6px 16px 14px; }
-.prio-btn { flex: 1; padding: 9px; border-radius: var(--radius-sm); font-size: 12px; font-weight: 800; border: 2px solid transparent; cursor: pointer; text-align: center; font-family: 'Nunito', sans-serif; transition: all .15s; background: var(--surface2); color: var(--text3); }
+.prio-row { display: flex; gap: 6px; padding: 6px 16px 14px; }
+.prio-btn {
+  flex: 1; padding: 9px 4px; border-radius: var(--radius-sm);
+  font-size: 12px; font-weight: 500; border: 1.5px solid transparent;
+  cursor: pointer; text-align: center; font-family: var(--font);
+  transition: all 0.15s; background: var(--ios-surface2); color: var(--ios-label3);
+  letter-spacing: -0.1px;
+}
 .prio-btn.on { border-color: currentColor; }
-.p-none.on { background: var(--surface2); color: var(--text2); }
-.p-low.on { background: rgba(52,199,89,0.12); color: var(--green); }
-.p-mid.on { background: rgba(255,149,0,0.12); color: var(--orange); }
-.p-high.on { background: rgba(255,59,48,0.12); color: var(--red); }
+.p-none.on { background: var(--ios-surface2); color: var(--ios-label2); }
+.p-low.on  { background: rgba(52,199,89,0.10);  color: var(--ios-green); }
+.p-mid.on  { background: rgba(255,149,0,0.10);  color: var(--ios-orange); }
+.p-high.on { background: rgba(255,59,48,0.10);  color: var(--ios-red); }
 
 /* extra toggle */
 .extra-toggle {
   display: flex; align-items: center; justify-content: space-between;
   padding: 12px 20px; background: transparent; border: none; cursor: pointer; width: 100%;
-  font-family: 'Nunito', sans-serif;
+  font-family: var(--font);
 }
-.extra-toggle-lbl { font-size: 13px; font-weight: 800; color: var(--accent); }
-.extra-toggle-arr { font-size: 12px; color: var(--text3); transition: transform .2s; }
+.extra-toggle-lbl { font-size: 14px; font-weight: 500; color: var(--accent); letter-spacing: -0.2px; }
+.extra-toggle-arr { font-size: 12px; color: var(--ios-label3); transition: transform 0.2s; }
 .extra-toggle-arr.open { transform: rotate(180deg); }
 .extra-box { display: none; }
 .extra-box.open { display: block; }
 
 /* Settings */
-.settings-section-lbl { font-size: 11px; font-weight: 800; color: var(--text3); padding: 6px 20px 6px; text-transform: uppercase; letter-spacing: .5px; }
+.settings-section-lbl {
+  font-size: 11px; font-weight: 500; color: var(--ios-label3);
+  padding: 16px 20px 5px; text-transform: uppercase; letter-spacing: 0.5px;
+}
 .bg-grid { display: grid; grid-template-columns: repeat(4,1fr); gap: 10px; padding: 0 16px 14px; }
-.bg-swatch { border-radius: 14px; aspect-ratio: 1; cursor: pointer; border: 3px solid transparent; transition: transform .1s; }
-.bg-swatch:active { transform: scale(.93); }
-.bg-swatch.selected { border-color: var(--accent); box-shadow: 0 4px 12px rgba(123,97,255,0.4); }
+.bg-swatch { border-radius: var(--radius-md); aspect-ratio: 1; cursor: pointer; border: 2px solid transparent; transition: transform 0.1s; }
+.bg-swatch:active { transform: scale(0.94); }
+.bg-swatch.selected { border-color: var(--accent); box-shadow: 0 0 0 2px rgba(0,122,255,0.3); }
 .bg-custom-row { display: flex; gap: 8px; padding: 0 16px 14px; }
 .bg-color-btn, .bg-img-btn {
-  flex: 1; padding: 12px; border-radius: var(--radius-sm); border: 1px solid var(--border);
-  background: var(--surface2); font-size: 12px; font-weight: 800; color: var(--text2);
-  cursor: pointer; position: relative; overflow: hidden; font-family: 'Nunito', sans-serif;
+  flex: 1; padding: 11px; border-radius: var(--radius-sm); border: 0.5px solid var(--ios-separator);
+  background: var(--ios-surface2); font-size: 13px; font-weight: 500; color: var(--ios-label2);
+  cursor: pointer; position: relative; overflow: hidden; font-family: var(--font);
+  letter-spacing: -0.1px;
 }
 .bg-color-btn input[type=color] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
 .bg-opacity-row { display: flex; align-items: center; gap: 12px; padding: 0 16px 14px; }
-.bg-opacity-lbl { font-size: 13px; font-weight: 700; color: var(--text2); white-space: nowrap; }
+.bg-opacity-lbl { font-size: 14px; font-weight: 400; color: var(--ios-label2); white-space: nowrap; }
 .bg-opacity-slider { flex: 1; accent-color: var(--accent); }
-.cat-row { display: flex; align-items: center; padding: 11px 14px; gap: 10px; border-bottom: 1px solid var(--border); }
-.cat-row:last-child { border-bottom: none; }
-.cat-color-dot { width: 28px; height: 28px; border-radius: 50%; flex-shrink: 0; cursor: pointer; position: relative; overflow: hidden; }
+.cat-row {
+  display: flex; align-items: center; padding: 10px 14px; gap: 10px;
+  position: relative;
+}
+.cat-row:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 52px; right: 0;
+  height: 0.5px; background: var(--ios-separator2);
+}
+.cat-color-dot { width: 26px; height: 26px; border-radius: 50%; flex-shrink: 0; cursor: pointer; position: relative; overflow: hidden; }
 .cat-color-dot input[type=color] { position: absolute; inset: 0; opacity: 0; cursor: pointer; width: 100%; height: 100%; }
-.cat-name-in { flex: 1; border: none; background: transparent; font-size: 14px; color: var(--text); font-weight: 700; outline: none; font-family: 'Nunito', sans-serif; }
-.cat-del-btn { background: rgba(255,59,48,0.1); border: none; cursor: pointer; width: 28px; height: 28px; border-radius: 50%; color: var(--red); font-size: 16px; font-weight: 700; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
-.cat-del-btn:disabled { opacity: .3; cursor: default; }
-.add-cat-btn { width: 100%; padding: 13px; border-radius: var(--radius-sm); border: 1.5px dashed var(--border); background: transparent; font-size: 13px; font-weight: 800; color: var(--accent); cursor: pointer; display: flex; align-items: center; justify-content: center; gap: 6px; font-family: 'Nunito', sans-serif; }
+.cat-name-in { flex: 1; border: none; background: transparent; font-size: 15px; color: var(--ios-label); font-weight: 400; outline: none; font-family: var(--font); letter-spacing: -0.2px; }
+.cat-del-btn {
+  background: rgba(255,59,48,0.10); border: none; cursor: pointer;
+  width: 26px; height: 26px; border-radius: 50%; color: var(--ios-red);
+  font-size: 16px; font-weight: 400; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+}
+.cat-del-btn:disabled { opacity: 0.3; cursor: default; }
+.add-cat-btn {
+  width: 100%; padding: 13px; border-radius: var(--radius-sm);
+  border: 1px dashed var(--ios-separator); background: transparent;
+  font-size: 14px; font-weight: 500; color: var(--accent); cursor: pointer;
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  font-family: var(--font); letter-spacing: -0.2px;
+}
 .color-palette { display: flex; flex-wrap: wrap; gap: 8px; padding: 4px 16px 14px; }
-.color-preset { width: 30px; height: 30px; border-radius: 50%; border: none; cursor: pointer; transition: transform .1s; }
-.color-preset:active { transform: scale(.88); }
+.color-preset { width: 28px; height: 28px; border-radius: 50%; border: none; cursor: pointer; transition: transform 0.1s; }
+.color-preset:active { transform: scale(0.88); }
 
 /* Stats */
-.stats-seg { display: flex; background: var(--surface2); border-radius: 12px; padding: 3px; margin: 12px 16px; }
-.stats-seg-btn { flex: 1; padding: 7px 0; border-radius: 9px; border: none; background: transparent; font-size: 13px; font-weight: 800; color: var(--text3); cursor: pointer; transition: all .2s; font-family: 'Nunito', sans-serif; }
-.stats-seg-btn.active { background: var(--surface); color: var(--text); box-shadow: var(--shadow); }
+.stats-seg {
+  display: flex; background: rgba(118,118,128,0.12);
+  border-radius: 9px; padding: 2px; margin: 12px 16px;
+}
+.stats-seg-btn {
+  flex: 1; padding: 6px 0; border-radius: 7px; border: none;
+  background: transparent; font-size: 13px; font-weight: 500;
+  color: var(--ios-label3); cursor: pointer; transition: all 0.2s;
+  font-family: var(--font); letter-spacing: -0.1px;
+}
+.stats-seg-btn.active {
+  background: var(--ios-surface);
+  color: var(--ios-label); font-weight: 600;
+  box-shadow: 0 1px 3px rgba(0,0,0,0.12);
+}
 .stats-chart { padding: 0 16px 8px; display: flex; flex-direction: column; gap: 10px; }
 .stats-row { display: flex; align-items: center; gap: 10px; }
-.stats-lbl { font-size: 11px; font-weight: 700; color: var(--text3); width: 32px; flex-shrink: 0; text-align: right; }
-.stats-bar-bg { flex: 1; height: 10px; background: var(--surface2); border-radius: 6px; overflow: hidden; }
-.stats-bar-fill { height: 100%; border-radius: 6px; background: linear-gradient(90deg, var(--accent), var(--green)); transition: width .5s cubic-bezier(.4,0,.2,1); }
-.stats-pct { font-size: 11px; font-weight: 800; color: var(--text2); width: 32px; flex-shrink: 0; }
+.stats-lbl { font-size: 11px; font-weight: 500; color: var(--ios-label3); width: 32px; flex-shrink: 0; text-align: right; }
+.stats-bar-bg { flex: 1; height: 8px; background: var(--ios-surface2); border-radius: 4px; overflow: hidden; }
+.stats-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--ios-teal)); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
+.stats-pct { font-size: 11px; font-weight: 600; color: var(--ios-label2); width: 32px; flex-shrink: 0; }
 .stats-summary { display: flex; gap: 10px; padding: 8px 16px 16px; }
-.stats-card { flex: 1; background: var(--surface2); border-radius: 14px; padding: 14px; text-align: center; }
-.stats-card-num { font-size: 22px; font-weight: 900; color: var(--text); }
-.stats-card-lbl { font-size: 11px; font-weight: 700; color: var(--text3); margin-top: 3px; }
+.stats-card {
+  flex: 1; background: var(--ios-surface2); border-radius: var(--radius-md);
+  padding: 14px; text-align: center;
+}
+.stats-card-num { font-size: 22px; font-weight: 700; color: var(--ios-label); letter-spacing: -0.5px; }
+.stats-card-lbl { font-size: 11px; font-weight: 400; color: var(--ios-label3); margin-top: 3px; letter-spacing: -0.1px; }
 
 /* heatmap */
 .heatmap-outer { padding: 0 16px 16px; overflow-x: auto; -webkit-overflow-scrolling: touch; }
 .heatmap-inner { display: flex; gap: 0; min-width: max-content; }
 .heatmap-dow-col { display: flex; flex-direction: column; gap: 3px; margin-right: 4px; padding-top: 20px; }
-.heatmap-dow-lbl { font-size: 9px; font-weight: 700; color: var(--text3); height: 12px; line-height: 12px; width: 14px; }
+.heatmap-dow-lbl { font-size: 9px; font-weight: 500; color: var(--ios-label3); height: 12px; line-height: 12px; width: 14px; }
 .heatmap-weeks { display: flex; flex-direction: column; gap: 0; }
 .heatmap-month-row { display: flex; gap: 3px; margin-bottom: 4px; }
 .heatmap-grid { display: flex; gap: 3px; }
 .heatmap-col { display: flex; flex-direction: column; gap: 3px; }
 .heatmap-cell { width: 12px; height: 12px; border-radius: 3px; cursor: default; }
 
-/* copy modal */
-#copy-modal { position: fixed; inset: 0; z-index: 200; display: none; align-items: center; justify-content: center; background: rgba(0,0,0,.5); backdrop-filter: blur(12px); }
+/* copy modal — iOS Alert style */
+#copy-modal {
+  position: fixed; inset: 0; z-index: 200;
+  display: none; align-items: center; justify-content: center;
+  background: rgba(0,0,0,0.35); backdrop-filter: blur(4px);
+}
 #copy-modal.show { display: flex; }
-.copy-box { background: var(--surface); border-radius: 24px; padding: 24px 20px; width: 290px; box-shadow: var(--shadow-lg); }
-.copy-box h3 { font-size: 16px; font-weight: 900; color: var(--text); margin-bottom: 16px; text-align: center; }
-.copy-date-in { width: 100%; padding: 13px; border-radius: 12px; border: 1.5px solid var(--border); background: var(--surface2); color: var(--text); font-size: 15px; text-align: center; margin-bottom: 14px; outline: none; font-family: 'Nunito', sans-serif; font-weight: 700; }
-.copy-btns { display: flex; gap: 8px; }
-.copy-btn { flex: 1; padding: 13px; border-radius: 12px; border: none; font-size: 14px; font-weight: 800; cursor: pointer; font-family: 'Nunito', sans-serif; }
+.copy-box {
+  background: rgba(242,242,247,0.96);
+  backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px);
+  border-radius: 14px; padding: 20px 20px 0; width: 270px;
+  box-shadow: var(--shadow-xl);
+  overflow: hidden;
+}
+.copy-box h3 {
+  font-size: 17px; font-weight: 600; color: var(--ios-label);
+  margin-bottom: 6px; text-align: center; letter-spacing: -0.3px;
+}
+.copy-box p {
+  font-size: 13px; color: var(--ios-label2); text-align: center;
+  margin-bottom: 16px; font-weight: 400; letter-spacing: -0.1px;
+}
+.copy-date-in {
+  width: 100%; padding: 11px 13px; border-radius: var(--radius-sm);
+  border: 0.5px solid var(--ios-separator);
+  background: var(--ios-surface); color: var(--ios-label);
+  font-size: 15px; text-align: center; margin-bottom: 16px;
+  outline: none; font-family: var(--font); font-weight: 400;
+}
+.copy-btns {
+  display: flex; border-top: 0.5px solid var(--ios-separator);
+  margin: 0 -20px;
+}
+.copy-btn {
+  flex: 1; padding: 14px; border: none;
+  font-size: 17px; font-weight: 400; cursor: pointer;
+  font-family: var(--font); background: transparent;
+  letter-spacing: -0.2px;
+}
+.copy-btn:not(:first-child) {
+  border-left: 0.5px solid var(--ios-separator);
+  font-weight: 600; color: var(--accent);
+}
+.copy-btn:first-child { color: var(--accent); }
+.copy-btn:active { background: rgba(0,0,0,0.06); }
 
 /* drag */
-.month-cell.drag-over { background: var(--accent-light) !important; outline: 2.5px dashed var(--accent); outline-offset: -2px; }
+.month-cell.drag-over { background: rgba(0,122,255,0.08) !important; outline: 2px dashed rgba(0,122,255,0.4); outline-offset: -2px; }
 .month-ev[draggable] { cursor: grab; }
-.month-ev.dragging { opacity: .3 !important; transform: scale(.94); }
-.todo-item.dragging { opacity: .4; }
+.month-ev.dragging { opacity: 0.3 !important; transform: scale(0.94); }
+.todo-item.dragging { opacity: 0.4; }
 
 /* attach */
 .attach-section { padding: 8px 14px 4px; }
 .attach-thumbs { display: flex; flex-wrap: wrap; gap: 8px; margin-bottom: 8px; }
 .attach-thumb-wrap { position: relative; }
-.attach-thumb { width: 64px; height: 64px; border-radius: 12px; object-fit: cover; border: 1px solid var(--border); cursor: pointer; display: block; }
-.attach-del-btn { position: absolute; top: -5px; right: -5px; width: 18px; height: 18px; border-radius: 50%; background: var(--red); border: none; color: #fff; font-size: 10px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
-.link-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--surface2); border-radius: 10px; margin-bottom: 6px; border: 1px solid var(--border); }
-.link-item-url { font-size: 12px; color: var(--accent); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 700; }
+.attach-thumb { width: 64px; height: 64px; border-radius: var(--radius-sm); object-fit: cover; border: 0.5px solid var(--ios-separator); cursor: pointer; display: block; }
+.attach-del-btn { position: absolute; top: -4px; right: -4px; width: 18px; height: 18px; border-radius: 50%; background: var(--ios-label2); border: none; color: #fff; font-size: 9px; cursor: pointer; display: flex; align-items: center; justify-content: center; }
+.link-item { display: flex; align-items: center; gap: 8px; padding: 8px 10px; background: var(--ios-surface2); border-radius: var(--radius-sm); margin-bottom: 6px; border: 0.5px solid var(--ios-separator); }
+.link-item-url { font-size: 12px; color: var(--accent); flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-weight: 400; }
 
 /* routine */
 .freq-btns { display: flex; gap: 6px; padding: 4px 14px 10px; }
-.freq-btn { flex: 1; padding: 9px 4px; border-radius: 10px; border: 2px solid transparent; background: var(--surface2); color: var(--text3); font-size: 12px; font-weight: 800; cursor: pointer; text-align: center; transition: all .15s; font-family: 'Nunito', sans-serif; }
-.freq-btn.on { background: var(--accent-light); border-color: var(--accent); color: var(--accent); }
-
-/* scroll adjustments */
-#view::-webkit-scrollbar { display: none; }
-.sheet::-webkit-scrollbar { display: none; }
-.month-grid-wrap::-webkit-scrollbar { display: none; }
-
-/* animations */
-@keyframes pop-in {
-  0% { transform: scale(.5); opacity: 0; }
-  70% { transform: scale(1.08); }
-  100% { transform: scale(1); opacity: 1; }
+.freq-btn {
+  flex: 1; padding: 9px 4px; border-radius: var(--radius-sm);
+  border: 1.5px solid transparent; background: var(--ios-surface2);
+  color: var(--ios-label3); font-size: 12px; font-weight: 500;
+  cursor: pointer; text-align: center; transition: all 0.15s;
+  font-family: var(--font); letter-spacing: -0.1px;
 }
-.todo-check.checked { animation: pop-in .25s cubic-bezier(.34,1.56,.64,1); }
+.freq-btn.on { background: rgba(0,122,255,0.10); border-color: var(--accent); color: var(--accent); }
 
-/* Background layer for custom BG */
+/* BG Layer */
 #bg-layer {
   position: fixed; inset: 0; z-index: -1;
   transition: background 0.5s ease;
 }
-body.custom-bg {
-  background: transparent;
-}
+body.custom-bg { background: transparent; }
 body.custom-bg #app { background: transparent; }
-
-/* iOS frosted glass: panels are translucent, bg shines through */
 body.custom-bg #topbar {
-  background: rgba(255,255,255,0.55) !important;
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-bottom: 1px solid rgba(255,255,255,0.3);
+  background: rgba(242,242,247,0.78) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-bottom: 0.5px solid rgba(255,255,255,0.4);
 }
 body.custom-bg #bottom-nav {
-  background: rgba(255,255,255,0.55) !important;
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-  border-top: 1px solid rgba(255,255,255,0.3);
+  background: rgba(249,249,249,0.78) !important;
+  backdrop-filter: blur(24px) saturate(180%);
+  -webkit-backdrop-filter: blur(24px) saturate(180%);
+  border-top: 0.5px solid rgba(255,255,255,0.4);
 }
-body.custom-bg .month-container {
-  background: transparent !important;
-}
+body.custom-bg .month-container { background: transparent !important; }
 body.custom-bg .month-nav,
-body.custom-bg .dow-row {
-  background: transparent !important;
-}
-body.custom-bg .month-grid-wrap {
-  background: transparent !important;
-}
-body.custom-bg .month-cell {
-  background: rgba(255,255,255,0.38) !important;
-  backdrop-filter: blur(12px) saturate(150%);
-  -webkit-backdrop-filter: blur(12px) saturate(150%);
-  border: 1px solid rgba(255,255,255,0.45);
-}
-body.custom-bg .month-cell.empty-cell {
-  background: transparent !important;
-  backdrop-filter: none !important;
-  border: none !important;
-}
-body.custom-bg .week-nav-bar,
-body.custom-bg .week-strip-wrap {
-  background: rgba(255,255,255,0.55) !important;
-  backdrop-filter: blur(28px) saturate(180%);
-  -webkit-backdrop-filter: blur(28px) saturate(180%);
-}
-body.custom-bg .todo-item {
-  background: rgba(255,255,255,0.52) !important;
-  backdrop-filter: blur(16px) saturate(160%);
-  -webkit-backdrop-filter: blur(16px) saturate(160%);
-  border: 1px solid rgba(255,255,255,0.5);
-}
-body.custom-bg .sheet {
-  background: rgba(255,255,255,0.6) !important;
-  backdrop-filter: blur(36px) saturate(200%);
-  -webkit-backdrop-filter: blur(36px) saturate(200%);
-}
+body.custom-bg .dow-row { background: rgba(242,242,247,0.72) !important; }
+body.custom-bg .month-cell { background: rgba(255,255,255,0.52) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 0.5px solid rgba(255,255,255,0.5); }
+body.custom-bg .month-cell.empty-cell { background: transparent !important; backdrop-filter: none !important; border: none !important; }
+body.custom-bg .week-nav-bar, body.custom-bg .week-strip-wrap { background: rgba(242,242,247,0.78) !important; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
+body.custom-bg .todo-group { background: rgba(255,255,255,0.62) !important; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
+body.custom-bg .sheet { background: rgba(249,249,249,0.88) !important; backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); }
 body.custom-bg #view { background: transparent; }
-body.custom-bg .day-hdr-bar { background: transparent; }
 
-/* 텍스트 가시성: 어두운 배경에서도 잘 보이게 */
-body.custom-bg .tb-title,
-body.custom-bg .month-nav-lbl,
-body.custom-bg .month-num,
-body.custom-bg .wn-lbl,
-body.custom-bg .ws-dow,
-body.custom-bg .ws-num,
-body.custom-bg .dow-cell,
-body.custom-bg .dh-date,
-body.custom-bg .dh-sub,
-body.custom-bg .todo-title,
-body.custom-bg .todo-time,
-body.custom-bg .bnav-label,
-body.custom-bg .bnav-btn,
-body.custom-bg .seg-btn {
-  text-shadow: 0 1px 4px rgba(0,0,0,0.35);
+/* Animations */
+@keyframes sheet-up {
+  from { transform: translateY(30px); opacity: 0.8; }
+  to   { transform: translateY(0); opacity: 1; }
 }
-body.custom-bg .month-num:not(.today-num) {
-  color: var(--text) !important;
-}
-body.custom-bg .seg-btn { color: rgba(30,30,30,0.75); }
-body.custom-bg .seg-btn.active { color: var(--accent); }
-body.custom-bg .mnav-btn,
-body.custom-bg .wn-btn {
-  background: rgba(255,255,255,0.5) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
-body.custom-bg .prog-lbl { color: var(--accent); }
-body.custom-bg .tb-btn {
-  background: rgba(255,255,255,0.5) !important;
-  backdrop-filter: blur(8px);
-  -webkit-backdrop-filter: blur(8px);
-}
+.overlay.show .sheet { animation: sheet-up 0.3s cubic-bezier(0.32,0,0.67,0) forwards; }
 </style>
 </head>
 <body>
@@ -610,10 +821,10 @@ body.custom-bg .tb-btn {
       <div class="tb-actions">
         <div class="prog-pill">
           <div class="prog-ring">
-            <svg viewBox="0 0 22 22" width="22" height="22">
-              <circle class="prog-ring-bg" cx="11" cy="11" r="8"/>
-              <circle class="prog-ring-fill" id="prog-ring-fill" cx="11" cy="11" r="8"
-                stroke-dasharray="50.27" stroke-dashoffset="50.27"/>
+            <svg viewBox="0 0 20 20" width="20" height="20">
+              <circle class="prog-ring-bg" cx="10" cy="10" r="7"/>
+              <circle class="prog-ring-fill" id="prog-ring-fill" cx="10" cy="10" r="7"
+                stroke-dasharray="43.98" stroke-dashoffset="43.98"/>
             </svg>
           </div>
           <span class="prog-lbl" id="prog-lbl">0/0</span>
@@ -622,38 +833,41 @@ body.custom-bg .tb-btn {
           <span>🔥</span><span id="streak-num">0일</span>
         </div>
         <button class="tb-btn" onclick="openStats()" title="통계">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
         </button>
         <button class="tb-btn" onclick="openSettings()" title="설정">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+          <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
         </button>
       </div>
     </div>
-    <div class="seg" style="display:flex;align-items:center;justify-content:space-between">
-      <div style="display:flex">
-        <button class="seg-btn active" id="btn-month" onclick="setView('month')">월간</button>
-        <button class="seg-btn" id="btn-week" onclick="setView('week')">주간</button>
+    <div class="seg-row">
+      <div class="seg-wrap" style="padding:0">
+        <div class="seg">
+          <button class="seg-btn active" id="btn-month" onclick="setView('month')">월간</button>
+          <button class="seg-btn" id="btn-week" onclick="setView('week')">주간</button>
+        </div>
       </div>
-      <div id="today-btn-wrap" style="padding-right:8px;padding-bottom:4px"></div>
+      <div id="today-btn-wrap" style="padding-right:4px;padding-bottom:2px"></div>
     </div>
   </div>
 
   <!-- MAIN -->
   <div id="view"></div>
 
-  <!-- BOTTOM NAV -->
+  <!-- BOTTOM NAV — iOS Tab Bar -->
   <div id="bottom-nav">
     <button class="bnav-btn active" id="bnav-home" onclick="setView(currentView)">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="m3 9 9-7 9 7v11a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><polyline points="9 22 9 12 15 12 15 22"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
       <span class="bnav-label">홈</span>
     </button>
     <button class="bnav-fab" id="plus-btn">
       <div class="bnav-fab-inner">
-        <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.8" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
       </div>
+      <span class="bnav-fab-label">추가</span>
     </button>
     <button class="bnav-btn" onclick="openStats()">
-      <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <span class="bnav-label">통계</span>
     </button>
   </div>
@@ -672,10 +886,11 @@ body.custom-bg .tb-btn {
     <div class="info-group" id="detail-rows"></div>
     <div class="act-row">
       <button class="act-btn" id="detail-done-btn" onclick="toggleFromDetail()"></button>
-      <button class="act-btn" style="background:var(--accent-light);color:var(--accent)" onclick="openEditFromDetail()">수정</button>
-      <button class="act-btn" style="background:rgba(52,199,89,0.12);color:var(--green)" onclick="copyFromDetail()">복사</button>
-      <button class="act-btn" style="background:rgba(255,59,48,0.12);color:var(--red)" onclick="deleteFromDetail()">삭제</button>
+      <button class="act-btn" style="background:rgba(0,122,255,0.10);color:var(--accent)" onclick="openEditFromDetail()">수정</button>
+      <button class="act-btn" style="background:rgba(52,199,89,0.10);color:var(--ios-green)" onclick="copyFromDetail()">복사</button>
+      <button class="act-btn" style="background:rgba(255,59,48,0.10);color:var(--ios-red)" onclick="deleteFromDetail()">삭제</button>
     </div>
+    <div style="height:8px"></div>
   </div>
 </div>
 
@@ -686,12 +901,13 @@ body.custom-bg .tb-btn {
     <div class="day-panel-head">
       <span class="day-panel-title" id="day-panel-title"></span>
       <div style="display:flex;gap:8px;align-items:center">
-        <button class="act-btn" style="background:var(--accent);color:#fff;font-size:22px;padding:0;width:36px;height:36px;border-radius:50%;flex:none" onclick="dayPanelAdd()">+</button>
+        <button class="act-btn" style="background:var(--accent);color:#fff;font-size:18px;padding:0;width:32px;height:32px;border-radius:50%;flex:none;display:flex;align-items:center;justify-content:center" onclick="dayPanelAdd()">+</button>
         <button class="sheet-close" onclick="closeDayPanel()">✕</button>
       </div>
     </div>
-    <div class="sheet-divider" style="margin-bottom:10px"></div>
+    <div class="sheet-divider" style="margin-bottom:12px"></div>
     <div class="day-panel-cards" id="day-panel-cards"></div>
+    <div style="height:8px"></div>
   </div>
 </div>
 
@@ -703,7 +919,7 @@ body.custom-bg .tb-btn {
       <span class="sheet-title">설정</span>
       <button class="sheet-close" onclick="closeSettings()">✕</button>
     </div>
-    <div class="sheet-divider" style="margin-bottom:12px"></div>
+    <div class="sheet-divider" style="margin-bottom:0"></div>
     <div class="settings-section-lbl">배경 테마</div>
     <div class="bg-grid" id="bg-gradient-grid"></div>
     <div class="bg-custom-row">
@@ -714,7 +930,7 @@ body.custom-bg .tb-btn {
       <span class="bg-opacity-lbl">패널 투명도</span>
       <input type="range" class="bg-opacity-slider" id="bg-opacity-slider" min="5" max="100" value="100" oninput="applyPanelOpacity(this.value)" onchange="saveBgSettings()">
     </div>
-    <div class="sheet-divider" style="margin:4px 0 12px"></div>
+    <div class="sheet-divider" style="margin:4px 0 0"></div>
     <div class="settings-section-lbl">카테고리</div>
     <div id="cat-list"></div>
     <div style="margin:0 16px 16px">
@@ -741,48 +957,48 @@ body.custom-bg .tb-btn {
         <span class="fm-lbl">시간</span>
         <div id="time-inputs" style="display:flex;flex:1;align-items:center;min-width:0">
           <input class="fm-in" type="time" id="f-start" style="flex:1;text-align:center;min-width:0">
-          <span style="color:var(--text3);font-size:13px;padding:0 4px;flex-shrink:0">–</span>
+          <span style="color:var(--ios-label3);font-size:13px;padding:0 4px;flex-shrink:0">–</span>
           <input class="fm-in" type="time" id="f-end" style="flex:1;text-align:center;min-width:0">
         </div>
-        <span id="allday-txt" style="display:none;flex:1;color:var(--text3);font-size:14px;text-align:right;padding-right:6px;font-weight:700">하루종일</span>
+        <span id="allday-txt" style="display:none;flex:1;color:var(--ios-label3);font-size:14px;text-align:right;padding-right:6px;font-weight:400">하루종일</span>
         <input type="checkbox" id="f-allday" onchange="toggleAllDay(this.checked)" style="width:22px;height:22px;accent-color:var(--accent);cursor:pointer;flex-shrink:0;margin-left:10px">
       </div>
       <div class="fm-row">
-        <span class="fm-lbl" style="font-size:13px;width:auto;flex:1;color:var(--text2)">달력에 제목 표시</span>
+        <span class="fm-lbl" style="font-size:14px;width:auto;flex:1;color:var(--ios-label2)">달력에 제목 표시</span>
         <input type="checkbox" id="f-showtitle" style="width:22px;height:22px;accent-color:var(--accent);cursor:pointer">
       </div>
-      <div class="fm-row" style="border-bottom:none">
-        <span class="fm-lbl" style="font-size:13px;width:auto;flex:1;color:var(--text2)">🔁 루틴으로 설정</span>
+      <div class="fm-row" style="position:relative">
+        <span class="fm-lbl" style="font-size:14px;width:auto;flex:1;color:var(--ios-label2)">🔁 루틴으로 설정</span>
         <input type="checkbox" id="f-routine" onchange="toggleRoutine(this.checked)" style="width:22px;height:22px;accent-color:var(--accent);cursor:pointer">
       </div>
     </div>
-    <div id="routine-freq-box" style="display:none;margin:0 16px 12px">
-      <div style="font-size:12px;font-weight:700;color:var(--text3);margin-bottom:6px">반복 주기</div>
+    <div id="routine-freq-box" style="display:none;margin:0 16px 8px">
+      <div style="font-size:11px;font-weight:500;color:var(--ios-label3);margin-bottom:6px;text-transform:uppercase;letter-spacing:0.5px">반복 주기</div>
       <div class="freq-btns">
         <button type="button" class="freq-btn on" id="freq-daily" onclick="setRoutineFreq('daily')">매일</button>
         <button type="button" class="freq-btn" id="freq-weekly" onclick="setRoutineFreq('weekly')">매주</button>
         <button type="button" class="freq-btn" id="freq-monthly" onclick="setRoutineFreq('monthly')">매달</button>
       </div>
       <div style="display:flex;align-items:center;gap:10px;padding:0 0 4px">
-        <span style="font-size:12px;font-weight:700;color:var(--text3)">종료일</span>
-        <input type="date" id="f-routine-end" class="fm-in" style="flex:1;text-align:right;font-size:13px;background:var(--surface2);border:1.5px solid var(--border);border-radius:10px;padding:8px 10px;color:var(--text)">
+        <span style="font-size:14px;font-weight:400;color:var(--ios-label2)">종료일</span>
+        <input type="date" id="f-routine-end" class="fm-in" style="flex:1;text-align:right;font-size:14px;background:var(--ios-surface2);border:0.5px solid var(--ios-separator);border-radius:var(--radius-sm);padding:8px 10px;color:var(--ios-label)">
       </div>
     </div>
     <div class="fm-group" style="margin-top:0">
-      <div class="fm-row" style="align-items:flex-start;padding-top:13px;padding-bottom:13px">
+      <div class="fm-row" style="align-items:flex-start;padding-top:12px;padding-bottom:12px">
         <span class="fm-lbl">내용</span>
-        <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3" style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:var(--text2)"></textarea>
+        <textarea class="fm-in" id="f-content" placeholder="내용 입력" rows="3" style="resize:none;line-height:1.5;text-align:left;white-space:pre-wrap;font-size:14px;color:var(--ios-label2)"></textarea>
       </div>
       <div class="fm-row" style="flex-wrap:wrap;gap:6px">
-        <span class="fm-lbl" style="font-size:13px">사진</span>
+        <span class="fm-lbl" style="font-size:14px">사진</span>
         <div id="form-photo-preview" style="display:flex;flex-wrap:wrap;gap:6px;flex:1;align-items:center"></div>
-        <button type="button" onclick="document.getElementById('f-photo').click()" style="background:var(--accent-light);border:none;color:var(--accent);font-size:12px;font-weight:800;padding:6px 12px;border-radius:20px;cursor:pointer;flex-shrink:0">📷 추가</button>
+        <button type="button" onclick="document.getElementById('f-photo').click()" style="background:rgba(0,122,255,0.10);border:none;color:var(--accent);font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer;flex-shrink:0;font-family:var(--font)">📷 추가</button>
         <input type="file" id="f-photo" accept="image/*" multiple style="display:none" onchange="handlePhotoSelect(this)">
       </div>
-      <div class="fm-row" style="gap:6px">
-        <span class="fm-lbl" style="font-size:13px">링크</span>
+      <div class="fm-row" style="gap:6px;position:relative">
+        <span class="fm-lbl" style="font-size:14px">링크</span>
         <input class="fm-in" type="url" id="f-link-in" placeholder="https://" style="flex:1;text-align:left">
-        <button type="button" onclick="addFormLink()" style="background:var(--accent-light);border:none;color:var(--accent);font-size:12px;font-weight:800;padding:6px 12px;border-radius:20px;cursor:pointer;flex-shrink:0">추가</button>
+        <button type="button" onclick="addFormLink()" style="background:rgba(0,122,255,0.10);border:none;color:var(--accent);font-size:12px;font-weight:500;padding:6px 12px;border-radius:20px;cursor:pointer;flex-shrink:0;font-family:var(--font)">추가</button>
       </div>
       <div id="form-link-preview"></div>
     </div>
@@ -809,17 +1025,19 @@ body.custom-bg .tb-btn {
       </div>
     </div>
     <button class="submit-btn" id="submit-btn" onclick="submitAdd()">추가</button>
+    <div style="height:4px"></div>
   </div>
 </div>
 
 <!-- Copy Modal -->
 <div id="copy-modal">
   <div class="copy-box">
-    <h3>📋 일정 복사</h3>
+    <h3>일정 복사</h3>
+    <p>복사할 날짜를 선택하세요</p>
     <input type="date" class="copy-date-in" id="copy-date-in">
     <div class="copy-btns">
-      <button class="copy-btn" style="background:var(--surface2);color:var(--text2)" onclick="closeCopyModal()">취소</button>
-      <button class="copy-btn" style="background:var(--accent);color:#fff" onclick="confirmCopy()">복사</button>
+      <button class="copy-btn" onclick="closeCopyModal()">취소</button>
+      <button class="copy-btn" onclick="confirmCopy()">복사</button>
     </div>
   </div>
 </div>
@@ -898,7 +1116,7 @@ function cat(k){ return CAT[k]||CAT["기타"]||{bg:"#636366",light:"#EFEFEF",tex
 function updateProgress(){
   const done=events.filter(e=>e.done).length, total=events.length;
   document.getElementById("prog-lbl").textContent=done+"/"+total;
-  const r=8, circ=2*Math.PI*r, pct=total?done/total:0;
+  const r=7, circ=2*Math.PI*r, pct=total?done/total:0;
   document.getElementById("prog-ring-fill").style.strokeDashoffset=circ*(1-pct);
   updateStreakUI();
 }
@@ -943,7 +1161,7 @@ function todoItemHtml(ev){
   const prio=ev.priority||'none';
   const hasImg=ev.images&&ev.images.length, hasLnk=ev.links&&ev.links.length;
   return `<div class="todo-item${ev.done?' done-item':''}" onclick="openDetail(${ev.id})">
-    <div class="todo-color-bar" style="background:${ct.bg}"></div>
+    <div class="todo-color-accent" style="background:${ct.bg}"></div>
     <div class="todo-check-area">
       <button class="todo-check${ev.done?' checked':''}" onclick="event.stopPropagation();toggleDone(${ev.id})">${ev.done?'✓':''}</button>
     </div>
@@ -951,12 +1169,21 @@ function todoItemHtml(ev){
       <div class="todo-title${ev.done?' done':''}">${esc(ev.title)}</div>
       <div class="todo-meta">
         <span class="todo-cat-chip" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
-        ${tl?`<span class="todo-time">⏰ ${esc(tl)}</span>`:''}
+        ${tl?`<span class="todo-time">${esc(tl)}</span>`:''}
         ${(hasImg||hasLnk)?`<span class="todo-time">${hasImg?'📷':''} ${hasLnk?'🔗':''}</span>`:''}
       </div>
     </div>
-    ${prio!=='none'?`<div class="prio-dot-sm" style="background:${PRIO_COLORS[prio]}"></div>`:''}
+    <div class="todo-right">
+      ${prio!=='none'?`<div class="prio-dot-sm" style="background:${PRIO_COLORS[prio]}"></div>`:''}
+      <span class="todo-chevron">›</span>
+    </div>
   </div>`;
+}
+
+// Wrap a list of events into an iOS grouped card
+function todoGroupHtml(evs){
+  if(!evs.length) return '';
+  return `<div class="todo-group">${evs.map(ev=>todoItemHtml(ev)).join('')}</div>`;
 }
 
 /* MONTH */
@@ -981,7 +1208,7 @@ function renderMonth(){
     </div>
     <div class="dow-row">`;
   DAY_KR.forEach((d,i)=>{
-    const col = i===0?"var(--red)":i===6?"var(--blue)":"var(--text3)";
+    const col = i===0?"var(--ios-red)":i===6?"var(--ios-blue)":"var(--ios-label3)";
     h+=`<div class="dow-cell" style="color:${col}">${d}</div>`;
   });
   const numWeeks = cells.length / 7;
@@ -990,7 +1217,7 @@ function renderMonth(){
     if(!day){ h+=`<div class="month-cell empty-cell"></div>`; return; }
     const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
     const isT=ds===todayStr, dow=ci%7, evs=getEvs(ds);
-    const numColor=dow===0?"var(--red)":dow===6?"var(--blue)":"var(--text2)";
+    const numColor=dow===0?"var(--ios-red)":dow===6?"var(--ios-blue)":"var(--ios-label2)";
     h+=`<div class="month-cell" onclick="openDayPanel('${ds}')">
       <div class="month-num${isT?' today-num':''}" style="${!isT?`color:${numColor}`:''}">${day}</div>`;
     evs.forEach(ev=>{
@@ -1031,11 +1258,11 @@ function renderWeek(){
     const ds=fmt(d), isT=ds===todayStr, isSel=ds===selectedWeekDay;
     const hasEv=events.some(e=>e.date===ds);
     const evsDots=getEvs(ds).slice(0,3);
-    const dowColor=i===0?"var(--red)":i===6?"var(--blue)":"var(--text3)";
+    const dowColor=i===0?"var(--ios-red)":i===6?"var(--ios-blue)":"var(--ios-label3)";
     let numClass="ws-num"; if(isT) numClass+=" today"; else if(isSel) numClass+=" selected";
-    let numStyle=""; if(!isT&&!isSel) numStyle=`color:${i===0?"var(--red)":i===6?"var(--blue)":"var(--text2)"}`;
+    let numStyle=""; if(!isT&&!isSel) numStyle=`color:${i===0?"var(--ios-red)":i===6?"var(--ios-blue)":"var(--ios-label2)"}`;
     stripHtml+=`<div class="ws-day" onclick="selectWeekDay('${ds}')">
-      <span class="ws-dow" style="color:${isSel?'var(--accent)':dowColor};font-weight:${isSel?'900':'700'}">${DAY_KR[d.getDay()]}</span>
+      <span class="ws-dow" style="color:${isSel?'var(--accent)':dowColor};font-weight:${isSel?'600':'500'}">${DAY_KR[d.getDay()]}</span>
       <div class="${numClass}" style="${numStyle}">${d.getDate()}</div>
       <div class="ws-dot-row">${evsDots.map(e=>`<div class="ws-dot" style="background:${cat(e.category).bg}"></div>`).join('')}</div>
     </div>`;
@@ -1050,24 +1277,24 @@ function renderWeek(){
 
   let h=stripHtml+`<div class="day-hdr-bar">
     <div class="dh-left">
-      <div class="dh-date">${selD.getMonth()+1}월 ${selD.getDate()}일 <span style="font-size:15px;font-weight:700;color:var(--text3)">${DAY_KR[selD.getDay()]}요일</span>${isSelT?`<span style="font-size:10px;font-weight:800;background:var(--red);color:#fff;padding:2px 8px;border-radius:20px;margin-left:6px">오늘</span>`:""}</div>
+      <div class="dh-date">${selD.getMonth()+1}월 ${selD.getDate()}일 <span style="font-size:14px;font-weight:400;color:var(--ios-label3)">${DAY_KR[selD.getDay()]}요일</span>${isSelT?`<span style="font-size:10px;font-weight:600;background:var(--ios-red);color:#fff;padding:2px 8px;border-radius:20px;margin-left:6px;letter-spacing:-0.1px">오늘</span>`:""}</div>
       <div class="dh-sub">${selTotal?selDone+"/"+selTotal+" 완료":"일정 없음"}</div>
     </div>
     <div class="dh-right">
       <div class="dh-prog-ring">
-        <svg width="42" height="42" viewBox="0 0 42 42">
-          <circle class="dh-prog-bg" cx="21" cy="21" r="${r}"/>
-          <circle class="dh-prog-fill" cx="21" cy="21" r="${r}" stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
+        <svg width="38" height="38" viewBox="0 0 38 38">
+          <circle class="dh-prog-bg" cx="19" cy="19" r="${r}"/>
+          <circle class="dh-prog-fill" cx="19" cy="19" r="${r}" stroke-dasharray="${circ.toFixed(2)}" stroke-dashoffset="${offset.toFixed(2)}"/>
         </svg>
         <div class="dh-prog-txt">${selTotal?Math.round(selPct*100)+'%':''}</div>
       </div>
-      <button class="add-day-btn" onclick="openAdd('${selDs}')">+ 추가</button>
+      <button class="add-day-btn" onclick="openAdd('${selDs}')">추가</button>
     </div>
   </div>
   <div class="todo-list">`;
   h+=selEvs.length
-    ? selEvs.map(ev=>todoItemHtml(ev)).join("")
-    : `<div class="empty-state"><div class="empty-icon">🗓️</div><div class="empty-text">오늘의 할 일을 추가해보세요</div><div class="empty-sub">+ 추가 버튼을 눌러 시작하세요</div></div>`;
+    ? todoGroupHtml(selEvs)
+    : `<div class="empty-state"><div class="empty-icon">🗓️</div><div class="empty-text">일정이 없어요</div><div class="empty-sub">아래 추가 버튼을 눌러 시작하세요</div></div>`;
   h+=`</div>`;
   v.innerHTML=h;
 }
@@ -1157,7 +1384,7 @@ function refreshDetail(){
   const db=document.getElementById("detail-done-btn");
   db.textContent=ev.done?"미완료":"✓ 완료";
   db.style.background=ev.done?"rgba(142,142,147,0.12)":"rgba(52,199,89,0.12)";
-  db.style.color=ev.done?"var(--text3)":"var(--green)";
+  db.style.color=ev.done?"var(--ios-label3)":"var(--ios-green)";
 }
 function toggleFromDetail(){ if(selectedId) toggleDone(selectedId); }
 function openEditFromDetail(){ closeDetail(); setTimeout(()=>openEdit(selectedId),80); }
@@ -1181,7 +1408,7 @@ function refreshDayPanel(){
     container.innerHTML=`<div class="empty-state" style="padding:40px 0 20px"><div class="empty-icon">🗓️</div><div class="empty-text">일정이 없어요</div></div>`;
     return;
   }
-  container.innerHTML=evs.map(ev=>todoItemHtml(ev)).join("");
+  container.innerHTML=todoGroupHtml(evs);
 }
 
 /* ADD */
@@ -1414,7 +1641,7 @@ function applyBgPreset(idx){
   if(BG_PRESETS[idx].css==="none"){
     layer.style.background="none";
     document.body.classList.remove("custom-bg");
-    document.body.style.background="var(--bg)";
+    document.body.style.background="var(--ios-bg)";
   } else {
     layer.style.background=currentBgValue;
     document.body.classList.add("custom-bg");
@@ -1490,10 +1717,10 @@ function renderCatList(){
   let html="";
   CAT_GROUPS.forEach(g=>{
     if(g.group){
-      html+=`<div style="margin:0 16px 14px;border:1px solid var(--border);border-radius:14px;overflow:hidden;background:var(--surface2)">
-        <div style="padding:9px 14px;font-size:12px;font-weight:800;color:var(--accent);background:rgba(123,97,255,0.06);border-bottom:1px solid var(--border)">${g.group}</div>`;
+      html+=`<div style="margin:0 16px 14px;border:1px solid var(--ios-separator);border-radius:14px;overflow:hidden;background:var(--ios-surface2)">
+        <div style="padding:9px 14px;font-size:12px;font-weight:800;color:var(--accent);background:rgba(0,122,255,0.06);border-bottom:1px solid var(--ios-separator)">${g.group}</div>`;
       g.subs.forEach((s,i)=>{ const rowId=`catrow-${g.group}-${i}`; const isLast=i===g.subs.length-1;
-        html+=`<div class="cat-row" id="${rowId}" style="border-bottom:${isLast?"none":"1px solid var(--border)"}">
+        html+=`<div class="cat-row" id="${rowId}" style="border-bottom:${isLast?"none":"1px solid var(--ios-separator)"}">
           <div class="cat-color-dot" style="background:${s.color.bg}"><input type="color" value="${s.color.bg}" oninput="updateSubColor('${esc(g.group)}','${esc(s.name)}',this.value,'${rowId}')" onchange="updateSubColor('${esc(g.group)}','${esc(s.name)}',this.value,'${rowId}')"></div>
           <input class="cat-name-in" data-group="${esc(g.group)}" data-key="${esc(s.name)}" value="${esc(s.name)}" placeholder="카테고리명">
           <button class="cat-del-btn" onclick="deleteSub('${esc(g.group)}','${esc(s.name)}')" ${g.subs.length>1?"":"disabled"}>−</button>
@@ -1501,7 +1728,7 @@ function renderCatList(){
       html+=`</div>`;
     } else {
       const s=g.subs[0]; const rowId=`catrow-solo-${s.name}`;
-      html+=`<div class="cat-row" id="${rowId}" style="margin:0 16px 8px;border-radius:12px;background:var(--surface2);border:1px solid var(--border)">
+      html+=`<div class="cat-row" id="${rowId}" style="margin:0 16px 8px;border-radius:12px;background:var(--ios-surface2);border:1px solid var(--ios-separator)">
         <div class="cat-color-dot" style="background:${s.color.bg}"><input type="color" value="${s.color.bg}" oninput="updateSoloColor('${esc(s.name)}',this.value,'${rowId}')" onchange="updateSoloColor('${esc(s.name)}',this.value,'${rowId}')"></div>
         <input class="cat-name-in" data-group="" data-key="${esc(s.name)}" value="${esc(s.name)}" placeholder="카테고리명">
         <button class="cat-del-btn" onclick="deleteSoloGroup('${esc(s.name)}')">−</button>
@@ -1539,7 +1766,7 @@ function addFormLink(){ const inp=document.getElementById('f-link-in'); const ur
 function renderFormAttachPreview(){
   const pp=document.getElementById('form-photo-preview'); const lp=document.getElementById('form-link-preview'); if(!pp||!lp) return;
   pp.innerHTML=formPhotos.map((src,i)=>`<div class="attach-thumb-wrap"><img class="attach-thumb" src="${src}" style="width:48px;height:48px;border-radius:10px;object-fit:cover;cursor:pointer" onclick="window.open(this.src)"><button class="attach-del-btn" onclick="formPhotos.splice(${i},1);renderFormAttachPreview()">✕</button></div>`).join('');
-  lp.innerHTML=formLinks.length?`<div style="padding:4px 14px 4px">`+formLinks.map((url,i)=>`<div class="link-item"><span class="link-item-url">${esc(url)}</span><button onclick="formLinks.splice(${i},1);renderFormAttachPreview()" style="background:none;border:none;color:var(--text3);cursor:pointer;font-size:14px;flex-shrink:0">✕</button></div>`).join('')+`</div>`:'';
+  lp.innerHTML=formLinks.length?`<div style="padding:4px 14px 4px">`+formLinks.map((url,i)=>`<div class="link-item"><span class="link-item-url">${esc(url)}</span><button onclick="formLinks.splice(${i},1);renderFormAttachPreview()" style="background:none;border:none;color:var(--ios-label3);cursor:pointer;font-size:14px;flex-shrink:0">✕</button></div>`).join('')+`</div>`:'';
 }
 
 /* STREAK */
@@ -1573,7 +1800,7 @@ function renderHeatmap(){
   while(d<=today||d.getDay()!==0){ const weekCells=[]; for(let dow=0;dow<7;dow++){ const ds=fmtLocal(d); const isFuture=d>today; weekCells.push(isFuture?'rgba(0,0,0,0.03)':heatColor(dayMap[ds])); d.setDate(d.getDate()+1); if(d>today&&d.getDay()===0) break; } const ws=new Date(d); ws.setDate(ws.getDate()-7+1); const mo=ws.getMonth(); if(mo!==curMonth){monthLabels.push({mo,idx:cols.length});curMonth=mo;}else monthLabels.push(null); cols.push(weekCells); }
   const MO_KR=['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
   const DOW_SH=['일','월','화','수','목','금','토'];
-  let html=`<div class="heatmap-outer"><div class="heatmap-inner"><div class="heatmap-dow-col">${DOW_SH.map(d=>`<div class="heatmap-dow-lbl">${d}</div>`).join('')}</div><div class="heatmap-weeks"><div class="heatmap-month-row">${cols.map((c,i)=>{const m=monthLabels[i];return`<div style="width:12px;margin-right:3px;font-size:10px;color:var(--text3);white-space:nowrap;overflow:visible">${m?MO_KR[m.mo]:''}</div>`;}).join('')}</div><div class="heatmap-grid">${cols.map(cells=>`<div class="heatmap-col">${cells.map(c=>`<div class="heatmap-cell" style="background:${c}"></div>`).join('')}</div>`).join('')}</div></div></div></div>`;
+  let html=`<div class="heatmap-outer"><div class="heatmap-inner"><div class="heatmap-dow-col">${DOW_SH.map(d=>`<div class="heatmap-dow-lbl">${d}</div>`).join('')}</div><div class="heatmap-weeks"><div class="heatmap-month-row">${cols.map((c,i)=>{const m=monthLabels[i];return`<div style="width:12px;margin-right:3px;font-size:10px;color:var(--ios-label3);white-space:nowrap;overflow:visible">${m?MO_KR[m.mo]:''}</div>`;}).join('')}</div><div class="heatmap-grid">${cols.map(cells=>`<div class="heatmap-col">${cells.map(c=>`<div class="heatmap-cell" style="background:${c}"></div>`).join('')}</div>`).join('')}</div></div></div></div>`;
   chart.innerHTML=html;
   const totalAll=events.length,doneAll=events.filter(e=>e.done).length,streak=calcStreak();
   summary.innerHTML=`<div class="stats-card"><div class="stats-card-num">${doneAll}</div><div class="stats-card-lbl">완료된 일정</div></div><div class="stats-card"><div class="stats-card-num">${streak}🔥</div><div class="stats-card-lbl">연속 달성</div></div><div class="stats-card"><div class="stats-card-num">${totalAll?Math.round(doneAll/totalAll*100):0}%</div><div class="stats-card-lbl">전체 완료율</div></div>`;
@@ -1672,6 +1899,7 @@ window.addEventListener('popstate', e => {
     }
   }
 });
+</script>
 </script>
 </body>
 </html>
