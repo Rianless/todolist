@@ -94,8 +94,8 @@ html, body {
   max-width: 430px; margin: 0 auto;
   height: 100%;
   display: flex; flex-direction: column;
-  overflow: hidden; position: relative;
-  /* index.html 앱 배경 */
+  overflow: hidden;
+  position: relative; /* tab-panel absolute 기준점 */
   background: radial-gradient(circle at top left, rgba(10,132,255,.12), transparent 28%),
               linear-gradient(180deg, rgba(255,255,255,.72), rgba(244,245,249,.92));
 }
@@ -933,17 +933,18 @@ body.custom-bg #view { background: transparent; }
 /* ══ SIDE PANEL (구독/메모) — 옆으로 슬라이드 ══ */
 /* side-panel → tab-panel 으로 통합됨 */
 /* side-panel-nav/back/title/body 클래스는 tab-panel 내부에서도 사용 */
-/* ══ TAB PANELS (탭 전환 시스템) ══ */
+/* ══ TAB PANELS — #app 내부에서 absolute로 완전히 덮기 ══ */
 .tab-panel {
-  position: fixed;
-  top: 0; bottom: 0;
-  width: 100%; max-width: 430px;
+  position: absolute;
+  top: 0; left: 0; right: 0; bottom: 0;
+  width: 100%;
   background: var(--ios-bg);
   z-index: 45;
   display: flex; flex-direction: column;
   overflow: hidden;
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  /* #app이 overflow:hidden이므로 바깥은 잘림 */
 }
 .tab-panel.active {
   transform: translateX(0);
@@ -975,6 +976,7 @@ body.custom-bg #view { background: transparent; }
 }
 .side-panel-body {
   flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+  padding-bottom: 84px;
 }
 .side-panel-body::-webkit-scrollbar { display: none; }
 
@@ -3534,16 +3536,8 @@ function setupSidePanelSwipe(panelId, closeFn) {
 setupSidePanelSwipe('sub-overlay', closeSubView);
 setupSidePanelSwipe('memo-overlay', closeMemoView);
 function adjustAppHeight(){
-  const app=document.getElementById("app");
-  if(app){ app.style.height='100%'; }
-  const appRect = app ? app.getBoundingClientRect() : null;
-  document.querySelectorAll('.tab-panel').forEach(el => {
-    if (appRect) {
-      el.style.left = appRect.left + 'px';
-      el.style.width = appRect.width + 'px';
-    }
-    el.style.paddingBottom = '84px';
-  });
+  // tab-panel은 이제 #app 내부 absolute — 별도 위치 조정 불필요
+  // 리사이즈 시 renderView만 갱신
 }
 window.addEventListener("resize",()=>{ adjustAppHeight(); renderView(); });
 setTimeout(adjustAppHeight, 0);
