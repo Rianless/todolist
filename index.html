@@ -705,7 +705,11 @@ textarea.fm-in { text-align: left; resize: none; line-height: 1.5; }
 .stats-bar-bg { flex: 1; height: 8px; background: var(--ios-surface2); border-radius: 4px; overflow: hidden; }
 .stats-bar-fill { height: 100%; border-radius: 4px; background: linear-gradient(90deg, var(--accent), var(--ios-teal)); transition: width 0.6s cubic-bezier(0.4,0,0.2,1); }
 .stats-pct { font-size: 11px; font-weight: 600; color: var(--ios-label2); width: 32px; flex-shrink: 0; }
-.stats-summary { display: flex; gap: 10px; padding: 8px 16px 16px; }
+.stats-summary {
+  display: flex; gap: 10px; padding: 12px 16px 16px;
+  border-top: 0.5px solid var(--ios-separator);
+  background: var(--ios-surface);
+}
 .stats-card {
   flex: 1; background: var(--ios-surface2); border-radius: var(--radius-md);
   padding: 14px; text-align: center;
@@ -1618,6 +1622,7 @@ body.custom-bg #view { background: transparent; }
       <div class="sub-fm-row"><span class="sub-fm-lbl">메모</span><input class="sub-fm-in" type="text" id="sf-note" placeholder="선택사항"></div>
     </div>
     <button class="submit-btn" id="sub-submit-btn" onclick="submitSub()">추가</button>
+    <button id="sub-delete-btn" onclick="deleteSubscription()" style="display:none;width:calc(100%-32px);margin:0 16px 8px;padding:14px;border-radius:var(--radius-lg);border:none;background:rgba(255,59,48,0.10);color:var(--ios-red);font-size:16px;font-weight:600;cursor:pointer;font-family:var(--font)">구독 삭제</button>
     <div style="height:4px"></div>
   </div>
 </div>
@@ -1647,14 +1652,18 @@ body.custom-bg #view { background: transparent; }
       <div style="width:52px"></div>
     </div>
   </div>
-  <div class="side-panel-body" style="padding-bottom:80px">
-    <div class="stats-seg">
-      <button class="stats-seg-btn active" id="stats-btn-week" onclick="setStatsMode('week')">주별</button>
-      <button class="stats-seg-btn" id="stats-btn-month" onclick="setStatsMode('month')">월별</button>
-      <button class="stats-seg-btn" id="stats-btn-heatmap" onclick="setStatsMode('heatmap')">잔디</button>
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
+    <div style="flex-shrink:0">
+      <div class="stats-seg">
+        <button class="stats-seg-btn active" id="stats-btn-week" onclick="setStatsMode('week')">주별</button>
+        <button class="stats-seg-btn" id="stats-btn-month" onclick="setStatsMode('month')">월별</button>
+        <button class="stats-seg-btn" id="stats-btn-heatmap" onclick="setStatsMode('heatmap')">잔디</button>
+      </div>
     </div>
-    <div class="stats-chart" id="stats-chart"></div>
-    <div class="stats-summary" id="stats-summary"></div>
+    <div class="side-panel-body" style="flex:1;min-height:0">
+      <div class="stats-chart" id="stats-chart"></div>
+    </div>
+    <div class="stats-summary" id="stats-summary" style="flex-shrink:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)"></div>
   </div>
 </div>
 
@@ -1755,7 +1764,10 @@ function timeLbl(ev){
 }
 
 function todoItemHtml(ev){
-  const ct=cat(ev.category), tl=timeLbl(ev);
+  const isSub = !!ev['__sub__'];
+  const accentColor = isSub ? (ev._color || '#FF2D55') : null;
+  const ct = isSub ? { bg: accentColor, light: accentColor + '22', text: accentColor } : cat(ev.category);
+  const tl=timeLbl(ev);
   const prio=ev.priority||'none';
   const hasImg=ev.images&&ev.images.length, hasLnk=ev.links&&ev.links.length;
   return `<div class="todo-item${ev.done?' done-item':''}" onclick="openDetail(${ev.id})">
@@ -1766,7 +1778,10 @@ function todoItemHtml(ev){
     <div class="todo-body">
       <div class="todo-title${ev.done?' done':''}">${esc(ev.title)}</div>
       <div class="todo-meta">
-        <span class="todo-cat-chip" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>
+        ${isSub
+          ? `<span class="todo-cat-chip" style="background:${accentColor}22;color:${accentColor}">💳 구독</span>`
+          : `<span class="todo-cat-chip" style="background:${ct.light};color:${ct.text}">${esc(ev.category)}</span>`
+        }
         ${tl?`<span class="todo-time">${esc(tl)}</span>`:''}
         ${(hasImg||hasLnk)?`<span class="todo-time">${hasImg?'📷':''} ${hasLnk?'🔗':''}</span>`:''}
       </div>
@@ -1819,10 +1834,11 @@ function renderMonth(){
     h+=`<div class="month-cell" onclick="openDayPanel('${ds}')">
       <div class="month-num${isT?' today-num':''}" style="${!isT?`color:${numColor}`:''}">${day}</div>`;
     evs.forEach(ev=>{
-      const c=cat(ev.category);
+      const isSub2 = !!ev['__sub__'];
+      const c = isSub2 ? { bg: ev._color || '#FF2D55' } : cat(ev.category);
       h+=`<div class="month-ev" draggable="true" data-evid="${ev.id}" style="background:${c.bg};opacity:${ev.done?.4:1}" onclick="event.stopPropagation();openDetail(${ev.id})">
         ${ev.startTime?`<span class="month-ev-time">${esc(ev.startTime)}</span>`:''}
-        ${ev.showTitle?`<span class="month-ev-title">${esc(ev.title)}</span>`:''}
+        ${(ev.showTitle||isSub2)?`<span class="month-ev-title">${esc(ev.title)}</span>`:''}
       </div>`;
     });
     h+=`</div>`;
@@ -1953,12 +1969,35 @@ function deleteDone(id){ events=events.filter(e=>e.id!==id); saveEvents(); rende
 /* DETAIL */
 function openDetail(id){ selectedId=id; refreshDetail(); document.getElementById("detail-overlay").classList.add("show"); }
 function closeDetail(){ document.getElementById("detail-overlay").classList.remove("show"); }
+function toggleFromDetail(){ if(selectedId) toggleDone(selectedId); }
+function openEditFromDetail(){
+  const ev = events.find(e => e.id === selectedId);
+  if (ev && ev['__sub__']) {
+    closeDetail();
+    setTimeout(() => openSubView(), 80);
+    return;
+  }
+  closeDetail(); setTimeout(()=>openEdit(selectedId),80);
+}
+function deleteFromDetail(){
+  if(!selectedId) return;
+  const ev = events.find(e => e.id === selectedId);
+  if (ev && ev['__sub__']) {
+    alert('구독 결제일은 구독 탭에서 삭제할 수 있어요.');
+    return;
+  }
+  events=events.filter(e=>e.id!==selectedId); saveEvents(); closeDetail(); renderView();
+}
+
 function refreshDetail(){
   const ev=events.find(e=>e.id===selectedId); if(!ev) return;
-  const ct=cat(ev.category);
+  const isSub = !!ev['__sub__'];
+  const accentColor = isSub ? (ev._color || '#FF2D55') : null;
+  const ct = isSub ? { bg: accentColor, light: accentColor + '22', text: accentColor } : cat(ev.category);
   document.getElementById("detail-bar").style.background=ct.bg;
   const ce=document.getElementById("detail-cat");
-  ce.textContent=ev.category; ce.style.background=ct.light; ce.style.color=ct.text;
+  ce.textContent = isSub ? ('💳 구독') : ev.category;
+  ce.style.background=ct.light; ce.style.color=ct.text;
   document.getElementById("detail-title").textContent=ev.title;
   const prio=ev.priority||'none';
   const rows=[
@@ -1986,10 +2025,15 @@ function refreshDetail(){
   db.textContent=ev.done?"미완료":"✓ 완료";
   db.style.background=ev.done?"rgba(142,142,147,0.12)":"rgba(52,199,89,0.12)";
   db.style.color=ev.done?"var(--ios-label3)":"var(--ios-green)";
+
+  // 구독 이벤트는 수정 버튼 → '구독 관리'로, 삭제 버튼 숨김
+  const editBtn = document.querySelector('#detail-sheet .act-btn[onclick="openEditFromDetail()"]');
+  const copyBtn = document.querySelector('#detail-sheet .act-btn[onclick="copyFromDetail()"]');
+  const delBtn  = document.querySelector('#detail-sheet .act-btn[onclick="deleteFromDetail()"]');
+  if (editBtn) { editBtn.textContent = isSub ? '구독 관리' : '수정'; }
+  if (copyBtn) { copyBtn.style.display = isSub ? 'none' : ''; }
+  if (delBtn)  { delBtn.style.display  = isSub ? 'none' : ''; }
 }
-function toggleFromDetail(){ if(selectedId) toggleDone(selectedId); }
-function openEditFromDetail(){ closeDetail(); setTimeout(()=>openEdit(selectedId),80); }
-function deleteFromDetail(){ if(!selectedId) return; events=events.filter(e=>e.id!==selectedId); saveEvents(); closeDetail(); renderView(); }
 
 /* DAY PANEL */
 function openDayPanel(ds){
@@ -2461,10 +2505,30 @@ function setStatsMode(mode){ statsMode=mode; ['week','month','heatmap'].forEach(
 function renderStats(){
   const today=new Date(getTodayStr()); const chart=document.getElementById('stats-chart'); const summary=document.getElementById('stats-summary'); if(!chart||!summary) return;
   let bars=[];
-  if(statsMode==='week'){ for(let w=6;w>=0;w--){ const end=new Date(today); end.setDate(end.getDate()-w*7); const start=new Date(end); start.setDate(start.getDate()-6); const label=(start.getMonth()+1)+'/'+(start.getDate()); const dayEvs=events.filter(e=>{const ed=new Date(e.date);return ed>=start&&ed<=end;}); const done=dayEvs.filter(e=>e.done).length,total=dayEvs.length; bars.push({label,done,total,pct:total?Math.round(done/total*100):0}); } }
-  else { for(let mo=0;mo<=5;mo++){ const d=new Date(today.getFullYear(),today.getMonth()+mo,1); const y=d.getFullYear(),m=d.getMonth(); const dayEvs=events.filter(e=>{const[ey,em]=e.date.split('-').map(Number);return ey===y&&em-1===m;}); const done=dayEvs.filter(e=>e.done).length,total=dayEvs.length; bars.push({label:(m+1)+'월',done,total,pct:total?Math.round(done/total*100):0}); } }
+  if(statsMode==='week'){
+    // 오늘 포함 주 기준, 과거 6주 → 오늘 주 순서로
+    const todayWeekStart = weekStart(today);
+    for(let w=6;w>=0;w--){
+      const ws=new Date(todayWeekStart); ws.setDate(ws.getDate()-w*7);
+      const we=new Date(ws); we.setDate(we.getDate()+6);
+      const label=(ws.getMonth()+1)+'/'+(ws.getDate());
+      const dayEvs=events.filter(e=>{ const ed=new Date(e.date+'T00:00:00'); return ed>=ws&&ed<=we; });
+      const done=dayEvs.filter(e=>e.done).length, total=dayEvs.length;
+      bars.push({label,done,total,pct:total?Math.round(done/total*100):0});
+    }
+  } else {
+    // 오늘 달 기준, 과거 5달 → 오늘 달 순서로
+    for(let mo=5;mo>=0;mo--){
+      const d=new Date(today.getFullYear(),today.getMonth()-mo,1);
+      const y=d.getFullYear(),m=d.getMonth();
+      const dayEvs=events.filter(e=>{const[ey,em]=e.date.split('-').map(Number);return ey===y&&em-1===m;});
+      const done=dayEvs.filter(e=>e.done).length,total=dayEvs.length;
+      bars.push({label:(m+1)+'월',done,total,pct:total?Math.round(done/total*100):0});
+    }
+  }
   chart.innerHTML=bars.map(b=>`<div class="stats-row"><span class="stats-lbl">${b.label}</span><div class="stats-bar-bg"><div class="stats-bar-fill" style="width:${b.pct}%"></div></div><span class="stats-pct">${b.total?b.pct+'%':'–'}</span></div>`).join('');
-  const totalAll=events.length,doneAll=events.filter(e=>e.done).length,streak=calcStreak();
+  const realEvs=events.filter(e=>!e['__sub__']);
+  const totalAll=realEvs.length,doneAll=realEvs.filter(e=>e.done).length,streak=calcStreak();
   summary.innerHTML=`<div class="stats-card"><div class="stats-card-num">${doneAll}</div><div class="stats-card-lbl">완료된 일정</div></div><div class="stats-card"><div class="stats-card-num">${totalAll?Math.round(doneAll/totalAll*100):0}%</div><div class="stats-card-lbl">전체 완료율</div></div><div class="stats-card"><div class="stats-card-num">${streak}🔥</div><div class="stats-card-lbl">연속 달성</div></div>`;
 }
 function renderHeatmap(){
@@ -2478,7 +2542,8 @@ function renderHeatmap(){
   const DOW_SH=['일','월','화','수','목','금','토'];
   let html=`<div class="heatmap-outer"><div class="heatmap-inner"><div class="heatmap-dow-col">${DOW_SH.map(d=>`<div class="heatmap-dow-lbl">${d}</div>`).join('')}</div><div class="heatmap-weeks"><div class="heatmap-month-row">${cols.map((c,i)=>{const m=monthLabels[i];return`<div style="width:12px;margin-right:3px;font-size:10px;color:var(--ios-label3);white-space:nowrap;overflow:visible">${m?MO_KR[m.mo]:''}</div>`;}).join('')}</div><div class="heatmap-grid">${cols.map(cells=>`<div class="heatmap-col">${cells.map(c=>`<div class="heatmap-cell" style="background:${c}"></div>`).join('')}</div>`).join('')}</div></div></div></div>`;
   chart.innerHTML=html;
-  const totalAll=events.length,doneAll=events.filter(e=>e.done).length,streak=calcStreak();
+  const realEvs2=events.filter(e=>!e['__sub__']);
+  const totalAll=realEvs2.length,doneAll=realEvs2.filter(e=>e.done).length,streak=calcStreak();
   summary.innerHTML=`<div class="stats-card"><div class="stats-card-num">${doneAll}</div><div class="stats-card-lbl">완료된 일정</div></div><div class="stats-card"><div class="stats-card-num">${streak}🔥</div><div class="stats-card-lbl">연속 달성</div></div><div class="stats-card"><div class="stats-card-num">${totalAll?Math.round(doneAll/totalAll*100):0}%</div><div class="stats-card-lbl">전체 완료율</div></div>`;
 }
 
@@ -2882,6 +2947,7 @@ function openAddSub() {
   selectedSubEmoji = '💳';
   document.getElementById('add-sub-title').textContent = '구독 추가';
   document.getElementById('sub-submit-btn').textContent = '추가';
+  document.getElementById('sub-delete-btn').style.display = 'none';
   document.getElementById('sf-name').value = '';
   document.getElementById('sf-amount').value = '';
   document.getElementById('sf-cycle').value = 'monthly';
@@ -2904,6 +2970,7 @@ function editSub(id) {
   selectedSubEmoji = sub.icon || '💳';
   document.getElementById('add-sub-title').textContent = '구독 수정';
   document.getElementById('sub-submit-btn').textContent = '저장';
+  document.getElementById('sub-delete-btn').style.display = 'block';
   document.getElementById('sf-name').value = sub.name;
   document.getElementById('sf-amount').value = sub.amount;
   document.getElementById('sf-cycle').value = sub.cycle || 'monthly';
@@ -2913,6 +2980,17 @@ function editSub(id) {
   renderEmojiGrid();
   document.getElementById('add-sub-overlay').classList.add('show');
   pushOverlayHistory('add-sub-overlay');
+}
+
+function deleteSubscription() {
+  if (subEditingId === null) return;
+  if (!confirm('이 구독을 삭제할까요? 달력의 결제일 일정도 함께 삭제됩니다.')) return;
+  subscriptions = subscriptions.filter(s => s.id !== subEditingId);
+  saveSubs();
+  syncSubsToCalendar();
+  closeAddSub();
+  renderSubView();
+  renderView();
 }
 
 function renderEmojiGrid() {
@@ -2942,9 +3020,103 @@ function submitSub() {
     subscriptions.push({ id: Date.now(), ...data });
   }
   saveSubs();
+  syncSubsToCalendar();
   closeAddSub();
   renderSubView();
+  renderView();
 }
+
+/* ════════════════════════════════════════════
+   SUBSCRIPTION ↔ CALENDAR SYNC
+   구독 결제일을 캘린더 이벤트로 자동 반영
+   ════════════════════════════════════════════ */
+
+// 구독 이벤트임을 구분하는 마커
+const SUB_EVENT_TAG = '__sub__';
+
+// 구독 색상 (카테고리별)
+function getSubColor(category) {
+  const map = {
+    '엔터테인먼트': '#FF2D55',
+    '음악':         '#AF52DE',
+    '앱/소프트웨어':'#007AFF',
+    '뉴스/도서':    '#FF9500',
+    '쇼핑':         '#34C759',
+    '피트니스':     '#FF6B35',
+    '교육':         '#5856D6',
+    '기타':         '#8E8E93',
+  };
+  return map[category] || '#8E8E93';
+}
+
+// 구독의 결제 날짜 문자열 목록 생성 (오늘~12개월)
+function getSubPayDates(sub) {
+  const dates = [];
+  const today = new Date();
+  const y = today.getFullYear(), m = today.getMonth();
+
+  if (sub.cycle === 'monthly') {
+    for (let i = 0; i < 12; i++) {
+      const d = new Date(y, m + i, Math.min(sub.payDay, new Date(y, m + i + 1, 0).getDate()));
+      dates.push(fmtLocal(d));
+    }
+  } else if (sub.cycle === 'yearly') {
+    // 연간: 현재 연도 + 내년에 한 번씩
+    for (let i = 0; i <= 1; i++) {
+      const baseDate = sub.startMonth
+        ? new Date(y + i, (sub.startMonth - 1), Math.min(sub.payDay, 28))
+        : new Date(y + i, m, Math.min(sub.payDay, 28));
+      dates.push(fmtLocal(baseDate));
+    }
+  } else if (sub.cycle === 'weekly') {
+    // 주간: 오늘부터 52주
+    let d = new Date(today);
+    for (let i = 0; i < 52; i++) {
+      dates.push(fmtLocal(d));
+      d.setDate(d.getDate() + 7);
+    }
+  }
+  return dates;
+}
+
+// 모든 구독을 캘린더와 동기화
+function syncSubsToCalendar() {
+  // 기존 구독 이벤트 모두 제거
+  events = events.filter(ev => !ev[SUB_EVENT_TAG]);
+
+  // 각 구독에 대해 결제일 이벤트 생성
+  subscriptions.forEach(sub => {
+    const color = getSubColor(sub.category);
+    const payDates = getSubPayDates(sub);
+    payDates.forEach(date => {
+      events.push({
+        id: nextId++,
+        [SUB_EVENT_TAG]: true,
+        subId: sub.id,
+        done: false,
+        date,
+        title: `${sub.icon || '💳'} ${sub.name} 결제일`,
+        content: `₩${sub.amount.toLocaleString()} · ${sub.cycle === 'monthly' ? '월간' : sub.cycle === 'yearly' ? '연간' : '주간'}${sub.note ? ' · ' + sub.note : ''}`,
+        category: sub.category,
+        _color: color,
+        showTitle: true,
+        allDay: true,
+        priority: 'none',
+      });
+    });
+  });
+
+  saveEvents();
+}
+
+// 앱 시작 시 기존 구독 이벤트 동기화
+idbGet('subscriptions_v1').then(saved => {
+  if (saved) {
+    try { subscriptions = JSON.parse(saved); } catch(e) {}
+    syncSubsToCalendar();
+    renderView();
+  }
+}).catch(() => {});
 
 // Register sub overlays in OVERLAYS list and history management
 // (patched after OVERLAYS is defined below)
@@ -3345,5 +3517,6 @@ window.addEventListener('popstate', e => {
 </script>
 </body>
 </html>
+
 
 
