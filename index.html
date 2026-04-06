@@ -874,27 +874,26 @@ body.custom-bg #view { background: transparent; }
 .month-cell { padding-top: 4px; }
 
 /* ══ SIDE PANEL (구독/메모) — 옆으로 슬라이드 ══ */
-.side-panel {
-  position: fixed; top: 0; right: 0; bottom: 0;
-  width: 100%; max-width: 430px;
+/* side-panel → tab-panel 으로 통합됨 */
+/* side-panel-nav/back/title/body 클래스는 tab-panel 내부에서도 사용 */
+/* ══ TAB PANELS (탭 전환 시스템) ══ */
+.tab-panel {
+  position: fixed;
+  top: 0; left: 0; right: 0; bottom: 0;
+  max-width: 430px; margin: 0 auto;
   background: var(--ios-bg);
-  z-index: 100;
-  transform: translateX(100%);
-  transition: transform 0.32s cubic-bezier(0.32,0,0.67,0);
+  z-index: 45;
   display: flex; flex-direction: column;
   overflow: hidden;
+  transform: translateX(100%);
+  transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
+  will-change: transform;
 }
-.side-panel.show {
+.tab-panel.active {
   transform: translateX(0);
 }
-/* push main app content left when panel opens */
-#app.panel-open {
-  transform: translateX(-40px);
-  transition: transform 0.32s cubic-bezier(0.32,0,0.67,0);
-}
-#app {
-  transition: transform 0.32s cubic-bezier(0.32,0,0.67,0);
-}
+
+/* panel-open: no transform on #app */
 .side-panel-nav {
   background: rgba(255,255,255,0.95);
   backdrop-filter: blur(20px) saturate(180%);
@@ -1148,7 +1147,7 @@ body.custom-bg #view { background: transparent; }
 /* Todo list scroll area */
 .memo-list-wrap {
   flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 4px 0 80px;
+  padding: 4px 0 100px;
 }
 .memo-list-wrap::-webkit-scrollbar { display: none; }
 
@@ -1295,7 +1294,7 @@ body.custom-bg #view { background: transparent; }
   <!-- BOTTOM NAV — iOS Tab Bar (5탭 대칭) -->
   <div id="bottom-nav" class="five-tabs">
     <!-- 홈 -->
-    <button class="bnav-btn active" id="bnav-home" onclick="setView(currentView)">
+    <button class="bnav-btn active" id="bnav-home" onclick="switchTab(null);setView(currentView)">
       <svg width="22" height="22" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
       <span class="bnav-label">홈</span>
     </button>
@@ -1486,7 +1485,7 @@ body.custom-bg #view { background: transparent; }
 </div>
 
 <!-- Memo / Todo View Side Panel -->
-<div class="side-panel" id="memo-overlay">
+<div class="tab-panel" id="memo-overlay">
   <div class="side-panel-nav">
     <div class="side-panel-nav-row">
       <button class="side-panel-back" onclick="closeMemoView()">
@@ -1546,7 +1545,7 @@ body.custom-bg #view { background: transparent; }
 </div>
 
 <!-- Subscription View Side Panel -->
-<div class="side-panel" id="sub-overlay">
+<div class="tab-panel" id="sub-overlay">
   <div class="side-panel-nav">
     <div class="side-panel-nav-row">
       <button class="side-panel-back" onclick="closeSubView()">
@@ -1636,14 +1635,19 @@ body.custom-bg #view { background: transparent; }
   </div>
 </div>
 
-<!-- Stats Overlay -->
-<div class="overlay" id="stats-overlay" onclick="closeStats()">
-  <div class="sheet" id="stats-sheet" onclick="event.stopPropagation()">
-    <div class="handle"></div>
-    <div class="sheet-hdr">
-      <span class="sheet-title">완료율 통계</span>
-      <button class="sheet-close" onclick="closeStats()">✕</button>
+<!-- Stats Side Panel -->
+<div class="tab-panel" id="stats-overlay">
+  <div class="side-panel-nav">
+    <div class="side-panel-nav-row">
+      <button class="side-panel-back" onclick="closeStats()">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M9 1L1 8.5L9 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        홈
+      </button>
+      <span class="side-panel-title" style="text-align:center">완료율 통계</span>
+      <div style="width:52px"></div>
     </div>
+  </div>
+  <div class="side-panel-body" style="padding-bottom:80px">
     <div class="stats-seg">
       <button class="stats-seg-btn active" id="stats-btn-week" onclick="setStatsMode('week')">주별</button>
       <button class="stats-seg-btn" id="stats-btn-month" onclick="setStatsMode('month')">월별</button>
@@ -2213,13 +2217,14 @@ setupSwipe("detail-overlay","detail-sheet",closeDetail);
 setupSwipe("day-overlay","day-sheet",closeDayPanel);
 setupSwipe("settings-overlay","settings-sheet",closeSettings);
 setupSwipe("add-overlay","add-sheet",closeAdd);
-setupSwipe("stats-overlay","stats-sheet",closeStats);
 
 /* SIDE PANEL SWIPE (오른쪽으로 스와이프 → 닫기) */
 function setupSidePanelSwipe(panelId, closeFn) {
   const panel = document.getElementById(panelId);
+  if (!panel) return;
   let startX = 0, currentX = 0, dragging = false;
   panel.addEventListener('touchstart', e => {
+    if (!panel.classList.contains('active')) return;
     startX = e.touches[0].clientX;
     currentX = 0; dragging = true;
     panel.style.transition = 'none';
@@ -2230,25 +2235,20 @@ function setupSidePanelSwipe(panelId, closeFn) {
     if (dx < 0) { dragging = false; panel.style.transform = ''; return; }
     currentX = dx;
     panel.style.transform = `translateX(${dx}px)`;
-    const app = document.getElementById('app');
-    app.style.transform = `translateX(${-40 + (dx / panel.offsetWidth) * 40}px)`;
   }, { passive: true });
   panel.addEventListener('touchend', () => {
     if (!dragging) return;
     dragging = false;
     panel.style.transition = '';
-    const app = document.getElementById('app');
-    app.style.transition = '';
     if (currentX > 80) {
       panel.style.transform = 'translateX(100%)';
-      app.style.transform = '';
-      setTimeout(() => { panel.style.transform = ''; closeFn(); }, 300);
+      setTimeout(() => { panel.style.transform = ''; closeFn(); }, 280);
     } else {
       panel.style.transform = '';
-      app.style.transform = 'translateX(-40px)';
     }
   });
 }
+setupSidePanelSwipe('stats-overlay', closeStats);
 setupSidePanelSwipe('sub-overlay', closeSubView);
 setupSidePanelSwipe('memo-overlay', closeMemoView);
 
@@ -2425,8 +2425,38 @@ function closeCopyModal(){ document.getElementById('copy-modal').classList.remov
 function confirmCopy(){ if(!copyingId) return; const ev=events.find(e=>e.id===copyingId); if(!ev){closeCopyModal();return;} const newDate=document.getElementById('copy-date-in').value; if(!newDate){alert('날짜를 선택해주세요');return;} events.push({...ev,id:nextId++,date:newDate,done:false}); saveEvents(); renderView(); closeCopyModal(); }
 
 /* STATS */
-function openStats(){ renderStats(); document.getElementById('stats-overlay').classList.add('show'); }
-function closeStats(){ document.getElementById('stats-overlay').classList.remove('show'); }
+/* ══ 탭 전환 시스템 ══
+   홈(캘린더), 통계, 구독, 메모 — 한 번에 하나만 active */
+const TAB_PANELS = ['stats-overlay', 'sub-overlay', 'memo-overlay'];
+
+function switchTab(tabId) {
+  // 현재 열린 패널 닫기
+  TAB_PANELS.forEach(id => {
+    document.getElementById(id).classList.remove('active');
+  });
+  if (tabId) {
+    document.getElementById(tabId).classList.add('active');
+  }
+  // bnav 활성 상태
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  const bnavMap = {
+    null: 'bnav-home',
+    'stats-overlay': 'bnav-stats',
+    'sub-overlay': 'bnav-sub',
+    'memo-overlay': 'bnav-memo',
+  };
+  const bnavId = bnavMap[tabId] || 'bnav-home';
+  const bnavEl = document.getElementById(bnavId);
+  if (bnavEl) bnavEl.classList.add('active');
+}
+
+function openStats(){
+  renderStats();
+  switchTab('stats-overlay');
+}
+function closeStats(){
+  switchTab(null);
+}
 function setStatsMode(mode){ statsMode=mode; ['week','month','heatmap'].forEach(m=>{ const b=document.getElementById('stats-btn-'+m); if(b) b.classList.toggle('active',m===mode); }); if(mode==='heatmap') renderHeatmap(); else renderStats(); }
 function renderStats(){
   const today=new Date(getTodayStr()); const chart=document.getElementById('stats-chart'); const summary=document.getElementById('stats-summary'); if(!chart||!summary) return;
@@ -2563,9 +2593,9 @@ function injectMultiDayBars() {
     if (!firstCellEl) continue;
     const firstRect = firstCellEl.getBoundingClientRect();
 
-    // Cell width and row top relative to wrap
+    // Cell width and row top relative to wrap (scroll-aware)
     const cellW = firstRect.width;
-    const rowTop = firstRect.top - wrapRect.top + 22; // below date number
+    const rowTop = firstRect.top - wrapRect.top + wrap.scrollTop + 22; // below date number
 
     // Assign lanes (simple greedy)
     const lanes = []; // lanes[i] = end date of last event assigned to lane i
@@ -2752,17 +2782,11 @@ function getNextPaymentDate(sub) {
 
 function openSubView() {
   renderSubView();
-  document.getElementById('sub-overlay').classList.add('show');
-  document.getElementById('app').classList.add('panel-open');
-  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('bnav-sub').classList.add('active');
+  switchTab('sub-overlay');
   pushOverlayHistory('sub-overlay');
 }
 function closeSubView() {
-  document.getElementById('sub-overlay').classList.remove('show');
-  document.getElementById('app').classList.remove('panel-open');
-  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
-  document.getElementById('bnav-home').classList.add('active');
+  switchTab(null);
   if (isTopOverlay('sub-overlay')) history.back();
 }
 
@@ -2974,21 +2998,22 @@ function getAllTodos() {
 /* ── open/close ── */
 function openMemoView() {
   renderMemoView();
-  document.getElementById('memo-overlay').classList.add('show');
-  document.getElementById('app').classList.add('panel-open');
-  setAllBnavInactive();
-  document.getElementById('bnav-memo').classList.add('active');
+  switchTab('memo-overlay');
   pushOverlayHistory('memo-overlay');
 }
 function closeMemoView() {
-  document.getElementById('memo-overlay').classList.remove('show');
-  document.getElementById('app').classList.remove('panel-open');
-  setAllBnavInactive();
-  document.getElementById('bnav-home').classList.add('active');
+  switchTab(null);
   if (isTopOverlay('memo-overlay')) history.back();
 }
 function openMemoDetail(id) {
   selectedMemoId = id;
+  // id가 'ev_' 로 시작하면 이벤트 상세로 이동
+  if (typeof id === 'string' && id.startsWith('ev_')) {
+    const evId = parseInt(id.slice(3));
+    closeMemoView();
+    setTimeout(() => openDetail(evId), 80);
+    return;
+  }
   const m = memos.find(x => x.id === id);
   if (!m) return;
   memoEditingId = id;
@@ -3119,6 +3144,7 @@ function toggleMemo(id) {
   memos = memos.map(m => m.id === id ? { ...m, done: !m.done } : m);
   saveMemos();
   renderMemoView();
+  renderView(); // 캘린더 진행률 업데이트
 }
 
 function toggleMemoFromDetail() {
@@ -3193,6 +3219,38 @@ function pickMemoCat(c) { memoAddCat = c; renderMemoCatPick(); }
 
 loadBgSettings();
 loadEvents();
+
+/* ── Side Panel Swipe-to-close (오른쪽으로 스와이프) ── */
+function setupSidePanelSwipe(panelId, closeFn) {
+  const panel = document.getElementById(panelId);
+  if (!panel) return;
+  let startX = 0, currentX = 0, dragging = false;
+  panel.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    currentX = 0; dragging = true;
+    panel.style.transition = 'none';
+  }, { passive: true });
+  panel.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const dx = e.touches[0].clientX - startX;
+    if (dx < 0) { dragging = false; panel.style.transform = ''; return; }
+    currentX = dx;
+    panel.style.transform = `translateX(${dx}px)`;
+  }, { passive: true });
+  panel.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    panel.style.transition = '';
+    if (currentX > 80) {
+      panel.style.transform = 'translateX(100%)';
+      setTimeout(() => { panel.style.transform = ''; closeFn(); }, 300);
+    } else {
+      panel.style.transform = '';
+    }
+  });
+}
+setupSidePanelSwipe('sub-overlay', closeSubView);
+setupSidePanelSwipe('memo-overlay', closeMemoView);
 function adjustAppHeight(){
   const bnav=document.getElementById("bottom-nav");
   const app=document.getElementById("app");
@@ -3246,11 +3304,11 @@ const _origCloseDetail    = closeDetail;
 const _origCloseDayPanel  = closeDayPanel;
 const _origCloseSettings  = closeSettings;
 const _origCloseAdd       = closeAdd;
-const _origCloseStats     = closeStats;
+const _origCloseStats     = function(){ switchTab(null); };
 const _origCloseCopyModal = closeCopyModal;
-const _origCloseSubView   = function(){ document.getElementById('sub-overlay').classList.remove('show'); document.getElementById('app').classList.remove('panel-open'); document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('bnav-home').classList.add('active'); };
+const _origCloseSubView   = function(){ switchTab(null); };
 const _origCloseAddSub    = function(){ document.getElementById('add-sub-overlay').classList.remove('show'); };
-const _origCloseMemoView  = function(){ document.getElementById('memo-overlay').classList.remove('show'); document.getElementById('app').classList.remove('panel-open'); document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('bnav-home').classList.add('active'); };
+const _origCloseMemoView  = function(){ switchTab(null); };
 const _origCloseMemoDetail= function(){ document.getElementById('memo-detail-overlay').classList.remove('show'); };
 
 closeDetail    = function(){ _origCloseDetail();    if(isTopOverlay('detail-overlay'))   history.back(); };
@@ -3268,7 +3326,8 @@ closeMemoDetail= function(){ _origCloseMemoDetail(); if(isTopOverlay('memo-detai
 window.addEventListener('popstate', e => {
   for(const ov of OVERLAYS){
     const el=document.getElementById(ov.id);
-    if(el && (el.classList.contains('show') || el.style.display==='flex')){
+    const isVisible = el && (el.classList.contains('show') || el.classList.contains('active') || el.style.display==='flex');
+    if(isVisible){
       if(ov.id==='detail-overlay')     _origCloseDetail();
       else if(ov.id==='day-overlay')   _origCloseDayPanel();
       else if(ov.id==='settings-overlay') _origCloseSettings();
