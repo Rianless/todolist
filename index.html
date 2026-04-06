@@ -79,15 +79,15 @@ html, body {
 /* ══ App Shell ══ */
 #app {
   max-width: 430px; margin: 0 auto;
-  height: calc(100% - 83px);
+  height: 100%;
   display: flex; flex-direction: column;
   overflow: hidden; position: relative;
-  background: var(--ios-bg);
+  background: #ffffff;
 }
 
 /* ══ NAV BAR — iOS Large Title Style ══ */
 #topbar {
-  background: rgba(242,242,247,0.92);
+  background: rgba(255,255,255,0.95);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   padding: env(safe-area-inset-top, 44px) 16px 0;
@@ -178,7 +178,7 @@ html, body {
 /* ══ MAIN VIEW ══ */
 #view {
   flex: 1; overflow-y: auto; overflow-x: hidden;
-  background: var(--ios-bg);
+  background: #ffffff;
   -webkit-overflow-scrolling: touch;
   min-height: 0;
 }
@@ -336,15 +336,17 @@ html, body {
 .empty-sub { font-size: 13px; font-weight: 400; color: var(--ios-label3); margin-top: 4px; }
 
 /* ══ MONTH GRID ══ */
+/* ══ MONTH CALENDAR — Clean flat grid, white bg, lines only ══ */
 .month-container {
-  background: var(--ios-bg);
-  flex: 1; display: flex; flex-direction: column; overflow: hidden;
+  background: #fff;
+  flex: 1; display: flex; flex-direction: column;
+  min-height: 0; overflow: hidden;
 }
 .month-nav {
   display: flex; align-items: center; justify-content: space-between;
   padding: 10px 16px 8px;
-  background: rgba(242,242,247,0.92);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  background: #fff;
+  flex-shrink: 0;
 }
 .month-nav-lbl {
   font-size: 17px; font-weight: 600; color: var(--ios-label);
@@ -352,54 +354,75 @@ html, body {
 }
 .month-nav-side { display: flex; align-items: center; gap: 4px; }
 .mnav-btn {
-  background: rgba(118,118,128,0.12); border: none; cursor: pointer;
+  background: transparent; border: none; cursor: pointer;
   width: 30px; height: 30px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 17px; color: var(--ios-label2); font-weight: 400;
+  font-size: 20px; color: var(--accent); font-weight: 400;
   transition: background 0.12s;
 }
-.mnav-btn:active { background: var(--ios-surface3); }
+.mnav-btn:active { background: rgba(0,0,0,0.05); }
 .today-chip {
-  background: var(--ios-red); color: #fff; border: none; cursor: pointer;
-  font-size: 11px; font-weight: 600; padding: 4px 10px;
-  border-radius: 20px; font-family: var(--font); letter-spacing: -0.1px;
+  background: transparent; color: var(--accent); border: none; cursor: pointer;
+  font-size: 14px; font-weight: 500; padding: 4px 8px;
+  border-radius: 6px; font-family: var(--font); letter-spacing: -0.1px;
 }
 
 .dow-row {
   display: grid; grid-template-columns: repeat(7,1fr);
-  padding: 0 4px; border-bottom: 0.5px solid var(--ios-separator);
-  background: rgba(242,242,247,0.92);
-  backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px);
+  border-bottom: 0.5px solid var(--ios-separator);
+  background: #fff;
+  flex-shrink: 0;
 }
 .dow-cell {
   text-align: center; font-size: 11px; font-weight: 500;
-  padding: 5px 0; color: var(--ios-label3); letter-spacing: 0.2px;
+  padding: 6px 0; color: var(--ios-label3); letter-spacing: 0.2px;
 }
 
 .month-grid-wrap {
-  flex: 1; overflow-y: hidden; padding: 2px 4px; display: flex; flex-direction: column;
+  flex: 1;
+  overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
 }
 .month-grid-wrap::-webkit-scrollbar { display: none; }
-.month-grid { flex: 1; display: grid; grid-template-columns: repeat(7,1fr); gap: 2px; }
+.month-grid {
+  /* Use auto rows so each row takes equal share of available height,
+     but with a minimum so 6-week months never clip */
+  display: grid;
+  grid-template-columns: repeat(7, 1fr);
+  grid-auto-rows: minmax(52px, 1fr);
+  gap: 0;
+  border-left: 0.5px solid var(--ios-separator);
+  border-top: 0.5px solid var(--ios-separator);
+  flex: 1;
+}
 .month-cell {
-  background: var(--ios-surface);
-  border-radius: var(--radius-sm);
+  background: #fff;
+  border-right: 0.5px solid var(--ios-separator);
+  border-bottom: 0.5px solid var(--ios-separator);
   padding: 4px 3px 3px; cursor: pointer;
   display: flex; flex-direction: column;
   transition: background 0.12s; overflow: hidden;
-  box-shadow: var(--shadow-xs);
 }
-.month-cell:active { background: rgba(0,122,255,0.06); }
-.month-cell.empty-cell { background: transparent; cursor: default; box-shadow: none; }
+.month-cell:active { background: rgba(0,122,255,0.04); }
+.month-cell.empty-cell {
+  background: rgba(242,242,247,0.5);
+  cursor: default;
+}
 .month-num {
-  width: 22px; height: 22px; border-radius: 50%;
+  width: 24px; height: 24px; border-radius: 50%;
   display: flex; align-items: center; justify-content: center;
-  font-size: 12px; font-weight: 400; color: var(--ios-label2);
-  flex-shrink: 0; margin-bottom: 2px; align-self: flex-start;
+  font-size: 13px; font-weight: 400; color: var(--ios-label);
+  flex-shrink: 0; margin-bottom: 2px; align-self: center;
 }
-.month-num.today-num { background: var(--ios-red); color: #fff; font-weight: 600; }
+.month-num.today-num {
+  background: var(--ios-red); color: #fff; font-weight: 600;
+}
 .month-ev {
-  border-radius: 5px; padding: 2px 4px; margin-bottom: 1px;
+  border-radius: 3px; padding: 1px 3px; margin-bottom: 1px;
   overflow: hidden; cursor: pointer; flex-shrink: 0; width: 100%;
 }
 .month-ev-time { font-size: 7px; font-weight: 600; color: #fff; display: block; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
@@ -409,12 +432,12 @@ html, body {
 #bottom-nav {
   position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
   width: 100%; max-width: 430px;
-  background: rgba(249,249,249,0.94);
+  background: rgba(255,255,255,0.97);
   backdrop-filter: blur(20px) saturate(180%);
   -webkit-backdrop-filter: blur(20px) saturate(180%);
   border-top: 0.5px solid var(--ios-separator);
-  display: flex; padding: 8px 0 0;
-  padding-bottom: max(env(safe-area-inset-bottom, 0px), 8px);
+  display: flex; padding: 6px 0 0;
+  padding-bottom: max(env(safe-area-inset-bottom, 0px), 6px);
   z-index: 50;
 }
 .bnav-btn {
@@ -748,7 +771,7 @@ textarea.fm-in { text-align: left; resize: none; line-height: 1.5; }
 .copy-btn:active { background: rgba(0,0,0,0.06); }
 
 /* drag */
-.month-cell.drag-over { background: rgba(0,122,255,0.08) !important; outline: 2px dashed rgba(0,122,255,0.4); outline-offset: -2px; }
+.month-cell.drag-over { background: rgba(0,122,255,0.06) !important; outline: 2px dashed rgba(0,122,255,0.35); outline-offset: -2px; }
 .month-ev[draggable] { cursor: grab; }
 .month-ev.dragging { opacity: 0.3 !important; transform: scale(0.94); }
 .todo-item.dragging { opacity: 0.4; }
@@ -794,9 +817,9 @@ body.custom-bg #bottom-nav {
 }
 body.custom-bg .month-container { background: transparent !important; }
 body.custom-bg .month-nav,
-body.custom-bg .dow-row { background: rgba(242,242,247,0.72) !important; }
-body.custom-bg .month-cell { background: rgba(255,255,255,0.52) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); border: 0.5px solid rgba(255,255,255,0.5); }
-body.custom-bg .month-cell.empty-cell { background: transparent !important; backdrop-filter: none !important; border: none !important; }
+body.custom-bg .dow-row { background: rgba(255,255,255,0.72) !important; backdrop-filter: blur(20px); -webkit-backdrop-filter: blur(20px); }
+body.custom-bg .month-cell { background: rgba(255,255,255,0.55) !important; backdrop-filter: blur(12px); -webkit-backdrop-filter: blur(12px); }
+body.custom-bg .month-cell.empty-cell { background: rgba(242,242,247,0.3) !important; backdrop-filter: none !important; }
 body.custom-bg .week-nav-bar, body.custom-bg .week-strip-wrap { background: rgba(242,242,247,0.78) !important; backdrop-filter: blur(24px); -webkit-backdrop-filter: blur(24px); }
 body.custom-bg .todo-group { background: rgba(255,255,255,0.62) !important; backdrop-filter: blur(18px); -webkit-backdrop-filter: blur(18px); }
 body.custom-bg .sheet { background: rgba(249,249,249,0.88) !important; backdrop-filter: blur(40px); -webkit-backdrop-filter: blur(40px); }
@@ -808,6 +831,220 @@ body.custom-bg #view { background: transparent; }
   to   { transform: translateY(0); opacity: 1; }
 }
 .overlay.show .sheet { animation: sheet-up 0.3s cubic-bezier(0.32,0,0.67,0) forwards; }
+
+/* ══ MULTI-DAY EVENT BARS ══ */
+/* Month grid needs a stacking context for the span bars */
+.month-grid-wrap { position: relative; }
+
+/* Row of span bars rendered above the cells */
+.multiday-layer {
+  position: absolute; inset: 0;
+  pointer-events: none;
+  z-index: 2;
+}
+.multiday-row {
+  /* one per week row; top offset set in JS */
+  position: absolute; left: 0; right: 0;
+  height: 18px; /* bar height per track */
+}
+.multiday-bar {
+  position: absolute;
+  height: 16px;
+  border-radius: 8px;
+  display: flex; align-items: center; overflow: hidden;
+  pointer-events: all; cursor: pointer;
+  transition: opacity 0.12s;
+  top: 1px;
+}
+.multiday-bar:active { opacity: 0.75; }
+.multiday-bar.bar-start { border-radius: 8px 4px 4px 8px; }
+.multiday-bar.bar-end   { border-radius: 4px 8px 8px 4px; }
+.multiday-bar.bar-mid   { border-radius: 2px; }
+.multiday-bar-label {
+  font-size: 9px; font-weight: 600; color: #fff;
+  padding: 0 6px; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; letter-spacing: -0.1px;
+  flex: 1; min-width: 0;
+}
+/* hide label on mid/end segments */
+.multiday-bar.bar-mid .multiday-bar-label,
+.multiday-bar.bar-end .multiday-bar-label { opacity: 0.6; font-size: 0; }
+
+/* push single-day events down to avoid bar overlap */
+.month-cell { padding-top: 4px; }
+
+/* ══ SUBSCRIPTION TAB ══ */
+.sub-screen {
+  flex: 1; overflow-y: auto; background: var(--ios-bg);
+  -webkit-overflow-scrolling: touch; padding-bottom: 80px;
+}
+.sub-screen::-webkit-scrollbar { display: none; }
+
+/* Summary card */
+.sub-summary-card {
+  margin: 16px 16px 8px;
+  background: var(--accent);
+  border-radius: var(--radius-xl);
+  padding: 20px 20px 18px;
+  color: #fff;
+  position: relative; overflow: hidden;
+}
+.sub-summary-card::before {
+  content: '';
+  position: absolute; top: -24px; right: -24px;
+  width: 120px; height: 120px;
+  background: rgba(255,255,255,0.10);
+  border-radius: 50%;
+}
+.sub-summary-card::after {
+  content: '';
+  position: absolute; bottom: -20px; right: 40px;
+  width: 80px; height: 80px;
+  background: rgba(255,255,255,0.07);
+  border-radius: 50%;
+}
+.sub-summary-lbl {
+  font-size: 13px; font-weight: 500; opacity: 0.78; letter-spacing: -0.1px;
+  margin-bottom: 4px;
+}
+.sub-summary-amount {
+  font-size: 34px; font-weight: 700; letter-spacing: -1px; line-height: 1.1;
+}
+.sub-summary-sub {
+  font-size: 12px; font-weight: 400; opacity: 0.65; margin-top: 6px;
+  letter-spacing: -0.1px;
+}
+.sub-summary-row {
+  display: flex; gap: 12px; margin-top: 14px;
+}
+.sub-summary-pill {
+  background: rgba(255,255,255,0.18);
+  border-radius: 20px; padding: 5px 12px;
+  font-size: 12px; font-weight: 500; letter-spacing: -0.1px;
+}
+
+/* Next payment notice */
+.sub-next-card {
+  margin: 0 16px 12px;
+  background: rgba(255,149,0,0.10);
+  border-radius: var(--radius-lg);
+  padding: 12px 14px;
+  display: flex; align-items: center; gap: 10px;
+}
+.sub-next-icon { font-size: 20px; flex-shrink: 0; }
+.sub-next-text { flex: 1; }
+.sub-next-title { font-size: 13px; font-weight: 600; color: var(--ios-label); letter-spacing: -0.2px; }
+.sub-next-sub { font-size: 12px; color: var(--ios-label3); margin-top: 1px; }
+.sub-next-amt { font-size: 15px; font-weight: 700; color: var(--ios-orange); letter-spacing: -0.3px; }
+
+/* Category segments */
+.sub-cat-seg {
+  display: flex; gap: 6px; padding: 0 16px 12px;
+  overflow-x: auto; -webkit-overflow-scrolling: touch;
+}
+.sub-cat-seg::-webkit-scrollbar { display: none; }
+.sub-cat-btn {
+  flex-shrink: 0; padding: 6px 14px; border-radius: 20px;
+  border: 1.5px solid transparent;
+  font-size: 12px; font-weight: 500; cursor: pointer;
+  font-family: var(--font); transition: all 0.15s; letter-spacing: -0.1px;
+  background: var(--ios-surface2); color: var(--ios-label2);
+}
+.sub-cat-btn.active {
+  background: rgba(0,122,255,0.10);
+  border-color: var(--accent); color: var(--accent);
+}
+
+/* Subscription list */
+.sub-list { padding: 0 16px; }
+.sub-section-hdr {
+  font-size: 11px; font-weight: 500; color: var(--ios-label3);
+  padding: 12px 4px 6px; text-transform: uppercase; letter-spacing: 0.5px;
+}
+.sub-group {
+  background: var(--ios-surface);
+  border-radius: var(--radius-lg); overflow: hidden;
+  box-shadow: var(--shadow-xs); margin-bottom: 12px;
+}
+.sub-item {
+  display: flex; align-items: center; gap: 12px;
+  padding: 12px 14px; cursor: pointer; position: relative;
+  transition: background 0.12s;
+}
+.sub-item:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 56px; right: 0;
+  height: 0.5px; background: var(--ios-separator2);
+}
+.sub-item:active { background: rgba(0,0,0,0.04); }
+.sub-icon {
+  width: 36px; height: 36px; border-radius: 10px;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 18px; flex-shrink: 0;
+}
+.sub-body { flex: 1; min-width: 0; }
+.sub-name { font-size: 15px; font-weight: 500; color: var(--ios-label); letter-spacing: -0.3px; }
+.sub-meta { font-size: 12px; color: var(--ios-label3); margin-top: 2px; letter-spacing: -0.1px; }
+.sub-right { text-align: right; flex-shrink: 0; }
+.sub-amount { font-size: 15px; font-weight: 600; color: var(--ios-label); letter-spacing: -0.3px; }
+.sub-cycle { font-size: 11px; color: var(--ios-label3); margin-top: 2px; }
+
+/* Empty sub state */
+.sub-empty {
+  text-align: center; padding: 60px 20px 40px;
+}
+.sub-empty-icon { font-size: 48px; margin-bottom: 12px; }
+.sub-empty-text { font-size: 15px; font-weight: 500; color: var(--ios-label2); }
+.sub-empty-sub { font-size: 13px; color: var(--ios-label3); margin-top: 4px; }
+
+/* Add sub button */
+.sub-add-btn {
+  margin: 8px 16px 16px;
+  width: calc(100% - 32px); padding: 14px;
+  border-radius: var(--radius-md); border: 1px dashed var(--ios-separator);
+  background: transparent; font-size: 15px; font-weight: 500;
+  color: var(--accent); cursor: pointer; font-family: var(--font);
+  display: flex; align-items: center; justify-content: center; gap: 6px;
+  letter-spacing: -0.2px;
+}
+
+/* Sub form sheet */
+.sub-fm-group {
+  background: var(--ios-surface2); border-radius: var(--radius-md);
+  margin: 0 16px 8px; overflow: hidden;
+}
+.sub-fm-row {
+  display: flex; align-items: center; padding: 12px 14px; gap: 10px;
+  position: relative; min-height: 44px;
+}
+.sub-fm-row:not(:last-child)::after {
+  content: ''; position: absolute; bottom: 0; left: 44px; right: 0;
+  height: 0.5px; background: var(--ios-separator2);
+}
+.sub-fm-lbl { font-size: 15px; font-weight: 400; color: var(--ios-label); width: 56px; flex-shrink: 0; letter-spacing: -0.2px; }
+.sub-fm-in {
+  flex: 1; border: none; background: transparent;
+  font-size: 15px; color: var(--ios-label2); outline: none;
+  font-family: var(--font); text-align: right; font-weight: 400; letter-spacing: -0.2px;
+}
+.sub-fm-in::placeholder { color: var(--ios-label3); }
+.sub-fm-in:focus { color: var(--ios-label); }
+
+/* Emoji picker for sub icon */
+.emoji-grid {
+  display: grid; grid-template-columns: repeat(6,1fr); gap: 6px;
+  padding: 10px 16px 14px;
+}
+.emoji-btn {
+  font-size: 22px; text-align: center; padding: 6px;
+  border-radius: var(--radius-sm); border: 2px solid transparent;
+  background: var(--ios-surface2); cursor: pointer; transition: all 0.12s;
+}
+.emoji-btn:active { transform: scale(0.88); }
+.emoji-btn.selected { border-color: var(--accent); background: rgba(0,122,255,0.08); }
+
+/* bnav 4-tab layout — needs equal widths including subscription tab */
+#bottom-nav.four-tabs .bnav-btn,
+#bottom-nav.four-tabs .bnav-fab { flex: 1; }
 </style>
 </head>
 <body>
@@ -855,7 +1092,7 @@ body.custom-bg #view { background: transparent; }
   <div id="view"></div>
 
   <!-- BOTTOM NAV — iOS Tab Bar -->
-  <div id="bottom-nav">
+  <div id="bottom-nav" class="four-tabs">
     <button class="bnav-btn active" id="bnav-home" onclick="setView(currentView)">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M3 9.5L12 3l9 6.5V20a1 1 0 0 1-1 1H4a1 1 0 0 1-1-1V9.5z"/><path d="M9 21V12h6v9"/></svg>
       <span class="bnav-label">홈</span>
@@ -866,7 +1103,11 @@ body.custom-bg #view { background: transparent; }
       </div>
       <span class="bnav-fab-label">추가</span>
     </button>
-    <button class="bnav-btn" onclick="openStats()">
+    <button class="bnav-btn" id="bnav-sub" onclick="openSubView()">
+      <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><rect x="1" y="4" width="22" height="16" rx="2"/><line x1="1" y1="10" x2="23" y2="10"/></svg>
+      <span class="bnav-label">구독</span>
+    </button>
+    <button class="bnav-btn" id="bnav-stats" onclick="openStats()">
       <svg width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>
       <span class="bnav-label">통계</span>
     </button>
@@ -951,7 +1192,12 @@ body.custom-bg #view { background: transparent; }
       <button class="sheet-close" onclick="closeAdd()">✕</button>
     </div>
     <div class="fm-group">
-      <div class="fm-row"><span class="fm-lbl">날짜</span><input class="fm-in" type="date" id="f-date"></div>
+      <div class="fm-row"><span class="fm-lbl">시작일</span><input class="fm-in" type="date" id="f-date"></div>
+      <div class="fm-row" id="f-enddate-row">
+        <span class="fm-lbl" style="font-size:14px;width:auto;flex:1;color:var(--ios-label2)">📅 멀티데이 (연속 일정)</span>
+        <input type="checkbox" id="f-multiday" onchange="toggleMultiDay(this.checked)" style="width:22px;height:22px;accent-color:var(--accent);cursor:pointer">
+      </div>
+      <div class="fm-row" id="f-enddate-input-row" style="display:none"><span class="fm-lbl">종료일</span><input class="fm-in" type="date" id="f-enddate"></div>
       <div class="fm-row"><span class="fm-lbl">제목</span><input class="fm-in" type="text" id="f-title" placeholder="제목 입력" oninput="autoSaveDraft()"></div>
       <div class="fm-row" id="time-row" style="gap:0">
         <span class="fm-lbl">시간</span>
@@ -1025,6 +1271,79 @@ body.custom-bg #view { background: transparent; }
       </div>
     </div>
     <button class="submit-btn" id="submit-btn" onclick="submitAdd()">추가</button>
+    <div style="height:4px"></div>
+  </div>
+</div>
+
+<!-- Subscription View Overlay -->
+<div class="overlay" id="sub-overlay" onclick="closeSubView()">
+  <div class="sheet" id="sub-sheet" style="max-height:96vh" onclick="event.stopPropagation()">
+    <div class="handle"></div>
+    <div class="sheet-hdr">
+      <span class="sheet-title">구독 관리</span>
+      <button class="sheet-close" onclick="closeSubView()">✕</button>
+    </div>
+    <div class="sub-summary-card">
+      <div class="sub-summary-lbl">이번 달 구독료</div>
+      <div class="sub-summary-amount" id="sub-monthly-total">₩0</div>
+      <div class="sub-summary-sub" id="sub-monthly-sub">총 0개 서비스</div>
+      <div class="sub-summary-row" id="sub-summary-row"></div>
+    </div>
+    <div class="sub-next-card" id="sub-next-card" style="display:none">
+      <div class="sub-next-icon">🔔</div>
+      <div class="sub-next-text">
+        <div class="sub-next-title" id="sub-next-title"></div>
+        <div class="sub-next-sub" id="sub-next-sub"></div>
+      </div>
+      <div class="sub-next-amt" id="sub-next-amt"></div>
+    </div>
+    <div class="sub-cat-seg" id="sub-cat-seg"></div>
+    <div class="sub-list" id="sub-list"></div>
+    <button class="sub-add-btn" onclick="openAddSub()">
+      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+      구독 추가
+    </button>
+  </div>
+</div>
+
+<!-- Add/Edit Subscription Sheet -->
+<div class="overlay" id="add-sub-overlay" onclick="closeAddSub()">
+  <div class="sheet" onclick="event.stopPropagation()">
+    <div class="handle"></div>
+    <div class="sheet-hdr">
+      <span class="sheet-title" id="add-sub-title">구독 추가</span>
+      <button class="sheet-close" onclick="closeAddSub()">✕</button>
+    </div>
+    <div class="fm-section-lbl">아이콘</div>
+    <div class="emoji-grid" id="sub-emoji-grid"></div>
+    <div class="sub-fm-group">
+      <div class="sub-fm-row"><span class="sub-fm-lbl">서비스명</span><input class="sub-fm-in" type="text" id="sf-name" placeholder="Netflix"></div>
+      <div class="sub-fm-row"><span class="sub-fm-lbl">금액</span><input class="sub-fm-in" type="number" id="sf-amount" placeholder="0" min="0"></div>
+      <div class="sub-fm-row">
+        <span class="sub-fm-lbl">주기</span>
+        <select class="sub-fm-in" id="sf-cycle" style="text-align:right;border:none;outline:none;background:transparent;font-family:var(--font);font-size:15px;color:var(--ios-label2);cursor:pointer">
+          <option value="monthly">월간</option>
+          <option value="yearly">연간</option>
+          <option value="weekly">주간</option>
+        </select>
+      </div>
+      <div class="sub-fm-row"><span class="sub-fm-lbl">결제일</span><input class="sub-fm-in" type="number" id="sf-day" placeholder="매월 N일" min="1" max="31"></div>
+      <div class="sub-fm-row">
+        <span class="sub-fm-lbl">카테고리</span>
+        <select class="sub-fm-in" id="sf-cat" style="text-align:right;border:none;outline:none;background:transparent;font-family:var(--font);font-size:15px;color:var(--ios-label2);cursor:pointer">
+          <option value="엔터테인먼트">엔터테인먼트</option>
+          <option value="음악">음악</option>
+          <option value="앱/소프트웨어">앱/소프트웨어</option>
+          <option value="뉴스/도서">뉴스/도서</option>
+          <option value="쇼핑">쇼핑</option>
+          <option value="피트니스">피트니스</option>
+          <option value="교육">교육</option>
+          <option value="기타">기타</option>
+        </select>
+      </div>
+      <div class="sub-fm-row"><span class="sub-fm-lbl">메모</span><input class="sub-fm-in" type="text" id="sf-note" placeholder="선택사항"></div>
+    </div>
+    <button class="submit-btn" id="sub-submit-btn" onclick="submitSub()">추가</button>
     <div style="height:4px"></div>
   </div>
 </div>
@@ -1212,12 +1531,12 @@ function renderMonth(){
     h+=`<div class="dow-cell" style="color:${col}">${d}</div>`;
   });
   const numWeeks = cells.length / 7;
-  h+=`</div><div class="month-grid-wrap"><div class="month-grid" style="grid-template-rows:repeat(${numWeeks},1fr)">`;
+  h+=`</div><div class="month-grid-wrap"><div class="month-grid">`;
   cells.forEach((day,ci)=>{
     if(!day){ h+=`<div class="month-cell empty-cell"></div>`; return; }
     const ds=`${y}-${String(m+1).padStart(2,"0")}-${String(day).padStart(2,"0")}`;
     const isT=ds===todayStr, dow=ci%7, evs=getEvs(ds);
-    const numColor=dow===0?"var(--ios-red)":dow===6?"var(--ios-blue)":"var(--ios-label2)";
+    const numColor=dow===0?"var(--ios-red)":dow===6?"var(--ios-blue)":"var(--ios-label)";
     h+=`<div class="month-cell" onclick="openDayPanel('${ds}')">
       <div class="month-num${isT?' today-num':''}" style="${!isT?`color:${numColor}`:''}">${day}</div>`;
     evs.forEach(ev=>{
@@ -1362,6 +1681,7 @@ function refreshDetail(){
   document.getElementById("detail-title").textContent=ev.title;
   const prio=ev.priority||'none';
   const rows=[
+    ["📅","날짜", isMultiDay(ev) ? `${ev.date} – ${ev.endDate}` : ev.date, true],
     ["🕐","시간", ev.allDay?"하루종일":(ev.startTime||ev.endTime)?(ev.startTime||"")+(ev.endTime?" – "+ev.endTime:""):"", !!(ev.allDay||ev.startTime||ev.endTime)],
     ["🏷️","우선순위", prio!=='none'?`<span style="color:${PRIO_COLORS[prio]};font-weight:800">${PRIO_LABELS[prio]}</span>`:"", prio!=='none'],
     ["📚","모듈", ev.module||"", false],
@@ -1821,6 +2141,463 @@ function setupMonthDrag(){
   });
 }
 
+/* ════════════════════════════════════════════
+   MULTI-DAY EVENT SUPPORT
+   ════════════════════════════════════════════ */
+
+// Normalize: get all dates for an event (single or multi-day)
+function getEventDates(ev) {
+  if (!ev.endDate || ev.endDate <= ev.date) return [ev.date];
+  const dates = [];
+  let d = new Date(ev.date + 'T00:00:00');
+  const end = new Date(ev.endDate + 'T00:00:00');
+  while (d <= end) {
+    dates.push(fmtLocal(d));
+    d.setDate(d.getDate() + 1);
+  }
+  return dates;
+}
+
+function isMultiDay(ev) {
+  return ev.endDate && ev.endDate > ev.date;
+}
+
+// Returns multi-day events that overlap with a given date
+function getMultiDayEvs(ds) {
+  return events.filter(ev => isMultiDay(ev) && ev.date <= ds && ev.endDate >= ds);
+}
+
+/* ── renderMonth override with multi-day bars ── */
+const _origRenderMonth = renderMonth;
+renderMonth = function() {
+  _origRenderMonth();
+  injectMultiDayBars();
+};
+
+function injectMultiDayBars() {
+  const v = document.getElementById('view');
+  const grid = v.querySelector('.month-grid');
+  const wrap = v.querySelector('.month-grid-wrap');
+  if (!grid || !wrap) return;
+
+  const y = monthRef.getFullYear(), m = monthRef.getMonth();
+  const total = daysInMonth(y, m), first = firstDayOfMonth(y, m);
+
+  // Build cell date map: cellIndex -> dateString
+  const cells = [];
+  for (let i = 0; i < first; i++) cells.push(null);
+  for (let d = 1; d <= total; d++) {
+    cells.push(`${y}-${String(m+1).padStart(2,'0')}-${String(d).padStart(2,'0')}`);
+  }
+  while (cells.length % 7 !== 0) cells.push(null);
+  const numWeeks = cells.length / 7;
+
+  // Find multi-day events visible this month
+  const firstDs = cells.find(c => c);
+  const lastDs = [...cells].reverse().find(c => c);
+  const mdEvs = events.filter(ev => isMultiDay(ev) && ev.date <= lastDs && ev.endDate >= firstDs);
+  if (!mdEvs.length) return;
+
+  // For each week row, assign track lanes per event
+  const cellEls = grid.querySelectorAll('.month-cell:not(.empty-cell)');
+
+  // Create a floating layer over the grid
+  let layer = wrap.querySelector('.multiday-layer');
+  if (!layer) {
+    layer = document.createElement('div');
+    layer.className = 'multiday-layer';
+    wrap.appendChild(layer);
+  }
+  layer.innerHTML = '';
+
+  // Get grid layout metrics
+  const gridRect = grid.getBoundingClientRect();
+  const wrapRect = wrap.getBoundingClientRect();
+
+  // Get cell elements positions (by date)
+  const cellMap = {};
+  grid.querySelectorAll('.month-cell').forEach((el, i) => {
+    const ds = cells[i];
+    if (ds) cellMap[ds] = el;
+  });
+
+  // Assign lane tracks per week to avoid overlaps
+  for (let week = 0; week < numWeeks; week++) {
+    const weekCells = cells.slice(week * 7, week * 7 + 7).filter(Boolean);
+    if (!weekCells.length) continue;
+
+    const weekStart = weekCells[0], weekEnd = weekCells[weekCells.length - 1];
+
+    // Events visible in this week
+    const weekMd = mdEvs.filter(ev => ev.date <= weekEnd && ev.endDate >= weekStart);
+    if (!weekMd.length) continue;
+
+    // Get geometry of first cell in row
+    const firstCellEl = cellMap[weekStart];
+    if (!firstCellEl) continue;
+    const firstRect = firstCellEl.getBoundingClientRect();
+
+    // Cell width and row top relative to wrap
+    const cellW = firstRect.width;
+    const rowTop = firstRect.top - wrapRect.top + 22; // below date number
+
+    // Assign lanes (simple greedy)
+    const lanes = [];
+    weekMd.forEach(ev => {
+      let lane = 0;
+      while (lanes[lane] && lanes[lane] > ev.date) lane++;
+      lanes[lane] = ev.endDate;
+
+      // Clamp to this week
+      const barStart = ev.date < weekStart ? weekStart : ev.date;
+      const barEnd = ev.endDate > weekEnd ? weekEnd : ev.endDate;
+
+      const startIdx = weekCells.indexOf(barStart);
+      const endIdx = weekCells.indexOf(barEnd);
+      if (startIdx === -1 || endIdx === -1) return;
+
+      const isStart = ev.date >= weekStart;
+      const isEnd = ev.endDate <= weekEnd;
+
+      const barLeft = startIdx * cellW + 2;
+      const barWidth = (endIdx - startIdx + 1) * cellW - 4;
+      const barTop = rowTop + lane * 19;
+
+      const ct = cat(ev.category);
+      const posClass = isStart && isEnd ? 'bar-start bar-end' : isStart ? 'bar-start' : isEnd ? 'bar-end' : 'bar-mid';
+
+      const bar = document.createElement('div');
+      bar.className = `multiday-bar ${posClass}`;
+      bar.style.cssText = `left:${barLeft}px;width:${barWidth}px;top:${barTop}px;background:${ct.bg};opacity:${ev.done ? 0.45 : 1}`;
+      bar.innerHTML = `<span class="multiday-bar-label">${isStart ? esc(ev.title) : ''}</span>`;
+      bar.onclick = (e) => { e.stopPropagation(); openDetail(ev.id); };
+      layer.appendChild(bar);
+    });
+  }
+}
+
+/* toggleMultiDay — show/hide endDate row in form */
+function toggleMultiDay(on) {
+  const row = document.getElementById('f-enddate-input-row');
+  if (row) row.style.display = on ? 'flex' : 'none';
+}
+
+/* ── Patch openAdd to reset multiday field ── */
+const __origOpenAdd = openAdd;
+openAdd = function(ds) {
+  __origOpenAdd(ds);
+  const cb = document.getElementById('f-multiday');
+  if (cb) { cb.checked = false; toggleMultiDay(false); }
+  const ed = document.getElementById('f-enddate');
+  if (ed) ed.value = '';
+};
+
+/* ── Patch openEdit to populate endDate ── */
+const __origOpenEdit = openEdit;
+openEdit = function(id) {
+  __origOpenEdit(id);
+  const ev = events.find(e => e.id === id);
+  if (!ev) return;
+  const cb = document.getElementById('f-multiday');
+  const row = document.getElementById('f-enddate-input-row');
+  const ed = document.getElementById('f-enddate');
+  if (cb && ed) {
+    const multi = !!(ev.endDate && ev.endDate > ev.date);
+    cb.checked = multi;
+    if (row) row.style.display = multi ? 'flex' : 'none';
+    ed.value = ev.endDate || '';
+  }
+};
+
+/* ── Full submitAdd override with endDate support ── */
+submitAdd = function() {
+  const title = document.getElementById("f-title").value.trim();
+  if (!title) return;
+  const allDay = document.getElementById("f-allday").checked;
+  const showTitleChk = document.getElementById("f-showtitle").checked;
+  const cb = document.getElementById('f-multiday');
+  const ed = document.getElementById('f-enddate');
+  const startDate = document.getElementById("f-date").value;
+  const endDateVal = (cb && cb.checked && ed && ed.value > startDate) ? ed.value : null;
+
+  const data = {
+    date: startDate,
+    endDate: endDateVal || null,
+    allDay, showTitle: showTitleChk, priority: addPrio,
+    startTime: allDay ? "" : document.getElementById("f-start").value,
+    endTime: allDay ? "" : document.getElementById("f-end").value,
+    title, category: addCat,
+    module: document.getElementById("f-module").value,
+    instructor: document.getElementById("f-instructor").value,
+    location: document.getElementById("f-location").value,
+    room: document.getElementById("f-room").value,
+    note: document.getElementById("f-note").value,
+    content: document.getElementById("f-content").value,
+    images: [...formPhotos], links: [...formLinks],
+  };
+  if (editingId !== null) {
+    events = events.map(e => e.id === editingId ? { ...e, ...data } : e);
+  } else {
+    if (_autoSavedId !== null && !addRoutine) {
+      events = events.map(e => e.id === _autoSavedId ? { ...e, ...data } : e);
+      _autoSavedId = null;
+    } else if (addRoutine) {
+      if (_autoSavedId !== null) { events = events.filter(e => e.id !== _autoSavedId); _autoSavedId = null; }
+      const routineId = 'r_' + Date.now();
+      const endDate2 = document.getElementById('f-routine-end').value || null;
+      const firstEv = { id: nextId++, done: false, routineId, routineFreq: addRoutineFreq, ...data };
+      events.push(firstEv);
+      generateRoutineDates(data.date, addRoutineFreq, endDate2).forEach(date => {
+        events.push({ ...firstEv, id: nextId++, done: false, date });
+      });
+    } else {
+      events.push({ id: nextId++, done: false, ...data });
+    }
+  }
+  saveEvents(); closeAdd(); renderView();
+};
+
+/* ── Fix getEvs to exclude multi-day events (they're shown as bars) ── */
+const __origGetEvs = getEvs;
+getEvs = function(ds) {
+  return events.filter(e => e.date === ds && !isMultiDay(e))
+    .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+};
+
+/* ── Day panel: also show multi-day events overlapping this date ── */
+const __origRefreshDayPanel = refreshDayPanel;
+refreshDayPanel = function() {
+  if (!dayPanelDate) return;
+  const singleEvs = __origGetEvs(dayPanelDate);
+  const mdEvs2 = getMultiDayEvs(dayPanelDate);
+  const allEvs = [...mdEvs2, ...singleEvs];
+  const container = document.getElementById('day-panel-cards');
+  if (!allEvs.length) {
+    container.innerHTML = `<div class="empty-state" style="padding:40px 0 20px"><div class="empty-icon">🗓️</div><div class="empty-text">일정이 없어요</div></div>`;
+    return;
+  }
+  container.innerHTML = todoGroupHtml(allEvs);
+};
+
+/* ════════════════════════════════════════════
+   SUBSCRIPTION MANAGEMENT
+   ════════════════════════════════════════════ */
+
+let subscriptions = [];
+let subEditingId = null;
+let subCatFilter = '전체';
+let selectedSubEmoji = '💳';
+
+const SUB_EMOJIS = ['📺','🎵','📰','🎮','🛒','💪','📚','☁️','🎨','🔒','📧','🗓️','💼','🍔','🚗','✈️','🏠','💊','📷','🎙️'];
+const SUB_CAT_COLORS = {
+  '엔터테인먼트': '#FF2D55',
+  '음악': '#AF52DE',
+  '앱/소프트웨어': '#007AFF',
+  '뉴스/도서': '#FF9500',
+  '쇼핑': '#34C759',
+  '피트니스': '#FF6B35',
+  '교육': '#5856D6',
+  '기타': '#8E8E93',
+};
+
+function saveSubs() { idbSet('subscriptions_v1', JSON.stringify(subscriptions)).catch(() => {}); }
+function loadSubs() {
+  idbGet('subscriptions_v1').then(saved => {
+    if (saved) { try { subscriptions = JSON.parse(saved); } catch(e) {} }
+  }).catch(() => {});
+}
+loadSubs();
+
+function getMonthlyAmount(sub) {
+  if (sub.cycle === 'monthly') return sub.amount;
+  if (sub.cycle === 'yearly') return Math.round(sub.amount / 12);
+  if (sub.cycle === 'weekly') return Math.round(sub.amount * 4.33);
+  return sub.amount;
+}
+
+function getNextPaymentDate(sub) {
+  const today = new Date();
+  const day = sub.payDay || 1;
+  let d = new Date(today.getFullYear(), today.getMonth(), day);
+  if (d <= today) d.setMonth(d.getMonth() + 1);
+  return d;
+}
+
+function openSubView() {
+  renderSubView();
+  document.getElementById('sub-overlay').classList.add('show');
+  // update tab active states
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('bnav-sub').classList.add('active');
+  pushOverlayHistory('sub-overlay');
+}
+function closeSubView() {
+  document.getElementById('sub-overlay').classList.remove('show');
+  document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
+  document.getElementById('bnav-home').classList.add('active');
+  if (isTopOverlay('sub-overlay')) history.back();
+}
+
+function renderSubView() {
+  // Compute totals
+  const monthlyTotal = subscriptions.reduce((s, sub) => s + getMonthlyAmount(sub), 0);
+  const count = subscriptions.length;
+  document.getElementById('sub-monthly-total').textContent = '₩' + monthlyTotal.toLocaleString();
+  document.getElementById('sub-monthly-sub').textContent = `총 ${count}개 서비스`;
+
+  // Category breakdown pills
+  const catMap = {};
+  subscriptions.forEach(sub => {
+    if (!catMap[sub.category]) catMap[sub.category] = 0;
+    catMap[sub.category] += getMonthlyAmount(sub);
+  });
+  const topCats = Object.entries(catMap).sort((a,b) => b[1]-a[1]).slice(0, 3);
+  document.getElementById('sub-summary-row').innerHTML = topCats.map(([cat, amt]) =>
+    `<div class="sub-summary-pill">${cat} ₩${amt.toLocaleString()}</div>`
+  ).join('');
+
+  // Next payment notice
+  if (subscriptions.length) {
+    const sorted = [...subscriptions].sort((a,b) => getNextPaymentDate(a) - getNextPaymentDate(b));
+    const next = sorted[0];
+    const nextDate = getNextPaymentDate(next);
+    const daysLeft = Math.ceil((nextDate - new Date()) / 86400000);
+    document.getElementById('sub-next-card').style.display = 'flex';
+    document.getElementById('sub-next-title').textContent = next.name;
+    document.getElementById('sub-next-sub').textContent = daysLeft === 0 ? '오늘 결제' : `${daysLeft}일 후 결제`;
+    document.getElementById('sub-next-amt').textContent = '₩' + next.amount.toLocaleString();
+  } else {
+    document.getElementById('sub-next-card').style.display = 'none';
+  }
+
+  // Category filter buttons
+  const cats = ['전체', ...new Set(subscriptions.map(s => s.category))];
+  document.getElementById('sub-cat-seg').innerHTML = cats.map(c =>
+    `<button class="sub-cat-btn${c === subCatFilter ? ' active' : ''}" onclick="setSubCat('${c}')">${c}</button>`
+  ).join('');
+
+  // Subscription list
+  const filtered = subCatFilter === '전체' ? subscriptions : subscriptions.filter(s => s.category === subCatFilter);
+  const listEl = document.getElementById('sub-list');
+
+  if (!filtered.length) {
+    listEl.innerHTML = `<div class="sub-empty"><div class="sub-empty-icon">💳</div><div class="sub-empty-text">${subCatFilter === '전체' ? '구독 서비스가 없어요' : `${subCatFilter} 구독이 없어요`}</div><div class="sub-empty-sub">아래 버튼으로 추가해보세요</div></div>`;
+    return;
+  }
+
+  // Group by category
+  const groups = {};
+  filtered.forEach(sub => {
+    if (!groups[sub.category]) groups[sub.category] = [];
+    groups[sub.category].push(sub);
+  });
+
+  let html = '';
+  Object.entries(groups).forEach(([catName, subs]) => {
+    const catTotal = subs.reduce((s, sub) => s + getMonthlyAmount(sub), 0);
+    html += `<div class="sub-section-hdr">${catName} · 월 ₩${catTotal.toLocaleString()}</div>`;
+    html += `<div class="sub-group">`;
+    subs.forEach(sub => {
+      const nextDate = getNextPaymentDate(sub);
+      const daysLeft = Math.ceil((nextDate - new Date()) / 86400000);
+      const dayStr = daysLeft === 0 ? '오늘' : `${daysLeft}일 후`;
+      const cycleLabel = sub.cycle === 'monthly' ? '월간' : sub.cycle === 'yearly' ? '연간' : '주간';
+      const accentColor = SUB_CAT_COLORS[sub.category] || '#8E8E93';
+      html += `<div class="sub-item" onclick="editSub(${sub.id})">
+        <div class="sub-icon" style="background:${accentColor}18">${sub.icon || '💳'}</div>
+        <div class="sub-body">
+          <div class="sub-name">${esc(sub.name)}</div>
+          <div class="sub-meta">${esc(sub.payDay)}일 결제 · ${dayStr}${sub.note ? ' · ' + esc(sub.note) : ''}</div>
+        </div>
+        <div class="sub-right">
+          <div class="sub-amount">₩${sub.amount.toLocaleString()}</div>
+          <div class="sub-cycle">${cycleLabel}</div>
+        </div>
+      </div>`;
+    });
+    html += `</div>`;
+  });
+  listEl.innerHTML = html;
+}
+
+function setSubCat(cat) {
+  subCatFilter = cat;
+  renderSubView();
+}
+
+function openAddSub() {
+  subEditingId = null;
+  selectedSubEmoji = '💳';
+  document.getElementById('add-sub-title').textContent = '구독 추가';
+  document.getElementById('sub-submit-btn').textContent = '추가';
+  document.getElementById('sf-name').value = '';
+  document.getElementById('sf-amount').value = '';
+  document.getElementById('sf-cycle').value = 'monthly';
+  document.getElementById('sf-day').value = '';
+  document.getElementById('sf-cat').value = '엔터테인먼트';
+  document.getElementById('sf-note').value = '';
+  renderEmojiGrid();
+  document.getElementById('add-sub-overlay').classList.add('show');
+  pushOverlayHistory('add-sub-overlay');
+}
+function closeAddSub() {
+  document.getElementById('add-sub-overlay').classList.remove('show');
+  if (isTopOverlay('add-sub-overlay')) history.back();
+}
+
+function editSub(id) {
+  const sub = subscriptions.find(s => s.id === id);
+  if (!sub) return;
+  subEditingId = id;
+  selectedSubEmoji = sub.icon || '💳';
+  document.getElementById('add-sub-title').textContent = '구독 수정';
+  document.getElementById('sub-submit-btn').textContent = '저장';
+  document.getElementById('sf-name').value = sub.name;
+  document.getElementById('sf-amount').value = sub.amount;
+  document.getElementById('sf-cycle').value = sub.cycle || 'monthly';
+  document.getElementById('sf-day').value = sub.payDay || '';
+  document.getElementById('sf-cat').value = sub.category || '기타';
+  document.getElementById('sf-note').value = sub.note || '';
+  renderEmojiGrid();
+  document.getElementById('add-sub-overlay').classList.add('show');
+  pushOverlayHistory('add-sub-overlay');
+}
+
+function renderEmojiGrid() {
+  document.getElementById('sub-emoji-grid').innerHTML = SUB_EMOJIS.map(e =>
+    `<button class="emoji-btn${e === selectedSubEmoji ? ' selected' : ''}" onclick="pickEmoji('${e}')">${e}</button>`
+  ).join('');
+}
+
+function pickEmoji(e) {
+  selectedSubEmoji = e;
+  renderEmojiGrid();
+}
+
+function submitSub() {
+  const name = document.getElementById('sf-name').value.trim();
+  const amount = parseInt(document.getElementById('sf-amount').value) || 0;
+  const cycle = document.getElementById('sf-cycle').value;
+  const payDay = parseInt(document.getElementById('sf-day').value) || 1;
+  const category = document.getElementById('sf-cat').value;
+  const note = document.getElementById('sf-note').value.trim();
+  if (!name) { document.getElementById('sf-name').focus(); return; }
+
+  const data = { name, amount, cycle, payDay, category, note, icon: selectedSubEmoji };
+  if (subEditingId !== null) {
+    subscriptions = subscriptions.map(s => s.id === subEditingId ? { ...s, ...data } : s);
+  } else {
+    subscriptions.push({ id: Date.now(), ...data });
+  }
+  saveSubs();
+  closeAddSub();
+  renderSubView();
+}
+
+// Register sub overlays in OVERLAYS list and history management
+// (patched after OVERLAYS is defined below)
+
+
 loadBgSettings();
 loadEvents();
 function adjustAppHeight(){
@@ -1840,6 +2617,8 @@ const OVERLAYS = [
   { id: 'add-overlay',      close: ()=>closeAdd() },
   { id: 'stats-overlay',    close: ()=>closeStats() },
   { id: 'copy-modal',       close: ()=>closeCopyModal() },
+  { id: 'sub-overlay',      close: ()=>_origCloseSubView() },
+  { id: 'add-sub-overlay',  close: ()=>_origCloseAddSub() },
 ];
 
 // 초기 상태 설정
@@ -1874,6 +2653,8 @@ const _origCloseSettings  = closeSettings;
 const _origCloseAdd       = closeAdd;
 const _origCloseStats     = closeStats;
 const _origCloseCopyModal = closeCopyModal;
+const _origCloseSubView   = function(){ document.getElementById('sub-overlay').classList.remove('show'); document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('bnav-home').classList.add('active'); };
+const _origCloseAddSub    = function(){ document.getElementById('add-sub-overlay').classList.remove('show'); };
 
 closeDetail    = function(){ _origCloseDetail();    if(isTopOverlay('detail-overlay'))   history.back(); };
 closeDayPanel  = function(){ _origCloseDayPanel();  if(isTopOverlay('day-overlay'))      history.back(); };
@@ -1881,25 +2662,26 @@ closeSettings  = function(){ _origCloseSettings();  if(isTopOverlay('settings-ov
 closeAdd       = function(){ _origCloseAdd();        if(isTopOverlay('add-overlay'))      history.back(); };
 closeStats     = function(){ _origCloseStats();      if(isTopOverlay('stats-overlay'))    history.back(); };
 closeCopyModal = function(){ _origCloseCopyModal();  if(isTopOverlay('copy-modal'))       history.back(); };
+closeSubView   = function(){ _origCloseSubView();    if(isTopOverlay('sub-overlay'))      history.back(); };
+closeAddSub    = function(){ _origCloseAddSub();     if(isTopOverlay('add-sub-overlay'))  history.back(); };
 
 // 뒤로가기 이벤트
 window.addEventListener('popstate', e => {
-  // 어떤 오버레이가 현재 열려있는지 찾아서 닫기
   for(const ov of OVERLAYS){
     const el=document.getElementById(ov.id);
     if(el && (el.classList.contains('show') || el.style.display==='flex')){
-      // 원본 닫기 함수 직접 호출 (history.back() 루프 방지)
-      if(ov.id==='detail-overlay')   _origCloseDetail();
-      else if(ov.id==='day-overlay') _origCloseDayPanel();
+      if(ov.id==='detail-overlay')     _origCloseDetail();
+      else if(ov.id==='day-overlay')   _origCloseDayPanel();
       else if(ov.id==='settings-overlay') _origCloseSettings();
-      else if(ov.id==='add-overlay') _origCloseAdd();
+      else if(ov.id==='add-overlay')   _origCloseAdd();
       else if(ov.id==='stats-overlay') _origCloseStats();
-      else if(ov.id==='copy-modal')  _origCloseCopyModal();
+      else if(ov.id==='copy-modal')    _origCloseCopyModal();
+      else if(ov.id==='sub-overlay')   _origCloseSubView();
+      else if(ov.id==='add-sub-overlay') _origCloseAddSub();
       return;
     }
   }
 });
-</script>
 </script>
 </body>
 </html>
