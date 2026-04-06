@@ -873,6 +873,56 @@ body.custom-bg #view { background: transparent; }
 /* push single-day events down to avoid bar overlap */
 .month-cell { padding-top: 4px; }
 
+/* ══ SIDE PANEL (구독/메모) — 옆으로 슬라이드 ══ */
+.side-panel {
+  position: fixed; top: 0; right: 0; bottom: 0;
+  width: 100%; max-width: 430px;
+  background: var(--ios-bg);
+  z-index: 100;
+  transform: translateX(100%);
+  transition: transform 0.32s cubic-bezier(0.32,0,0.67,0);
+  display: flex; flex-direction: column;
+  overflow: hidden;
+}
+.side-panel.show {
+  transform: translateX(0);
+}
+/* push main app content left when panel opens */
+#app.panel-open {
+  transform: translateX(-40px);
+  transition: transform 0.32s cubic-bezier(0.32,0,0.67,0);
+}
+#app {
+  transition: transform 0.32s cubic-bezier(0.32,0,0.67,0);
+}
+.side-panel-nav {
+  background: rgba(255,255,255,0.95);
+  backdrop-filter: blur(20px) saturate(180%);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  padding: env(safe-area-inset-top, 44px) 16px 0;
+  border-bottom: 0.5px solid var(--ios-separator);
+  flex-shrink: 0;
+}
+.side-panel-nav-row {
+  display: flex; align-items: center; height: 44px; gap: 8px; padding: 0 4px;
+}
+.side-panel-back {
+  display: flex; align-items: center; gap: 2px;
+  background: transparent; border: none; cursor: pointer;
+  color: var(--accent); font-size: 16px; font-weight: 400;
+  padding: 4px 6px; border-radius: 8px; font-family: var(--font);
+  transition: opacity 0.15s;
+}
+.side-panel-back:active { opacity: 0.6; }
+.side-panel-title {
+  flex: 1; font-size: 17px; font-weight: 600; color: var(--ios-label);
+  letter-spacing: -0.4px;
+}
+.side-panel-body {
+  flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
+}
+.side-panel-body::-webkit-scrollbar { display: none; }
+
 /* ══ SUBSCRIPTION TAB ══ */
 .sub-screen {
   flex: 1; overflow-y: auto; background: var(--ios-bg);
@@ -1435,31 +1485,31 @@ body.custom-bg #view { background: transparent; }
   </div>
 </div>
 
-<!-- Memo / Todo View Overlay -->
-<div class="overlay" id="memo-overlay" onclick="closeMemoView()">
-  <div class="sheet" id="memo-sheet" style="max-height:96vh;display:flex;flex-direction:column" onclick="event.stopPropagation()">
-    <div class="handle"></div>
-    <div class="sheet-hdr" style="flex-shrink:0">
-      <span class="sheet-title">메모 · 할일</span>
-      <button class="sheet-close" onclick="closeMemoView()">✕</button>
-    </div>
-
-    <!-- Quick-add bar -->
-    <div class="memo-add-bar">
-      <input class="memo-add-input" id="memo-quick-input" type="text"
-        placeholder="할 일을 입력하세요..."
-        onkeydown="if(event.key==='Enter')quickAddMemo()">
-      <button class="memo-add-btn" onclick="quickAddMemo()">
-        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+<!-- Memo / Todo View Side Panel -->
+<div class="side-panel" id="memo-overlay">
+  <div class="side-panel-nav">
+    <div class="side-panel-nav-row">
+      <button class="side-panel-back" onclick="closeMemoView()">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M9 1L1 8.5L9 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        홈
       </button>
+      <span class="side-panel-title" style="text-align:center">메모 · 할일</span>
+      <div style="width:52px"></div>
     </div>
-
-    <!-- Filter chips -->
-    <div class="memo-filter-row" id="memo-filter-row"></div>
-
-    <!-- List -->
-    <div class="memo-list-wrap" id="memo-list-wrap"></div>
   </div>
+  <!-- Quick-add bar -->
+  <div class="memo-add-bar">
+    <input class="memo-add-input" id="memo-quick-input" type="text"
+      placeholder="할 일을 입력하세요..."
+      onkeydown="if(event.key==='Enter')quickAddMemo()">
+    <button class="memo-add-btn" onclick="quickAddMemo()">
+      <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2.5" stroke-linecap="round"><line x1="12" y1="5" x2="12" y2="19"/><line x1="5" y1="12" x2="19" y2="12"/></svg>
+    </button>
+  </div>
+  <!-- Filter chips -->
+  <div class="memo-filter-row" id="memo-filter-row"></div>
+  <!-- List -->
+  <div class="memo-list-wrap" id="memo-list-wrap"></div>
 </div>
 
 <!-- Memo Detail / Edit Sheet -->
@@ -1495,14 +1545,19 @@ body.custom-bg #view { background: transparent; }
   </div>
 </div>
 
-<!-- Subscription View Overlay -->
-<div class="overlay" id="sub-overlay" onclick="closeSubView()">
-  <div class="sheet" id="sub-sheet" style="max-height:96vh" onclick="event.stopPropagation()">
-    <div class="handle"></div>
-    <div class="sheet-hdr">
-      <span class="sheet-title">구독 관리</span>
-      <button class="sheet-close" onclick="closeSubView()">✕</button>
+<!-- Subscription View Side Panel -->
+<div class="side-panel" id="sub-overlay">
+  <div class="side-panel-nav">
+    <div class="side-panel-nav-row">
+      <button class="side-panel-back" onclick="closeSubView()">
+        <svg width="10" height="17" viewBox="0 0 10 17" fill="none"><path d="M9 1L1 8.5L9 16" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"/></svg>
+        홈
+      </button>
+      <span class="side-panel-title" style="text-align:center">구독 관리</span>
+      <div style="width:52px"></div>
     </div>
+  </div>
+  <div class="side-panel-body">
     <div class="sub-summary-card">
       <div class="sub-summary-lbl">이번 달 구독료</div>
       <div class="sub-summary-amount" id="sub-monthly-total">₩0</div>
@@ -1886,6 +1941,8 @@ function toggleDone(id){
   saveEvents(); renderView();
   if(selectedId===id) refreshDetail();
   if(dayPanelDate) refreshDayPanel();
+  // 메모 탭이 열려있으면 같이 갱신
+  if(document.getElementById('memo-overlay').classList.contains('show')) renderMemoView();
 }
 function deleteDone(id){ events=events.filter(e=>e.id!==id); saveEvents(); renderView(); }
 
@@ -2157,6 +2214,43 @@ setupSwipe("day-overlay","day-sheet",closeDayPanel);
 setupSwipe("settings-overlay","settings-sheet",closeSettings);
 setupSwipe("add-overlay","add-sheet",closeAdd);
 setupSwipe("stats-overlay","stats-sheet",closeStats);
+
+/* SIDE PANEL SWIPE (오른쪽으로 스와이프 → 닫기) */
+function setupSidePanelSwipe(panelId, closeFn) {
+  const panel = document.getElementById(panelId);
+  let startX = 0, currentX = 0, dragging = false;
+  panel.addEventListener('touchstart', e => {
+    startX = e.touches[0].clientX;
+    currentX = 0; dragging = true;
+    panel.style.transition = 'none';
+  }, { passive: true });
+  panel.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const dx = e.touches[0].clientX - startX;
+    if (dx < 0) { dragging = false; panel.style.transform = ''; return; }
+    currentX = dx;
+    panel.style.transform = `translateX(${dx}px)`;
+    const app = document.getElementById('app');
+    app.style.transform = `translateX(${-40 + (dx / panel.offsetWidth) * 40}px)`;
+  }, { passive: true });
+  panel.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    panel.style.transition = '';
+    const app = document.getElementById('app');
+    app.style.transition = '';
+    if (currentX > 80) {
+      panel.style.transform = 'translateX(100%)';
+      app.style.transform = '';
+      setTimeout(() => { panel.style.transform = ''; closeFn(); }, 300);
+    } else {
+      panel.style.transform = '';
+      app.style.transform = 'translateX(-40px)';
+    }
+  });
+}
+setupSidePanelSwipe('sub-overlay', closeSubView);
+setupSidePanelSwipe('memo-overlay', closeMemoView);
 
 /* SETTINGS */
 const PALETTE=["#FF3B30","#FF6B6B","#FF9500","#FFD93D","#34C759","#30D158","#007AFF","#4D96FF","#5856D6","#7B61FF","#AF52DE","#FF2D55","#8E8E93","#636366","#1C1C1E","#00C7BE","#32ADE6","#BF5AF2"];
@@ -2474,19 +2568,20 @@ function injectMultiDayBars() {
     const rowTop = firstRect.top - wrapRect.top + 22; // below date number
 
     // Assign lanes (simple greedy)
-    const lanes = [];
+    const lanes = []; // lanes[i] = end date of last event assigned to lane i
     weekMd.forEach(ev => {
-      let lane = 0;
-      while (lanes[lane] && lanes[lane] > ev.date) lane++;
-      lanes[lane] = ev.endDate;
-
-      // Clamp to this week
+      // Clamp to this week first
       const barStart = ev.date < weekStart ? weekStart : ev.date;
       const barEnd = ev.endDate > weekEnd ? weekEnd : ev.endDate;
 
       const startIdx = weekCells.indexOf(barStart);
       const endIdx = weekCells.indexOf(barEnd);
       if (startIdx === -1 || endIdx === -1) return;
+
+      // Find a free lane: a lane is free if it has no event or its last event ends before barStart
+      let lane = 0;
+      while (lanes[lane] && lanes[lane] >= barStart) lane++;
+      lanes[lane] = barEnd;
 
       const isStart = ev.date >= weekStart;
       const isEnd = ev.endDate <= weekEnd;
@@ -2658,13 +2753,14 @@ function getNextPaymentDate(sub) {
 function openSubView() {
   renderSubView();
   document.getElementById('sub-overlay').classList.add('show');
-  // update tab active states
+  document.getElementById('app').classList.add('panel-open');
   document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('bnav-sub').classList.add('active');
   pushOverlayHistory('sub-overlay');
 }
 function closeSubView() {
   document.getElementById('sub-overlay').classList.remove('show');
+  document.getElementById('app').classList.remove('panel-open');
   document.querySelectorAll('.bnav-btn').forEach(b => b.classList.remove('active'));
   document.getElementById('bnav-home').classList.add('active');
   if (isTopOverlay('sub-overlay')) history.back();
@@ -2852,16 +2948,41 @@ function loadMemos() {
 }
 loadMemos();
 
+/* ── 메모↔할일 연동: events에서 할일 동기화 ── */
+function getLinkedTodos() {
+  // events 중 done 여부가 있는 것을 할일로 취급 (오늘 이후 or 완료 안된것)
+  const today = getTodayStr();
+  return events.filter(ev => !ev.routineId && ev.date >= today.slice(0,7) + '-01')
+    .map(ev => ({
+      _isEvent: true,
+      id: 'ev_' + ev.id,
+      evId: ev.id,
+      title: ev.title,
+      done: !!ev.done,
+      category: ev.category || '기타',
+      priority: ev.priority || 'none',
+      note: ev.content || ev.note || '',
+      date: ev.date,
+      createdAt: 0,
+    }));
+}
+
+function getAllTodos() {
+  return [...memos, ...getLinkedTodos()];
+}
+
 /* ── open/close ── */
 function openMemoView() {
   renderMemoView();
   document.getElementById('memo-overlay').classList.add('show');
+  document.getElementById('app').classList.add('panel-open');
   setAllBnavInactive();
   document.getElementById('bnav-memo').classList.add('active');
   pushOverlayHistory('memo-overlay');
 }
 function closeMemoView() {
   document.getElementById('memo-overlay').classList.remove('show');
+  document.getElementById('app').classList.remove('panel-open');
   setAllBnavInactive();
   document.getElementById('bnav-home').classList.add('active');
   if (isTopOverlay('memo-overlay')) history.back();
@@ -2897,14 +3018,20 @@ function setAllBnavInactive() {
 
 /* ── render ── */
 function renderMemoView() {
-  // Filter chips
-  const cats = ['전체', ...new Set(memos.map(m => m.category || '개인'))];
+  // Filter chips — categories from both memos and linked events
+  const allTodos = getAllTodos();
+  const cats = ['전체', '메모만', '일정만', ...new Set(allTodos.map(m => m.category || '개인'))];
   document.getElementById('memo-filter-row').innerHTML = cats.map(c =>
     `<button class="memo-filter-btn${c === memoFilter ? ' active' : ''}" onclick="setMemoFilter('${esc(c)}')">${esc(c)}</button>`
   ).join('');
 
   const listWrap = document.getElementById('memo-list-wrap');
-  const filtered = memoFilter === '전체' ? memos : memos.filter(m => (m.category || '개인') === memoFilter);
+
+  let filtered;
+  if (memoFilter === '전체') filtered = allTodos;
+  else if (memoFilter === '메모만') filtered = memos;
+  else if (memoFilter === '일정만') filtered = getLinkedTodos();
+  else filtered = allTodos.filter(m => (m.category || '개인') === memoFilter);
 
   if (!filtered.length) {
     listWrap.innerHTML = `<div class="memo-empty">
@@ -2919,9 +3046,14 @@ function renderMemoView() {
   const pending = filtered.filter(m => !m.done);
   const done    = filtered.filter(m => m.done);
 
-  // Sort pending: high > mid > low > none
+  // Sort pending: high > mid > low > none, then by date for events
   const prioOrder = { high: 0, mid: 1, low: 2, none: 3 };
-  pending.sort((a, b) => (prioOrder[a.priority||'none'] - prioOrder[b.priority||'none']));
+  pending.sort((a, b) => {
+    const po = prioOrder[a.priority||'none'] - prioOrder[b.priority||'none'];
+    if (po !== 0) return po;
+    if (a.date && b.date) return a.date.localeCompare(b.date);
+    return (a.createdAt||0) - (b.createdAt||0);
+  });
 
   let html = '';
   if (pending.length) {
@@ -2938,13 +3070,24 @@ function renderMemoView() {
 function memoItemHtml(m) {
   const ct = cat(m.category || '개인');
   const prio = m.priority || 'none';
-  return `<div class="memo-item${m.done ? '' : ''}" onclick="openMemoDetail(${m.id})">
+  const isEvent = !!m._isEvent;
+  const clickAction = isEvent
+    ? `openDetail(${m.evId})`
+    : `openMemoDetail(${m.id})`;
+  const toggleAction = isEvent
+    ? `event.stopPropagation();toggleDone(${m.evId})`
+    : `event.stopPropagation();toggleMemo(${m.id})`;
+  const dateLabel = isEvent && m.date ? `<span style="font-size:10px;color:var(--ios-label3);margin-left:2px">${m.date.slice(5).replace('-','/')}</span>` : '';
+  const eventBadge = isEvent ? `<span style="font-size:9px;font-weight:600;padding:1px 5px;border-radius:10px;background:rgba(0,122,255,0.10);color:var(--accent);margin-left:2px">일정</span>` : '';
+  return `<div class="memo-item" onclick="${clickAction}">
     <button class="memo-check${m.done ? ' checked' : ''}"
-      onclick="event.stopPropagation();toggleMemo(${m.id})">${m.done ? '✓' : ''}</button>
+      onclick="${toggleAction}">${m.done ? '✓' : ''}</button>
     <div class="memo-body">
       <div class="memo-title${m.done ? ' done' : ''}">${esc(m.title)}</div>
       <div class="memo-meta-row">
         <span class="memo-tag" style="background:${ct.light};color:${ct.text}">${esc(m.category||'개인')}</span>
+        ${eventBadge}
+        ${dateLabel}
         ${m.note ? `<span style="font-size:11px;color:var(--ios-label3)">📝</span>` : ''}
       </div>
     </div>
@@ -3105,9 +3248,9 @@ const _origCloseSettings  = closeSettings;
 const _origCloseAdd       = closeAdd;
 const _origCloseStats     = closeStats;
 const _origCloseCopyModal = closeCopyModal;
-const _origCloseSubView   = function(){ document.getElementById('sub-overlay').classList.remove('show'); document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('bnav-home').classList.add('active'); };
+const _origCloseSubView   = function(){ document.getElementById('sub-overlay').classList.remove('show'); document.getElementById('app').classList.remove('panel-open'); document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('bnav-home').classList.add('active'); };
 const _origCloseAddSub    = function(){ document.getElementById('add-sub-overlay').classList.remove('show'); };
-const _origCloseMemoView  = function(){ document.getElementById('memo-overlay').classList.remove('show'); document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('bnav-home').classList.add('active'); };
+const _origCloseMemoView  = function(){ document.getElementById('memo-overlay').classList.remove('show'); document.getElementById('app').classList.remove('panel-open'); document.querySelectorAll('.bnav-btn').forEach(b=>b.classList.remove('active')); document.getElementById('bnav-home').classList.add('active'); };
 const _origCloseMemoDetail= function(){ document.getElementById('memo-detail-overlay').classList.remove('show'); };
 
 closeDetail    = function(){ _origCloseDetail();    if(isTopOverlay('detail-overlay'))   history.back(); };
@@ -3143,4 +3286,5 @@ window.addEventListener('popstate', e => {
 </script>
 </body>
 </html>
+
 
