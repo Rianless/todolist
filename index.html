@@ -550,6 +550,7 @@ html, body {
 
 /* Sheet swipe-down animation */
 .sheet { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
+.handle {
   width: 36px; height: 4px;
   background: var(--ios-separator);
   border-radius: 2px; margin: 8px auto 0;
@@ -949,6 +950,12 @@ body.custom-bg #view { background: transparent; }
 .tab-panel.active {
   transform: translateX(0);
 }
+/* tab-panel 내부 스크롤 영역에 하단 탭바 여백 확보 */
+.tab-panel .side-panel-body,
+.tab-panel .sub-screen,
+.tab-panel .memo-list-wrap {
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 90px) !important;
+}
 
 /* panel-open: no transform on #app */
 .side-panel-nav {
@@ -976,14 +983,14 @@ body.custom-bg #view { background: transparent; }
 }
 .side-panel-body {
   flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding-bottom: 84px;
+  padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
 }
 .side-panel-body::-webkit-scrollbar { display: none; }
 
 /* ══ SUBSCRIPTION TAB ══ */
 .sub-screen {
   flex: 1; overflow-y: auto; background: var(--ios-bg);
-  -webkit-overflow-scrolling: touch; padding-bottom: 80px;
+  -webkit-overflow-scrolling: touch; padding-bottom: calc(env(safe-area-inset-bottom, 0px) + 90px);
 }
 .sub-screen::-webkit-scrollbar { display: none; }
 
@@ -1205,7 +1212,7 @@ body.custom-bg #view { background: transparent; }
 /* Todo list scroll area */
 .memo-list-wrap {
   flex: 1; overflow-y: auto; -webkit-overflow-scrolling: touch;
-  padding: 4px 0 100px;
+  padding: 4px 0 calc(env(safe-area-inset-bottom, 0px) + 100px);
 }
 .memo-list-wrap::-webkit-scrollbar { display: none; }
 
@@ -1450,8 +1457,7 @@ body.custom-bg #view { background: transparent; }
 <!-- Add / Edit Sheet -->
 <div class="overlay" id="add-overlay" onclick="closeAdd()">
   <div class="sheet" id="add-sheet" onclick="event.stopPropagation()">
-    <div class="handle"></div>
-    <div class="sheet-hdr">
+    <div class="sheet-hdr" style="padding-top:18px">
       <span class="sheet-title" id="add-head-title">새 일정</span>
       <button class="sheet-close" onclick="closeAdd()">✕</button>
     </div>
@@ -1714,7 +1720,7 @@ body.custom-bg #view { background: transparent; }
     <div class="side-panel-body" style="flex:1;min-height:0">
       <div class="stats-chart" id="stats-chart"></div>
     </div>
-    <div class="stats-summary" id="stats-summary" style="flex-shrink:0"></div>
+    <div class="stats-summary" id="stats-summary" style="flex-shrink:0;margin-bottom:calc(env(safe-area-inset-bottom,0px) + 90px)"></div>
   </div>
 </div>
 
