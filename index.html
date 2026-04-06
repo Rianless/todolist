@@ -1641,7 +1641,7 @@ body.custom-bg #view { background: transparent; }
 </div>
 
 <!-- Stats Side Panel -->
-<div class="tab-panel" id="stats-overlay">
+<div class="tab-panel" id="stats-overlay" style="padding-bottom:0">
   <div class="side-panel-nav">
     <div class="side-panel-nav-row">
       <button class="side-panel-back" onclick="closeStats()">
@@ -1652,7 +1652,7 @@ body.custom-bg #view { background: transparent; }
       <div style="width:52px"></div>
     </div>
   </div>
-  <div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden">
+  <div style="flex:1;display:flex;flex-direction:column;min-height:0;overflow:hidden" id="stats-inner">
     <div style="flex-shrink:0">
       <div class="stats-seg">
         <button class="stats-seg-btn active" id="stats-btn-week" onclick="setStatsMode('week')">주별</button>
@@ -1663,7 +1663,7 @@ body.custom-bg #view { background: transparent; }
     <div class="side-panel-body" style="flex:1;min-height:0">
       <div class="stats-chart" id="stats-chart"></div>
     </div>
-    <div class="stats-summary" id="stats-summary" style="flex-shrink:0;padding-bottom:calc(env(safe-area-inset-bottom,0px) + 8px)"></div>
+    <div class="stats-summary" id="stats-summary" style="flex-shrink:0"></div>
   </div>
 </div>
 
@@ -3426,7 +3426,13 @@ setupSidePanelSwipe('memo-overlay', closeMemoView);
 function adjustAppHeight(){
   const bnav=document.getElementById("bottom-nav");
   const app=document.getElementById("app");
-  if(bnav&&app){ app.style.height=`calc(100% - ${bnav.offsetHeight}px)`; }
+  const bnavH = bnav ? bnav.offsetHeight : 0;
+  if(bnav&&app){ app.style.height=`calc(100% - ${bnavH}px)`; }
+  // tab-panels (stats/sub/memo) 은 fixed full-screen이므로 bottom-nav 높이만큼 내부 패딩 적용
+  ['stats-overlay','sub-overlay','memo-overlay'].forEach(id=>{
+    const el=document.getElementById(id);
+    if(el) el.style.paddingBottom = bnavH+'px';
+  });
 }
 window.addEventListener("resize",()=>{ adjustAppHeight(); renderView(); });
 setTimeout(adjustAppHeight, 0);
