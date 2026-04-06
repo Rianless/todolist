@@ -481,6 +481,7 @@ html, body {
   backdrop-filter: blur(0px);
   z-index: 100; display: none; align-items: flex-end;
   transition: backdrop-filter 0.3s;
+  overflow: hidden;
 }
 .overlay.show { display: flex; backdrop-filter: blur(2px); }
 
@@ -495,8 +496,8 @@ html, body {
 }
 .sheet::-webkit-scrollbar { display: none; }
 
-/* Sheet handle */
-.handle {
+/* Sheet swipe-down animation */
+.sheet { transition: transform 0.3s cubic-bezier(0.4,0,0.2,1); }
   width: 36px; height: 4px;
   background: var(--ios-separator);
   border-radius: 2px; margin: 8px auto 0;
@@ -883,15 +884,14 @@ body.custom-bg #view { background: transparent; }
 /* ══ TAB PANELS (탭 전환 시스템) ══ */
 .tab-panel {
   position: fixed;
-  top: 0; left: 0; right: 0; bottom: 0;
-  max-width: 430px; margin: 0 auto;
+  top: 0; bottom: 0;
+  width: 100%; max-width: 430px;
   background: var(--ios-bg);
   z-index: 45;
   display: flex; flex-direction: column;
   overflow: hidden;
   transform: translateX(100%);
   transition: transform 0.3s cubic-bezier(0.4,0,0.2,1);
-  will-change: transform;
 }
 .tab-panel.active {
   transform: translateX(0);
@@ -3392,6 +3392,67 @@ function pickMemoCat(c) { memoAddCat = c; renderMemoCatPick(); }
 loadBgSettings();
 loadEvents();
 
+/* ── Sheet 아래로 스와이프해서 닫기 ── */
+function setupSheetSwipe(overlayId, closeFn) {
+  const overlay = document.getElementById(overlayId);
+  if (!overlay) return;
+  const sheet = overlay.querySelector('.sheet');
+  if (!sheet) return;
+
+  let startY = 0, startScrollTop = 0, dragging = false, currentDY = 0;
+
+  sheet.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    startScrollTop = sheet.scrollTop;
+    dragging = true;
+    currentDY = 0;
+    sheet.style.transition = 'none';
+  }, { passive: true });
+
+  sheet.addEventListener('touchmove', e => {
+    if (!dragging) return;
+    const dy = e.touches[0].clientY - startY;
+    // 스크롤이 최상단일 때만 스와이프 허용
+    if (dy <= 0 || sheet.scrollTop > 2) return;
+    currentDY = dy;
+    sheet.style.transform = `translateY(${dy}px)`;
+    // 배경 dim 살짝 줄이기
+    const opacity = Math.max(0, 0.35 - (dy / 400) * 0.35);
+    overlay.style.background = `rgba(0,0,0,${opacity.toFixed(2)})`;
+  }, { passive: true });
+
+  sheet.addEventListener('touchend', () => {
+    if (!dragging) return;
+    dragging = false;
+    sheet.style.transition = '';
+    if (currentDY > 100) {
+      // 충분히 내렸으면 닫기 애니메이션 후 닫기
+      sheet.style.transform = `translateY(110%)`;
+      overlay.style.background = 'rgba(0,0,0,0)';
+      setTimeout(() => {
+        sheet.style.transform = '';
+        overlay.style.background = '';
+        closeFn();
+      }, 280);
+    } else {
+      // 원위치 복귀
+      sheet.style.transform = '';
+      overlay.style.background = '';
+    }
+    currentDY = 0;
+  });
+}
+
+// 모든 sheet overlay에 스와이프 적용
+setTimeout(() => {
+  setupSheetSwipe('detail-overlay',      () => closeDetail());
+  setupSheetSwipe('day-overlay',         () => closeDayPanel());
+  setupSheetSwipe('settings-overlay',    () => closeSettings());
+  setupSheetSwipe('add-overlay',         () => closeAdd());
+  setupSheetSwipe('memo-detail-overlay', () => closeMemoDetail());
+  setupSheetSwipe('add-sub-overlay',     () => closeAddSub());
+}, 0);
+
 /* ── Side Panel Swipe-to-close (오른쪽으로 스와이프) ── */
 function setupSidePanelSwipe(panelId, closeFn) {
   const panel = document.getElementById(panelId);
@@ -3428,38 +3489,73 @@ function adjustAppHeight(){
   const app=document.getElementById("app");
   const bnavH = bnav ? bnav.offsetHeight : 0;
   if(bnav&&app){ app.style.height=`calc(100% - ${bnavH}px)`; }
-  // tab-panels (stats/sub/memo) 은 fixed full-screen이므로 bottom-nav 높이만큼 내부 패딩 적용
-  ['stats-overlay','sub-overlay','memo-overlay'].forEach(id=>{
-    const el=document.getElementById(id);
-    if(el) el.style.paddingBottom = bnavH+'px';
+  // tab-panel을 #app 위치에 맞춤 (데스크탑 중앙 정렬 대응)
+  const appRect = app ? app.getBoundingClientRect() : null;
+  document.querySelectorAll('.tab-panel').forEach(el => {
+    if (appRect) {
+      el.style.left = appRect.left + 'px';
+      el.style.width = appRect.width + 'px';
+    }
+    el.style.paddingBottom = bnavH + 'px';
   });
 }
 window.addEventListener("resize",()=>{ adjustAppHeight(); renderView(); });
 setTimeout(adjustAppHeight, 0);
 
 /* ── BACK BUTTON (History API) ── */
-// 오버레이가 열릴 때 history에 쌓고, 뒤로가기 시 닫음
-const OVERLAYS = [
-  { id: 'detail-overlay',      close: ()=>closeDetail() },
-  { id: 'day-overlay',         close: ()=>closeDayPanel() },
-  { id: 'settings-overlay',    close: ()=>closeSettings() },
-  { id: 'add-overlay',         close: ()=>closeAdd() },
-  { id: 'stats-overlay',       close: ()=>closeStats() },
-  { id: 'copy-modal',          close: ()=>closeCopyModal() },
-  { id: 'sub-overlay',         close: ()=>_origCloseSubView() },
-  { id: 'add-sub-overlay',     close: ()=>_origCloseAddSub() },
-  { id: 'memo-overlay',        close: ()=>_origCloseMemoView() },
-  { id: 'memo-detail-overlay', close: ()=>_origCloseMemoDetail() },
-];
+// 원칙: open 시 history.pushState, 뒤로가기(popstate) 시에만 실제 닫기 실행
+// 버튼으로 닫을 때는 UI만 닫고 history.back() 호출 → popstate가 닫기 재실행하지 않도록 플래그 사용
 
-// 초기 상태 설정
 history.replaceState({ overlay: null }, '');
+let _closingByButton = false; // 버튼 닫기 중 popstate 무시용 플래그
 
-function pushOverlayHistory(id) {
+// UI 닫기 원본 함수들 (history 조작 없이 순수하게 UI만 닫음)
+const _rawClose = {
+  'detail-overlay':      () => { const el=document.getElementById('detail-overlay'); if(el) el.classList.remove('show'); },
+  'day-overlay':         () => { const el=document.getElementById('day-overlay');    if(el) el.classList.remove('show'); dayPanelDate=null; },
+  'settings-overlay':    () => { const el=document.getElementById('settings-overlay'); if(el) el.classList.remove('show'); },
+  'add-overlay':         () => { clearTimeout(_autoSaveTimer); if(_autoSavedId!==null){ events=events.filter(e=>e.id!==_autoSavedId); saveEvents(); renderView(); } _autoSavedId=null; const el=document.getElementById('add-overlay'); if(el) el.classList.remove('show'); editingId=null; },
+  'stats-overlay':       () => switchTab(null),
+  'copy-modal':          () => { const el=document.getElementById('copy-modal'); if(el) el.classList.remove('show'); copyingId=null; },
+  'sub-overlay':         () => switchTab(null),
+  'add-sub-overlay':     () => { const el=document.getElementById('add-sub-overlay'); if(el) el.classList.remove('show'); },
+  'memo-overlay':        () => switchTab(null),
+  'memo-detail-overlay': () => { const el=document.getElementById('memo-detail-overlay'); if(el) el.classList.remove('show'); },
+};
+
+function isOverlayVisible(id) {
+  const el = document.getElementById(id);
+  if (!el) return false;
+  return el.classList.contains('show') || el.classList.contains('active') || el.style.display === 'flex';
+}
+
+// 버튼으로 닫기: UI 닫고 history.back()
+function closeByButton(id) {
+  if (!isOverlayVisible(id)) return;
+  _rawClose[id]();
+  if (history.state && history.state.overlay === id) {
+    _closingByButton = true;
+    history.back();
+  }
+}
+
+// 열기: UI 열고 history.pushState
+function openWithHistory(id, openFn) {
+  openFn();
   history.pushState({ overlay: id }, '');
 }
 
-// 각 열기 함수에 history push 연결
+// popstate: 버튼 닫기가 아닌 경우만 UI 닫기
+window.addEventListener('popstate', e => {
+  if (_closingByButton) { _closingByButton = false; return; }
+  // 열려있는 오버레이 중 가장 위 것 닫기
+  const order = ['add-sub-overlay','memo-detail-overlay','detail-overlay','day-overlay','copy-modal','settings-overlay','add-overlay','stats-overlay','sub-overlay','memo-overlay'];
+  for (const id of order) {
+    if (isOverlayVisible(id)) { _rawClose[id](); return; }
+  }
+});
+
+// ── 각 open/close 함수 연결 ──
 const _origOpenDetail    = openDetail;
 const _origOpenDayPanel  = openDayPanel;
 const _origOpenSettings  = openSettings;
@@ -3468,61 +3564,36 @@ const _origOpenEdit      = openEdit;
 const _origOpenStats     = openStats;
 const _origCopyFromDetail= copyFromDetail;
 
-openDetail = function(id){ _origOpenDetail(id); pushOverlayHistory('detail-overlay'); };
-openDayPanel = function(ds){ _origOpenDayPanel(ds); pushOverlayHistory('day-overlay'); };
-openSettings = function(){ _origOpenSettings(); pushOverlayHistory('settings-overlay'); };
-openAdd = function(ds){ _origOpenAdd(ds); pushOverlayHistory('add-overlay'); };
-openEdit = function(id){ _origOpenEdit(id); pushOverlayHistory('add-overlay'); };
-openStats = function(){ _origOpenStats(); pushOverlayHistory('stats-overlay'); };
-copyFromDetail = function(){ _origCopyFromDetail(); pushOverlayHistory('copy-modal'); };
+openDetail    = function(id){ openWithHistory('detail-overlay',   ()=>_origOpenDetail(id)); };
+openDayPanel  = function(ds){ openWithHistory('day-overlay',      ()=>_origOpenDayPanel(ds)); };
+openSettings  = function(){   openWithHistory('settings-overlay', ()=>_origOpenSettings()); };
+openAdd       = function(ds){ openWithHistory('add-overlay',      ()=>_origOpenAdd(ds)); };
+openEdit      = function(id){ openWithHistory('add-overlay',      ()=>_origOpenEdit(id)); };
+openStats     = function(){   openWithHistory('stats-overlay',    ()=>_origOpenStats()); };
+copyFromDetail= function(){   openWithHistory('copy-modal',       ()=>_origCopyFromDetail()); };
 
-// 닫기 함수들: 이미 popstate로 닫히는 경우 중복 pushState 방지를 위해 state 확인
-function isTopOverlay(id){ return history.state && history.state.overlay === id; }
-const _origCloseDetail    = closeDetail;
-const _origCloseDayPanel  = closeDayPanel;
-const _origCloseSettings  = closeSettings;
-const _origCloseAdd       = closeAdd;
-const _origCloseStats     = function(){ switchTab(null); };
-const _origCloseCopyModal = closeCopyModal;
-const _origCloseSubView   = function(){ switchTab(null); };
-const _origCloseAddSub    = function(){ document.getElementById('add-sub-overlay').classList.remove('show'); };
-const _origCloseMemoView  = function(){ switchTab(null); };
-const _origCloseMemoDetail= function(){ document.getElementById('memo-detail-overlay').classList.remove('show'); };
+// openAddSub / openSubView / openMemoView 내부에서 pushOverlayHistory를 직접 호출하므로
+// pushOverlayHistory는 openWithHistory로 통일
+function pushOverlayHistory(id) {
+  history.pushState({ overlay: id }, '');
+}
 
-closeDetail    = function(){ _origCloseDetail();    if(isTopOverlay('detail-overlay'))   history.back(); };
-closeDayPanel  = function(){ _origCloseDayPanel();  if(isTopOverlay('day-overlay'))      history.back(); };
-closeSettings  = function(){ _origCloseSettings();  if(isTopOverlay('settings-overlay')) history.back(); };
-closeAdd       = function(){ _origCloseAdd();        if(isTopOverlay('add-overlay'))      history.back(); };
-closeStats     = function(){ _origCloseStats();      if(isTopOverlay('stats-overlay'))    history.back(); };
-closeCopyModal = function(){ _origCloseCopyModal();  if(isTopOverlay('copy-modal'))       history.back(); };
-closeSubView   = function(){ _origCloseSubView();    if(isTopOverlay('sub-overlay'))      history.back(); };
-closeAddSub    = function(){ _origCloseAddSub();     if(isTopOverlay('add-sub-overlay'))  history.back(); };
-closeMemoView  = function(){ _origCloseMemoView();   if(isTopOverlay('memo-overlay'))     history.back(); };
-closeMemoDetail= function(){ _origCloseMemoDetail(); if(isTopOverlay('memo-detail-overlay')) history.back(); };
+closeDetail    = function(){ closeByButton('detail-overlay'); };
+closeDayPanel  = function(){ closeByButton('day-overlay'); };
+closeSettings  = function(){ closeByButton('settings-overlay'); };
+closeAdd       = function(){ closeByButton('add-overlay'); };
+closeStats     = function(){ closeByButton('stats-overlay'); };
+closeCopyModal = function(){ closeByButton('copy-modal'); };
+closeSubView   = function(){ closeByButton('sub-overlay'); };
+closeAddSub    = function(){ closeByButton('add-sub-overlay'); };
+closeMemoView  = function(){ closeByButton('memo-overlay'); };
+closeMemoDetail= function(){ closeByButton('memo-detail-overlay'); };
 
-// 뒤로가기 이벤트
-window.addEventListener('popstate', e => {
-  for(const ov of OVERLAYS){
-    const el=document.getElementById(ov.id);
-    const isVisible = el && (el.classList.contains('show') || el.classList.contains('active') || el.style.display==='flex');
-    if(isVisible){
-      if(ov.id==='detail-overlay')     _origCloseDetail();
-      else if(ov.id==='day-overlay')   _origCloseDayPanel();
-      else if(ov.id==='settings-overlay') _origCloseSettings();
-      else if(ov.id==='add-overlay')   _origCloseAdd();
-      else if(ov.id==='stats-overlay') _origCloseStats();
-      else if(ov.id==='copy-modal')    _origCloseCopyModal();
-      else if(ov.id==='sub-overlay')        _origCloseSubView();
-      else if(ov.id==='add-sub-overlay')    _origCloseAddSub();
-      else if(ov.id==='memo-overlay')       _origCloseMemoView();
-      else if(ov.id==='memo-detail-overlay')_origCloseMemoDetail();
-      return;
-    }
-  }
-});
+// openSubView / openMemoView 내부에서 pushOverlayHistory 이미 호출하므로 중복 push 방지
+const _origCloseSubView   = function(){ _rawClose['sub-overlay'](); };
+const _origCloseAddSub    = function(){ _rawClose['add-sub-overlay'](); };
+const _origCloseMemoView  = function(){ _rawClose['memo-overlay'](); };
+const _origCloseMemoDetail= function(){ _rawClose['memo-detail-overlay'](); };
 </script>
 </body>
 </html>
-
-
-
