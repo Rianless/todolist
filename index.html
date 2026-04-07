@@ -1913,9 +1913,10 @@ function updateProgress() {
 ══════════════════════════════════════ */
 function renderCal() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const mm = String(calM + 1).padStart(2, '0');
   document.getElementById('calLabel').textContent = isDark
-    ? `${calY} // ${MONTHS_KO[calM]}`
-    : `${calY}년 ${MONTHS_KO[calM]}`;
+    ? `${calY} // ${mm}월`
+    : `${calY}년 ${mm}월`;
 
   const grid = document.getElementById('calGrid');
   grid.innerHTML = '';
