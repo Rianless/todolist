@@ -238,28 +238,17 @@ body::after {
 
 /* ── HEADER SYS-EXTRA (dark only) ── */
 .header-sys-extra {
-  display: none;
   margin-top: 8px;
-  padding-top: 7px;
+  padding-top: 6px;
   border-top: 1px solid rgba(0,255,231,0.08);
-  display: flex; gap: 6px; flex-wrap: wrap;
-}
-[data-theme="light"] .header-sys-extra { display: none !important; }
-[data-theme="dark"] .header-sys-extra { display: flex; }
-
-.sys-chip {
   font-family: 'Share Tech Mono', monospace;
-  font-size: 7px; letter-spacing: 1px;
-  padding: 2px 6px;
-  border-radius: 2px;
-  border: 1px solid rgba(0,255,231,0.15);
-  color: rgba(0,255,231,0.45);
-  white-space: nowrap;
+  font-size: 8px;
+  letter-spacing: 1px;
+  color: rgba(0,255,231,0.35);
+  line-height: 1.6;
 }
-.sys-chip.c { border-color: rgba(0,255,231,0.25); color: rgba(0,255,231,0.6); }
-.sys-chip.m { border-color: rgba(255,0,170,0.2); color: rgba(255,0,170,0.5); }
-.sys-chip.p { border-color: rgba(157,0,255,0.2); color: rgba(157,0,255,0.5); }
-.sys-chip.g { border-color: rgba(57,255,20,0.2); color: rgba(57,255,20,0.5); }
+[data-theme="light"] .header-sys-extra { display: none; }
+[data-theme="dark"] .header-sys-extra { display: block; }
 
 /* ── MAIN SCROLL AREA ── */
 #mainContent {
@@ -1309,13 +1298,7 @@ body::after {
       <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
       <div class="prog-pct" id="progPct">0%</div>
     </div>
-    <div class="header-sys-extra">
-      <span class="sys-chip c">SYS:ONLINE</span>
-      <span class="sys-chip g">AUTH:GRANTED</span>
-      <span class="sys-chip m">ENC:AES-256</span>
-      <span class="sys-chip p">DB:SYNCED</span>
-      <span class="sys-chip" id="sysChipDate"></span>
-    </div>
+    <div class="header-sys-extra" id="sysExtraLine"></div>
   </div>
 
   <!-- ── MAIN CONTENT ── -->
@@ -2794,10 +2777,11 @@ currentTab = 'cal';
 renderCal();
 updateProgress();
 (function() {
-  const el = document.getElementById('sysChipDate');
+  const el = document.getElementById('sysExtraLine');
   if (!el) return;
   const now = new Date();
-  el.textContent = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  const d = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
+  el.textContent = `SYS:ONLINE  //  AUTH:GRANTED  //  ENC:AES-256  //  DB:SYNCED  //  ${d}`;
 })();
 </script>
 </body>
