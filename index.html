@@ -522,6 +522,15 @@ body::after {
   border-radius: 4px; transition: all 0.2s;
 }
 .cal-arrow:hover { border-color: var(--accent); background: rgba(0,85,255,0.07); }
+.cal-today-btn {
+  font-size: 10px; font-family: var(--font-main);
+  background: none; border: 1px solid var(--border2);
+  color: var(--text3); padding: 6px 12px; cursor: pointer;
+  border-radius: 4px; transition: all 0.2s; letter-spacing: 0.5px;
+}
+.cal-today-btn:hover { border-color: var(--accent); color: var(--accent); }
+[data-theme="dark"] .cal-today-btn:hover { background: rgba(0,255,231,0.06); }
+[data-theme="dark"] .cal-today-btn { font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; }
 .cal-month {
   font-family: var(--font-title);
   font-size: 14px; color: var(--accent); letter-spacing: 2px;
@@ -1321,7 +1330,10 @@ body::after {
     <div class="view active" id="viewCal">
       <div class="cal-nav">
         <button class="cal-arrow" onclick="calMove(-1)">‹</button>
-        <div class="cal-month" id="calLabel"></div>
+        <div style="display:flex;align-items:center;gap:8px;">
+          <div class="cal-month" id="calLabel"></div>
+          <button class="cal-today-btn" onclick="calGoToday()">TODAY</button>
+        </div>
         <button class="cal-arrow" onclick="calMove(1)">›</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
@@ -2013,6 +2025,12 @@ function renderCal() {
 }
 
 function calMove(d){ calM+=d; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;} renderCal(); }
+
+function calGoToday() {
+  const t = new Date();
+  calY = t.getFullYear(); calM = t.getMonth();
+  renderCal();
+}
 
 function openDayModal(ds, evts) {
   const dt = new Date(ds+'T00:00:00');
