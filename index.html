@@ -888,6 +888,36 @@ body::after {
 .cat-item {
   display: flex; align-items: center; gap: 10px;
   padding: 10px 0; border-bottom: 1px solid var(--border);
+  transition: opacity 0.15s;
+}
+.cat-item.dragging { opacity: 0.35; }
+.cat-item.drag-over-cat { border-top: 2px solid var(--accent); }
+.cat-drag-handle {
+  cursor: grab; color: var(--text3); font-size: 14px;
+  padding: 0 2px; touch-action: none; flex-shrink: 0;
+  user-select: none;
+}
+.cat-drag-handle:active { cursor: grabbing; }
+
+/* calendar drag */
+.cal-dot[draggable="true"] { cursor: grab; }
+.cal-dot[draggable="true"]:active { cursor: grabbing; }
+.cal-cell.drag-over {
+  background: rgba(0,255,231,0.08) !important;
+  outline: 1px dashed var(--accent);
+}
+[data-theme="light"] .cal-cell.drag-over {
+  background: rgba(0,85,255,0.07) !important;
+  outline-color: var(--accent);
+}
+#calDragGhost {
+  position: fixed; pointer-events: none; z-index: 9999;
+  opacity: 0.75; font-size: 9px; background: var(--panel2);
+  border: 1px solid var(--accent); border-radius: 3px;
+  padding: 2px 6px; color: var(--accent); white-space: nowrap;
+  transform: translate(-50%, -110%);
+  box-shadow: 0 0 10px rgba(0,255,231,0.3);
+  display: none;
 }
 .cat-color-dot { width: 12px; height: 12px; border-radius: 50%; flex-shrink:0; }
 .cat-name { flex:1; font-size: 14px; color: var(--text); }
@@ -1403,15 +1433,15 @@ body::after {
           <div class="mp-card-body">
             <div class="mp-card-inner">
 
-              <!-- 청도활동 그룹 -->
-              <div class="cat-group-header" style="margin-top:10px;margin-bottom:8px;">
+              <!-- 일반 카테고리 (순서 변경 가능) -->
+              <div id="otherCatList"></div>
+
+              <!-- 청도활동 그룹 (고정, 항상 하단) -->
+              <div class="cat-group-header" style="margin-top:14px;margin-bottom:8px;">
                 <span class="cat-group-tag">청도활동</span>
                 <span style="font-size:10px;color:var(--text3);">고정 카테고리</span>
               </div>
               <div id="cheongdoCatList"></div>
-
-              <!-- 일반 카테고리 -->
-              <div id="otherCatList" style="margin-top:10px;"></div>
 
               <!-- 카테고리 추가 버튼 -->
               <button class="add-cat-btn" style="margin-top:10px;" onclick="showInlineAddCatForm()">+ 카테고리 추가</button>
@@ -1615,6 +1645,8 @@ body::after {
   <button class="pv-close" onclick="closePhotoViewer()">✕</button>
 </div>
 
+<div id="calDragGhost"></div>
+
 <!-- DAY DETAIL MODAL -->
 <div class="modal-overlay" id="dayModal">
   <div class="modal-sheet">
@@ -1681,6 +1713,7 @@ let isSub = false;
 let isHideTitle = false;
 let selectedPrio = 'none';
 let currentPhoto = null;
+let _calDragId   = null;
 let selectedCatColor = '#ff6ef7';
 
 function getCatColor(name) {
@@ -2003,6 +2036,18 @@ function renderCal() {
       const ts=item.time?item.time.split('~')[0]+' ':'';
       const displayTitle = item.hideTitle ? '// 비공개' : item.title;
       dot.textContent=(item.secret&&!item._unlocked?'🔒 CLASSIFIED':ts+displayTitle);
+
+      // 드래그 (개인 일정만)
+      if (!item.isSub) {
+        dot.setAttribute('draggable','true');
+        dot.addEventListener('dragstart', e => {
+          _calDragId = item.id;
+          e.dataTransfer.effectAllowed = 'move';
+          e.stopPropagation();
+        });
+        dot.addEventListener('dragend', () => { _calDragId = null; });
+        _setupCalTouchDrag(dot, item);
+      }
       cell.appendChild(dot);
     });
     if(evts.length>3){
@@ -2011,13 +2056,71 @@ function renderCal() {
       more.textContent=`+${evts.length-3}`;
       cell.appendChild(more);
     }
+
+    // 셀 드롭 대상
+    cell.dataset.date = ds;
+    cell.addEventListener('dragover',  e => { e.preventDefault(); cell.classList.add('drag-over'); });
+    cell.addEventListener('dragleave', () => cell.classList.remove('drag-over'));
+    cell.addEventListener('drop', e => {
+      e.preventDefault(); cell.classList.remove('drag-over');
+      if (_calDragId === null) return;
+      const it = items.find(i=>i.id===_calDragId);
+      if (it && it.date !== ds) { it.date = ds; renderCal(); }
+      _calDragId = null;
+    });
+
     cell.style.cursor='pointer';
     cell.classList.add('has-events');
-    cell.addEventListener('click',()=>openDayModal(ds, evts));
+    cell.addEventListener('click', e => {
+      if (_calDragId !== null) return; // 드래그 중 클릭 무시
+      openDayModal(ds, dmap[ds]||[]);
+    });
     grid.appendChild(cell);
   }
 
   if(calSelectedDate) renderCalDayList(calSelectedDate);
+}
+
+function _setupCalTouchDrag(dot, item) {
+  const ghost = document.getElementById('calDragGhost');
+  let active = false;
+
+  dot.addEventListener('touchstart', e => {
+    active = true;
+    _calDragId = item.id;
+    ghost.textContent = item.title;
+    ghost.style.display = 'block';
+    const t = e.touches[0];
+    ghost.style.left = t.clientX + 'px';
+    ghost.style.top  = t.clientY + 'px';
+  }, {passive: true});
+
+  dot.addEventListener('touchmove', e => {
+    if (!active) return;
+    const t = e.touches[0];
+    ghost.style.left = t.clientX + 'px';
+    ghost.style.top  = t.clientY + 'px';
+    // 현재 셀 강조
+    document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    el?.closest('[data-date]')?.classList.add('drag-over');
+    e.preventDefault();
+  }, {passive: false});
+
+  dot.addEventListener('touchend', e => {
+    if (!active) return;
+    active = false;
+    ghost.style.display = 'none';
+    document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
+    const t = e.changedTouches[0];
+    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const cell = el?.closest('[data-date]');
+    if (cell && _calDragId !== null) {
+      const it = items.find(i=>i.id===_calDragId);
+      if (it && it.date !== cell.dataset.date) { it.date = cell.dataset.date; renderCal(); }
+    }
+    _calDragId = null;
+  });
 }
 
 function calMove(d){ calM+=d; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;} renderCal(); }
@@ -2263,32 +2366,99 @@ function renderSubs() {
 /* ── CATEGORY LIST (마이페이지 내) ── */
 function renderCatLists() {
   const cheongdoEl = document.getElementById('cheongdoCatList');
-  const otherEl = document.getElementById('otherCatList');
+  const otherEl    = document.getElementById('otherCatList');
   cheongdoEl.innerHTML = '';
-  otherEl.innerHTML = '';
+  otherEl.innerHTML    = '';
 
-  categories.forEach((cat, i) => {
+  let catDragSrc = null;
+
+  // 일반 카테고리 (드래그 순서 변경 가능)
+  const otherCats = categories.filter(c => !isCheongdo(c.name));
+  if (!otherCats.length) {
+    otherEl.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:8px 0;">추가된 카테고리가 없습니다</div>';
+  }
+  otherCats.forEach(cat => {
+    const globalIdx = categories.indexOf(cat);
     const row = document.createElement('div');
     row.className = 'cat-item';
-    const isCheongdoCat = isCheongdo(cat.name);
+    row.draggable = true;
+    row.dataset.name = cat.name;
     row.innerHTML = `
+      <div class="cat-drag-handle">⠿</div>
       <div class="cat-color-dot" style="background:${cat.color}"></div>
       <div class="cat-name">${cat.name}</div>
       <div class="cat-actions">
-        ${isCheongdoCat
-          ? `<span style="font-size:10px;color:var(--text3);padding:0 6px;">고정</span>`
-          : `<button class="cat-act-btn del" onclick="deleteCat(${i})">삭제</button>`}
+        <button class="cat-act-btn del" onclick="deleteCat(${globalIdx})">삭제</button>
       </div>`;
-    if (isCheongdoCat) {
-      cheongdoEl.appendChild(row);
-    } else {
-      otherEl.appendChild(row);
-    }
+
+    // HTML5 drag
+    row.addEventListener('dragstart', e => { catDragSrc = cat.name; row.classList.add('dragging'); e.dataTransfer.effectAllowed='move'; });
+    row.addEventListener('dragend',   () => { catDragSrc = null; row.classList.remove('dragging'); renderCatLists(); });
+    row.addEventListener('dragover',  e => { e.preventDefault(); row.classList.add('drag-over-cat'); });
+    row.addEventListener('dragleave', () => row.classList.remove('drag-over-cat'));
+    row.addEventListener('drop',      e => {
+      e.preventDefault(); row.classList.remove('drag-over-cat');
+      if (!catDragSrc || catDragSrc === cat.name) return;
+      const fromIdx = categories.findIndex(c=>c.name===catDragSrc);
+      const toIdx   = categories.findIndex(c=>c.name===cat.name);
+      const [moved] = categories.splice(fromIdx, 1);
+      categories.splice(toIdx, 0, moved);
+      buildFilters(); buildCatSelect(); renderCatLists();
+    });
+
+    // Touch drag
+    let touchGhost=null, touchSrcName=null;
+    row.addEventListener('touchstart', e => {
+      touchSrcName = cat.name;
+      const t = e.touches[0];
+      touchGhost = row.cloneNode(true);
+      touchGhost.style.cssText=`position:fixed;left:${t.clientX}px;top:${t.clientY-20}px;width:${row.offsetWidth}px;opacity:0.75;pointer-events:none;z-index:9999;background:var(--panel2);border:1px solid var(--accent);border-radius:6px;`;
+      document.body.appendChild(touchGhost);
+      row.classList.add('dragging');
+    }, {passive:true});
+    row.addEventListener('touchmove', e => {
+      if (!touchGhost) return;
+      const t = e.touches[0];
+      touchGhost.style.left = t.clientX+'px';
+      touchGhost.style.top  = (t.clientY-20)+'px';
+      e.preventDefault();
+    }, {passive:false});
+    row.addEventListener('touchend', e => {
+      if (touchGhost) { touchGhost.remove(); touchGhost=null; }
+      row.classList.remove('dragging');
+      const t = e.changedTouches[0];
+      const el = document.elementFromPoint(t.clientX, t.clientY);
+      const targetRow = el?.closest('[data-name]');
+      if (targetRow && targetRow.dataset.name !== touchSrcName) {
+        const fromIdx = categories.findIndex(c=>c.name===touchSrcName);
+        const toIdx   = categories.findIndex(c=>c.name===targetRow.dataset.name);
+        const [moved] = categories.splice(fromIdx, 1);
+        categories.splice(toIdx, 0, moved);
+        buildFilters(); buildCatSelect();
+      }
+      renderCatLists();
+      touchSrcName = null;
+    });
+
+    otherEl.appendChild(row);
   });
 
-  if (otherEl.children.length === 0) {
-    otherEl.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:10px 0;">추가된 카테고리가 없습니다</div>';
-  }
+  // 청도활동 (고정, 아래)
+  categories.filter(c => isCheongdo(c.name)).forEach(cat => {
+    const row = document.createElement('div');
+    row.className = 'cat-item';
+    row.innerHTML = `
+      <div class="cat-color-dot" style="background:${cat.color}"></div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-actions"><span style="font-size:10px;color:var(--text3);padding:0 6px;">고정</span></div>`;
+    cheongdoEl.appendChild(row);
+  });
+}
+
+function moveCat(fromIdx, toIdx) {
+  const [moved] = categories.splice(fromIdx, 1);
+  categories.splice(toIdx, 0, moved);
+  buildFilters(); buildCatSelect(); renderCatLists();
 }
 
 function showInlineAddCatForm() {
@@ -2340,7 +2510,14 @@ function buildCatSelect() {
   const sel = document.getElementById('f_cat');
   sel.innerHTML = '';
 
-  // 청도활동 그룹
+  // 일반 카테고리 먼저
+  categories.filter(c => !isCheongdo(c.name)).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
+
+  // 청도활동 그룹 (맨 아래)
   const grp = document.createElement('optgroup');
   grp.label = '🎯 청도활동';
   CHEONGDO_CATS.forEach(name => {
@@ -2351,13 +2528,6 @@ function buildCatSelect() {
     grp.appendChild(opt);
   });
   sel.appendChild(grp);
-
-  // 기타 카테고리 (그룹 없이 바로 추가)
-  categories.filter(c => !isCheongdo(c.name)).forEach(c => {
-    const opt = document.createElement('option');
-    opt.value = c.name; opt.textContent = c.name;
-    sel.appendChild(opt);
-  });
 }
 
 function openAdd(forSub=false, presetDate=null) {
