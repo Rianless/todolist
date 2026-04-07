@@ -516,6 +516,7 @@ body::after {
   display: flex; justify-content: space-between; align-items: center;
   margin-bottom: 8px;
 }
+.cal-nav .cal-month { flex: 1; text-align: center; }
 .cal-arrow {
   font-size: 16px; background: none; border: 1px solid var(--border2);
   color: var(--accent); padding: 6px 14px; cursor: pointer;
@@ -1365,11 +1366,11 @@ body::after {
     <div class="view active" id="viewCal">
       <div class="cal-nav">
         <button class="cal-arrow" onclick="calMove(-1)">‹</button>
-        <div style="display:flex;align-items:center;gap:8px;">
-          <div class="cal-month" id="calLabel"></div>
+        <div class="cal-month" id="calLabel"></div>
+        <div style="display:flex;align-items:center;gap:6px;">
+          <button class="cal-arrow" onclick="calMove(1)">›</button>
           <button class="cal-today-btn" onclick="calGoToday()">TODAY</button>
         </div>
-        <button class="cal-arrow" onclick="calMove(1)">›</button>
       </div>
       <div class="cal-grid" id="calGrid"></div>
       <div id="calDayList" style="margin-top:12px;"></div>
