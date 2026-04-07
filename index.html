@@ -563,6 +563,7 @@ body::after {
   background: rgba(0,0,0,0.03);
 }
 [data-theme="dark"] .cal-dot { background: rgba(13,15,30,0.6); }
+.cal-dot.done { opacity: 0.4; text-decoration: line-through; }
 .cal-more { font-size: 7px; color: var(--purple); padding: 1px 3px; }
 
 /* ═══════════════════════════════════════
@@ -1717,7 +1718,7 @@ function renderCal() {
 
     evts.slice(0,3).forEach(item=>{
       const dot=document.createElement('span');
-      dot.className='cal-dot';
+      dot.className='cal-dot'+(item.done?' done':'');
       const dotColor = item.isSub ? '#9d00ff' : getCatColor(item.category);
       dot.style.borderLeftColor=dotColor;
       const ts=item.time?item.time.split('~')[0]+' ':'';
@@ -1771,6 +1772,7 @@ function openDayModal(ds, evts) {
     });
   }
 
+  history.pushState({modal:'day'}, '');
   document.getElementById('dayModal').classList.add('open');
 }
 
@@ -2099,6 +2101,7 @@ function openAdd(forSub=false, presetDate=null) {
   setPrio('none');
   updateSecretToggle();
   updateSubToggle(forSub);
+  history.pushState({modal:'add'}, '');
   document.getElementById('addModal').classList.add('open');
   setTimeout(()=>document.getElementById(forSub?'f_subname':'f_title').focus(),300);
 }
@@ -2124,6 +2127,7 @@ function openEdit(id) {
   updateSecretToggle();
   updateSubToggle(false);
   closeDetail();
+  history.replaceState({modal:'edit'}, '');
   document.getElementById('addModal').classList.add('open');
 }
 
@@ -2193,7 +2197,7 @@ function saveItem() {
   if (editingId !== null) {
     const idx = items.findIndex(i=>i.id===editingId);
     if (idx > -1) {
-      items[idx] = {...items[idx], ...obj, done: items[idx].done, _unlocked: items[idx]._unlocked};
+      items[idx] = {...items[idx], ...obj, done: items[idx].done, _unlocked: false};
     }
   } else {
     obj.id = nextId++;
@@ -2247,6 +2251,7 @@ function openDetail(id) {
   document.querySelector('.detail-btn.edit-btn').style.display = item.personal ? '' : 'none';
   document.querySelector('.detail-btn.del-btn').style.display = item.personal ? '' : 'none';
 
+  history.pushState({modal:'detail'}, '');
   document.getElementById('detailModal').classList.add('open');
 }
 
@@ -2291,6 +2296,17 @@ document.addEventListener('keydown',e=>{
   if(e.key==='Escape') {
     document.querySelectorAll('.modal-overlay.open').forEach(m=>m.classList.remove('open'));
   }
+});
+
+window.addEventListener('popstate', () => {
+  const openModals = [...document.querySelectorAll('.modal-overlay.open')];
+  if (!openModals.length) return;
+  openModals.sort((a, b) => {
+    const za = parseInt(a.style.zIndex) || 9000;
+    const zb = parseInt(b.style.zIndex) || 9000;
+    return zb - za;
+  });
+  openModals[0].classList.remove('open');
 });
 
 /* ══════════════════════════════════════
