@@ -2310,6 +2310,62 @@ window.addEventListener('popstate', () => {
 });
 
 /* ══════════════════════════════════════
+   SWIPE TO DISMISS
+══════════════════════════════════════ */
+function addSwipeToDismiss(overlay) {
+  const sheet = overlay.querySelector('.modal-sheet');
+  let startY = 0, dy = 0, swiping = false;
+
+  sheet.addEventListener('touchstart', e => {
+    startY = e.touches[0].clientY;
+    dy = 0;
+    swiping = false;
+  }, {passive: true});
+
+  sheet.addEventListener('touchmove', e => {
+    const newDy = e.touches[0].clientY - startY;
+    if (newDy > 0 && sheet.scrollTop <= 0) {
+      swiping = true;
+      dy = newDy;
+      sheet.style.transform = `translateY(${dy}px)`;
+      sheet.style.transition = 'none';
+      overlay.style.background = `rgba(0,0,0,${Math.max(0, 0.7*(1 - dy/300))})`;
+      e.preventDefault();
+    }
+  }, {passive: false});
+
+  const onEnd = () => {
+    if (!swiping) return;
+    swiping = false;
+    if (dy > 100) {
+      sheet.style.transition = 'transform 0.25s ease-in';
+      sheet.style.transform = 'translateY(100%)';
+      setTimeout(() => {
+        overlay.classList.remove('open');
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+        overlay.style.background = '';
+      }, 250);
+    } else {
+      sheet.style.transition = 'transform 0.3s ease-out';
+      sheet.style.transform = 'translateY(0)';
+      overlay.style.background = '';
+      setTimeout(() => {
+        sheet.style.transform = '';
+        sheet.style.transition = '';
+      }, 300);
+    }
+  };
+
+  sheet.addEventListener('touchend', onEnd);
+  sheet.addEventListener('touchcancel', onEnd);
+}
+
+['addModal','detailModal','dayModal'].forEach(id => {
+  addSwipeToDismiss(document.getElementById(id));
+});
+
+/* ══════════════════════════════════════
    INIT
 ══════════════════════════════════════ */
 buildFilters();
