@@ -216,16 +216,19 @@ body::after {
 }
 .theme-btn:hover { border-color: var(--accent); color: var(--accent); }
 
-/* ── PROGRESS (dark only) ── */
+/* ── PROGRESS (both themes) ── */
 .progress-bar-wrap {
   display: flex; align-items: center; gap: 8px;
   margin-top: 7px;
 }
-[data-theme="light"] .progress-bar-wrap { display: none; }
 .prog-label { font-size: 8px; color: var(--cyan); letter-spacing: 2px; white-space: nowrap; opacity:0.7; }
-.prog-track { flex:1; height:3px; background:var(--border2); overflow:hidden; }
-.prog-fill { height:100%; background:linear-gradient(90deg,var(--cyan),var(--purple)); width:0%; transition:width .6s ease; box-shadow:0 0 6px var(--cyan); }
+[data-theme="light"] .prog-label { font-family: 'Noto Sans KR', sans-serif; color: var(--accent); font-size: 10px; letter-spacing: 0; opacity: 1; }
+.prog-track { flex:1; height:3px; background:var(--border2); overflow:hidden; border-radius: 2px; }
+[data-theme="light"] .prog-track { height: 5px; border-radius: 3px; }
+.prog-fill { height:100%; background:linear-gradient(90deg,var(--cyan),var(--purple)); width:0%; transition:width .6s ease; box-shadow:0 0 6px var(--cyan); border-radius: 2px; }
+[data-theme="light"] .prog-fill { background: linear-gradient(90deg, var(--accent), var(--purple)); box-shadow: none; border-radius: 3px; }
 .prog-pct { font-size:9px; color:var(--cyan); font-family:'Orbitron',sans-serif; min-width:32px; text-align:right; opacity:0.8; }
+[data-theme="light"] .prog-pct { font-family: 'Noto Sans KR', sans-serif; color: var(--accent); font-size: 11px; font-weight: 700; opacity: 1; }
 
 /* ── MAIN SCROLL AREA ── */
 #mainContent {
@@ -885,35 +888,97 @@ body::after {
 .section-subtitle { font-size:11px; color:var(--text3); margin-bottom:10px; letter-spacing:1px; }
 
 /* ═══════════════════════════════════════
-   MYPAGE VIEW
+   MYPAGE VIEW - ACCORDION CARDS
 ═══════════════════════════════════════ */
-.mypage-section {
-  margin-bottom: 20px;
+.mypage-cards {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding-bottom: 12px;
 }
-.mypage-section-header {
-  display: flex; justify-content: space-between; align-items: center;
-  padding: 8px 0 10px;
-  border-bottom: 1px solid var(--border);
-  margin-bottom: 12px;
+
+/* Each accordion card */
+.mp-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  overflow: hidden;
+  transition: box-shadow 0.2s;
 }
-.mypage-section-title {
-  font-family: var(--font-title);
-  font-size: 11px; color: var(--accent); letter-spacing: 2px;
+[data-theme="light"] .mp-card { box-shadow: 0 2px 10px rgba(0,0,0,0.05); }
+[data-theme="dark"] .mp-card { border-color: var(--border2); }
+[data-theme="dark"] .mp-card.open { border-color: var(--accent); box-shadow: 0 0 16px rgba(0,255,231,0.07); }
+[data-theme="light"] .mp-card.open { box-shadow: 0 4px 18px rgba(0,0,0,0.10); border-color: var(--accent); }
+
+/* Card header row (always visible, tap to toggle) */
+.mp-card-header {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  padding: 16px 16px;
+  cursor: pointer;
+  user-select: none;
+  -webkit-user-select: none;
+  transition: background 0.15s;
 }
-[data-theme="light"] .mypage-section-title {
-  font-family: 'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; letter-spacing:0; color:var(--text);
+.mp-card-header:active { opacity: 0.7; }
+
+.mp-card-icon {
+  font-size: 20px;
+  line-height: 1;
+  flex-shrink: 0;
 }
-.mypage-section-header .section-action-btn {
-  font-size: 10px; padding: 4px 10px;
-  border: 1px solid var(--border2);
-  background: transparent; color: var(--text3);
-  cursor: pointer; border-radius: 4px;
+.mp-card-label {
+  flex: 1;
+  font-family: var(--font-body);
+  font-size: 16px;
+  font-weight: 700;
+  color: var(--text);
+  letter-spacing: 0.3px;
+}
+[data-theme="dark"] .mp-card-label {
   font-family: var(--font-main);
-  transition: all 0.2s;
+  font-size: 13px;
+  letter-spacing: 1.5px;
 }
-.mypage-section-header .section-action-btn:hover {
-  border-color: var(--accent); color: var(--accent);
+.mp-card-chevron {
+  font-size: 12px;
+  color: var(--text3);
+  transition: transform 0.25s ease;
+  flex-shrink: 0;
 }
+.mp-card.open .mp-card-chevron { transform: rotate(180deg); color: var(--accent); }
+
+/* Card body (collapsible) */
+.mp-card-body {
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.35s ease;
+}
+.mp-card.open .mp-card-body {
+  max-height: 2000px;
+}
+.mp-card-inner {
+  padding: 0 16px 16px;
+  border-top: 1px solid var(--border);
+}
+
+/* Stats period tabs inside card */
+.mp-stats-tabs {
+  display: flex; gap: 4px;
+  padding: 12px 0 10px;
+  margin-bottom: 4px;
+}
+
+/* Category section styles inside card */
+.mp-section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 12px 0 8px;
+}
+.mp-section-label {
+  font-size: 12px; color: var(--text3); letter-spacing: 1px;
+}
+[data-theme="light"] .mp-section-label { font-size: 13px; color: var(--text2); letter-spacing: 0; }
 
 /* ── 청도활동 category group in select ── */
 .cat-group-label {
@@ -986,7 +1051,7 @@ body::after {
       </div>
     </div>
     <div class="progress-bar-wrap">
-      <div class="prog-label">SYS_LOAD</div>
+      <div class="prog-label" id="progLabel">SYS_LOAD</div>
       <div class="prog-track"><div class="prog-fill" id="progFill"></div></div>
       <div class="prog-pct" id="progPct">0%</div>
     </div>
@@ -1021,77 +1086,105 @@ body::after {
 
     <!-- MY PAGE VIEW -->
     <div class="view" id="viewMypage">
+      <div class="mypage-cards">
 
-      <!-- ── 통계 섹션 ── -->
-      <div class="mypage-section">
-        <div class="mypage-section-header">
-          <div class="mypage-section-title" id="statsSysLabel">// STATS</div>
-          <div class="stats-tabs" style="margin-bottom:0;">
-            <button class="stab active" onclick="setStatPeriod('week',this)">주간</button>
-            <button class="stab" onclick="setStatPeriod('month',this)">월간</button>
-            <button class="stab" onclick="setStatPeriod('year',this)">연간</button>
+        <!-- ── 통계 카드 ── -->
+        <div class="mp-card" id="mpCardStats">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardStats')">
+            <span class="mp-card-icon">📊</span>
+            <span class="mp-card-label" id="statsSysLabel">통계</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div class="mp-stats-tabs">
+                <button class="stab active" onclick="setStatPeriod('week',this);event.stopPropagation()">주간</button>
+                <button class="stab" onclick="setStatPeriod('month',this);event.stopPropagation()">월간</button>
+                <button class="stab" onclick="setStatPeriod('year',this);event.stopPropagation()">연간</button>
+              </div>
+              <div id="statsContent"></div>
+            </div>
           </div>
         </div>
-        <div id="statsContent"></div>
-      </div>
 
-      <!-- ── 메모 섹션 ── -->
-      <div class="mypage-section">
-        <div class="mypage-section-header">
-          <div class="mypage-section-title" id="notesSysLabel">// MEMO_DB</div>
-        </div>
-        <div id="notesList"></div>
-      </div>
-
-      <!-- ── 구독 섹션 ── -->
-      <div class="mypage-section">
-        <div class="mypage-section-header">
-          <div class="mypage-section-title" id="subsSysLabel">// SUBSCRIPTION</div>
-          <button class="section-action-btn" onclick="openAdd(true)">+ 추가</button>
-        </div>
-        <div id="subTotal" class="sub-total" style="display:none;"></div>
-        <div id="subsList"></div>
-        <button class="mypage-add-sub-btn" onclick="openAdd(true)">🔖 구독 항목 추가</button>
-      </div>
-
-      <!-- ── 카테고리 관리 섹션 ── -->
-      <div class="mypage-section">
-        <div class="mypage-section-header">
-          <div class="mypage-section-title" id="catSysLabel">// CATEGORY</div>
-          <button class="section-action-btn" onclick="showInlineAddCatForm()">+ 추가</button>
-        </div>
-
-        <!-- 청도활동 그룹 -->
-        <div class="cat-group-header" style="margin-bottom:8px;">
-          <span class="cat-group-tag">청도활동</span>
-          <span style="font-size:10px;color:var(--text3);">고정 카테고리</span>
-        </div>
-        <div id="cheongdoCatList"></div>
-
-        <!-- 일반 카테고리 -->
-        <div class="cat-group-header" style="margin-top:12px;margin-bottom:8px;">
-          <span class="cat-group-tag" style="border-color:rgba(0,255,231,0.4);color:var(--accent);">기타</span>
-          <span style="font-size:10px;color:var(--text3);">추가/삭제 가능</span>
-        </div>
-        <div id="otherCatList"></div>
-
-        <!-- 인라인 추가 폼 -->
-        <div id="inlineAddCatForm" style="display:none;margin-top:12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;">
-          <div class="form-group">
-            <label class="form-label">카테고리 이름</label>
-            <input class="form-input" id="newCatName" type="text" placeholder="이름">
+        <!-- ── 메모 카드 ── -->
+        <div class="mp-card" id="mpCardMemo">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardMemo')">
+            <span class="mp-card-icon">📝</span>
+            <span class="mp-card-label" id="notesSysLabel">메모</span>
+            <span class="mp-card-chevron">▼</span>
           </div>
-          <div class="form-group">
-            <label class="form-label">색상</label>
-            <div class="color-swatches" id="colorSwatches"></div>
-          </div>
-          <div style="display:flex;gap:8px;margin-top:8px;">
-            <button class="btn-cancel" style="flex:1;padding:9px;" onclick="document.getElementById('inlineAddCatForm').style.display='none'">취소</button>
-            <button class="btn-save" style="flex:2;padding:9px;" onclick="saveNewCat()">추가</button>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div id="notesList" style="padding-top:10px;"></div>
+            </div>
           </div>
         </div>
-      </div>
 
+        <!-- ── 구독 카드 ── -->
+        <div class="mp-card" id="mpCardSubs">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardSubs')">
+            <span class="mp-card-icon">🔖</span>
+            <span class="mp-card-label" id="subsSysLabel">구독</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div id="subTotal" class="sub-total" style="display:none;margin-top:12px;"></div>
+              <div id="subsList"></div>
+              <button class="mypage-add-sub-btn" onclick="openAdd(true)">🔖 구독 항목 추가</button>
+            </div>
+          </div>
+        </div>
+
+        <!-- ── 카테고리 카드 ── -->
+        <div class="mp-card" id="mpCardCat">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardCat')">
+            <span class="mp-card-icon">🏷️</span>
+            <span class="mp-card-label" id="catSysLabel">카테고리 관리</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+
+              <!-- 청도활동 그룹 -->
+              <div class="cat-group-header" style="margin-top:10px;margin-bottom:8px;">
+                <span class="cat-group-tag">청도활동</span>
+                <span style="font-size:10px;color:var(--text3);">고정 카테고리</span>
+              </div>
+              <div id="cheongdoCatList"></div>
+
+              <!-- 일반 카테고리 -->
+              <div class="cat-group-header" style="margin-top:14px;margin-bottom:8px;">
+                <span class="cat-group-tag" style="border-color:rgba(0,255,231,0.4);color:var(--accent);">기타</span>
+                <span style="font-size:10px;color:var(--text3);">추가/삭제 가능</span>
+              </div>
+              <div id="otherCatList"></div>
+
+              <!-- 카테고리 추가 버튼 -->
+              <button class="add-cat-btn" style="margin-top:10px;" onclick="showInlineAddCatForm()">+ 카테고리 추가</button>
+
+              <!-- 인라인 추가 폼 -->
+              <div id="inlineAddCatForm" style="display:none;margin-top:12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;">
+                <div class="form-group">
+                  <label class="form-label">카테고리 이름</label>
+                  <input class="form-input" id="newCatName" type="text" placeholder="이름">
+                </div>
+                <div class="form-group">
+                  <label class="form-label">색상</label>
+                  <div class="color-swatches" id="colorSwatches"></div>
+                </div>
+                <div style="display:flex;gap:8px;margin-top:8px;">
+                  <button class="btn-cancel" style="flex:1;padding:9px;" onclick="document.getElementById('inlineAddCatForm').style.display='none'">취소</button>
+                  <button class="btn-save" style="flex:2;padding:9px;" onclick="saveNewCat()">추가</button>
+                </div>
+              </div>
+
+            </div>
+          </div>
+        </div>
+
+      </div><!-- end mypage-cards -->
     </div><!-- end viewMypage -->
 
   </div><!-- end mainContent -->
@@ -1343,15 +1436,33 @@ function updateHeaderBadges() {
     document.getElementById('subsSysLabel').textContent = '// SUBSCRIPTION';
     document.getElementById('statsSysLabel').textContent = '// STATS';
     document.getElementById('catSysLabel').textContent = '// CATEGORY';
+    document.getElementById('progLabel').textContent = 'SYS_LOAD';
   } else {
     document.getElementById('hb1').textContent = '개인 일정 관리';
     document.getElementById('hb2').textContent = '1회차 프로그램';
     document.getElementById('hb3').textContent = '2026';
     document.getElementById('headerSys').textContent = 'Rianless · 중기 3기';
     document.getElementById('notesSysLabel').textContent = '메모';
-    document.getElementById('subsSysLabel').textContent = '구독 관리';
+    document.getElementById('subsSysLabel').textContent = '구독';
     document.getElementById('statsSysLabel').textContent = '통계';
     document.getElementById('catSysLabel').textContent = '카테고리 관리';
+    document.getElementById('progLabel').textContent = '달성률';
+  }
+}
+
+/* ══════════════════════════════════════
+   MYPAGE ACCORDION
+══════════════════════════════════════ */
+function toggleMpCard(id) {
+  const card = document.getElementById(id);
+  const isOpen = card.classList.contains('open');
+  card.classList.toggle('open', !isOpen);
+  // render content when opening
+  if (!isOpen) {
+    if (id === 'mpCardStats') renderStats();
+    if (id === 'mpCardMemo') renderNotes();
+    if (id === 'mpCardSubs') renderSubs();
+    if (id === 'mpCardCat') renderCatLists();
   }
 }
 
@@ -1717,10 +1828,11 @@ function makeCardForDayModal(item, ds, evts) {
    MYPAGE (통계 + 메모 + 구독 + 카테고리)
 ══════════════════════════════════════ */
 function renderMypage() {
-  renderStats();
-  renderNotes();
-  renderSubs();
-  renderCatLists();
+  // Re-render content of any currently open cards
+  if (document.getElementById('mpCardStats').classList.contains('open')) renderStats();
+  if (document.getElementById('mpCardMemo').classList.contains('open')) renderNotes();
+  if (document.getElementById('mpCardSubs').classList.contains('open')) renderSubs();
+  if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
 }
 
 /* ── NOTES ── */
