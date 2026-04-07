@@ -598,6 +598,11 @@ body::after {
   box-shadow: 0 0 4px -1px currentColor;
   letter-spacing: 0.2px;
 }
+[data-theme="light"] .cal-dot {
+  color: #fff;
+  font-weight: 500;
+  border-radius: 3px;
+}
 .cal-dot.done { opacity: 0.4; text-decoration: line-through; }
 .cal-more { font-size: 7px; color: var(--purple); padding: 1px 3px; }
 
@@ -2032,7 +2037,12 @@ function renderCal() {
       const dot=document.createElement('span');
       dot.className='cal-dot'+(item.done?' done':'');
       const dotColor = item.isSub ? '#9d00ff' : getCatColor(item.category);
-      dot.style.color=dotColor;
+      if (isDark) {
+        dot.style.color = dotColor;
+      } else {
+        dot.style.background = dotColor;
+        dot.style.borderColor = dotColor;
+      }
       const ts=item.time?item.time.split('~')[0]+' ':'';
       const displayTitle = item.hideTitle ? '// 비공개' : item.title;
       dot.textContent=(item.secret&&!item._unlocked?'🔒 CLASSIFIED':ts+displayTitle);
