@@ -1038,9 +1038,149 @@ body::after {
 #f_cat_wrapper, #f_cat_sub_wrapper {
   position: relative;
 }
+/* ═══════════════════════════════════════
+   BOOT SCREEN
+═══════════════════════════════════════ */
+#bootScreen {
+  position: fixed; inset: 0;
+  background: #06070f;
+  z-index: 99999;
+  display: flex; flex-direction: column;
+  align-items: center; justify-content: center;
+  font-family: 'Share Tech Mono', monospace;
+  cursor: pointer;
+  transition: opacity 0.7s ease;
+}
+#bootScreen.fade-out { opacity: 0; pointer-events: none; }
+
+/* Moving scan line */
+#bootScreen::after {
+  content: '';
+  position: absolute; left: 0; right: 0; height: 2px;
+  background: linear-gradient(90deg, transparent 0%, rgba(0,255,231,0.6) 40%, #00ffe7 50%, rgba(0,255,231,0.6) 60%, transparent 100%);
+  box-shadow: 0 0 16px #00ffe7, 0 0 40px rgba(0,255,231,0.3);
+  animation: scanSweep 2.2s linear infinite;
+  pointer-events: none;
+}
+@keyframes scanSweep {
+  0%   { top: -2px; opacity: 0; }
+  5%   { opacity: 1; }
+  95%  { opacity: 1; }
+  100% { top: 100%; opacity: 0; }
+}
+
+/* Static scanlines overlay */
+#bootScreen::before {
+  content: '';
+  position: absolute; inset: 0;
+  background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,255,231,0.025) 2px, rgba(0,255,231,0.025) 4px);
+  pointer-events: none;
+}
+
+.boot-wrap {
+  width: 88%; max-width: 340px;
+  position: relative; z-index: 1;
+}
+
+.boot-logo {
+  font-family: 'Orbitron', sans-serif;
+  font-size: 26px; font-weight: 900;
+  color: #00ffe7;
+  text-align: center;
+  letter-spacing: 5px;
+  margin-bottom: 2px;
+  text-shadow: 0 0 18px #00ffe7, 0 0 40px rgba(0,255,231,0.35);
+  animation: bootLogoIn 0.5s cubic-bezier(0.2,0,0,1) both;
+}
+@keyframes bootLogoIn {
+  0%  { opacity: 0; transform: scaleX(1.3); letter-spacing: 20px; text-shadow: -6px 0 #ff00aa, 6px 0 #00ffe7; }
+  60% { text-shadow: -2px 0 #ff00aa, 2px 0 #00ffe7; }
+  100%{ opacity: 1; transform: none; text-shadow: 0 0 18px #00ffe7, 0 0 40px rgba(0,255,231,0.35); }
+}
+
+.boot-tagline {
+  font-size: 8px; color: #9d00ff; letter-spacing: 4px;
+  text-align: center; margin-bottom: 28px;
+  opacity: 0;
+  animation: fadeSlideUp 0.4s 0.45s forwards;
+}
+@keyframes fadeSlideUp {
+  from { opacity: 0; transform: translateY(6px); }
+  to   { opacity: 1; transform: none; }
+}
+
+.boot-terminal {
+  border: 1px solid rgba(0,255,231,0.18);
+  border-radius: 3px;
+  padding: 12px 14px;
+  background: rgba(0,255,231,0.025);
+  margin-bottom: 14px;
+  min-height: 108px;
+  position: relative;
+  overflow: hidden;
+}
+.boot-terminal::before {
+  content: '// SYSTEM LOG';
+  position: absolute; top: 5px; right: 10px;
+  font-size: 7px; color: rgba(0,255,231,0.2); letter-spacing: 1px;
+}
+
+.boot-line {
+  font-size: 10px; line-height: 1.9;
+  white-space: nowrap; overflow: hidden;
+  color: rgba(0,255,231,0.25);
+  animation: lineIn 0.15s ease forwards;
+}
+@keyframes lineIn { from { opacity: 0; transform: translateX(-4px); } to { opacity: 1; transform: none; } }
+.boot-line.ok   { color: #39ff14; }
+.boot-line.ok::after  { content: ' ✓'; opacity: 0.7; }
+.boot-line.warn { color: #ffe600; }
+.boot-line.grant { color: #00ffe7; font-weight: 700; font-size: 11px; letter-spacing: 1px; }
+
+.boot-progress-track {
+  height: 2px; background: rgba(0,255,231,0.1);
+  border-radius: 1px; margin-bottom: 8px; overflow: hidden;
+}
+.boot-progress-fill {
+  height: 100%; width: 0%;
+  background: linear-gradient(90deg, #9d00ff, #00ffe7);
+  box-shadow: 0 0 8px #00ffe7;
+  transition: width 0.35s ease;
+}
+
+.boot-footer {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.boot-status-txt {
+  font-size: 8px; color: rgba(0,255,231,0.35); letter-spacing: 1.5px;
+}
+.boot-skip-txt {
+  font-size: 8px; color: rgba(255,255,255,0.12); letter-spacing: 1px;
+  animation: blinkFade 1.2s 1.5s ease infinite;
+}
+@keyframes blinkFade {
+  0%,100% { opacity: 0.4; } 50% { opacity: 0.15; }
+}
 </style>
 </head>
 <body>
+
+<!-- BOOT SCREEN -->
+<div id="bootScreen" onclick="skipBoot()">
+  <div class="boot-wrap">
+    <div class="boot-logo">RIANLESS</div>
+    <div class="boot-tagline">PERSONAL SCHEDULE SYSTEM // NODE_03</div>
+    <div class="boot-terminal" id="bootTerminal"></div>
+    <div class="boot-progress-track">
+      <div class="boot-progress-fill" id="bootProgress"></div>
+    </div>
+    <div class="boot-footer">
+      <span class="boot-status-txt" id="bootStatusTxt">INITIALIZING...</span>
+      <span class="boot-skip-txt">TAP TO SKIP</span>
+    </div>
+  </div>
+</div>
+
 <div id="app">
 
   <!-- ── HEADER ── -->
@@ -2393,6 +2533,59 @@ function addSwipeToDismiss(overlay) {
 ['addModal','detailModal','dayModal'].forEach(id => {
   addSwipeToDismiss(document.getElementById(id));
 });
+
+/* ══════════════════════════════════════
+   BOOT SEQUENCE
+══════════════════════════════════════ */
+(function() {
+  const boot = document.getElementById('bootScreen');
+
+  // Skip if already booted this session
+  if (sessionStorage.getItem('booted')) {
+    boot.style.display = 'none'; return;
+  }
+
+  const LINES = [
+    { text: '> SYSTEM_BOOT............v2.7.1', cls: '', prog: 15, status: 'LOADING MODULE...' },
+    { text: '> AUTH_MODULE.............LOADED', cls: 'ok', prog: 35, status: 'AUTHENTICATING...' },
+    { text: '> USER_PROFILE.............FOUND', cls: 'ok', prog: 55, status: 'VERIFYING...' },
+    { text: '> SCHEDULE_DB..............SYNCED', cls: 'ok', prog: 73, status: 'SYNCING DATA...' },
+    { text: '> ENCRYPTION_LAYER..........ACTIVE', cls: 'ok', prog: 88, status: 'SECURING...' },
+    { text: ':: ACCESS GRANTED ::', cls: 'grant', prog: 100, status: 'SYSTEM READY' },
+  ];
+
+  const terminal   = document.getElementById('bootTerminal');
+  const progressEl = document.getElementById('bootProgress');
+  const statusEl   = document.getElementById('bootStatusTxt');
+
+  let skipped = false;
+  let timers = [];
+
+  function addLine(cfg) {
+    const el = document.createElement('div');
+    el.className = 'boot-line ' + cfg.cls;
+    el.textContent = cfg.text;
+    terminal.appendChild(el);
+    progressEl.style.width = cfg.prog + '%';
+    statusEl.textContent = cfg.status;
+  }
+
+  function dismiss() {
+    if (skipped) return;
+    skipped = true;
+    timers.forEach(clearTimeout);
+    boot.classList.add('fade-out');
+    setTimeout(() => { boot.style.display = 'none'; sessionStorage.setItem('booted','1'); }, 700);
+  }
+
+  window.skipBoot = dismiss;
+
+  const BASE = 550;
+  LINES.forEach((cfg, i) => {
+    timers.push(setTimeout(() => addLine(cfg), BASE + i * 370));
+  });
+  timers.push(setTimeout(dismiss, BASE + LINES.length * 370 + 600));
+})();
 
 /* ══════════════════════════════════════
    INIT
