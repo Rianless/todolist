@@ -921,7 +921,7 @@ body::after {
   <div id="mainContent">
 
     <!-- LIST VIEW -->
-    <div class="view active" id="viewList">
+    <div class="view" id="viewList">
       <div class="action-bar">
         <button class="today-btn" onclick="goToday()">📍 TODAY</button>
         <button class="add-btn" onclick="openAdd()">+ 일정 추가</button>
@@ -935,7 +935,7 @@ body::after {
     </div>
 
     <!-- CALENDAR VIEW -->
-    <div class="view" id="viewCal">
+    <div class="view active" id="viewCal">
       <div class="cal-nav">
         <button class="cal-arrow" onclick="calMove(-1)">‹</button>
         <div class="cal-month" id="calLabel"></div>
@@ -967,7 +967,7 @@ body::after {
     <div class="view" id="viewSubs">
       <div class="notes-header">
         <div class="section-title" id="subsSysLabel">// SUBSCRIPTION</div>
-        <button class="add-btn" style="width:auto;padding:6px 14px;font-size:10px;" onclick="openAdd(true)">+ 추가</button>
+        <button class="add-btn" style="width:auto;padding:6px 10px;font-size:10px;flex-shrink:0;margin-left:12px;" onclick="openAdd(true)">+ 추가</button>
       </div>
       <div id="subTotal" class="sub-total"></div>
       <div id="subsList"></div>
@@ -977,13 +977,13 @@ body::after {
 
   <!-- ── TAB BAR ── -->
   <div class="tab-bar">
-    <button class="tab-item active" onclick="setTab('list',this)" data-view="viewList">
-      <div class="tab-icon">📋</div>
-      <div class="tab-label">리스트</div>
-    </button>
-    <button class="tab-item" onclick="setTab('cal',this)" data-view="viewCal">
+    <button class="tab-item active" onclick="setTab('cal',this)" data-view="viewCal">
       <div class="tab-icon">📅</div>
       <div class="tab-label">달력</div>
+    </button>
+    <button class="tab-item" onclick="setTab('list',this)" data-view="viewList">
+      <div class="tab-icon">📋</div>
+      <div class="tab-label">리스트</div>
     </button>
     <button class="tab-item" onclick="setTab('notes',this)" data-view="viewNotes">
       <div class="tab-icon">📝</div>
@@ -1116,7 +1116,7 @@ body::after {
 </div>
 
 <!-- DETAIL MODAL -->
-<div class="modal-overlay" id="detailModal">
+<div class="modal-overlay" id="detailModal" style="z-index:9100;">
   <div class="modal-sheet">
     <div class="modal-handle"></div>
     <div class="modal-header">
@@ -1478,6 +1478,24 @@ function renderCal() {
     if(!dmap[item.date]) dmap[item.date]=[];
     dmap[item.date].push(item);
   });
+  // Also show subscriptions on their payment date
+  subscriptions.forEach(sub=>{
+    if(!sub.date) return;
+    const subItem = {
+      id: 'sub_'+sub.name,
+      date: sub.date,
+      category: sub.category||'구독',
+      time: '',
+      title: `🔖 ${sub.name}`,
+      sub: `₩${Number(sub.amount||0).toLocaleString()} · ${({monthly:'매월',yearly:'매년',weekly:'매주'})[sub.cycle]||''}`,
+      priority: 'none',
+      secret: false,
+      done: false,
+      isSub: true
+    };
+    if(!dmap[sub.date]) dmap[sub.date]=[];
+    dmap[sub.date].push(subItem);
+  });
 
   for(let i=0;i<firstDow;i++){
     const e=document.createElement('div'); e.className='cal-cell empty'; grid.appendChild(e);
@@ -1501,7 +1519,8 @@ function renderCal() {
     evts.slice(0,3).forEach(item=>{
       const dot=document.createElement('span');
       dot.className='cal-dot';
-      dot.style.borderLeftColor=getCatColor(item.category);
+      const dotColor = item.isSub ? '#9d00ff' : getCatColor(item.category);
+      dot.style.borderLeftColor=dotColor;
       const ts=item.time?item.time.split('~')[0]+' ':'';
       dot.textContent=(item.secret&&!item._unlocked?'🔒 CLASSIFIED':ts+item.title);
       cell.appendChild(dot);
@@ -1512,9 +1531,10 @@ function renderCal() {
       more.textContent=`+${evts.length-3}`;
       cell.appendChild(more);
     }
-    if(evts.length){
-      cell.addEventListener('click',()=>openDayModal(ds,evts));
-    }
+    // ALL cells are clickable: opens day modal (with add button)
+    cell.style.cursor='pointer';
+    cell.classList.add('has-events');
+    cell.addEventListener('click',()=>openDayModal(ds, evts));
     grid.appendChild(cell);
   }
 
@@ -1526,14 +1546,88 @@ function calMove(d){ calM+=d; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;cal
 
 function openDayModal(ds, evts) {
   const dt = new Date(ds+'T00:00:00');
-  document.getElementById('dayModalTitle').textContent = `${String(dt.getMonth()+1).padStart(2,'0')}.${String(dt.getDate()).padStart(2,'0')} (${DOW_KO[dt.getDay()]})`;
+  const mm = String(dt.getMonth()+1).padStart(2,'0');
+  const dd = String(dt.getDate()).padStart(2,'0');
+  document.getElementById('dayModalTitle').textContent = `${mm}.${dd} (${DOW_KO[dt.getDay()]})`;
   const body = document.getElementById('dayModalBody');
   body.innerHTML = '';
-  evts.forEach(item => {
-    const card = makeCard(item);
-    body.appendChild(card);
-  });
+
+  // Add event button for this date
+  const addBtn = document.createElement('button');
+  addBtn.className = 'add-btn';
+  addBtn.style.cssText = 'width:100%;margin-bottom:10px;display:block;';
+  addBtn.textContent = '+ 이 날에 일정 추가';
+  addBtn.onclick = () => {
+    document.getElementById('dayModal').classList.remove('open');
+    openAdd(false, ds);
+  };
+  body.appendChild(addBtn);
+
+  if (!evts.length) {
+    const empty = document.createElement('div');
+    empty.className = 'empty-state';
+    empty.textContent = '일정이 없습니다';
+    body.appendChild(empty);
+  } else {
+    evts.forEach(item => {
+      const card = makeCardForDayModal(item, ds, evts);
+      body.appendChild(card);
+    });
+  }
+
   document.getElementById('dayModal').classList.add('open');
+}
+
+// Cards inside day modal: tap closes day modal first, then opens detail
+function makeCardForDayModal(item, ds, evts) {
+  const color = getCatColor(item.category);
+  const card = document.createElement('div');
+  const isSecret = item.secret;
+  const lockClass = isSecret ? (item._unlocked ? 'secret-unlocked' : 'secret-locked') : '';
+  card.className = `todo-card cat-custom ${item.done?'done':''} ${lockClass}`;
+  card.style.setProperty('--cc', color);
+
+  const prioClass = item.priority === 'high' ? 'p-high' : item.priority === 'mid' ? 'p-mid' : item.priority === 'low' ? 'p-low' : 'p-none';
+  const star = item.priority === 'high' ? '⭐' : item.priority === 'mid' ? '🔸' : item.priority === 'low' ? '🔹' : '';
+
+  const secretMask = isSecret ? `
+    <div class="secret-mask">
+      <span class="secret-icon">🔒</span>
+      <span class="secret-text">CLASSIFIED :: ${Array(8).fill(0).map(()=>'■□▪▫'[Math.floor(Math.random()*4)]).join('')} :: ACCESS_DENIED</span>
+    </div>` : '';
+
+  card.innerHTML = `
+    ${secretMask}
+    <div class="todo-real">
+      <div class="todo-row">
+        <div class="priority-bar ${prioClass}"></div>
+        <div class="todo-body">
+          <div class="todo-meta">
+            <span class="cat-badge" style="color:${color};border-color:${color};">${item.category}</span>
+            ${item.time ? `<span class="todo-time">${item.time}</span>` : ''}
+            ${star ? `<span class="importance-star">${star}</span>` : ''}
+          </div>
+          <div class="todo-title">${item.title}</div>
+          ${item.sub ? `<div class="todo-sub">${item.sub}</div>` : ''}
+        </div>
+      </div>
+    </div>
+    <div class="corner-d"></div>`;
+
+  card.addEventListener('click', () => {
+    if (isSecret && !item._unlocked) {
+      item._unlocked = true;
+      card.classList.remove('secret-locked');
+      card.classList.add('secret-unlocked');
+      return;
+    }
+    if (item.isSub) return; // subscription items: no detail modal
+    // Close day modal FIRST, then open detail
+    document.getElementById('dayModal').classList.remove('open');
+    setTimeout(() => openDetail(item.id), 80);
+  });
+
+  return card;
 }
 
 /* ══════════════════════════════════════
@@ -1695,21 +1789,21 @@ function buildCatSelect() {
   if(!categories.find(c=>c.name==='개인')) sel.appendChild(personal);
 }
 
-function openAdd(forSub=false) {
+function openAdd(forSub=false, presetDate=null) {
   editingId = null;
   isSecret = false;
   isSub = forSub;
   selectedPrio = 'none';
   document.getElementById('addModalTitle').textContent = forSub ? '구독 추가' : '새 일정';
   document.getElementById('f_title').value='';
-  document.getElementById('f_date').value=fmtDate(new Date());
+  document.getElementById('f_date').value= presetDate || fmtDate(new Date());
   document.getElementById('f_st').value='';
   document.getElementById('f_et').value='';
   document.getElementById('f_loc').value='';
   document.getElementById('f_memo').value='';
   document.getElementById('f_subname').value='';
   document.getElementById('f_subamt').value='';
-  document.getElementById('f_subdate').value=fmtDate(new Date());
+  document.getElementById('f_subdate').value= presetDate || fmtDate(new Date());
   document.getElementById('f_subcat').value='';
   document.getElementById('f_submemo').value='';
   buildCatSelect();
@@ -1787,6 +1881,8 @@ function saveItem() {
     });
     closeAdd();
     if (currentTab === 'subs') renderSubs();
+    if (currentTab === 'cal') renderCal();
+    else renderCal(); // always refresh cal so sub shows up
     return;
   }
 
@@ -1978,7 +2074,8 @@ document.addEventListener('keydown',e=>{
 buildFilters();
 buildCatSelect();
 updateHeaderBadges();
-renderList();
+currentTab = 'cal';
+renderCal();
 updateProgress();
 </script>
 </body>
