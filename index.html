@@ -1168,6 +1168,82 @@ body::after {
 @keyframes blinkFade {
   0%,100% { opacity: 0.4; } 50% { opacity: 0.15; }
 }
+
+/* ═══════════════════════════════════════
+   PHOTO
+═══════════════════════════════════════ */
+.photo-upload-area {
+  border: 1px dashed var(--border2);
+  border-radius: 6px;
+  padding: 14px 12px;
+  display: flex; align-items: center; justify-content: center; gap: 8px;
+  cursor: pointer; transition: border-color 0.2s, background 0.2s;
+  color: var(--text3); font-size: 12px;
+}
+.photo-upload-area:hover { border-color: var(--accent); color: var(--accent); }
+[data-theme="dark"] .photo-upload-area:hover { background: rgba(0,255,231,0.04); }
+
+.photo-preview-wrap {
+  position: relative; margin-top: 0;
+}
+.photo-preview-img {
+  width: 100%; max-height: 200px;
+  object-fit: cover; border-radius: 6px;
+  border: 1px solid var(--border);
+  display: block;
+}
+[data-theme="dark"] .photo-preview-img { border-color: rgba(0,255,231,0.2); }
+.photo-remove-btn {
+  position: absolute; top: 7px; right: 7px;
+  background: rgba(0,0,0,0.55); backdrop-filter: blur(4px);
+  border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; width: 26px; height: 26px;
+  border-radius: 50%; cursor: pointer; font-size: 12px;
+  display: flex; align-items: center; justify-content: center;
+  transition: background 0.2s;
+}
+.photo-remove-btn:hover { background: rgba(255,45,85,0.7); }
+
+/* photo in detail modal */
+.detail-photo-wrap {
+  margin: 0 16px 12px;
+  position: relative;
+  cursor: pointer;
+}
+.detail-photo-img {
+  width: 100%; max-height: 220px;
+  object-fit: cover; border-radius: 8px;
+  border: 1px solid var(--border);
+  display: block;
+}
+[data-theme="dark"] .detail-photo-img {
+  border-color: rgba(0,255,231,0.2);
+  box-shadow: 0 0 16px rgba(0,255,231,0.08);
+}
+
+/* fullscreen photo viewer */
+#photoViewer {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.92); z-index: 99000;
+  align-items: center; justify-content: center;
+}
+#photoViewer.open { display: flex; }
+#photoViewer img {
+  max-width: 96vw; max-height: 92vh;
+  object-fit: contain; border-radius: 4px;
+}
+#photoViewer .pv-close {
+  position: absolute; top: 16px; right: 16px;
+  background: rgba(255,255,255,0.1); border: 1px solid rgba(255,255,255,0.2);
+  color: #fff; width: 36px; height: 36px; border-radius: 50%;
+  font-size: 18px; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+}
+
+/* camera icon badge on cards */
+.card-photo-badge {
+  font-size: 9px; opacity: 0.6; margin-left: 4px; vertical-align: middle;
+}
 </style>
 </head>
 <body>
@@ -1416,6 +1492,17 @@ body::after {
           <input class="form-input" id="f_loc" type="text" placeholder="장소 (선택)">
         </div>
         <div class="form-group">
+          <label class="form-label">사진</label>
+          <input type="file" id="photoFileInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(this)">
+          <div class="photo-upload-area" id="photoUploadArea" onclick="document.getElementById('photoFileInput').click()">
+            <span>📷</span><span>사진 추가</span>
+          </div>
+          <div class="photo-preview-wrap" id="photoPreviewWrap" style="display:none;">
+            <img class="photo-preview-img" id="photoPreviewImg" src="" alt="">
+            <button class="photo-remove-btn" onclick="removePhoto(event)">✕</button>
+          </div>
+        </div>
+        <div class="form-group">
           <label class="form-label">메모</label>
           <textarea class="form-textarea" id="f_memo" placeholder="메모 내용..."></textarea>
         </div>
@@ -1489,6 +1576,9 @@ body::after {
       <div class="modal-title" id="detailTitle">일정 상세</div>
       <button class="modal-close" onclick="closeDetail()">✕</button>
     </div>
+    <div class="detail-photo-wrap" id="detailPhotoWrap" style="display:none;">
+      <img class="detail-photo-img" id="detailPhotoImg" src="" alt="" onclick="openPhotoViewer(this.src)">
+    </div>
     <div class="detail-info" id="detailInfo"></div>
     <div class="detail-note-box" id="detailNote" style="display:none;"></div>
     <div class="detail-actions">
@@ -1497,6 +1587,12 @@ body::after {
       <button class="detail-btn del-btn" onclick="detailDelete()">삭제</button>
     </div>
   </div>
+</div>
+
+<!-- PHOTO VIEWER -->
+<div id="photoViewer" onclick="closePhotoViewer()">
+  <img id="photoViewerImg" src="" alt="">
+  <button class="pv-close" onclick="closePhotoViewer()">✕</button>
 </div>
 
 <!-- DAY DETAIL MODAL -->
@@ -1564,6 +1660,7 @@ let isSecret = false;
 let isSub = false;
 let isHideTitle = false;
 let selectedPrio = 'none';
+let currentPhoto = null;
 let selectedCatColor = '#ff6ef7';
 
 function getCatColor(name) {
@@ -2247,6 +2344,7 @@ function openAdd(forSub=false, presetDate=null) {
   isHideTitle = false;
   isSub = forSub;
   selectedPrio = 'none';
+  currentPhoto = null;
   document.getElementById('addModalTitle').textContent = forSub ? '구독 추가' : '새 일정';
   document.getElementById('f_title').value='';
   document.getElementById('f_date').value= presetDate || fmtDate(new Date());
@@ -2254,6 +2352,7 @@ function openAdd(forSub=false, presetDate=null) {
   document.getElementById('f_et').value='';
   document.getElementById('f_loc').value='';
   document.getElementById('f_memo').value='';
+  removePhoto();
   document.getElementById('f_subname').value='';
   document.getElementById('f_subamt').value='';
   document.getElementById('f_subdate').value= presetDate || fmtDate(new Date());
@@ -2287,6 +2386,8 @@ function openEdit(id) {
   document.getElementById('f_loc').value = item.location||'';
   document.getElementById('f_memo').value = item.memo||'';
   document.getElementById('f_cat').value = item.category;
+  currentPhoto = item.photo || null;
+  if (currentPhoto) _showPhotoPreview(currentPhoto); else removePhoto();
   setPrio(selectedPrio);
   updateSecretToggle();
   updateHideTitleToggle();
@@ -2335,6 +2436,52 @@ function setPrio(p) {
   });
 }
 
+/* ── PHOTO ── */
+function handlePhotoUpload(input) {
+  const file = input.files[0];
+  if (!file) return;
+  input.value = '';
+  const reader = new FileReader();
+  reader.onload = e => {
+    const img = new Image();
+    img.onload = () => {
+      const MAX = 1200;
+      const scale = img.width > MAX ? MAX / img.width : 1;
+      const canvas = document.createElement('canvas');
+      canvas.width = Math.round(img.width * scale);
+      canvas.height = Math.round(img.height * scale);
+      canvas.getContext('2d').drawImage(img, 0, 0, canvas.width, canvas.height);
+      currentPhoto = canvas.toDataURL('image/jpeg', 0.82);
+      _showPhotoPreview(currentPhoto);
+    };
+    img.src = e.target.result;
+  };
+  reader.readAsDataURL(file);
+}
+
+function _showPhotoPreview(src) {
+  document.getElementById('photoUploadArea').style.display = 'none';
+  document.getElementById('photoPreviewWrap').style.display = '';
+  document.getElementById('photoPreviewImg').src = src;
+}
+
+function removePhoto(e) {
+  if (e) e.stopPropagation();
+  currentPhoto = null;
+  document.getElementById('photoUploadArea').style.display = '';
+  document.getElementById('photoPreviewWrap').style.display = 'none';
+  document.getElementById('photoPreviewImg').src = '';
+}
+
+function openPhotoViewer(src) {
+  document.getElementById('photoViewerImg').src = src;
+  document.getElementById('photoViewer').classList.add('open');
+  history.pushState({modal:'photoViewer'}, '');
+}
+function closePhotoViewer() {
+  document.getElementById('photoViewer').classList.remove('open');
+}
+
 function saveItem() {
   if (isSub) {
     const name = document.getElementById('f_subname').value.trim();
@@ -2366,6 +2513,7 @@ function saveItem() {
     location: document.getElementById('f_loc').value,
     memo: document.getElementById('f_memo').value,
     priority: selectedPrio, secret: isSecret, hideTitle: isHideTitle,
+    photo: currentPhoto || null,
     personal: true, done: false
   };
 
@@ -2410,6 +2558,16 @@ function openDetail(id) {
     ${item.instructor?`<div class="detail-row"><span class="dr-key">강사</span><span class="dr-val">${item.instructor}</span></div>`:''}
     <div class="detail-row"><span class="dr-key">중요도</span><span class="dr-val">${prioLabels[item.priority||'none']}</span></div>
     <div class="detail-row"><span class="dr-key">완료</span><span class="dr-val">${item.done?'✅ 완료':'⬜ 미완료'}</span></div>`;
+
+  const photoWrap = document.getElementById('detailPhotoWrap');
+  const photoImg  = document.getElementById('detailPhotoImg');
+  if (item.photo) {
+    photoImg.src = item.photo;
+    photoWrap.style.display = '';
+  } else {
+    photoWrap.style.display = 'none';
+    photoImg.src = '';
+  }
 
   const noteBox = document.getElementById('detailNote');
   if (item.memo && item.memo.trim()) {
@@ -2474,6 +2632,8 @@ document.addEventListener('keydown',e=>{
 });
 
 window.addEventListener('popstate', () => {
+  const viewer = document.getElementById('photoViewer');
+  if (viewer.classList.contains('open')) { viewer.classList.remove('open'); return; }
   const openModals = [...document.querySelectorAll('.modal-overlay.open')];
   if (!openModals.length) return;
   openModals.sort((a, b) => {
