@@ -143,14 +143,23 @@ body::after {
 .header-top {
   display: flex;
   justify-content: space-between;
-  align-items: center;
+  align-items: flex-start;
+}
+.header-left {
+  flex: 1; min-width: 0;
+}
+.header-controls {
+  padding-top: 6px;
 }
 
 .header-sys {
   font-size: 8px;
   color: var(--text3);
   letter-spacing: 1.5px;
-  line-height: 1.4;
+  line-height: 1;
+  height: 12px;
+  display: flex;
+  align-items: center;
 }
 [data-theme="dark"] .header-sys { color: var(--cyan); opacity: 0.6; }
 
@@ -160,7 +169,11 @@ body::after {
   font-weight: 700;
   color: var(--text);
   letter-spacing: 1px;
-  margin-top: 2px;
+  margin-top: 4px;
+  line-height: 1.2;
+  height: 22px;
+  display: flex;
+  align-items: center;
 }
 [data-theme="dark"] .header-title {
   text-shadow: 0 0 16px var(--cyan), 0 0 32px rgba(0,255,231,0.2);
@@ -196,12 +209,6 @@ body::after {
 [data-theme="light"] .hbadge-m { border-color: var(--purple); color: var(--purple); background: rgba(102,0,204,0.06); }
 [data-theme="light"] .hbadge-p { border-color: var(--text3); color: var(--text2); }
 
-.header-controls {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-}
-
 .theme-btn {
   width: 32px; height: 32px;
   border: 1px solid var(--border2);
@@ -221,14 +228,13 @@ body::after {
   display: flex; align-items: center; gap: 8px;
   margin-top: 7px;
 }
-.prog-label { font-size: 8px; color: var(--cyan); letter-spacing: 2px; white-space: nowrap; opacity:0.7; }
-[data-theme="light"] .prog-label { font-family: 'Noto Sans KR', sans-serif; color: var(--accent); font-size: 10px; letter-spacing: 0; opacity: 1; }
-.prog-track { flex:1; height:3px; background:var(--border2); overflow:hidden; border-radius: 2px; }
-[data-theme="light"] .prog-track { height: 5px; border-radius: 3px; }
+.prog-label { font-size: 9px; color: var(--cyan); letter-spacing: 2px; white-space: nowrap; opacity:0.7; }
+[data-theme="light"] .prog-label { color: var(--accent); letter-spacing: 0.5px; opacity: 1; }
+.prog-track { flex:1; height:4px; background:var(--border2); overflow:hidden; border-radius: 2px; }
 .prog-fill { height:100%; background:linear-gradient(90deg,var(--cyan),var(--purple)); width:0%; transition:width .6s ease; box-shadow:0 0 6px var(--cyan); border-radius: 2px; }
-[data-theme="light"] .prog-fill { background: linear-gradient(90deg, var(--accent), var(--purple)); box-shadow: none; border-radius: 3px; }
-.prog-pct { font-size:9px; color:var(--cyan); font-family:'Orbitron',sans-serif; min-width:32px; text-align:right; opacity:0.8; }
-[data-theme="light"] .prog-pct { font-family: 'Noto Sans KR', sans-serif; color: var(--accent); font-size: 11px; font-weight: 700; opacity: 1; }
+[data-theme="light"] .prog-fill { background: linear-gradient(90deg, var(--accent), var(--purple)); box-shadow: none; }
+.prog-pct { font-size:10px; color:var(--cyan); font-family:'Orbitron',sans-serif; min-width:32px; text-align:right; opacity:0.8; }
+[data-theme="light"] .prog-pct { color: var(--accent); font-weight: 700; opacity: 1; }
 
 /* ── MAIN SCROLL AREA ── */
 #mainContent {
@@ -557,19 +563,20 @@ body::after {
   display: block; font-size: 6px;
   padding: 1px 4px; margin-bottom: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  border-left: 2px solid var(--border2);
-  color: var(--text3);
   line-height: 1.4;
-  background: rgba(0,0,0,0.04);
-  border-radius: 0 2px 2px 0;
+  border-radius: 2px;
+  border: 1px solid currentColor;
+  color: var(--text3);
+  background: transparent;
 }
 [data-theme="dark"] .cal-dot {
-  background: none;
+  border: none;
   border-left: 1px solid currentColor;
   font-family: 'Share Tech Mono', monospace;
   text-shadow: 0 0 6px currentColor;
   letter-spacing: 0.2px;
   padding-left: 5px;
+  border-radius: 0;
 }
 .cal-dot.done { opacity: 0.4; text-decoration: line-through; }
 .cal-more { font-size: 7px; color: var(--purple); padding: 1px 3px; }
@@ -1186,7 +1193,7 @@ body::after {
   <!-- ── HEADER ── -->
   <div class="app-header">
     <div class="header-top">
-      <div style="flex:1;min-width:0;">
+      <div class="header-left">
         <div class="header-sys" id="headerSys">// SYS::Rianless // NODE_03 // AUTH_OK</div>
         <div class="header-title">To Do <span>List</span></div>
         <div class="header-badges">
@@ -1873,8 +1880,7 @@ function renderCal() {
       const dot=document.createElement('span');
       dot.className='cal-dot'+(item.done?' done':'');
       const dotColor = item.isSub ? '#9d00ff' : getCatColor(item.category);
-      dot.style.borderLeftColor=dotColor;
-      if(isDark) dot.style.color=dotColor;
+      dot.style.color=dotColor;
       const ts=item.time?item.time.split('~')[0]+' ':'';
       const displayTitle = item.hideTitle ? '// 비공개' : item.title;
       dot.textContent=(item.secret&&!item._unlocked?'🔒 CLASSIFIED':ts+displayTitle);
