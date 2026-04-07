@@ -855,8 +855,47 @@ body::after {
 .sub-toggle-title { font-size: 11px; color: var(--purple); margin-bottom: 2px; }
 
 /* ═══════════════════════════════════════
-   DETAIL MODAL
+   DETAIL MODAL — CENTER POPUP
 ═══════════════════════════════════════ */
+#detailModal {
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+.detail-sheet {
+  border-radius: 8px !important;
+  border-top: none !important;
+  border: 1px solid var(--border2);
+  width: 100%;
+  max-width: 400px;
+  max-height: 82dvh;
+  margin: 0 !important;
+  position: relative;
+  animation: detailIn 0.18s cubic-bezier(0.2,0,0.2,1);
+}
+@keyframes detailIn {
+  from { opacity:0; transform:scale(0.93); }
+  to   { opacity:1; transform:scale(1); }
+}
+[data-theme="dark"] .detail-sheet {
+  border-color: rgba(0,255,231,0.4);
+  box-shadow: 0 0 0 1px rgba(0,255,231,0.08),
+              0 0 40px rgba(0,255,231,0.1),
+              0 16px 48px rgba(0,0,0,0.7);
+}
+[data-theme="light"] .detail-sheet {
+  box-shadow: 0 8px 40px rgba(0,0,0,0.18);
+}
+.detail-sheet .modal-handle { display: none; }
+
+/* 코너 장식 (다크모드만) */
+.dc { position:absolute; width:12px; height:12px; display:none; }
+[data-theme="dark"] .dc { display:block; }
+.dc-tl { top:4px;  left:4px;  border-top:2px solid var(--cyan); border-left:2px solid var(--cyan); }
+.dc-tr { top:4px;  right:4px; border-top:2px solid var(--cyan); border-right:2px solid var(--cyan); }
+.dc-bl { bottom:4px; left:4px;  border-bottom:2px solid var(--cyan); border-left:2px solid var(--cyan); }
+.dc-br { bottom:4px; right:4px; border-bottom:2px solid var(--cyan); border-right:2px solid var(--cyan); }
+
 .detail-actions {
   display: flex; gap: 6px;
   padding: 0 16px 16px;
@@ -1626,8 +1665,9 @@ body::after {
 
 <!-- DETAIL MODAL -->
 <div class="modal-overlay" id="detailModal" style="z-index:9100;">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
+  <div class="modal-sheet detail-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
     <div class="modal-header">
       <div class="modal-title" id="detailTitle">일정 상세</div>
       <button class="modal-close" onclick="closeDetail()">✕</button>
@@ -2899,7 +2939,7 @@ function addSwipeToDismiss(overlay) {
   sheet.addEventListener('touchcancel', onEnd);
 }
 
-['addModal','detailModal','dayModal'].forEach(id => {
+['addModal','dayModal'].forEach(id => {
   addSwipeToDismiss(document.getElementById(id));
 });
 
