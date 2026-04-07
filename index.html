@@ -3383,29 +3383,30 @@ function renderWeek() {
   const today = new Date();
   const todayStr = fmtDate(today);
 
-  // Base: Monday of current week + offset
+  // Base: Sunday of current week + offset
   const base = new Date(today);
-  const dow = base.getDay() === 0 ? 6 : base.getDay() - 1; // 0=Mon
+  const dow = base.getDay(); // 0=Sun, so Sunday is already 0
   base.setDate(base.getDate() - dow + calWeekOffset * 7);
   base.setHours(0,0,0,0);
 
-  // Default selected date: today if in this week, else Monday
+  // Default selected date: today if in this week, else Sunday
   if (!weekSelectedDate) weekSelectedDate = todayStr;
   // Check if selected date is in this week
   const endOfWeek = new Date(base); endOfWeek.setDate(base.getDate() + 6);
   const selD = new Date(weekSelectedDate + 'T00:00:00');
   if (selD < base || selD > endOfWeek) {
-    // if today is in this week, select today, else select Monday
     weekSelectedDate = (new Date(todayStr) >= base && new Date(todayStr) <= endOfWeek) ? todayStr : fmtDate(base);
   }
 
-  // Label
+  // Label: 두 줄 - "2026" 과 "// 04월 06일 — 04월 12일"
   const mm1 = String(base.getMonth()+1).padStart(2,'0');
   const mm2 = String(endOfWeek.getMonth()+1).padStart(2,'0');
-  const label = isDark
-    ? `${base.getFullYear()} // ${mm1}월 ${String(base.getDate()).padStart(2,'0')}일 — ${mm2}월 ${String(endOfWeek.getDate()).padStart(2,'0')}일`
-    : `${mm1}/${String(base.getDate()).padStart(2,'0')} – ${mm2}/${String(endOfWeek.getDate()).padStart(2,'0')}`;
-  document.getElementById('calLabel').textContent = label;
+  const labelEl = document.getElementById('calLabel');
+  if (isDark) {
+    labelEl.innerHTML = `${base.getFullYear()}<br>// ${mm1}월 ${String(base.getDate()).padStart(2,'0')}일 — ${mm2}월 ${String(endOfWeek.getDate()).padStart(2,'0')}일`;
+  } else {
+    labelEl.textContent = `${mm1}/${String(base.getDate()).padStart(2,'0')} – ${mm2}/${String(endOfWeek.getDate()).padStart(2,'0')}`;
+  }
 
   // Build dmap
   const dmap = {};
@@ -3727,3 +3728,4 @@ updateProgress();
 </script>
 </body>
 </html>
+
