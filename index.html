@@ -2274,7 +2274,7 @@ function openEdit(id) {
   if (!item) return;
   editingId = id;
   isSecret = item.secret;
-  isHideTitle = !item.hideTitle; // hideTitle=true means title is hidden, toggle shows "표시 중"
+  isHideTitle = !!item.hideTitle;
   isSub = false;
   selectedPrio = item.priority || 'none';
   document.getElementById('addModalTitle').textContent = '일정 수정';
@@ -2365,7 +2365,7 @@ function saveItem() {
     time, floor: existing?.floor||'', sub: existing?.sub||'', instructor: existing?.instructor||'',
     location: document.getElementById('f_loc').value,
     memo: document.getElementById('f_memo').value,
-    priority: selectedPrio, secret: isSecret, hideTitle: !isHideTitle,
+    priority: selectedPrio, secret: isSecret, hideTitle: isHideTitle,
     personal: true, done: false
   };
 
