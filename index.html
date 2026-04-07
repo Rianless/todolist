@@ -87,7 +87,6 @@ body {
   position: relative;
 }
 
-/* Scanlines - dark only */
 body::before {
   content:'';
   position:fixed; inset:0;
@@ -97,7 +96,6 @@ body::before {
   transition: opacity 0.3s;
 }
 
-/* Grid bg - dark only */
 body::after {
   content:'';
   position:fixed; inset:0;
@@ -238,7 +236,6 @@ body::after {
   padding: 12px 12px 4px;
 }
 
-/* Hide scrollbar but keep scroll */
 #mainContent::-webkit-scrollbar { width: 3px; }
 #mainContent::-webkit-scrollbar-track { background: transparent; }
 #mainContent::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 2px; }
@@ -423,7 +420,6 @@ body::after {
 .todo-card:active { opacity: 0.75; transform: scale(0.99); }
 .todo-card.done { opacity: 0.4; }
 
-/* Secret item */
 .todo-card.secret-locked .secret-mask { display: flex; }
 .todo-card.secret-locked .todo-real { display: none; }
 .todo-card.secret-unlocked .secret-mask { display: none; }
@@ -481,7 +477,6 @@ body::after {
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
 }
 
-/* Corner deco - dark only */
 .corner-d {
   position: absolute; top: 3px; right: 3px;
   width: 5px; height: 5px;
@@ -523,11 +518,10 @@ body::after {
 .cal-dow.sun { color: var(--red); }
 .cal-dow.sat { color: var(--accent); }
 
-/* FIXED SIZE CALENDAR CELLS */
 .cal-cell {
   background: var(--card-bg);
   border: 1px solid var(--border);
-  height: 68px; /* FIXED HEIGHT */
+  height: 68px;
   padding: 4px 3px 3px;
   overflow: hidden;
   position: relative;
@@ -680,7 +674,7 @@ body::after {
   background: rgba(0,0,0,0.7);
   z-index: 9000;
   backdrop-filter: blur(4px);
-  align-items: flex-end; /* Bottom sheet on mobile */
+  align-items: flex-end;
 }
 .modal-overlay.open { display: flex; }
 
@@ -889,6 +883,87 @@ body::after {
 [data-theme="dark"] .empty-state { font-family:'Share Tech Mono',monospace; font-size:11px; letter-spacing:1px; }
 
 .section-subtitle { font-size:11px; color:var(--text3); margin-bottom:10px; letter-spacing:1px; }
+
+/* ═══════════════════════════════════════
+   MYPAGE VIEW
+═══════════════════════════════════════ */
+.mypage-section {
+  margin-bottom: 20px;
+}
+.mypage-section-header {
+  display: flex; justify-content: space-between; align-items: center;
+  padding: 8px 0 10px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 12px;
+}
+.mypage-section-title {
+  font-family: var(--font-title);
+  font-size: 11px; color: var(--accent); letter-spacing: 2px;
+}
+[data-theme="light"] .mypage-section-title {
+  font-family: 'Noto Sans KR',sans-serif; font-size:14px; font-weight:700; letter-spacing:0; color:var(--text);
+}
+.mypage-section-header .section-action-btn {
+  font-size: 10px; padding: 4px 10px;
+  border: 1px solid var(--border2);
+  background: transparent; color: var(--text3);
+  cursor: pointer; border-radius: 4px;
+  font-family: var(--font-main);
+  transition: all 0.2s;
+}
+.mypage-section-header .section-action-btn:hover {
+  border-color: var(--accent); color: var(--accent);
+}
+
+/* ── 청도활동 category group in select ── */
+.cat-group-label {
+  font-size: 10px; color: var(--purple); letter-spacing: 1px;
+  padding: 4px 0 2px; display: block;
+  border-top: 1px solid var(--border);
+  margin-top: 4px;
+}
+[data-theme="light"] .cat-group-label { font-size: 11px; color: var(--purple); }
+
+/* Category select custom group UI */
+.cat-select-group {
+  background: var(--input-bg);
+  border: 1px solid var(--border2);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.cat-select-group select {
+  border: none;
+  background: transparent;
+}
+
+/* ── Add sub btn inside mypage ── */
+.mypage-add-sub-btn {
+  width: 100%; padding: 10px; border: 1px dashed var(--purple);
+  background: rgba(157,0,255,0.05); color: var(--purple); cursor: pointer;
+  border-radius: 6px; font-family: var(--font-main); font-size: 12px;
+  transition: all 0.2s; margin-top: 4px;
+}
+.mypage-add-sub-btn:hover { background: rgba(157,0,255,0.12); }
+
+/* category group container in mypage */
+.cat-group-header {
+  display: flex; align-items: center; gap: 8px;
+  padding: 6px 0 4px;
+  border-bottom: 1px solid var(--border);
+  margin-bottom: 2px;
+}
+.cat-group-tag {
+  font-size: 9px; padding: 2px 8px;
+  border: 1px solid rgba(157,0,255,0.4);
+  color: var(--purple); border-radius: 10px;
+  letter-spacing: 1px;
+}
+[data-theme="light"] .cat-group-tag { font-size: 10px; }
+
+/* category select wrapper with grouped options */
+#f_cat_wrapper, #f_cat_sub_wrapper {
+  position: relative;
+}
 </style>
 </head>
 <body>
@@ -929,7 +1004,6 @@ body::after {
       <div class="filter-scroll" id="filterScroll">
         <button class="fchip active" onclick="setFilter('all',this)">전체</button>
         <button class="fchip" onclick="setFilter('중요',this)">⭐ 중요</button>
-        <!-- dynamic category filters added here -->
       </div>
       <div id="todoList"></div>
     </div>
@@ -945,33 +1019,80 @@ body::after {
       <div id="calDayList" style="margin-top:12px;"></div>
     </div>
 
-    <!-- NOTES VIEW -->
-    <div class="view" id="viewNotes">
-      <div class="notes-header">
-        <div class="section-title" id="notesSysLabel">// MEMO_DB</div>
-      </div>
-      <div id="notesList"></div>
-    </div>
+    <!-- MY PAGE VIEW -->
+    <div class="view" id="viewMypage">
 
-    <!-- STATS VIEW -->
-    <div class="view" id="viewStats">
-      <div class="stats-tabs">
-        <button class="stab active" onclick="setStatPeriod('week',this)">주간</button>
-        <button class="stab" onclick="setStatPeriod('month',this)">월간</button>
-        <button class="stab" onclick="setStatPeriod('year',this)">연간</button>
+      <!-- ── 통계 섹션 ── -->
+      <div class="mypage-section">
+        <div class="mypage-section-header">
+          <div class="mypage-section-title" id="statsSysLabel">// STATS</div>
+          <div class="stats-tabs" style="margin-bottom:0;">
+            <button class="stab active" onclick="setStatPeriod('week',this)">주간</button>
+            <button class="stab" onclick="setStatPeriod('month',this)">월간</button>
+            <button class="stab" onclick="setStatPeriod('year',this)">연간</button>
+          </div>
+        </div>
+        <div id="statsContent"></div>
       </div>
-      <div id="statsContent"></div>
-    </div>
 
-    <!-- SUBSCRIPTIONS VIEW -->
-    <div class="view" id="viewSubs">
-      <div class="notes-header">
-        <div class="section-title" id="subsSysLabel">// SUBSCRIPTION</div>
-        <button class="add-btn" style="width:auto;padding:6px 10px;font-size:10px;flex-shrink:0;margin-left:12px;" onclick="openAdd(true)">+ 추가</button>
+      <!-- ── 메모 섹션 ── -->
+      <div class="mypage-section">
+        <div class="mypage-section-header">
+          <div class="mypage-section-title" id="notesSysLabel">// MEMO_DB</div>
+        </div>
+        <div id="notesList"></div>
       </div>
-      <div id="subTotal" class="sub-total"></div>
-      <div id="subsList"></div>
-    </div>
+
+      <!-- ── 구독 섹션 ── -->
+      <div class="mypage-section">
+        <div class="mypage-section-header">
+          <div class="mypage-section-title" id="subsSysLabel">// SUBSCRIPTION</div>
+          <button class="section-action-btn" onclick="openAdd(true)">+ 추가</button>
+        </div>
+        <div id="subTotal" class="sub-total" style="display:none;"></div>
+        <div id="subsList"></div>
+        <button class="mypage-add-sub-btn" onclick="openAdd(true)">🔖 구독 항목 추가</button>
+      </div>
+
+      <!-- ── 카테고리 관리 섹션 ── -->
+      <div class="mypage-section">
+        <div class="mypage-section-header">
+          <div class="mypage-section-title" id="catSysLabel">// CATEGORY</div>
+          <button class="section-action-btn" onclick="showInlineAddCatForm()">+ 추가</button>
+        </div>
+
+        <!-- 청도활동 그룹 -->
+        <div class="cat-group-header" style="margin-bottom:8px;">
+          <span class="cat-group-tag">청도활동</span>
+          <span style="font-size:10px;color:var(--text3);">고정 카테고리</span>
+        </div>
+        <div id="cheongdoCatList"></div>
+
+        <!-- 일반 카테고리 -->
+        <div class="cat-group-header" style="margin-top:12px;margin-bottom:8px;">
+          <span class="cat-group-tag" style="border-color:rgba(0,255,231,0.4);color:var(--accent);">기타</span>
+          <span style="font-size:10px;color:var(--text3);">추가/삭제 가능</span>
+        </div>
+        <div id="otherCatList"></div>
+
+        <!-- 인라인 추가 폼 -->
+        <div id="inlineAddCatForm" style="display:none;margin-top:12px;background:var(--panel);border:1px solid var(--border);border-radius:8px;padding:12px;">
+          <div class="form-group">
+            <label class="form-label">카테고리 이름</label>
+            <input class="form-input" id="newCatName" type="text" placeholder="이름">
+          </div>
+          <div class="form-group">
+            <label class="form-label">색상</label>
+            <div class="color-swatches" id="colorSwatches"></div>
+          </div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn-cancel" style="flex:1;padding:9px;" onclick="document.getElementById('inlineAddCatForm').style.display='none'">취소</button>
+            <button class="btn-save" style="flex:2;padding:9px;" onclick="saveNewCat()">추가</button>
+          </div>
+        </div>
+      </div>
+
+    </div><!-- end viewMypage -->
 
   </div><!-- end mainContent -->
 
@@ -985,17 +1106,9 @@ body::after {
       <div class="tab-icon">📋</div>
       <div class="tab-label">리스트</div>
     </button>
-    <button class="tab-item" onclick="setTab('notes',this)" data-view="viewNotes">
-      <div class="tab-icon">📝</div>
-      <div class="tab-label">메모</div>
-    </button>
-    <button class="tab-item" onclick="setTab('stats',this)" data-view="viewStats">
-      <div class="tab-icon">📊</div>
-      <div class="tab-label">통계</div>
-    </button>
-    <button class="tab-item" onclick="setTab('subs',this)" data-view="viewSubs">
-      <div class="tab-icon">🔖</div>
-      <div class="tab-label">구독</div>
+    <button class="tab-item" onclick="setTab('mypage',this)" data-view="viewMypage">
+      <div class="tab-icon">👤</div>
+      <div class="tab-label">마이페이지</div>
     </button>
   </div>
 </div><!-- end app -->
@@ -1017,7 +1130,7 @@ body::after {
         <div class="toggle-row" style="border:none;padding:0;margin:0;">
           <div>
             <div class="sub-toggle-title">🔖 구독 항목</div>
-            <div style="font-size:10px;color:var(--text3);">켜면 구독 탭에 저장됩니다</div>
+            <div style="font-size:10px;color:var(--text3);">켜면 구독에 저장됩니다</div>
           </div>
           <div class="toggle-switch" id="subToggle" onclick="toggleSub()"></div>
         </div>
@@ -1133,35 +1246,6 @@ body::after {
   </div>
 </div>
 
-<!-- CATEGORIES MODAL -->
-<div class="modal-overlay" id="catModal">
-  <div class="modal-sheet">
-    <div class="modal-handle"></div>
-    <div class="modal-header">
-      <div class="modal-title">카테고리 관리</div>
-      <button class="modal-close" onclick="document.getElementById('catModal').classList.remove('open')">✕</button>
-    </div>
-    <div class="modal-body">
-      <div id="catList" class="cat-list"></div>
-      <button class="add-cat-btn" onclick="showAddCatForm()">+ 카테고리 추가</button>
-      <div id="addCatForm" style="display:none;margin-top:12px;">
-        <div class="form-group">
-          <label class="form-label">카테고리 이름</label>
-          <input class="form-input" id="newCatName" type="text" placeholder="이름">
-        </div>
-        <div class="form-group">
-          <label class="form-label">색상</label>
-          <div class="color-swatches" id="colorSwatches"></div>
-        </div>
-        <div class="modal-actions" style="padding:0;margin-top:10px;">
-          <button class="btn-cancel" style="flex:1;" onclick="document.getElementById('addCatForm').style.display='none'">취소</button>
-          <button class="btn-save" style="flex:2;" onclick="saveNewCat()">추가</button>
-        </div>
-      </div>
-    </div>
-  </div>
-</div>
-
 <!-- DAY DETAIL MODAL -->
 <div class="modal-overlay" id="dayModal">
   <div class="modal-sheet">
@@ -1183,6 +1267,10 @@ const CAT_COLORS_DEFAULT = {
   '진로탐색':'#39ff14','지역맞춤형':'#ff6600','사례관리':'#cc44ff',
   '개인':'#ff6ef7','자율':'#4a4f72'
 };
+
+// 청도활동 그룹에 속하는 카테고리들
+const CHEONGDO_CATS = ['밀착상담','자신감회복','취업역량강화','진로탐색','지역맞춤형','사례관리'];
+
 const SWATCH_COLORS = ['#ff2d55','#ff6600','#ffcc00','#39ff14','#00d4ff','#0055ff','#9d00ff','#ff6ef7','#ff00aa','#00ffe7','#4a4f72','#888888'];
 
 let categories = Object.entries(CAT_COLORS_DEFAULT).map(([name,color]) => ({name,color}));
@@ -1190,6 +1278,10 @@ let categories = Object.entries(CAT_COLORS_DEFAULT).map(([name,color]) => ({name
 const DOW_KO = ['일','월','화','수','목','금','토'];
 const DOW_EN = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
 const MONTHS_KO = ['1월','2월','3월','4월','5월','6월','7월','8월','9월','10월','11월','12월'];
+
+function mk(id,date,cat,time,floor,title,sub,instr,loc,prio,secret=false,personal=false) {
+  return {id,date,category:cat,time,floor,title,sub,instructor:instr,location:loc,priority:prio,secret,personal,done:false,memo:''};
+}
 
 let items = [
   mk(1,'2026-04-01','자신감회복','13:00~15:00','','청년 도전! 비전 게임 시작! (OT)','대인관계이해','담당자','3층 1교육실 / 미래기술산업진흥원','mid'),
@@ -1209,7 +1301,7 @@ let items = [
 let subscriptions = [];
 let nextId = 100;
 let filterCat = 'all';
-let currentTab = 'list';
+let currentTab = 'cal';
 let statPeriod = 'week';
 let calY = 2026, calM = 3;
 let calSelectedDate = null;
@@ -1219,14 +1311,14 @@ let isSecret = false;
 let isSub = false;
 let selectedPrio = 'none';
 let selectedCatColor = '#ff6ef7';
-let editingCatIdx = -1;
 
-function mk(id,date,cat,time,floor,title,sub,instr,loc,prio,secret=false,personal=false) {
-  return {id,date,category:cat,time,floor,title,sub,instructor:instr,location:loc,priority:prio,secret,personal,done:false,memo:''};
-}
 function getCatColor(name) {
   const c = categories.find(c=>c.name===name);
   return c ? c.color : '#4a4f72';
+}
+
+function isCheongdo(name) {
+  return CHEONGDO_CATS.includes(name);
 }
 
 /* ══════════════════════════════════════
@@ -1249,6 +1341,8 @@ function updateHeaderBadges() {
     document.getElementById('headerSys').textContent = '// SYS::Rianless // NODE_03 // AUTH_OK';
     document.getElementById('notesSysLabel').textContent = '// MEMO_DB';
     document.getElementById('subsSysLabel').textContent = '// SUBSCRIPTION';
+    document.getElementById('statsSysLabel').textContent = '// STATS';
+    document.getElementById('catSysLabel').textContent = '// CATEGORY';
   } else {
     document.getElementById('hb1').textContent = '개인 일정 관리';
     document.getElementById('hb2').textContent = '1회차 프로그램';
@@ -1256,6 +1350,8 @@ function updateHeaderBadges() {
     document.getElementById('headerSys').textContent = 'Rianless · 중기 3기';
     document.getElementById('notesSysLabel').textContent = '메모';
     document.getElementById('subsSysLabel').textContent = '구독 관리';
+    document.getElementById('statsSysLabel').textContent = '통계';
+    document.getElementById('catSysLabel').textContent = '카테고리 관리';
   }
 }
 
@@ -1267,14 +1363,12 @@ function setTab(tab, btn) {
   document.querySelectorAll('.tab-item').forEach(b=>b.classList.remove('active'));
   btn.classList.add('active');
   document.querySelectorAll('.view').forEach(v=>v.classList.remove('active'));
-  const viewMap = {list:'viewList',cal:'viewCal',notes:'viewNotes',stats:'viewStats',subs:'viewSubs'};
+  const viewMap = {list:'viewList',cal:'viewCal',mypage:'viewMypage'};
   document.getElementById(viewMap[tab]).classList.add('active');
   document.getElementById('mainContent').scrollTop = 0;
   if(tab==='list') renderList();
   if(tab==='cal') renderCal();
-  if(tab==='notes') renderNotes();
-  if(tab==='stats') renderStats();
-  if(tab==='subs') renderSubs();
+  if(tab==='mypage') renderMypage();
 }
 
 /* ══════════════════════════════════════
@@ -1282,38 +1376,31 @@ function setTab(tab, btn) {
 ══════════════════════════════════════ */
 function buildFilters() {
   const fs = document.getElementById('filterScroll');
-  // Clear dynamic ones
   const dynamic = fs.querySelectorAll('.dynamic');
   dynamic.forEach(d=>d.remove());
-  // Add cat manage btn
-  let manage = fs.querySelector('.manage-cats');
-  if (!manage) {
-    manage = document.createElement('button');
-    manage.className = 'fchip manage-cats';
-    manage.textContent = '⚙️ 카테고리';
-    manage.onclick = openCatModal;
-    fs.appendChild(manage);
+
+  // 청도활동 그룹 chip
+  if (!fs.querySelector('[data-cat="청도활동"]')) {
+    const grpBtn = document.createElement('button');
+    grpBtn.className = 'fchip dynamic';
+    grpBtn.setAttribute('data-cat','청도활동');
+    grpBtn.textContent = '🎯 청도활동';
+    grpBtn.style.borderColor = 'rgba(157,0,255,0.4)';
+    grpBtn.onclick = () => setFilter('청도활동', grpBtn);
+    fs.appendChild(grpBtn);
   }
-  // Add category chips
-  categories.forEach(cat => {
+
+  // individual category chips (non-cheongdo)
+  categories.filter(cat => !isCheongdo(cat.name)).forEach(cat => {
     const existing = fs.querySelector(`[data-cat="${cat.name}"]`);
     if (existing) return;
     const btn = document.createElement('button');
     btn.className = 'fchip dynamic';
     btn.setAttribute('data-cat', cat.name);
     btn.textContent = cat.name;
-    btn.onclick = () => { setFilter(cat.name, btn); };
-    fs.insertBefore(btn, manage);
+    btn.onclick = () => setFilter(cat.name, btn);
+    fs.appendChild(btn);
   });
-  // Personal
-  if (!fs.querySelector('[data-cat="개인"]') && !categories.find(c=>c.name==='개인')) {
-    const btn = document.createElement('button');
-    btn.className = 'fchip dynamic personal';
-    btn.setAttribute('data-cat', '개인');
-    btn.textContent = '개인';
-    btn.onclick = () => setFilter('개인', btn);
-    fs.insertBefore(btn, manage);
-  }
 }
 
 function setFilter(cat, btn) {
@@ -1331,11 +1418,12 @@ function renderList() {
   el.innerHTML = '';
   buildFilters();
 
-  let filtered = filterCat === 'all' ? [...items]
-    : filterCat === '중요' ? items.filter(i=>i.priority==='high')
-    : items.filter(i=>i.category===filterCat);
+  let filtered;
+  if (filterCat === 'all') filtered = [...items];
+  else if (filterCat === '중요') filtered = items.filter(i=>i.priority==='high');
+  else if (filterCat === '청도활동') filtered = items.filter(i=>CHEONGDO_CATS.includes(i.category));
+  else filtered = items.filter(i=>i.category===filterCat);
 
-  // Group by date
   const byDate = {};
   filtered.forEach(item => {
     const d = item.date || '개별';
@@ -1361,7 +1449,6 @@ function renderList() {
     }
     div.innerHTML = `<span class="dd-text">${label}</span><div class="dd-line"></div><span class="dd-count">${byDate[dateKey].length}</span>`;
     el.appendChild(div);
-
     byDate[dateKey].forEach(item => el.appendChild(makeCard(item)));
   });
 
@@ -1371,20 +1458,23 @@ function renderList() {
 function makeCard(item) {
   const color = getCatColor(item.category);
   const card = document.createElement('div');
-  const isSecret = item.secret;
+  const isItemSecret = item.secret;
   const isUnlocked = item._unlocked;
-  const lockClass = isSecret ? (isUnlocked ? 'secret-unlocked' : 'secret-locked') : '';
+  const lockClass = isItemSecret ? (isUnlocked ? 'secret-unlocked' : 'secret-locked') : '';
   card.className = `todo-card cat-custom ${item.done?'done':''} ${lockClass}`;
   card.style.setProperty('--cc', color);
 
   const prioClass = item.priority === 'high' ? 'p-high' : item.priority === 'mid' ? 'p-mid' : item.priority === 'low' ? 'p-low' : 'p-none';
   const star = item.priority === 'high' ? '⭐' : item.priority === 'mid' ? '🔸' : item.priority === 'low' ? '🔹' : '';
 
-  const secretMask = isSecret ? `
+  const secretMask = isItemSecret ? `
     <div class="secret-mask">
       <span class="secret-icon">🔒</span>
       <span class="secret-text">CLASSIFIED :: ${Array(8).fill(0).map(()=>'■□▪▫'[Math.floor(Math.random()*4)]).join('')} :: ACCESS_DENIED</span>
     </div>` : '';
+
+  // 청도활동 표시
+  const cheongdoBadge = isCheongdo(item.category) ? `<span style="font-size:8px;padding:1px 5px;border:1px solid rgba(157,0,255,0.4);color:var(--purple);border-radius:10px;margin-left:2px;">청도</span>` : '';
 
   card.innerHTML = `
     ${secretMask}
@@ -1394,6 +1484,7 @@ function makeCard(item) {
         <div class="todo-body">
           <div class="todo-meta">
             <span class="cat-badge" style="color:${color};border-color:${color};">${item.category}</span>
+            ${cheongdoBadge}
             ${item.time ? `<span class="todo-time">${item.time}</span>` : ''}
             ${star ? `<span class="importance-star">${star}</span>` : ''}
           </div>
@@ -1405,7 +1496,7 @@ function makeCard(item) {
     <div class="corner-d"></div>`;
 
   card.addEventListener('click', () => {
-    if (isSecret && !item._unlocked) {
+    if (isItemSecret && !item._unlocked) {
       item._unlocked = true;
       card.classList.remove('secret-locked');
       card.classList.add('secret-unlocked');
@@ -1422,7 +1513,6 @@ function makeCard(item) {
 ══════════════════════════════════════ */
 function goToday() {
   const t = new Date();
-  const ds = fmtDate(t);
   setFilter('all', document.querySelector('.fchip'));
   setTimeout(() => {
     const dividers = document.querySelectorAll('.date-divider .dd-text');
@@ -1435,7 +1525,6 @@ function goToday() {
         break;
       }
     }
-    // Also set calendar to today
     calY = t.getFullYear(); calM = t.getMonth();
   }, 100);
 }
@@ -1478,7 +1567,6 @@ function renderCal() {
     if(!dmap[item.date]) dmap[item.date]=[];
     dmap[item.date].push(item);
   });
-  // Also show subscriptions on their payment date
   subscriptions.forEach(sub=>{
     if(!sub.date) return;
     const subItem = {
@@ -1531,14 +1619,12 @@ function renderCal() {
       more.textContent=`+${evts.length-3}`;
       cell.appendChild(more);
     }
-    // ALL cells are clickable: opens day modal (with add button)
     cell.style.cursor='pointer';
     cell.classList.add('has-events');
     cell.addEventListener('click',()=>openDayModal(ds, evts));
     grid.appendChild(cell);
   }
 
-  // Day detail below
   if(calSelectedDate) renderCalDayList(calSelectedDate);
 }
 
@@ -1552,7 +1638,6 @@ function openDayModal(ds, evts) {
   const body = document.getElementById('dayModalBody');
   body.innerHTML = '';
 
-  // Add event button for this date
   const addBtn = document.createElement('button');
   addBtn.className = 'add-btn';
   addBtn.style.cssText = 'width:100%;margin-bottom:10px;display:block;';
@@ -1578,19 +1663,18 @@ function openDayModal(ds, evts) {
   document.getElementById('dayModal').classList.add('open');
 }
 
-// Cards inside day modal: tap closes day modal first, then opens detail
 function makeCardForDayModal(item, ds, evts) {
   const color = getCatColor(item.category);
   const card = document.createElement('div');
-  const isSecret = item.secret;
-  const lockClass = isSecret ? (item._unlocked ? 'secret-unlocked' : 'secret-locked') : '';
+  const isItemSecret = item.secret;
+  const lockClass = isItemSecret ? (item._unlocked ? 'secret-unlocked' : 'secret-locked') : '';
   card.className = `todo-card cat-custom ${item.done?'done':''} ${lockClass}`;
   card.style.setProperty('--cc', color);
 
   const prioClass = item.priority === 'high' ? 'p-high' : item.priority === 'mid' ? 'p-mid' : item.priority === 'low' ? 'p-low' : 'p-none';
   const star = item.priority === 'high' ? '⭐' : item.priority === 'mid' ? '🔸' : item.priority === 'low' ? '🔹' : '';
 
-  const secretMask = isSecret ? `
+  const secretMask = isItemSecret ? `
     <div class="secret-mask">
       <span class="secret-icon">🔒</span>
       <span class="secret-text">CLASSIFIED :: ${Array(8).fill(0).map(()=>'■□▪▫'[Math.floor(Math.random()*4)]).join('')} :: ACCESS_DENIED</span>
@@ -1615,24 +1699,31 @@ function makeCardForDayModal(item, ds, evts) {
     <div class="corner-d"></div>`;
 
   card.addEventListener('click', () => {
-    if (isSecret && !item._unlocked) {
+    if (isItemSecret && !item._unlocked) {
       item._unlocked = true;
       card.classList.remove('secret-locked');
       card.classList.add('secret-unlocked');
       return;
     }
-    if (item.isSub) return; // subscription items: no detail modal
-    // Close day modal FIRST, then open detail
+    if (item.isSub) return;
     document.getElementById('dayModal').classList.remove('open');
-    setTimeout(() => openDetail(item.id), 80);
+    openDetail(item.id);
   });
 
   return card;
 }
 
 /* ══════════════════════════════════════
-   NOTES
+   MYPAGE (통계 + 메모 + 구독 + 카테고리)
 ══════════════════════════════════════ */
+function renderMypage() {
+  renderStats();
+  renderNotes();
+  renderSubs();
+  renderCatLists();
+}
+
+/* ── NOTES ── */
 function renderNotes() {
   const el = document.getElementById('notesList');
   el.innerHTML = '';
@@ -1658,9 +1749,7 @@ function renderNotes() {
   });
 }
 
-/* ══════════════════════════════════════
-   STATS
-══════════════════════════════════════ */
+/* ── STATS ── */
 function setStatPeriod(p, btn) {
   statPeriod = p;
   document.querySelectorAll('.stab').forEach(b=>b.classList.remove('active'));
@@ -1691,7 +1780,6 @@ function renderStats() {
   const highPrio = inRange.filter(i=>i.priority==='high').length;
   const pct = total ? Math.round(done/total*100) : 0;
 
-  // Category breakdown
   const catCount = {};
   inRange.forEach(i=>{ catCount[i.category]=(catCount[i.category]||0)+1; });
   const sortedCats = Object.entries(catCount).sort((a,b)=>b[1]-a[1]);
@@ -1717,17 +1805,15 @@ function renderStats() {
     </div>`;
 }
 
-/* ══════════════════════════════════════
-   SUBSCRIPTIONS
-══════════════════════════════════════ */
+/* ── SUBSCRIPTIONS ── */
 function renderSubs() {
   const el = document.getElementById('subsList');
   const totalEl = document.getElementById('subTotal');
   el.innerHTML = '';
 
   if (!subscriptions.length) {
-    totalEl.innerHTML = '';
-    el.innerHTML = '<div class="sub-empty">구독 항목이 없습니다<br><small>일정 추가 시 구독 항목으로 등록하세요</small></div>';
+    totalEl.style.display = 'none';
+    el.innerHTML = '<div class="sub-empty" style="padding:20px 0;">구독 항목이 없습니다</div>';
     return;
   }
 
@@ -1739,6 +1825,7 @@ function renderSubs() {
     return acc;
   }, 0);
 
+  totalEl.style.display = 'block';
   totalEl.innerHTML = `
     <div class="sub-total-label">월 예상 지출</div>
     <div class="sub-total-amount">₩${Math.round(monthlyTotal).toLocaleString()}</div>`;
@@ -1773,20 +1860,110 @@ function renderSubs() {
   });
 }
 
+/* ── CATEGORY LIST (마이페이지 내) ── */
+function renderCatLists() {
+  const cheongdoEl = document.getElementById('cheongdoCatList');
+  const otherEl = document.getElementById('otherCatList');
+  cheongdoEl.innerHTML = '';
+  otherEl.innerHTML = '';
+
+  categories.forEach((cat, i) => {
+    const row = document.createElement('div');
+    row.className = 'cat-item';
+    const isCheongdoCat = isCheongdo(cat.name);
+    row.innerHTML = `
+      <div class="cat-color-dot" style="background:${cat.color}"></div>
+      <div class="cat-name">${cat.name}</div>
+      <div class="cat-actions">
+        ${isCheongdoCat
+          ? `<span style="font-size:10px;color:var(--text3);padding:0 6px;">고정</span>`
+          : `<button class="cat-act-btn del" onclick="deleteCat(${i})">삭제</button>`}
+      </div>`;
+    if (isCheongdoCat) {
+      cheongdoEl.appendChild(row);
+    } else {
+      otherEl.appendChild(row);
+    }
+  });
+
+  if (otherEl.children.length === 0) {
+    otherEl.innerHTML = '<div style="font-size:11px;color:var(--text3);padding:10px 0;">추가된 카테고리가 없습니다</div>';
+  }
+}
+
+function showInlineAddCatForm() {
+  const form = document.getElementById('inlineAddCatForm');
+  form.style.display = form.style.display === 'none' ? 'block' : 'none';
+  if (form.style.display === 'block') {
+    document.getElementById('newCatName').value = '';
+    selectedCatColor = '#ff6ef7';
+    buildSwatches();
+  }
+}
+
+function buildSwatches() {
+  const el = document.getElementById('colorSwatches');
+  el.innerHTML = '';
+  SWATCH_COLORS.forEach(c=>{
+    const sw = document.createElement('div');
+    sw.className = `color-swatch${c===selectedCatColor?' selected':''}`;
+    sw.style.background = c;
+    sw.onclick = () => { selectedCatColor=c; buildSwatches(); };
+    el.appendChild(sw);
+  });
+}
+
+function saveNewCat() {
+  const name = document.getElementById('newCatName').value.trim();
+  if (!name) return;
+  if (categories.find(c=>c.name===name)) { alert('이미 있는 카테고리입니다'); return; }
+  categories.push({name, color: selectedCatColor});
+  document.getElementById('inlineAddCatForm').style.display = 'none';
+  renderCatLists();
+  buildFilters();
+  buildCatSelect();
+}
+
+function deleteCat(i) {
+  if (isCheongdo(categories[i].name)) { alert('청도활동 카테고리는 삭제할 수 없습니다'); return; }
+  if (!confirm(`"${categories[i].name}" 카테고리를 삭제할까요?`)) return;
+  categories.splice(i,1);
+  renderCatLists();
+  buildFilters();
+  buildCatSelect();
+}
+
 /* ══════════════════════════════════════
    ADD / EDIT MODAL
 ══════════════════════════════════════ */
 function buildCatSelect() {
   const sel = document.getElementById('f_cat');
   sel.innerHTML = '';
-  categories.forEach(c=>{
-    const opt=document.createElement('option');
-    opt.value=c.name; opt.textContent=c.name;
-    sel.appendChild(opt);
+
+  // 청도활동 그룹
+  const grp = document.createElement('optgroup');
+  grp.label = '🎯 청도활동';
+  CHEONGDO_CATS.forEach(name => {
+    const cat = categories.find(c=>c.name===name);
+    if (!cat) return;
+    const opt = document.createElement('option');
+    opt.value = name; opt.textContent = name;
+    grp.appendChild(opt);
   });
-  const personal=document.createElement('option');
-  personal.value='개인'; personal.textContent='개인';
-  if(!categories.find(c=>c.name==='개인')) sel.appendChild(personal);
+  sel.appendChild(grp);
+
+  // 기타 카테고리
+  const otherCats = categories.filter(c => !isCheongdo(c.name));
+  if (otherCats.length) {
+    const grp2 = document.createElement('optgroup');
+    grp2.label = '기타';
+    otherCats.forEach(c => {
+      const opt = document.createElement('option');
+      opt.value = c.name; opt.textContent = c.name;
+      grp2.appendChild(opt);
+    });
+    sel.appendChild(grp2);
+  }
 }
 
 function openAdd(forSub=false, presetDate=null) {
@@ -1880,9 +2057,8 @@ function saveItem() {
       memo: document.getElementById('f_submemo').value
     });
     closeAdd();
-    if (currentTab === 'subs') renderSubs();
-    if (currentTab === 'cal') renderCal();
-    else renderCal(); // always refresh cal so sub shows up
+    renderCal();
+    if (currentTab === 'mypage') renderMypage();
     return;
   }
 
@@ -1915,7 +2091,7 @@ function saveItem() {
   closeAdd();
   if (currentTab==='list') renderList();
   if (currentTab==='cal') renderCal();
-  if (currentTab==='notes') renderNotes();
+  if (currentTab==='mypage') renderMypage();
   updateProgress();
 }
 
@@ -1929,8 +2105,9 @@ function openDetail(id) {
 
   const color = getCatColor(item.category);
   const prioLabels = {high:'🔴 높음',mid:'🟡 중간',low:'🟢 낮음',none:'-'};
+  const cheondoLabel = isCheongdo(item.category) ? '<span style="font-size:10px;padding:2px 7px;border:1px solid rgba(157,0,255,0.4);color:var(--purple);border-radius:10px;margin-left:6px;">청도활동</span>' : '';
 
-  document.getElementById('detailTitle').textContent = item.title;
+  document.getElementById('detailTitle').innerHTML = `${item.title}${cheondoLabel}`;
   document.getElementById('detailTitle').style.color = color;
 
   const info = document.getElementById('detailInfo');
@@ -1955,7 +2132,6 @@ function openDetail(id) {
   doneBtn.textContent = item.done ? '미완료' : '완료';
   doneBtn.className = `detail-btn done-btn${item.done?' checked':''}`;
 
-  // Show edit/delete only for personal items
   document.querySelector('.detail-btn.edit-btn').style.display = item.personal ? '' : 'none';
   document.querySelector('.detail-btn.del-btn').style.display = item.personal ? '' : 'none';
 
@@ -1982,70 +2158,8 @@ function detailDelete() {
   closeDetail();
   if (currentTab==='list') renderList();
   if (currentTab==='cal') renderCal();
-  if (currentTab==='notes') renderNotes();
+  if (currentTab==='mypage') renderMypage();
   updateProgress();
-}
-
-/* ══════════════════════════════════════
-   CATEGORIES MODAL
-══════════════════════════════════════ */
-function openCatModal() {
-  renderCatList();
-  document.getElementById('addCatForm').style.display = 'none';
-  document.getElementById('catModal').classList.add('open');
-}
-
-function renderCatList() {
-  const el = document.getElementById('catList');
-  el.innerHTML = '';
-  categories.forEach((cat, i) => {
-    const row = document.createElement('div');
-    row.className = 'cat-item';
-    row.innerHTML = `
-      <div class="cat-color-dot" style="background:${cat.color}"></div>
-      <div class="cat-name">${cat.name}</div>
-      <div class="cat-actions">
-        <button class="cat-act-btn del" onclick="deleteCat(${i})">삭제</button>
-      </div>`;
-    el.appendChild(row);
-  });
-}
-
-function showAddCatForm() {
-  document.getElementById('addCatForm').style.display = 'block';
-  document.getElementById('newCatName').value = '';
-  selectedCatColor = '#ff6ef7';
-  buildSwatches();
-}
-
-function buildSwatches() {
-  const el = document.getElementById('colorSwatches');
-  el.innerHTML = '';
-  SWATCH_COLORS.forEach(c=>{
-    const sw = document.createElement('div');
-    sw.className = `color-swatch${c===selectedCatColor?' selected':''}`;
-    sw.style.background = c;
-    sw.onclick = () => { selectedCatColor=c; buildSwatches(); };
-    el.appendChild(sw);
-  });
-}
-
-function saveNewCat() {
-  const name = document.getElementById('newCatName').value.trim();
-  if (!name) return;
-  if (categories.find(c=>c.name===name)) { alert('이미 있는 카테고리입니다'); return; }
-  categories.push({name, color: selectedCatColor});
-  renderCatList();
-  document.getElementById('addCatForm').style.display = 'none';
-  buildFilters();
-  buildCatSelect();
-}
-
-function deleteCat(i) {
-  if (!confirm(`"${categories[i].name}" 카테고리를 삭제할까요?`)) return;
-  categories.splice(i,1);
-  renderCatList();
-  buildFilters();
 }
 
 /* ══════════════════════════════════════
@@ -2055,7 +2169,6 @@ function fmtDate(d) {
   return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
 }
 
-// Close modals on overlay click
 ['addModal','detailModal','dayModal'].forEach(id=>{
   document.getElementById(id).addEventListener('click',e=>{
     if(e.target===e.currentTarget) e.currentTarget.classList.remove('open');
