@@ -150,6 +150,10 @@ body::after {
 }
 .header-controls {
   padding-top: 6px;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+  gap: 4px;
 }
 
 .header-sys {
@@ -513,8 +517,14 @@ body::after {
    CALENDAR VIEW
 ═══════════════════════════════════════ */
 .cal-nav {
-  display: flex; justify-content: space-between; align-items: center;
+  display: flex; flex-direction: column; gap: 6px;
   margin-bottom: 8px;
+}
+.cal-nav-row1 {
+  display: flex; justify-content: space-between; align-items: center;
+}
+.cal-nav-row2 {
+  display: flex; justify-content: flex-end; align-items: center; gap: 6px;
 }
 .cal-nav .cal-month { flex: 1; text-align: center; }
 .cal-arrow {
@@ -524,9 +534,9 @@ body::after {
 }
 .cal-arrow:hover { border-color: var(--accent); background: rgba(0,85,255,0.07); }
 .cal-today-btn {
-  font-size: 10px; font-family: var(--font-main);
+  font-size: 9px; font-family: var(--font-main);
   background: none; border: 1px solid var(--border2);
-  color: var(--text3); padding: 6px 12px; cursor: pointer;
+  color: var(--text3); padding: 4px 8px; cursor: pointer;
   border-radius: 4px; transition: all 0.2s; letter-spacing: 0.5px;
 }
 .cal-today-btn:hover { border-color: var(--accent); color: var(--accent); }
@@ -1454,48 +1464,129 @@ body::after {
 }
 .cal-mode-btn.active { background: var(--accent); color: var(--bg); }
 [data-theme="light"] .cal-mode-btn { font-size: 11px; }
-.week-grid {
-  display: grid; grid-template-columns: repeat(7,1fr); gap: 1px;
-  background: var(--border); border: 1px solid var(--border);
-  margin: 0 8px;
-}
-.week-cell {
-  background: var(--panel2); padding: 6px 4px;
-  min-height: 80px; cursor: pointer;
-  transition: background 0.15s;
-  display: flex; flex-direction: column; gap: 2px;
-}
-.week-cell:hover { background: var(--panel); }
-.week-cell.today { background: rgba(0,255,231,0.06); }
-[data-theme="light"] .week-cell.today { background: rgba(0,85,255,0.06); }
-.week-cell.sun .week-daynum { color: var(--red); }
-.week-cell.sat .week-daynum { color: var(--cyan); }
+
+/* 주뷰: 요일 헤더 */
 .week-header-row {
-  display: grid; grid-template-columns: repeat(7,1fr); gap: 1px;
-  background: var(--border); border: 1px solid var(--border);
-  border-bottom: none; margin: 0 8px;
+  display: grid; grid-template-columns: repeat(7,1fr);
+  border-bottom: 1px solid var(--border);
+  margin: 0 0 4px;
 }
 .week-dow {
-  background: var(--panel); text-align: center;
-  font-size: 9px; color: var(--text3); padding: 5px 0;
-  letter-spacing: 1px;
+  text-align: center;
+  font-size: 10px; color: var(--text3); padding: 6px 0;
+  letter-spacing: 0.5px;
 }
 .week-dow.sun { color: var(--red); }
 .week-dow.sat { color: var(--cyan); }
-.week-daynum {
-  font-size: 11px; color: var(--text2); text-align: center;
-  font-weight: 600; margin-bottom: 3px;
+[data-theme="dark"] .week-dow { font-size: 9px; letter-spacing: 1px; }
+
+/* 주뷰: 날짜 그리드 (미니 캘린더) */
+.week-grid {
+  display: grid; grid-template-columns: repeat(7,1fr);
+  gap: 2px;
+  margin: 0 0 12px;
+}
+.week-cell {
+  background: transparent;
+  padding: 4px 2px;
+  cursor: pointer;
+  transition: background 0.15s;
+  display: flex; flex-direction: column; align-items: center; gap: 2px;
+  border-radius: 8px;
+}
+.week-cell:hover { background: var(--panel2); }
+.week-cell.today {
+  background: transparent;
+  border-radius: 50%;
 }
 .week-cell.today .week-daynum {
-  color: var(--accent); font-weight: 700;
+  background: var(--accent);
+  border-radius: 50%;
+  color: var(--bg); font-weight: 700;
 }
+.week-cell.selected:not(.today) {
+  background: var(--panel2);
+  border-radius: 8px;
+  outline: 1px solid var(--accent);
+}
+.week-cell.sun .week-daynum { color: var(--red); }
+.week-cell.sat .week-daynum { color: var(--cyan); }
+.week-daynum {
+  font-size: 13px; color: var(--text2); text-align: center;
+  font-weight: 600; line-height: 1.8; width: 26px; height: 26px;
+  display: flex; align-items: center; justify-content: center;
+  border-radius: 50%;
+}
+.week-cell.today .week-daynum {
+  color: var(--bg); font-weight: 700;
+}
+.week-cell-dot {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--accent); flex-shrink: 0;
+}
+.week-cell.today .week-cell-dot { background: var(--bg); }
+
+/* 주뷰: 하단 날짜별 할 일 목록 */
+#weekDayTasks {
+  margin-top: 4px;
+}
+.wdt-header {
+  display: flex; align-items: center; justify-content: space-between;
+  margin-bottom: 8px; padding: 8px 4px 6px;
+  border-bottom: 1px solid var(--border);
+}
+.wdt-date-title {
+  font-family: var(--font-title);
+  font-size: 16px; font-weight: 700; color: var(--text);
+}
+[data-theme="light"] .wdt-date-title { font-family: 'Noto Sans KR', sans-serif; font-size: 18px; }
+.wdt-date-dow {
+  font-size: 11px; color: var(--text3); margin-left: 6px;
+}
+[data-theme="light"] .wdt-date-dow { font-size: 13px; }
+.wdt-progress {
+  display: flex; align-items: center; gap: 8px;
+}
+.wdt-pct {
+  font-size: 11px; color: var(--text3);
+  background: var(--panel2); border: 1px solid var(--border2);
+  border-radius: 20px; padding: 3px 10px;
+}
+.wdt-add-btn {
+  background: var(--accent); color: var(--bg);
+  border: none; border-radius: 50%; width: 30px; height: 30px;
+  font-size: 18px; font-weight: 700; cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  transition: opacity 0.2s;
+}
+.wdt-add-btn:hover { opacity: 0.8; }
+[data-theme="dark"] .wdt-add-btn { box-shadow: 0 0 10px rgba(0,255,231,0.3); }
+.wdt-complete-count {
+  font-size: 11px; color: var(--text3);
+  margin-bottom: 8px;
+}
+.wdt-empty {
+  text-align: center; padding: 32px 20px;
+  color: var(--text3); font-size: 12px;
+}
+[data-theme="dark"] .wdt-empty { font-family: 'Share Tech Mono', monospace; letter-spacing: 1px; }
 
 /* ══ NOTIF BUTTON ══ */
 .notif-btn {
-  background: none; border: none; font-size: 16px; cursor: pointer;
-  padding: 4px; line-height: 1; opacity: 0.5; transition: opacity 0.2s;
+  width: 32px; height: 32px;
+  border: 1px solid var(--border2);
+  background: var(--panel2);
+  color: var(--text2);
+  border-radius: 6px;
+  cursor: pointer;
+  display: flex; align-items: center; justify-content: center;
+  font-size: 14px;
+  transition: all 0.2s;
+  flex-shrink: 0;
+  opacity: 0.5;
 }
-.notif-btn.on { opacity: 1; }
+.notif-btn.on { opacity: 1; border-color: var(--accent); }
+.notif-btn:hover { border-color: var(--accent); color: var(--accent); opacity: 1; }
 
 /* ══ PWA INSTALL BAR ══ */
 #pwaBar {
@@ -1597,10 +1688,12 @@ body::after {
     <!-- CALENDAR VIEW -->
     <div class="view active" id="viewCal">
       <div class="cal-nav">
-        <button class="cal-arrow" onclick="calMove(-1)">‹</button>
-        <div class="cal-month" id="calLabel"></div>
-        <div style="display:flex;align-items:center;gap:6px;">
+        <div class="cal-nav-row1">
+          <button class="cal-arrow" onclick="calMove(-1)">‹</button>
+          <div class="cal-month" id="calLabel"></div>
           <button class="cal-arrow" onclick="calMove(1)">›</button>
+        </div>
+        <div class="cal-nav-row2">
           <button class="cal-today-btn" onclick="calGoToday()">TODAY</button>
           <div class="cal-mode-toggle">
             <button class="cal-mode-btn active" id="btnMonthMode" onclick="setCalMode('month')">월</button>
@@ -1612,8 +1705,12 @@ body::after {
         <div class="cal-grid" id="calGrid"></div>
       </div>
       <div id="calWeekWrap" style="display:none;">
+        <!-- 요일 헤더 -->
         <div class="week-header-row" id="weekHeaderRow"></div>
+        <!-- 날짜 미니 캘린더 그리드 -->
         <div class="week-grid" id="weekGrid"></div>
+        <!-- 선택된 날짜의 할 일 목록 -->
+        <div id="weekDayTasks"></div>
       </div>
       <div id="calDayList" style="margin-top:12px;"></div>
     </div>
@@ -3279,22 +3376,35 @@ function setCalMode(mode) {
   else renderCal();
 }
 
+let weekSelectedDate = null; // currently selected date in week view
+
 function renderWeek() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const today = new Date();
+  const todayStr = fmtDate(today);
+
   // Base: Monday of current week + offset
   const base = new Date(today);
   const dow = base.getDay() === 0 ? 6 : base.getDay() - 1; // 0=Mon
   base.setDate(base.getDate() - dow + calWeekOffset * 7);
   base.setHours(0,0,0,0);
 
-  // Label
+  // Default selected date: today if in this week, else Monday
+  if (!weekSelectedDate) weekSelectedDate = todayStr;
+  // Check if selected date is in this week
   const endOfWeek = new Date(base); endOfWeek.setDate(base.getDate() + 6);
+  const selD = new Date(weekSelectedDate + 'T00:00:00');
+  if (selD < base || selD > endOfWeek) {
+    // if today is in this week, select today, else select Monday
+    weekSelectedDate = (new Date(todayStr) >= base && new Date(todayStr) <= endOfWeek) ? todayStr : fmtDate(base);
+  }
+
+  // Label
   const mm1 = String(base.getMonth()+1).padStart(2,'0');
   const mm2 = String(endOfWeek.getMonth()+1).padStart(2,'0');
   const label = isDark
     ? `${base.getFullYear()} // ${mm1}월 ${String(base.getDate()).padStart(2,'0')}일 — ${mm2}월 ${String(endOfWeek.getDate()).padStart(2,'0')}일`
-    : `${base.getFullYear()}년 ${mm1}월 ${String(base.getDate()).padStart(2,'0')}일 ~ ${mm2}월 ${String(endOfWeek.getDate()).padStart(2,'0')}일`;
+    : `${mm1}/${String(base.getDate()).padStart(2,'0')} – ${mm2}/${String(endOfWeek.getDate()).padStart(2,'0')}`;
   document.getElementById('calLabel').textContent = label;
 
   // Build dmap
@@ -3303,7 +3413,6 @@ function renderWeek() {
     if (!it.date) return;
     if (!dmap[it.date]) dmap[it.date] = [];
     dmap[it.date].push(it);
-    // repeat instances
     if (it.repeat && it.repeat !== 'none') {
       generateRepeatInstances(it, base, endOfWeek).forEach(inst => {
         if (!dmap[inst.date]) dmap[inst.date] = [];
@@ -3320,35 +3429,110 @@ function renderWeek() {
   for (let d = 0; d < 7; d++) {
     const dt = new Date(base); dt.setDate(base.getDate() + d);
     const dowIdx = dt.getDay();
-    // header
+    const ds = fmtDate(dt);
+    const isToday = todayStr === ds;
+    const isSelected = weekSelectedDate === ds;
+
+    // header: 요일
     const hd = document.createElement('div');
     hd.className = `week-dow${dowIdx===0?' sun':dowIdx===6?' sat':''}`;
+    // 선택된 날짜 요일 표시
+    if (isSelected) {
+      hd.style.color = 'var(--accent)';
+      hd.style.fontWeight = '700';
+    }
     hd.textContent = isDark ? DOW_EN[dowIdx] : DOW_KO[dowIdx];
     headerRow.appendChild(hd);
-    // cell
-    const ds = fmtDate(dt);
-    const isToday = fmtDate(today) === ds;
+
+    // cell: 날짜 숫자 + 이벤트 dot
     const cell = document.createElement('div');
-    cell.className = `week-cell${isToday?' today':''}${dowIdx===0?' sun':dowIdx===6?' sat':''}`;
+    let cls = 'week-cell';
+    if (isToday) cls += ' today';
+    else if (isSelected) cls += ' selected';
+    if (dowIdx===0) cls += ' sun';
+    if (dowIdx===6) cls += ' sat';
+    cell.className = cls;
     cell.dataset.date = ds;
+
     const num = document.createElement('div');
     num.className = 'week-daynum';
-    num.textContent = String(dt.getDate()).padStart(2,'0');
+    num.textContent = String(dt.getDate());
     cell.appendChild(num);
-    (dmap[ds]||[]).slice(0,4).forEach(it => {
-      const dot = document.createElement('span');
-      dot.className = 'cal-dot' + (it.done?' done':'');
-      const c = getCatColor(it.category);
-      if (isDark) { dot.style.color = c; }
-      else { dot.style.background = c; dot.style.borderColor = c; }
-      dot.textContent = it.hideTitle ? '// 비공개' : (it.secret&&!it._unlocked?'🔒':it.title);
-      dot.style.display = 'block';
-      dot.onclick = e => { e.stopPropagation(); openDetail(it.id); };
+
+    // 이벤트 있으면 dot
+    if ((dmap[ds]||[]).length > 0) {
+      const dot = document.createElement('div');
+      dot.className = 'week-cell-dot';
+      const c = getCatColor((dmap[ds][0]||{}).category);
+      dot.style.background = isToday ? 'var(--accent)' : c;
       cell.appendChild(dot);
-    });
-    cell.onclick = () => openDayModal(ds, dmap[ds]||[]);
+    }
+
+    cell.onclick = () => {
+      weekSelectedDate = ds;
+      renderWeek();
+    };
     grid.appendChild(cell);
   }
+
+  // 하단 할 일 목록 렌더링
+  renderWeekDayTasks(dmap);
+}
+
+function renderWeekDayTasks(dmap) {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const container = document.getElementById('weekDayTasks');
+  const selDs = weekSelectedDate;
+  const tasks = dmap[selDs] || [];
+  const selDate = new Date(selDs + 'T00:00:00');
+  const dowIdx = selDate.getDay();
+  const DOW_KO_FULL = ['일요일','월요일','화요일','수요일','목요일','금요일','토요일'];
+  const DOW_EN_FULL = ['SUN','MON','TUE','WED','THU','FRI','SAT'];
+  const mm = String(selDate.getMonth()+1).padStart(2,'0');
+  const dd = String(selDate.getDate()).padStart(2,'0');
+
+  const done = tasks.filter(t=>t.done).length;
+  const total = tasks.length;
+  const pct = total ? Math.round(done/total*100) : 0;
+
+  let html = `<div class="wdt-header">
+    <div>
+      <span class="wdt-date-title">${selDate.getMonth()+1}월 ${selDate.getDate()}일</span>
+      <span class="wdt-date-dow">${isDark ? DOW_EN_FULL[dowIdx] : DOW_KO_FULL[dowIdx]}</span>
+    </div>
+    <div class="wdt-progress">
+      <span class="wdt-pct">${pct}%</span>
+      <button class="wdt-add-btn" onclick="openAdd()" title="일정 추가">+</button>
+    </div>
+  </div>
+  <div class="wdt-complete-count">${done}/${total} 완료</div>`;
+
+  if (!tasks.length) {
+    html += `<div class="wdt-empty">${isDark ? '// NO_TASKS :: 일정 없음' : '일정이 없습니다'}</div>`;
+  } else {
+    // Sort by time
+    const sorted = [...tasks].sort((a,b) => (a.time||'').localeCompare(b.time||''));
+    sorted.forEach(it => {
+      const color = getCatColor(it.category);
+      const timeStr = it.time || '';
+      const title = it.hideTitle ? (isDark ? '// 비공개' : '비공개') : (it.secret&&!it._unlocked ? '🔒' : it.title);
+      html += `<div class="todo-card cat-${it.category||'자율'}${it.done?' done':''}" onclick="openDetail(${it.id})" style="margin-bottom:6px;">
+        <div class="todo-row">
+          <div class="priority-bar p-${it.priority||'none'}"></div>
+          <div class="todo-body">
+            <div class="todo-meta">
+              <span class="cat-badge" style="--cc:${color}">${it.category||''}</span>
+              ${timeStr?`<span class="todo-time">${timeStr}</span>`:''}
+            </div>
+            <div class="todo-title">${title}</div>
+          </div>
+        </div>
+        <div class="corner-d"></div>
+      </div>`;
+    });
+  }
+
+  container.innerHTML = html;
 }
 
 /* ══════════════════════════════════════
