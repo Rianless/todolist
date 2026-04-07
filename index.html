@@ -888,6 +888,10 @@ body::after {
 }
 .detail-sheet .modal-handle, .add-sheet .modal-handle, .day-sheet .modal-handle { display: none; }
 
+/* Detail header: title wraps freely, close button anchors top-right */
+.detail-sheet .modal-header { align-items: flex-start; }
+.detail-sheet .modal-title  { flex: 1; min-width: 0; white-space: normal; line-height: 1.5; padding-right: 6px; }
+
 /* Add/Day/Detail modals — center popup: outer frame must not scroll so corners stay fixed */
 .add-sheet, .day-sheet, .detail-sheet {
   overflow: hidden !important;
