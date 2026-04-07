@@ -554,15 +554,23 @@ body::after {
 .cal-cell.sat .cal-daynum { color: var(--accent); }
 
 .cal-dot {
-  display: block; font-size: 7px;
-  padding: 1px 3px; margin-bottom: 1px;
+  display: block; font-size: 6px;
+  padding: 1px 4px; margin-bottom: 2px;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
-  border-left: 2px solid var(--cc, var(--border2));
+  border-left: 2px solid var(--border2);
   color: var(--text3);
-  line-height: 1.3;
-  background: rgba(0,0,0,0.03);
+  line-height: 1.4;
+  background: rgba(0,0,0,0.04);
+  border-radius: 0 2px 2px 0;
 }
-[data-theme="dark"] .cal-dot { background: rgba(13,15,30,0.6); }
+[data-theme="dark"] .cal-dot {
+  background: none;
+  border-left: 1px solid currentColor;
+  font-family: 'Share Tech Mono', monospace;
+  text-shadow: 0 0 6px currentColor;
+  letter-spacing: 0.2px;
+  padding-left: 5px;
+}
 .cal-dot.done { opacity: 0.4; text-decoration: line-through; }
 .cal-more { font-size: 7px; color: var(--purple); padding: 1px 3px; }
 
@@ -1274,6 +1282,10 @@ body::after {
           </div>
         </div>
         <div class="toggle-row">
+          <div class="toggle-label">👁 제목 표시</div>
+          <div class="toggle-switch on" id="hideTitleToggle" onclick="toggleHideTitle()"></div>
+        </div>
+        <div class="toggle-row">
           <div class="toggle-label">🔒 비밀 일정</div>
           <div class="toggle-switch" id="secretToggle" onclick="toggleSecret()"></div>
         </div>
@@ -1403,6 +1415,7 @@ let editingId = null;
 let detailId = null;
 let isSecret = false;
 let isSub = false;
+let isHideTitle = false;
 let selectedPrio = 'none';
 let selectedCatColor = '#ff6ef7';
 
@@ -1600,7 +1613,7 @@ function makeCard(item) {
             ${item.time ? `<span class="todo-time">${item.time}</span>` : ''}
             ${star ? `<span class="importance-star">${star}</span>` : ''}
           </div>
-          <div class="todo-title">${item.title}</div>
+          <div class="todo-title">${item.hideTitle ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>' : item.title}</div>
           ${item.sub ? `<div class="todo-sub">${item.sub}</div>` : ''}
         </div>
       </div>
@@ -1721,8 +1734,10 @@ function renderCal() {
       dot.className='cal-dot'+(item.done?' done':'');
       const dotColor = item.isSub ? '#9d00ff' : getCatColor(item.category);
       dot.style.borderLeftColor=dotColor;
+      if(isDark) dot.style.color=dotColor;
       const ts=item.time?item.time.split('~')[0]+' ':'';
-      dot.textContent=(item.secret&&!item._unlocked?'🔒 CLASSIFIED':ts+item.title);
+      const displayTitle = item.hideTitle ? '// 비공개' : item.title;
+      dot.textContent=(item.secret&&!item._unlocked?'🔒 CLASSIFIED':ts+displayTitle);
       cell.appendChild(dot);
     });
     if(evts.length>3){
@@ -1804,7 +1819,7 @@ function makeCardForDayModal(item, ds, evts) {
             ${item.time ? `<span class="todo-time">${item.time}</span>` : ''}
             ${star ? `<span class="importance-star">${star}</span>` : ''}
           </div>
-          <div class="todo-title">${item.title}</div>
+          <div class="todo-title">${item.hideTitle ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>' : item.title}</div>
           ${item.sub ? `<div class="todo-sub">${item.sub}</div>` : ''}
         </div>
       </div>
@@ -2083,6 +2098,7 @@ function buildCatSelect() {
 function openAdd(forSub=false, presetDate=null) {
   editingId = null;
   isSecret = false;
+  isHideTitle = false;
   isSub = forSub;
   selectedPrio = 'none';
   document.getElementById('addModalTitle').textContent = forSub ? '구독 추가' : '새 일정';
@@ -2100,6 +2116,7 @@ function openAdd(forSub=false, presetDate=null) {
   buildCatSelect();
   setPrio('none');
   updateSecretToggle();
+  updateHideTitleToggle();
   updateSubToggle(forSub);
   history.pushState({modal:'add'}, '');
   document.getElementById('addModal').classList.add('open');
@@ -2111,6 +2128,7 @@ function openEdit(id) {
   if (!item) return;
   editingId = id;
   isSecret = item.secret;
+  isHideTitle = !item.hideTitle; // hideTitle=true means title is hidden, toggle shows "표시 중"
   isSub = false;
   selectedPrio = item.priority || 'none';
   document.getElementById('addModalTitle').textContent = '일정 수정';
@@ -2125,6 +2143,7 @@ function openEdit(id) {
   document.getElementById('f_cat').value = item.category;
   setPrio(selectedPrio);
   updateSecretToggle();
+  updateHideTitleToggle();
   updateSubToggle(false);
   closeDetail();
   history.replaceState({modal:'edit'}, '');
@@ -2142,6 +2161,15 @@ function updateSubToggle(val) {
   document.getElementById('subToggle').className = 'toggle-switch'+(val?' on':'');
   document.getElementById('regularFields').style.display = val?'none':'block';
   document.getElementById('subFields').style.display = val?'block':'none';
+}
+
+function toggleHideTitle() {
+  isHideTitle = !isHideTitle;
+  updateHideTitleToggle();
+}
+function updateHideTitleToggle() {
+  // isHideTitle=false means title IS shown (toggle ON), isHideTitle=true means hidden (toggle OFF)
+  document.getElementById('hideTitleToggle').className = 'toggle-switch'+(!isHideTitle?' on':'');
 }
 
 function toggleSecret() {
@@ -2185,12 +2213,13 @@ function saveItem() {
   const st = document.getElementById('f_st').value;
   const et = document.getElementById('f_et').value;
   const time = st && et ? `${st}~${et}` : st||'';
+  const existing = editingId !== null ? items.find(i=>i.id===editingId) : null;
   const obj = {
     title, date: date||null, category: document.getElementById('f_cat').value,
-    time, floor:'', sub:'', instructor:'',
+    time, floor: existing?.floor||'', sub: existing?.sub||'', instructor: existing?.instructor||'',
     location: document.getElementById('f_loc').value,
     memo: document.getElementById('f_memo').value,
-    priority: selectedPrio, secret: isSecret,
+    priority: selectedPrio, secret: isSecret, hideTitle: !isHideTitle,
     personal: true, done: false
   };
 
@@ -2248,8 +2277,8 @@ function openDetail(id) {
   doneBtn.textContent = item.done ? '미완료' : '완료';
   doneBtn.className = `detail-btn done-btn${item.done?' checked':''}`;
 
-  document.querySelector('.detail-btn.edit-btn').style.display = item.personal ? '' : 'none';
-  document.querySelector('.detail-btn.del-btn').style.display = item.personal ? '' : 'none';
+  document.querySelector('.detail-btn.edit-btn').style.display = '';
+  document.querySelector('.detail-btn.del-btn').style.display = '';
 
   history.pushState({modal:'detail'}, '');
   document.getElementById('detailModal').classList.add('open');
