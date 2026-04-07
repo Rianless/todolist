@@ -1681,6 +1681,7 @@ function toggleTheme() {
   html.setAttribute('data-theme', isDark ? 'light' : 'dark');
   document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
   updateHeaderBadges();
+  renderCal();
 }
 
 function updateHeaderBadges() {
