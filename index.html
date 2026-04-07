@@ -1411,11 +1411,7 @@ body::after {
               <div id="cheongdoCatList"></div>
 
               <!-- 일반 카테고리 -->
-              <div class="cat-group-header" style="margin-top:14px;margin-bottom:8px;">
-                <span class="cat-group-tag" style="border-color:rgba(0,255,231,0.4);color:var(--accent);">기타</span>
-                <span style="font-size:10px;color:var(--text3);">추가/삭제 가능</span>
-              </div>
-              <div id="otherCatList"></div>
+              <div id="otherCatList" style="margin-top:10px;"></div>
 
               <!-- 카테고리 추가 버튼 -->
               <button class="add-cat-btn" style="margin-top:10px;" onclick="showInlineAddCatForm()">+ 카테고리 추가</button>
@@ -2356,18 +2352,12 @@ function buildCatSelect() {
   });
   sel.appendChild(grp);
 
-  // 기타 카테고리
-  const otherCats = categories.filter(c => !isCheongdo(c.name));
-  if (otherCats.length) {
-    const grp2 = document.createElement('optgroup');
-    grp2.label = '기타';
-    otherCats.forEach(c => {
-      const opt = document.createElement('option');
-      opt.value = c.name; opt.textContent = c.name;
-      grp2.appendChild(opt);
-    });
-    sel.appendChild(grp2);
-  }
+  // 기타 카테고리 (그룹 없이 바로 추가)
+  categories.filter(c => !isCheongdo(c.name)).forEach(c => {
+    const opt = document.createElement('option');
+    opt.value = c.name; opt.textContent = c.name;
+    sel.appendChild(opt);
+  });
 }
 
 function openAdd(forSub=false, presetDate=null) {
