@@ -888,6 +888,18 @@ body::after {
 }
 .detail-sheet .modal-handle, .add-sheet .modal-handle, .day-sheet .modal-handle { display: none; }
 
+/* Add/Day/Detail modals — center popup: outer frame must not scroll so corners stay fixed */
+.add-sheet, .day-sheet, .detail-sheet {
+  overflow: hidden !important;
+  display: flex;
+  flex-direction: column;
+}
+/* inner scroll wrapper keeps content scrollable while corners stay on outer frame */
+.sheet-scroll {
+  overflow-y: auto;
+  flex: 1;
+}
+
 /* Add/Day modals — center popup */
 .add-sheet, .day-sheet {
   border-radius: 8px !important;
@@ -1563,6 +1575,7 @@ body::after {
   <div class="modal-sheet add-sheet" id="addSheet">
     <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
     <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
     <div class="modal-header">
       <div class="modal-title" id="addModalTitle">새 일정</div>
       <button class="modal-close" onclick="closeAdd()">✕</button>
@@ -1684,6 +1697,7 @@ body::after {
       <button class="btn-cancel" onclick="closeAdd()">취소</button>
       <button class="btn-save" onclick="saveItem()">저장</button>
     </div>
+    </div><!-- /sheet-scroll -->
   </div>
 </div>
 
@@ -1692,6 +1706,7 @@ body::after {
   <div class="modal-sheet detail-sheet">
     <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
     <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
     <div class="modal-header">
       <div class="modal-title" id="detailTitle">일정 상세</div>
       <button class="modal-close" onclick="closeDetail()">✕</button>
@@ -1706,6 +1721,7 @@ body::after {
       <button class="detail-btn edit-btn" onclick="detailEdit()">수정</button>
       <button class="detail-btn del-btn" onclick="detailDelete()">삭제</button>
     </div>
+    </div><!-- /sheet-scroll -->
   </div>
 </div>
 
@@ -1722,11 +1738,13 @@ body::after {
   <div class="modal-sheet day-sheet">
     <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
     <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
     <div class="modal-header">
       <div class="modal-title" id="dayModalTitle"></div>
       <button class="modal-close" onclick="document.getElementById('dayModal').classList.remove('open')">✕</button>
     </div>
     <div class="modal-body" id="dayModalBody"></div>
+    </div><!-- /sheet-scroll -->
   </div>
 </div>
 
