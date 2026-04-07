@@ -1378,6 +1378,158 @@ body::after {
 .card-photo-badge {
   font-size: 9px; opacity: 0.6; margin-left: 4px; vertical-align: middle;
 }
+
+/* ══ SEARCH OVERLAY ══ */
+#searchOverlay {
+  display: none; position: fixed; inset: 0;
+  background: rgba(0,0,0,0.85);
+  z-index: 9500;
+  backdrop-filter: blur(6px);
+  align-items: flex-start;
+  justify-content: center;
+  padding: 60px 20px 20px;
+}
+#searchOverlay.open { display: flex; }
+.search-box {
+  width: 100%; max-width: 440px;
+  background: var(--panel2);
+  border: 1px solid var(--border2);
+  position: relative;
+}
+[data-theme="dark"] .search-box {
+  border-color: rgba(0,255,231,0.4);
+  box-shadow: 0 0 40px rgba(0,255,231,0.1), 0 16px 48px rgba(0,0,0,0.7);
+}
+[data-theme="light"] .search-box { box-shadow: 0 8px 40px rgba(0,0,0,0.18); }
+.search-sys {
+  font-size: 10px; color: var(--text3); letter-spacing: 2px;
+}
+[data-theme="light"] .search-sys { display: none; }
+.search-header {
+  display: flex; align-items: center; justify-content: space-between;
+  padding: 12px 16px 0;
+}
+.search-input-wrap {
+  padding: 10px 16px 12px;
+  border-bottom: 1px solid var(--border);
+  display: flex; align-items: center; gap: 8px;
+}
+.search-input-wrap::before {
+  content: '🔍'; font-size: 14px; flex-shrink: 0;
+}
+.search-input {
+  flex: 1; background: none; border: none; outline: none;
+  color: var(--text); font-family: var(--font-main); font-size: 15px;
+}
+[data-theme="dark"] .search-input { caret-color: var(--cyan); }
+.search-input::placeholder { color: var(--text3); }
+#searchResults { max-height: 60vh; overflow-y: auto; }
+.search-item {
+  padding: 10px 16px; border-bottom: 1px solid var(--border);
+  cursor: pointer; display: flex; flex-direction: column; gap: 3px;
+  transition: background 0.15s;
+}
+.search-item:hover { background: var(--panel); }
+.search-item-title { font-size: 13px; color: var(--text); }
+.search-item-meta  { font-size: 10px; color: var(--text3); }
+.search-empty {
+  padding: 32px 16px; text-align: center;
+  font-size: 11px; color: var(--text3); letter-spacing: 1px;
+}
+.search-dc { position:absolute; width:10px; height:10px; display:none; }
+[data-theme="dark"] .search-dc { display:block; }
+.search-dc-tl { top:3px; left:3px;  border-top:1px solid var(--cyan); border-left:1px solid var(--cyan); }
+.search-dc-tr { top:3px; right:3px; border-top:1px solid var(--cyan); border-right:1px solid var(--cyan); }
+.search-dc-bl { bottom:3px; left:3px;  border-bottom:1px solid var(--cyan); border-left:1px solid var(--cyan); }
+.search-dc-br { bottom:3px; right:3px; border-bottom:1px solid var(--cyan); border-right:1px solid var(--cyan); }
+
+/* ══ WEEK VIEW ══ */
+.cal-mode-toggle {
+  display: flex; gap: 0; border: 1px solid var(--border2); overflow: hidden;
+}
+.cal-mode-btn {
+  background: none; border: none; color: var(--text3);
+  font-family: var(--font-main); font-size: 9px; letter-spacing: 1px;
+  padding: 5px 8px; cursor: pointer; transition: all 0.2s;
+}
+.cal-mode-btn.active { background: var(--accent); color: var(--bg); }
+[data-theme="light"] .cal-mode-btn { font-size: 11px; }
+.week-grid {
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  margin: 0 8px;
+}
+.week-cell {
+  background: var(--panel2); padding: 6px 4px;
+  min-height: 80px; cursor: pointer;
+  transition: background 0.15s;
+  display: flex; flex-direction: column; gap: 2px;
+}
+.week-cell:hover { background: var(--panel); }
+.week-cell.today { background: rgba(0,255,231,0.06); }
+[data-theme="light"] .week-cell.today { background: rgba(0,85,255,0.06); }
+.week-cell.sun .week-daynum { color: var(--red); }
+.week-cell.sat .week-daynum { color: var(--cyan); }
+.week-header-row {
+  display: grid; grid-template-columns: repeat(7,1fr); gap: 1px;
+  background: var(--border); border: 1px solid var(--border);
+  border-bottom: none; margin: 0 8px;
+}
+.week-dow {
+  background: var(--panel); text-align: center;
+  font-size: 9px; color: var(--text3); padding: 5px 0;
+  letter-spacing: 1px;
+}
+.week-dow.sun { color: var(--red); }
+.week-dow.sat { color: var(--cyan); }
+.week-daynum {
+  font-size: 11px; color: var(--text2); text-align: center;
+  font-weight: 600; margin-bottom: 3px;
+}
+.week-cell.today .week-daynum {
+  color: var(--accent); font-weight: 700;
+}
+
+/* ══ NOTIF BUTTON ══ */
+.notif-btn {
+  background: none; border: none; font-size: 16px; cursor: pointer;
+  padding: 4px; line-height: 1; opacity: 0.5; transition: opacity 0.2s;
+}
+.notif-btn.on { opacity: 1; }
+
+/* ══ PWA INSTALL BAR ══ */
+#pwaBar {
+  display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
+  width: 100%; max-width: 480px;
+  background: var(--panel2);
+  border-top: 1px solid var(--border2);
+  padding: 12px 16px; z-index: 8500;
+  align-items: center; justify-content: space-between; gap: 12px;
+}
+[data-theme="dark"] #pwaBar {
+  border-top-color: rgba(0,255,231,0.4);
+  box-shadow: 0 -4px 30px rgba(0,255,231,0.08);
+}
+#pwaBar.show { display: flex; }
+.pwa-bar-text {
+  font-size: 10px; color: var(--text2); letter-spacing: 1.5px; flex: 1;
+}
+[data-theme="light"] .pwa-bar-text {
+  font-size: 12px; letter-spacing: 0; font-family: 'Noto Sans KR', sans-serif;
+}
+.pwa-bar-btns { display: flex; gap: 8px; }
+.pwa-btn-install {
+  background: var(--accent); color: var(--bg);
+  border: none; padding: 7px 14px;
+  font-family: var(--font-main); font-size: 11px; letter-spacing: 1px;
+  cursor: pointer; font-weight: 700;
+}
+[data-theme="light"] .pwa-btn-install { font-family: 'Noto Sans KR',sans-serif; font-size: 12px; border-radius: 4px; }
+.pwa-btn-dismiss {
+  background: none; border: 1px solid var(--border2);
+  color: var(--text3); padding: 7px 10px;
+  font-size: 13px; cursor: pointer;
+}
 </style>
 </head>
 <body>
@@ -1413,6 +1565,8 @@ body::after {
         </div>
       </div>
       <div class="header-controls">
+        <button class="notif-btn" id="notifBtn" onclick="toggleNotif()" title="알림">🔔</button>
+        <button class="theme-btn" onclick="openSearch()" title="검색">🔍</button>
         <button class="theme-btn" onclick="toggleTheme()" title="테마 전환" id="themeBtn">☀️</button>
       </div>
     </div>
@@ -1448,9 +1602,19 @@ body::after {
         <div style="display:flex;align-items:center;gap:6px;">
           <button class="cal-arrow" onclick="calMove(1)">›</button>
           <button class="cal-today-btn" onclick="calGoToday()">TODAY</button>
+          <div class="cal-mode-toggle">
+            <button class="cal-mode-btn active" id="btnMonthMode" onclick="setCalMode('month')">월</button>
+            <button class="cal-mode-btn" id="btnWeekMode" onclick="setCalMode('week')">주</button>
+          </div>
         </div>
       </div>
-      <div class="cal-grid" id="calGrid"></div>
+      <div id="calMonthWrap">
+        <div class="cal-grid" id="calGrid"></div>
+      </div>
+      <div id="calWeekWrap" style="display:none;">
+        <div class="week-header-row" id="weekHeaderRow"></div>
+        <div class="week-grid" id="weekGrid"></div>
+      </div>
       <div id="calDayList" style="margin-top:12px;"></div>
     </div>
 
@@ -1623,6 +1787,21 @@ body::after {
             <input class="form-input" id="f_et" type="time">
           </div>
         </div>
+        <div class="form-group form-row-2">
+          <div>
+            <label class="form-label">반복</label>
+            <select class="form-select" id="f_repeat" onchange="onRepeatChange()">
+              <option value="none">반복 없음</option>
+              <option value="daily">매일</option>
+              <option value="weekly">매주</option>
+              <option value="monthly">매월</option>
+            </select>
+          </div>
+          <div id="repeatEndWrap" style="visibility:hidden;">
+            <label class="form-label">종료일</label>
+            <input class="form-input" id="f_repeatEnd" type="date">
+          </div>
+        </div>
         <div class="form-group">
           <label class="form-label">장소</label>
           <input class="form-input" id="f_loc" type="text" placeholder="장소 (선택)">
@@ -1737,6 +1916,31 @@ body::after {
 
 <div id="calDragGhost"></div>
 
+<!-- SEARCH OVERLAY -->
+<div id="searchOverlay" onclick="onSearchOverlayClick(event)">
+  <div class="search-box" id="searchBox">
+    <span class="search-dc search-dc-tl"></span><span class="search-dc search-dc-tr"></span>
+    <span class="search-dc search-dc-bl"></span><span class="search-dc search-dc-br"></span>
+    <div class="search-header">
+      <span class="search-sys">// SEARCH_QUERY</span>
+      <button class="modal-close" onclick="closeSearch()">✕</button>
+    </div>
+    <div class="search-input-wrap">
+      <input class="search-input" id="searchInput" placeholder="제목, 메모, 장소..." oninput="doSearch(this.value)">
+    </div>
+    <div id="searchResults"></div>
+  </div>
+</div>
+
+<!-- PWA INSTALL BAR -->
+<div id="pwaBar">
+  <span class="pwa-bar-text" id="pwaBarText">// SYSTEM_INSTALL :: 홈 화면에 추가</span>
+  <div class="pwa-bar-btns">
+    <button class="pwa-btn-install" onclick="installPWA()">INSTALL</button>
+    <button class="pwa-btn-dismiss" onclick="dismissPWA()">✕</button>
+  </div>
+</div>
+
 <!-- DAY DETAIL MODAL -->
 <div class="modal-overlay" id="dayModal">
   <div class="modal-sheet day-sheet">
@@ -1827,7 +2031,13 @@ function toggleTheme() {
   html.setAttribute('data-theme', isDark ? 'light' : 'dark');
   document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
   updateHeaderBadges();
-  renderCal();
+  if (calMode === 'week') renderWeek(); else renderCal();
+  // update PWA bar text
+  if (_deferredInstall) {
+    document.getElementById('pwaBarText').textContent = !isDark
+      ? '// SYSTEM_INSTALL :: 홈 화면에 추가'
+      : '홈 화면에 추가하면 앱처럼 사용할 수 있어요';
+  }
 }
 
 function updateHeaderBadges() {
@@ -2079,10 +2289,17 @@ function renderCal() {
   const today = new Date();
 
   const dmap = {};
+  const monthStart = new Date(calY, calM, 1);
+  const monthEnd   = new Date(calY, calM+1, 0);
   items.forEach(item=>{
     if(!item.date) return;
     if(!dmap[item.date]) dmap[item.date]=[];
     dmap[item.date].push(item);
+    // generate repeat instances for this month
+    generateRepeatInstances(item, monthStart, monthEnd).forEach(inst=>{
+      if(!dmap[inst.date]) dmap[inst.date]=[];
+      dmap[inst.date].push(inst);
+    });
   });
   subscriptions.forEach(sub=>{
     if(!sub.date) return;
@@ -2221,12 +2438,16 @@ function _setupCalTouchDrag(dot, item) {
   });
 }
 
-function calMove(d){ calM+=d; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;} renderCal(); }
+function calMove(d) {
+  if (calMode === 'week') { calWeekOffset += d; renderWeek(); return; }
+  calM += d; if(calM<0){calM=11;calY--;} if(calM>11){calM=0;calY++;} renderCal();
+}
 
 function calGoToday() {
   const t = new Date();
   calY = t.getFullYear(); calM = t.getMonth();
-  renderCal();
+  calWeekOffset = 0;
+  if (calMode === 'week') renderWeek(); else renderCal();
 }
 
 function openDayModal(ds, evts) {
@@ -2642,6 +2863,9 @@ function openAdd(forSub=false, presetDate=null) {
   document.getElementById('f_et').value='';
   document.getElementById('f_loc').value='';
   document.getElementById('f_memo').value='';
+  document.getElementById('f_repeat').value='none';
+  document.getElementById('f_repeatEnd').value='';
+  document.getElementById('repeatEndWrap').style.visibility='hidden';
   removePhoto();
   document.getElementById('f_subname').value='';
   document.getElementById('f_subamt').value='';
@@ -2676,6 +2900,10 @@ function openEdit(id) {
   document.getElementById('f_loc').value = item.location||'';
   document.getElementById('f_memo').value = item.memo||'';
   document.getElementById('f_cat').value = item.category;
+  const repeatV = item.repeat||'none';
+  document.getElementById('f_repeat').value = repeatV;
+  document.getElementById('f_repeatEnd').value = item.repeatEnd||'';
+  document.getElementById('repeatEndWrap').style.visibility = repeatV!=='none'?'visible':'hidden';
   currentPhoto = item.photo || null;
   if (currentPhoto) _showPhotoPreview(currentPhoto); else removePhoto();
   setPrio(selectedPrio);
@@ -2797,6 +3025,7 @@ function saveItem() {
   const et = document.getElementById('f_et').value;
   const time = st && et ? `${st}~${et}` : st||'';
   const existing = editingId !== null ? items.find(i=>i.id===editingId) : null;
+  const repeatVal = document.getElementById('f_repeat').value;
   const obj = {
     title, date: date||null, category: document.getElementById('f_cat').value,
     time, floor: existing?.floor||'', sub: existing?.sub||'', instructor: existing?.instructor||'',
@@ -2804,6 +3033,7 @@ function saveItem() {
     memo: document.getElementById('f_memo').value,
     priority: selectedPrio, secret: isSecret, hideTitle: isHideTitle,
     photo: currentPhoto || null,
+    repeat: repeatVal, repeatEnd: repeatVal!=='none' ? (document.getElementById('f_repeatEnd').value||null) : null,
     personal: true, done: false
   };
 
@@ -2819,9 +3049,10 @@ function saveItem() {
 
   closeAdd();
   if (currentTab==='list') renderList();
-  if (currentTab==='cal') renderCal();
+  if (currentTab==='cal') { if(calMode==='week') renderWeek(); else renderCal(); }
   if (currentTab==='mypage') renderMypage();
   updateProgress();
+  scheduleNotifications();
 }
 
 /* ══════════════════════════════════════
@@ -2846,6 +3077,7 @@ function openDetail(id) {
     ${item.time?`<div class="detail-row"><span class="dr-key">시간</span><span class="dr-val">${item.time}</span></div>`:''}
     ${item.location?`<div class="detail-row"><span class="dr-key">장소</span><span class="dr-val">${item.location}</span></div>`:''}
     ${item.instructor?`<div class="detail-row"><span class="dr-key">강사</span><span class="dr-val">${item.instructor}</span></div>`:''}
+    ${item.repeat&&item.repeat!=='none'?`<div class="detail-row"><span class="dr-key">반복</span><span class="dr-val">${{daily:'매일',weekly:'매주',monthly:'매월'}[item.repeat]||''}${item.repeatEnd?' · ~'+item.repeatEnd:''}</span></div>`:''}
     <div class="detail-row"><span class="dr-key">중요도</span><span class="dr-val">${prioLabels[item.priority||'none']}</span></div>
     <div class="detail-row"><span class="dr-key">완료</span><span class="dr-val">${item.done?'✅ 완료':'⬜ 미완료'}</span></div>`;
 
@@ -2924,6 +3156,8 @@ document.addEventListener('keydown',e=>{
 window.addEventListener('popstate', () => {
   const viewer = document.getElementById('photoViewer');
   if (viewer.classList.contains('open')) { viewer.classList.remove('open'); return; }
+  const searchOverlay = document.getElementById('searchOverlay');
+  if (searchOverlay.classList.contains('open')) { searchOverlay.classList.remove('open'); return; }
   const openModals = [...document.querySelectorAll('.modal-overlay.open')];
   if (!openModals.length) return;
   openModals.sort((a, b) => {
@@ -2989,6 +3223,254 @@ function addSwipeToDismiss(overlay) {
 // addModal and dayModal are now center popups — no swipe dismiss
 
 /* ══════════════════════════════════════
+   SEARCH
+══════════════════════════════════════ */
+function openSearch() {
+  document.getElementById('searchInput').value = '';
+  document.getElementById('searchResults').innerHTML = '';
+  document.getElementById('searchOverlay').classList.add('open');
+  history.pushState({modal:'search'}, '');
+  setTimeout(() => document.getElementById('searchInput').focus(), 100);
+}
+function closeSearch() {
+  document.getElementById('searchOverlay').classList.remove('open');
+}
+function onSearchOverlayClick(e) {
+  if (!document.getElementById('searchBox').contains(e.target)) closeSearch();
+}
+function doSearch(q) {
+  const res = document.getElementById('searchResults');
+  q = q.trim().toLowerCase();
+  if (!q) { res.innerHTML = ''; return; }
+  const matches = items.filter(it =>
+    (it.title||'').toLowerCase().includes(q) ||
+    (it.memo||'').toLowerCase().includes(q) ||
+    (it.location||'').toLowerCase().includes(q) ||
+    (it.category||'').toLowerCase().includes(q)
+  );
+  if (!matches.length) {
+    res.innerHTML = `<div class="search-empty">// NO_MATCH :: "${q}"</div>`;
+    return;
+  }
+  res.innerHTML = matches.map(it => {
+    const color = getCatColor(it.category);
+    const meta = [it.date, it.time, it.location].filter(Boolean).join(' · ');
+    return `<div class="search-item" onclick="closeSearch();openDetail(${it.id})">
+      <div class="search-item-title" style="color:${color}">${it.hideTitle?'// 비공개':it.title}</div>
+      <div class="search-item-meta">${it.category} ${meta?'// '+meta:''}</div>
+    </div>`;
+  }).join('');
+}
+
+/* ══════════════════════════════════════
+   WEEK VIEW
+══════════════════════════════════════ */
+let calMode = 'month';
+let calWeekOffset = 0; // offset in weeks from today's week
+
+function setCalMode(mode) {
+  calMode = mode;
+  document.getElementById('btnMonthMode').classList.toggle('active', mode==='month');
+  document.getElementById('btnWeekMode').classList.toggle('active', mode==='week');
+  document.getElementById('calMonthWrap').style.display = mode==='month' ? '' : 'none';
+  document.getElementById('calWeekWrap').style.display = mode==='week' ? '' : 'none';
+  document.getElementById('calDayList').style.display = mode==='month' ? '' : 'none';
+  if (mode === 'week') renderWeek();
+  else renderCal();
+}
+
+function renderWeek() {
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  const today = new Date();
+  // Base: Monday of current week + offset
+  const base = new Date(today);
+  const dow = base.getDay() === 0 ? 6 : base.getDay() - 1; // 0=Mon
+  base.setDate(base.getDate() - dow + calWeekOffset * 7);
+  base.setHours(0,0,0,0);
+
+  // Label
+  const endOfWeek = new Date(base); endOfWeek.setDate(base.getDate() + 6);
+  const mm1 = String(base.getMonth()+1).padStart(2,'0');
+  const mm2 = String(endOfWeek.getMonth()+1).padStart(2,'0');
+  const label = isDark
+    ? `${base.getFullYear()} // ${mm1}월 ${String(base.getDate()).padStart(2,'0')}일 — ${mm2}월 ${String(endOfWeek.getDate()).padStart(2,'0')}일`
+    : `${base.getFullYear()}년 ${mm1}월 ${String(base.getDate()).padStart(2,'0')}일 ~ ${mm2}월 ${String(endOfWeek.getDate()).padStart(2,'0')}일`;
+  document.getElementById('calLabel').textContent = label;
+
+  // Build dmap
+  const dmap = {};
+  items.forEach(it => {
+    if (!it.date) return;
+    if (!dmap[it.date]) dmap[it.date] = [];
+    dmap[it.date].push(it);
+    // repeat instances
+    if (it.repeat && it.repeat !== 'none') {
+      generateRepeatInstances(it, base, endOfWeek).forEach(inst => {
+        if (!dmap[inst.date]) dmap[inst.date] = [];
+        dmap[inst.date].push(inst);
+      });
+    }
+  });
+
+  const headerRow = document.getElementById('weekHeaderRow');
+  const grid = document.getElementById('weekGrid');
+  headerRow.innerHTML = '';
+  grid.innerHTML = '';
+
+  for (let d = 0; d < 7; d++) {
+    const dt = new Date(base); dt.setDate(base.getDate() + d);
+    const dowIdx = dt.getDay();
+    // header
+    const hd = document.createElement('div');
+    hd.className = `week-dow${dowIdx===0?' sun':dowIdx===6?' sat':''}`;
+    hd.textContent = isDark ? DOW_EN[dowIdx] : DOW_KO[dowIdx];
+    headerRow.appendChild(hd);
+    // cell
+    const ds = fmtDate(dt);
+    const isToday = fmtDate(today) === ds;
+    const cell = document.createElement('div');
+    cell.className = `week-cell${isToday?' today':''}${dowIdx===0?' sun':dowIdx===6?' sat':''}`;
+    cell.dataset.date = ds;
+    const num = document.createElement('div');
+    num.className = 'week-daynum';
+    num.textContent = String(dt.getDate()).padStart(2,'0');
+    cell.appendChild(num);
+    (dmap[ds]||[]).slice(0,4).forEach(it => {
+      const dot = document.createElement('span');
+      dot.className = 'cal-dot' + (it.done?' done':'');
+      const c = getCatColor(it.category);
+      if (isDark) { dot.style.color = c; }
+      else { dot.style.background = c; dot.style.borderColor = c; }
+      dot.textContent = it.hideTitle ? '// 비공개' : (it.secret&&!it._unlocked?'🔒':it.title);
+      dot.style.display = 'block';
+      dot.onclick = e => { e.stopPropagation(); openDetail(it.id); };
+      cell.appendChild(dot);
+    });
+    cell.onclick = () => openDayModal(ds, dmap[ds]||[]);
+    grid.appendChild(cell);
+  }
+}
+
+/* ══════════════════════════════════════
+   RECURRING SCHEDULES
+══════════════════════════════════════ */
+function generateRepeatInstances(item, rangeStart, rangeEnd) {
+  const instances = [];
+  if (!item.date || !item.repeat || item.repeat === 'none') return instances;
+  const base = new Date(item.date + 'T00:00:00');
+  const endDate = item.repeatEnd ? new Date(item.repeatEnd + 'T00:00:00') : new Date(rangeEnd.getFullYear()+2,0,1);
+  let cur = new Date(base);
+  // advance to first occurrence after base
+  while (cur <= rangeEnd) {
+    if (item.repeat === 'daily')   cur.setDate(cur.getDate() + 1);
+    else if (item.repeat === 'weekly')  cur.setDate(cur.getDate() + 7);
+    else if (item.repeat === 'monthly') cur.setMonth(cur.getMonth() + 1);
+    if (cur > endDate) break;
+    if (cur >= rangeStart && cur <= rangeEnd) {
+      const ds = fmtDate(cur);
+      if (ds !== item.date) instances.push({...item, date: ds, _isRepeat: true});
+    }
+  }
+  return instances;
+}
+
+function onRepeatChange() {
+  const v = document.getElementById('f_repeat').value;
+  document.getElementById('repeatEndWrap').style.visibility = v==='none' ? 'hidden' : 'visible';
+}
+
+/* ══════════════════════════════════════
+   NOTIFICATIONS
+══════════════════════════════════════ */
+let notifEnabled = false;
+let _notifTimers = [];
+
+function updateNotifBtn() {
+  const btn = document.getElementById('notifBtn');
+  btn.classList.toggle('on', notifEnabled);
+  btn.title = notifEnabled ? '알림 켜짐' : '알림 끄기 (클릭하여 켜기)';
+}
+
+async function toggleNotif() {
+  if (!('Notification' in window)) {
+    alert('이 브라우저는 알림을 지원하지 않습니다');
+    return;
+  }
+  if (notifEnabled) {
+    notifEnabled = false;
+    _notifTimers.forEach(clearTimeout);
+    _notifTimers = [];
+    updateNotifBtn();
+    return;
+  }
+  const perm = await Notification.requestPermission();
+  if (perm === 'granted') {
+    notifEnabled = true;
+    updateNotifBtn();
+    scheduleNotifications();
+  } else {
+    alert('알림 권한이 거부되었습니다.\n브라우저 설정에서 허용해 주세요.');
+  }
+}
+
+function scheduleNotifications() {
+  _notifTimers.forEach(clearTimeout);
+  _notifTimers = [];
+  if (!notifEnabled) return;
+  const now = Date.now();
+  const DAY = 24 * 60 * 60 * 1000;
+  items.forEach(item => {
+    if (!item.date || !item.time || item.done || item.secret) return;
+    const startStr = item.time.split('~')[0];
+    if (!startStr || !startStr.includes(':')) return;
+    const [h, m] = startStr.split(':').map(Number);
+    const itemTime = new Date(item.date + 'T00:00:00');
+    itemTime.setHours(h, m, 0, 0);
+    // 15 min before
+    const notifAt = itemTime.getTime() - 15 * 60 * 1000;
+    const diff = notifAt - now;
+    if (diff > 0 && diff < DAY) {
+      _notifTimers.push(setTimeout(() => {
+        new Notification('📅 일정 알림', {
+          body: `${item.title}  ·  ${startStr} 시작 (15분 후)`,
+          tag: 'item_' + item.id
+        });
+      }, diff));
+    }
+  });
+}
+
+/* ══════════════════════════════════════
+   PWA INSTALL
+══════════════════════════════════════ */
+let _deferredInstall = null;
+window.addEventListener('beforeinstallprompt', e => {
+  e.preventDefault();
+  _deferredInstall = e;
+  const bar = document.getElementById('pwaBar');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('pwaBarText').textContent = isDark
+    ? '// SYSTEM_INSTALL :: 홈 화면에 추가'
+    : '홈 화면에 추가하면 앱처럼 사용할 수 있어요';
+  bar.classList.add('show');
+});
+window.addEventListener('appinstalled', () => {
+  document.getElementById('pwaBar').classList.remove('show');
+  _deferredInstall = null;
+});
+function installPWA() {
+  if (!_deferredInstall) return;
+  _deferredInstall.prompt();
+  _deferredInstall.userChoice.then(() => {
+    _deferredInstall = null;
+    document.getElementById('pwaBar').classList.remove('show');
+  });
+}
+function dismissPWA() {
+  document.getElementById('pwaBar').classList.remove('show');
+}
+
+/* ══════════════════════════════════════
    BOOT SEQUENCE
 ══════════════════════════════════════ */
 (function() {
@@ -3047,6 +3529,7 @@ function addSwipeToDismiss(overlay) {
 buildFilters();
 buildCatSelect();
 updateHeaderBadges();
+updateNotifBtn();
 currentTab = 'cal';
 renderCal();
 updateProgress();
