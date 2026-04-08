@@ -2472,14 +2472,15 @@ function isCheongdo(name) {
 }
 
 /* ══════════════════════════════════════
-   PERSIST (localStorage)
+   PERSIST (API + localStorage)
 ══════════════════════════════════════ */
 const STORAGE_KEY = 'rianless_todo_v1';
+const API_URL = '/api/todos';
 
+// items는 API로, 나머지는 localStorage로 저장
 function saveData() {
   try {
     const payload = {
-      items,
       subscriptions,
       categories,
       ledger,
@@ -2487,40 +2488,101 @@ function saveData() {
       ledgerNextId,
       theme: document.documentElement.getAttribute('data-theme') || 'dark'
     };
-    const json = JSON.stringify(payload);
-    localStorage.setItem(STORAGE_KEY, json);
-    // Verify it was actually stored
-    const check = localStorage.getItem(STORAGE_KEY);
-    if (!check) console.error('[saveData] 저장 후 읽기 실패 - localStorage가 차단된 것 같습니다');
+    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
   } catch(e) {
-    console.error('[saveData] 실패:', e);
-    alert('⚠️ 데이터 저장 실패: ' + e.message + '\n\nfile://로 열었다면 서버(http://)로 호스팅해야 합니다.');
+    console.error('[saveData] localStorage 실패:', e);
+  }
+  // items는 API로 저장 (비동기, fire-and-forget)
+  syncItemsToAPI();
+}
+
+async function syncItemsToAPI() {
+  try {
+    if (items.length === 0) return;
+    const rows = items.map(item => ({
+      id: item.id,
+      date: item.date,
+      title: item.title,
+      start_time: item.startTime || '',
+      end_time: item.endTime || '',
+      all_day: item.allDay || false,
+      category: item.category || '기타',
+      category_color: item.categoryColor || '#636366',
+      done: item.done || false,
+      location: item.location || '',
+      note: item.note || '',
+      content: item.content || ''
+    }));
+    await fetch(API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(rows)
+    });
+  } catch(e) {
+    console.error('[syncItemsToAPI] 실패:', e);
+  }
+}
+
+async function deleteItemFromAPI(id) {
+  try {
+    await fetch(API_URL + '?id=' + id, { method: 'DELETE' });
+  } catch(e) {
+    console.error('[deleteItemFromAPI] 실패:', e);
   }
 }
 
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) {
-      console.log('[loadData] 저장된 데이터 없음 (첫 실행)');
-      return false;
+    if (raw) {
+      const payload = JSON.parse(raw);
+      if (payload.subscriptions) subscriptions = payload.subscriptions;
+      if (payload.categories)    categories    = payload.categories;
+      if (payload.ledger)        ledger        = payload.ledger;
+      if (payload.nextId)        nextId        = payload.nextId;
+      if (payload.ledgerNextId)  ledgerNextId  = payload.ledgerNextId;
+      if (payload.theme) {
+        document.documentElement.setAttribute('data-theme', payload.theme);
+        document.getElementById('themeBtn').textContent = payload.theme === 'dark' ? '☀️' : '🌙';
+      }
     }
-    const payload = JSON.parse(raw);
-    console.log('[loadData] 불러오기 성공, items:', payload.items?.length);
-    if (payload.items)         items         = payload.items;
-    if (payload.subscriptions) subscriptions = payload.subscriptions;
-    if (payload.categories)    categories    = payload.categories;
-    if (payload.ledger)        ledger        = payload.ledger;
-    if (payload.nextId)        nextId        = payload.nextId;
-    if (payload.ledgerNextId)  ledgerNextId  = payload.ledgerNextId;
-    if (payload.theme) {
-      document.documentElement.setAttribute('data-theme', payload.theme);
-      document.getElementById('themeBtn').textContent = payload.theme === 'dark' ? '☀️' : '🌙';
-    }
-    return true;
   } catch(e) {
-    console.error('[loadData] 실패:', e);
-    return false;
+    console.error('[loadData] localStorage 실패:', e);
+  }
+  // items는 API에서 비동기로 로드
+  loadItemsFromAPI();
+  return true;
+}
+
+async function loadItemsFromAPI() {
+  try {
+    const res = await fetch(API_URL);
+    if (!res.ok) throw new Error('API 응답 오류: ' + res.status);
+    const data = await res.json();
+    if (Array.isArray(data) && data.length > 0) {
+      items = data.map(row => ({
+        id: row.id,
+        date: row.date,
+        title: row.title,
+        startTime: row.start_time || '',
+        endTime: row.end_time || '',
+        allDay: row.all_day || false,
+        category: row.category || '기타',
+        categoryColor: row.category_color || '#636366',
+        done: row.done || false,
+        location: row.location || '',
+        note: row.note || '',
+        content: row.content || ''
+      }));
+      console.log('[loadItemsFromAPI] 불러오기 성공, items:', items.length);
+      // 화면 갱신
+      buildFilters();
+      buildCatSelect();
+      renderCal();
+      updateProgress();
+    }
+  } catch(e) {
+    console.error('[loadItemsFromAPI] 실패:', e);
   }
 }
 
@@ -3787,7 +3849,9 @@ function detailEdit() { openEdit(detailId); }
 
 function detailDelete() {
   if (!confirm('이 일정을 삭제할까요?')) return;
-  items = items.filter(i=>i.id!==detailId);
+  const deletedId = detailId;
+  items = items.filter(i=>i.id!==deletedId);
+  deleteItemFromAPI(deletedId);
   saveData();
   closeDetail();
   if (currentMainTab === 'calendar') {
