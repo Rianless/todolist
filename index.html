@@ -1951,9 +1951,11 @@ body::after {
           <div>
             <label class="form-label">결제 주기</label>
             <select class="form-select" id="f_subcycle">
-              <option value="monthly">월간</option>
-              <option value="yearly">연간</option>
               <option value="weekly">주간</option>
+              <option value="biweekly">격주</option>
+              <option value="monthly">월간</option>
+              <option value="bimonthly">격월</option>
+              <option value="yearly">연간</option>
             </select>
           </div>
         </div>
@@ -2456,7 +2458,7 @@ function renderCal() {
       category: sub.category||'구독',
       time: '',
       title: `🔖 ${sub.name}`,
-      sub: `₩${Number(sub.amount||0).toLocaleString()} · ${({monthly:'매월',yearly:'매년',weekly:'매주'})[sub.cycle]||''}`,
+      sub: `₩${Number(sub.amount||0).toLocaleString()} · ${{weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[sub.cycle]||''}`,
       priority: 'none',
       secret: false,
       done: false,
@@ -2788,9 +2790,11 @@ function renderSubs() {
 
   const monthlyTotal = subscriptions.reduce((acc, s) => {
     const amt = Number(s.amount)||0;
-    if (s.cycle === 'monthly') return acc + amt;
-    if (s.cycle === 'yearly') return acc + amt/12;
-    if (s.cycle === 'weekly') return acc + amt*4.3;
+    if (s.cycle === 'weekly')    return acc + amt * 4.3;
+    if (s.cycle === 'biweekly')  return acc + amt * 2.15;
+    if (s.cycle === 'monthly')   return acc + amt;
+    if (s.cycle === 'bimonthly') return acc + amt / 2;
+    if (s.cycle === 'yearly')    return acc + amt / 12;
     return acc;
   }, 0);
 
@@ -2802,7 +2806,7 @@ function renderSubs() {
   subscriptions.forEach((s,i) => {
     const card = document.createElement('div');
     card.className = 'sub-card';
-    const cycleLabel = {monthly:'매월',yearly:'매년',weekly:'매주'}[s.cycle]||'';
+    const cycleLabel = {weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[s.cycle]||'';
     const dateStr = s.date ? (() => {
       const dt = new Date(s.date+'T00:00:00');
       return `${cycleLabel} ${dt.getDate()}일 결제`;
