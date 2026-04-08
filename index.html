@@ -2534,7 +2534,9 @@ function toggleTheme() {
   document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
   saveData();
   updateHeaderBadges();
-  if (calMode === 'week') renderWeek(); else renderCal();
+  if (currentCalSubTab === 'week') renderWeek();
+  else if (currentCalSubTab === 'list') renderList();
+  else renderCal();
   // update PWA bar text
   if (_deferredInstall) {
     document.getElementById('pwaBarText').textContent = !isDark
