@@ -8,6 +8,11 @@ import android.widget.RemoteViewsService
 import com.todoapp.widget.R
 import com.todoapp.widget.data.Todo
 import com.todoapp.widget.data.TodoDatabase
+import com.todoapp.widget.widget.TodoWidgetProvider.Companion.CLICK_OPEN
+import com.todoapp.widget.widget.TodoWidgetProvider.Companion.CLICK_TOGGLE
+import com.todoapp.widget.widget.TodoWidgetProvider.Companion.EXTRA_CLICK_ACTION
+import com.todoapp.widget.widget.TodoWidgetProvider.Companion.EXTRA_DONE
+import com.todoapp.widget.widget.TodoWidgetProvider.Companion.EXTRA_TODO_ID
 import kotlinx.coroutines.runBlocking
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -31,47 +36,60 @@ class TodoWidgetFactory(
         runBlocking {
             val dao = TodoDatabase.getDatabase(context).todoDao()
             val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-            // Show today's + upcoming todos (max 10)
             todos = dao.getUpcomingTodos(today, 10)
         }
     }
 
     override fun onDestroy() {}
-
     override fun getCount(): Int = todos.size
 
     override fun getViewAt(position: Int): RemoteViews {
         val todo = todos[position]
         val views = RemoteViews(context.packageName, R.layout.widget_item)
 
-        // Accent color bar
+        // 카테고리 색상 바
         try {
             views.setInt(R.id.widget_item_accent, "setBackgroundColor", Color.parseColor(todo.categoryColor))
         } catch (e: Exception) {
             views.setInt(R.id.widget_item_accent, "setBackgroundColor", Color.parseColor("#636366"))
         }
 
-        // Title
+        // 제목 (완료 시 반투명)
         views.setTextViewText(R.id.widget_item_title, todo.title)
         views.setFloat(R.id.widget_item_title, "setAlpha", if (todo.done) 0.45f else 1f)
 
-        // Time
+        // 카테고리
+        views.setTextViewText(R.id.widget_item_category, todo.category)
+
+        // 시간
         val timeStr = when {
             todo.allDay -> "하루종일"
-            todo.startTime.isNotEmpty() -> "${todo.startTime}${if (todo.endTime.isNotEmpty()) "–${todo.endTime}" else ""}"
+            todo.startTime.isNotEmpty() -> "${todo.startTime}${if (todo.endTime.isNotEmpty()) "\u2013${todo.endTime}" else ""}"
             else -> todo.date
         }
         views.setTextViewText(R.id.widget_item_time, timeStr)
 
-        // Category
-        views.setTextViewText(R.id.widget_item_category, todo.category)
-
-        // Done indicator
+        // 체크 표시 및 배경
         views.setTextViewText(R.id.widget_item_check, if (todo.done) "✓" else "")
+        views.setInt(
+            R.id.widget_item_check, "setBackgroundResource",
+            if (todo.done) R.drawable.bg_check_done else R.drawable.bg_check_empty
+        )
 
-        // Fill-in intent for item click (just open app for now)
-        val fillIntent = Intent()
-        views.setOnClickFillInIntent(R.id.widget_item_root, fillIntent)
+        // 콘텐츠 영역 클릭 → 앱 열기
+        val openFillIn = Intent().apply {
+            putExtra(EXTRA_CLICK_ACTION, CLICK_OPEN)
+            putExtra(EXTRA_TODO_ID, todo.id)
+        }
+        views.setOnClickFillInIntent(R.id.widget_item_content, openFillIn)
+
+        // 체크 버튼 클릭 → 완료 토글
+        val toggleFillIn = Intent().apply {
+            putExtra(EXTRA_CLICK_ACTION, CLICK_TOGGLE)
+            putExtra(EXTRA_TODO_ID, todo.id)
+            putExtra(EXTRA_DONE, !todo.done)
+        }
+        views.setOnClickFillInIntent(R.id.widget_item_check, toggleFillIn)
 
         return views
     }

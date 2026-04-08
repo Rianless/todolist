@@ -9,7 +9,7 @@
     android:paddingHorizontal="14dp"
     android:paddingVertical="7dp">
 
-    <!-- Color accent dot -->
+    <!-- 카테고리 색상 바 -->
     <View
         android:id="@+id/widget_item_accent"
         android:layout_width="4dp"
@@ -17,8 +17,9 @@
         android:layout_marginEnd="10dp"
         android:background="@drawable/bg_accent_bar" />
 
-    <!-- Content -->
+    <!-- 콘텐츠 영역 (클릭 → 앱 열기) -->
     <LinearLayout
+        android:id="@+id/widget_item_content"
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
@@ -62,7 +63,7 @@
 
     </LinearLayout>
 
-    <!-- Check indicator -->
+    <!-- 체크 버튼 (클릭 → 완료 토글) -->
     <TextView
         android:id="@+id/widget_item_check"
         android:layout_width="20dp"
@@ -71,6 +72,6 @@
         android:gravity="center"
         android:textSize="10sp"
         android:textColor="@android:color/white"
-        android:background="@drawable/bg_widget_check" />
+        android:background="@drawable/bg_check_empty" />
 
 </LinearLayout>
