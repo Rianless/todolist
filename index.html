@@ -1488,6 +1488,17 @@ body::after {
 .week-dow.sat { color: var(--cyan); }
 [data-theme="dark"] .week-dow { font-size: 9px; letter-spacing: 1px; }
 
+/* ══ 주뷰 네비 래퍼 ══ */
+.week-nav-wrap { margin-bottom: 10px; }
+.week-nav-year {
+  font-size: 9px; color: var(--text3); letter-spacing: 2px;
+  text-align: center; margin-bottom: 4px;
+  font-family: var(--font-main);
+}
+[data-theme="dark"] .week-nav-year { color: rgba(0,255,231,0.45); }
+[data-theme="light"] .week-nav-year { font-family: 'Noto Sans KR',sans-serif; letter-spacing: 0; font-size: 11px; }
+.week-nav-wrap .cal-nav { margin-bottom: 0; }
+
 /* ══ 주뷰: 요일+날짜 스트립 ══ */
 .week-strip {
   margin-bottom: 10px;
@@ -1940,12 +1951,15 @@ body::after {
 
       <!-- WEEK VIEW -->
       <div class="cal-subview" id="viewWeek">
-        <div class="cal-nav">
-          <button class="cal-arrow" onclick="weekMove(-1)">‹</button>
-          <div class="cal-month" id="weekLabel"></div>
-          <div class="cal-nav-right">
-            <button class="cal-arrow" onclick="weekMove(1)">›</button>
-            <button class="cal-today-btn" onclick="weekGoToday()">TODAY</button>
+        <div class="week-nav-wrap">
+          <div class="week-nav-year" id="weekNavYear"></div>
+          <div class="cal-nav">
+            <button class="cal-arrow" onclick="weekMove(-1)">‹</button>
+            <div class="cal-month" id="weekLabel"></div>
+            <div class="cal-nav-right">
+              <button class="cal-arrow" onclick="weekMove(1)">›</button>
+              <button class="cal-today-btn" onclick="weekGoToday()">TODAY</button>
+            </div>
           </div>
         </div>
         <div class="week-strip" id="weekStrip">
@@ -3947,12 +3961,14 @@ function renderWeek() {
     weekSelectedDate = (today >= base && today <= endOfWeek) ? todayStr : fmtDate(base);
   }
 
-  // 레이블
+  // 레이블 — 연도 따로, 날짜 범위 짧게
   const mm1 = String(base.getMonth()+1).padStart(2,'0');
   const mm2 = String(endOfWeek.getMonth()+1).padStart(2,'0');
+  const yearEl = document.getElementById('weekNavYear');
+  if (yearEl) yearEl.textContent = isDark ? `// ${base.getFullYear()} //` : `// ${base.getFullYear()} //`;
   document.getElementById('weekLabel').textContent = isDark
-    ? `${base.getFullYear()} // ${mm1}.${String(base.getDate()).padStart(2,'0')} — ${mm2}.${String(endOfWeek.getDate()).padStart(2,'0')}`
-    : `${base.getFullYear()}. ${mm1}.${String(base.getDate()).padStart(2,'0')} ~ ${mm2}.${String(endOfWeek.getDate()).padStart(2,'0')}`;
+    ? `${mm1}.${String(base.getDate()).padStart(2,'0')} — ${mm2}.${String(endOfWeek.getDate()).padStart(2,'0')}`
+    : `${mm1}.${String(base.getDate()).padStart(2,'0')} ~ ${mm2}.${String(endOfWeek.getDate()).padStart(2,'0')}`;
 
   // dmap 구성
   const dmap = {};
@@ -4376,6 +4392,3 @@ updateProgress();
 </script>
 </body>
 </html>
-
-
-
