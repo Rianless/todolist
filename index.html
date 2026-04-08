@@ -2029,7 +2029,7 @@ body::after {
         <div class="mp-card" id="mpCardMemo">
           <div class="mp-card-header" onclick="toggleMpCard('mpCardMemo')">
             <span class="mp-card-icon">📝</span>
-            <span class="mp-card-label">메모</span>
+            <span class="mp-card-label" id="memoSysLabel">메모</span>
             <span class="mp-card-chevron">▼</span>
           </div>
           <div class="mp-card-body">
@@ -2553,6 +2553,7 @@ function updateHeaderBadges() {
     document.getElementById('ledgerSysLabel').textContent = '// LEDGER';
     document.getElementById('subsSysLabel').textContent = '// SUBSCRIPTION';
     document.getElementById('catSysLabel').textContent = '// CATEGORY';
+    document.getElementById('memoSysLabel').textContent = '// MEMO';
     document.getElementById('progLabel').textContent = 'SYS_LOAD';
   } else {
     document.getElementById('hb1').textContent = '개인 일정 관리';
@@ -2562,6 +2563,7 @@ function updateHeaderBadges() {
     document.getElementById('ledgerSysLabel').textContent = '가계부';
     document.getElementById('subsSysLabel').textContent = '구독';
     document.getElementById('catSysLabel').textContent = '카테고리 관리';
+    document.getElementById('memoSysLabel').textContent = '메모';
     document.getElementById('progLabel').textContent = '달성률';
   }
 }
