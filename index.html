@@ -1728,6 +1728,7 @@ body::after {
 .ledger-month-nav {
   display: flex; align-items: center; justify-content: space-between;
   margin-bottom: 12px;
+  padding-top: 10px;
 }
 .ledger-month-label {
   font-family: var(--font-title); font-size: 12px; color: var(--accent); letter-spacing: 1px;
@@ -2899,7 +2900,7 @@ function renderCal() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const mm = String(calM + 1).padStart(2, '0');
   document.getElementById('calLabel').textContent = isDark
-    ? `${calY} // ${mm}월`
+    ? `${calY}년 // ${mm}월`
     : `${calY}년 ${mm}월`;
 
   const grid = document.getElementById('calGrid');
@@ -4143,7 +4144,7 @@ function renderLedgerCard() {
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
   const mm = String(ledgerM+1).padStart(2,'0');
   document.getElementById('ledgerMonthLabel').textContent = isDark
-    ? `${ledgerY} // ${mm}월` : `${ledgerY}년 ${mm}월`;
+    ? `${ledgerY}년 // ${mm}월` : `${ledgerY}년 ${mm}월`;
 
   const monthStr = `${ledgerY}-${mm}`;
   const entries  = ledger.filter(e => e.date && e.date.startsWith(monthStr))
