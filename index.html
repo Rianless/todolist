@@ -2133,17 +2133,26 @@ function saveData() {
       nextId,
       theme: document.documentElement.getAttribute('data-theme') || 'dark'
     };
-    localStorage.setItem(STORAGE_KEY, JSON.stringify(payload));
+    const json = JSON.stringify(payload);
+    localStorage.setItem(STORAGE_KEY, json);
+    // Verify it was actually stored
+    const check = localStorage.getItem(STORAGE_KEY);
+    if (!check) console.error('[saveData] 저장 후 읽기 실패 - localStorage가 차단된 것 같습니다');
   } catch(e) {
-    console.warn('saveData failed:', e);
+    console.error('[saveData] 실패:', e);
+    alert('⚠️ 데이터 저장 실패: ' + e.message + '\n\nfile://로 열었다면 서버(http://)로 호스팅해야 합니다.');
   }
 }
 
 function loadData() {
   try {
     const raw = localStorage.getItem(STORAGE_KEY);
-    if (!raw) return false;
+    if (!raw) {
+      console.log('[loadData] 저장된 데이터 없음 (첫 실행)');
+      return false;
+    }
     const payload = JSON.parse(raw);
+    console.log('[loadData] 불러오기 성공, items:', payload.items?.length);
     if (payload.items)         items         = payload.items;
     if (payload.subscriptions) subscriptions = payload.subscriptions;
     if (payload.categories)    categories    = payload.categories;
@@ -2154,7 +2163,7 @@ function loadData() {
     }
     return true;
   } catch(e) {
-    console.warn('loadData failed:', e);
+    console.error('[loadData] 실패:', e);
     return false;
   }
 }
@@ -3153,6 +3162,7 @@ function saveItem() {
       category: document.getElementById('f_subcat').value,
       memo: document.getElementById('f_submemo').value
     });
+    saveData();
     closeAdd();
     renderCal();
     if (currentTab === 'mypage') renderMypage();
