@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>To Do List // Rianless</title>
+<title>TDL</title>
 <link rel="manifest" href="/manifest.json">
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
@@ -4356,12 +4356,7 @@ let _deferredInstall = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _deferredInstall = e;
-  const bar = document.getElementById('pwaBar');
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-  document.getElementById('pwaBarText').textContent = isDark
-    ? '// SYSTEM_INSTALL :: 홈 화면에 추가'
-    : '홈 화면에 추가하면 앱처럼 사용할 수 있어요';
-  bar.classList.add('show');
+  // 설치 배너 숨김
 });
 window.addEventListener('appinstalled', () => {
   document.getElementById('pwaBar').classList.remove('show');
