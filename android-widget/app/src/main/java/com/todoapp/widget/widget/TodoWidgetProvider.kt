@@ -54,18 +54,8 @@ class TodoWidgetProvider : AppWidgetProvider() {
     private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-        // Derive web app base URL from API URL (strip /api/todos)
-        val apiUrl = ApiSyncManager.getApiUrl(context)
-        val webUrl = if (apiUrl.isNotEmpty())
-            apiUrl.replace(Regex("/api/todos.*"), "")
-        else null
-
-        // Open TDL web app on click; fall back to native app if URL not set
-        val openIntent = if (webUrl != null) {
-            Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
-        } else {
-            Intent(context, MainActivity::class.java)
-        }
+        // Open TDL web app on click
+        val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(com.todoapp.widget.BuildConfig.WEB_URL))
         val openPending = PendingIntent.getActivity(
             context, 0, openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE

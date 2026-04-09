@@ -12,8 +12,9 @@ object ApiSyncManager {
     const val KEY_API_URL = "api_url"
 
     fun getApiUrl(context: Context): String {
-        return context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
+        val saved = context.getSharedPreferences(PREFS_NAME, Context.MODE_PRIVATE)
             .getString(KEY_API_URL, "") ?: ""
+        return if (saved.isNotEmpty()) saved else com.todoapp.widget.BuildConfig.API_URL
     }
 
     fun setApiUrl(context: Context, url: String) {
