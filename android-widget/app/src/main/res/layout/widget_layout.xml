@@ -35,7 +35,7 @@
                 android:textSize="12sp"
                 android:textColor="#CDD6F4"
                 android:layout_marginTop="2dp"/>
-            <View
+            <TextView
                 android:id="@+id/dot_0"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
@@ -66,7 +66,7 @@
                 android:textSize="12sp"
                 android:textColor="#CDD6F4"
                 android:layout_marginTop="2dp"/>
-            <View
+            <TextView
                 android:id="@+id/dot_1"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
@@ -97,7 +97,7 @@
                 android:textSize="12sp"
                 android:textColor="#CDD6F4"
                 android:layout_marginTop="2dp"/>
-            <View
+            <TextView
                 android:id="@+id/dot_2"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
@@ -128,7 +128,7 @@
                 android:textSize="12sp"
                 android:textColor="#CDD6F4"
                 android:layout_marginTop="2dp"/>
-            <View
+            <TextView
                 android:id="@+id/dot_3"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
@@ -159,7 +159,7 @@
                 android:textSize="12sp"
                 android:textColor="#CDD6F4"
                 android:layout_marginTop="2dp"/>
-            <View
+            <TextView
                 android:id="@+id/dot_4"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
@@ -190,7 +190,7 @@
                 android:textSize="12sp"
                 android:textColor="#CDD6F4"
                 android:layout_marginTop="2dp"/>
-            <View
+            <TextView
                 android:id="@+id/dot_5"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
@@ -221,7 +221,7 @@
                 android:textSize="12sp"
                 android:textColor="#CDD6F4"
                 android:layout_marginTop="2dp"/>
-            <View
+            <TextView
                 android:id="@+id/dot_6"
                 android:layout_width="4dp"
                 android:layout_height="4dp"
@@ -232,8 +232,8 @@
 
     </LinearLayout>
 
-    <!-- Divider -->
-    <View
+    <!-- Divider (TextView instead of View for RemoteViews compatibility) -->
+    <TextView
         android:layout_width="match_parent"
         android:layout_height="1dp"
         android:layout_marginTop="8dp"
