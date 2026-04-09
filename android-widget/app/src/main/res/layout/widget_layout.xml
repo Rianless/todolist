@@ -84,13 +84,14 @@
                     android:textColor="#00ffe7"
                     android:layout_marginBottom="4dp" />
 
-                <!-- + button -->
+                <!-- Refresh button -->
                 <TextView
+                    android:id="@+id/widget_btn_refresh"
                     android:layout_width="24dp"
                     android:layout_height="24dp"
-                    android:text="+"
+                    android:text="↻"
                     android:textSize="15sp"
-                    android:textColor="#8891b4"
+                    android:textColor="#00ffe7"
                     android:gravity="center"
                     android:fontFamily="monospace"
                     android:background="@drawable/bg_widget_btn" />

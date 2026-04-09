@@ -19,6 +19,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
     companion object {
         const val ACTION_TOGGLE_DONE = "com.todoapp.widget.ACTION_TOGGLE_DONE"
+        const val ACTION_SYNC = "com.todoapp.widget.ACTION_SYNC"
         const val EXTRA_TODO_ID = "extra_todo_id"
         const val EXTRA_DONE = "extra_done"
     }
@@ -35,20 +36,31 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        if (intent.action == ACTION_TOGGLE_DONE) {
-            val id = intent.getIntExtra(EXTRA_TODO_ID, -1)
-            val done = intent.getBooleanExtra(EXTRA_DONE, false)
-            if (id != -1) {
+        when (intent.action) {
+            ACTION_TOGGLE_DONE -> {
+                val id = intent.getIntExtra(EXTRA_TODO_ID, -1)
+                val done = intent.getBooleanExtra(EXTRA_DONE, false)
+                if (id != -1) {
+                    CoroutineScope(Dispatchers.IO).launch {
+                        val dao = TodoDatabase.getDatabase(context).todoDao()
+                        dao.setDone(id, done)
+                        refreshAll(context)
+                    }
+                }
+            }
+            ACTION_SYNC -> {
                 CoroutineScope(Dispatchers.IO).launch {
-                    val dao = TodoDatabase.getDatabase(context).todoDao()
-                    dao.setDone(id, done)
-                    val manager = AppWidgetManager.getInstance(context)
-                    val provider = android.content.ComponentName(context, TodoWidgetProvider::class.java)
-                    val ids = manager.getAppWidgetIds(provider)
-                    ids.forEach { updateWidget(context, manager, it) }
+                    refreshAll(context)
                 }
             }
         }
+    }
+
+    private suspend fun refreshAll(context: Context) {
+        val manager = AppWidgetManager.getInstance(context)
+        val provider = android.content.ComponentName(context, TodoWidgetProvider::class.java)
+        val ids = manager.getAppWidgetIds(provider)
+        ids.forEach { updateWidget(context, manager, it) }
     }
 
     private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
@@ -61,6 +73,16 @@ class TodoWidgetProvider : AppWidgetProvider() {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_header, openPending)
+
+        // Refresh button → sync immediately
+        val syncIntent = Intent(context, TodoWidgetProvider::class.java).apply {
+            action = ACTION_SYNC
+        }
+        val syncPending = PendingIntent.getBroadcast(
+            context, widgetId, syncIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
+        views.setOnClickPendingIntent(R.id.widget_btn_refresh, syncPending)
 
         // Set up list service
         val serviceIntent = Intent(context, TodoWidgetService::class.java).apply {
