@@ -5,6 +5,7 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
@@ -53,13 +54,23 @@ class TodoWidgetProvider : AppWidgetProvider() {
     private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-        // Open app on header click
-        val openAppIntent = Intent(context, MainActivity::class.java)
-        val openAppPending = PendingIntent.getActivity(
-            context, 0, openAppIntent,
+        // Derive web app base URL from API URL (strip /api/todos)
+        val apiUrl = ApiSyncManager.getApiUrl(context)
+        val webUrl = if (apiUrl.isNotEmpty())
+            apiUrl.replace(Regex("/api/todos.*"), "")
+        else null
+
+        // Open TDL web app on click; fall back to native app if URL not set
+        val openIntent = if (webUrl != null) {
+            Intent(Intent.ACTION_VIEW, Uri.parse(webUrl))
+        } else {
+            Intent(context, MainActivity::class.java)
+        }
+        val openPending = PendingIntent.getActivity(
+            context, 0, openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
-        views.setOnClickPendingIntent(R.id.widget_header, openAppPending)
+        views.setOnClickPendingIntent(R.id.widget_header, openPending)
 
         // Set up list service
         val serviceIntent = Intent(context, TodoWidgetService::class.java).apply {
@@ -68,10 +79,9 @@ class TodoWidgetProvider : AppWidgetProvider() {
         views.setRemoteAdapter(R.id.widget_list, serviceIntent)
         views.setEmptyView(R.id.widget_list, R.id.widget_empty)
 
-        // Item click → open app
-        val itemIntent = Intent(context, MainActivity::class.java)
+        // Item click → open TDL web app
         val itemPending = PendingIntent.getActivity(
-            context, 1, itemIntent,
+            context, 1, openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setPendingIntentTemplate(R.id.widget_list, itemPending)
