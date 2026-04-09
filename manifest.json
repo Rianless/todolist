@@ -4,10 +4,8 @@
   "description": "청년 프로그램 일정 관리",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "
-#F2F2F7",
-  "theme_color": "
-#ffffff",
+  "background_color": "#06070F",
+  "theme_color": "#06070F",
   "orientation": "portrait",
   "icons": [
     {
