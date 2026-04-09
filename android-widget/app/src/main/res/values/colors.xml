@@ -38,4 +38,10 @@
     <!-- Widget -->
     <color name="widget_bg_start">#06070f</color>
     <color name="widget_bg_end">#0a0c1a</color>
+
+    <!-- Legacy aliases (referenced by activity layouts and themes) -->
+    <color name="ios_blue">#00ffe7</color>
+    <color name="surface_glass">#0d0f1e</color>
+    <color name="surface_card">#0d0f1e</color>
+    <color name="border_subtle">#1e2140</color>
 </resources>
