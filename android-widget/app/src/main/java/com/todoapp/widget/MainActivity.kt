@@ -63,37 +63,9 @@ class MainActivity : AppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityMainBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-        setSupportActionBar(binding.toolbar)
-
-        viewModel = ViewModelProvider(this)[TodoViewModel::class.java]
-
-        adapter = TodoAdapter(
-            onChecked = { todo, done ->
-                viewModel.setDone(todo.id, done)
-                refreshWidget()
-            },
-            onClick = { todo ->
-                val intent = Intent(this, AddEditActivity::class.java).apply {
-                    putExtra(AddEditActivity.EXTRA_TODO_ID, todo.id)
-                }
-                addEditLauncher.launch(intent)
-            }
-        )
-
-        binding.recyclerView.layoutManager = LinearLayoutManager(this)
-        binding.recyclerView.adapter = adapter
-
-        viewModel.allTodos.observe(this) { todos ->
-            adapter.submitList(todos)
-            val done = todos.count { it.done }
-            binding.toolbar.subtitle = "$done / ${todos.size} 완료"
-        }
-
-        binding.fab.setOnClickListener {
-            addEditLauncher.launch(Intent(this, AddEditActivity::class.java))
-        }
+        // 앱 아이콘 → TDL 웹앱으로 바로 이동
+        startActivity(Intent(Intent.ACTION_VIEW, android.net.Uri.parse(com.todoapp.widget.BuildConfig.WEB_URL)))
+        finish()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
