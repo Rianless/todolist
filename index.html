@@ -4385,7 +4385,7 @@ function dismissPWA() {
   const boot = document.getElementById('bootScreen');
 
   // Skip if already booted this session
-  if (sessionStorage.getItem('booted')) {
+  if (sessionStorage.getItem('booted') || new URLSearchParams(window.location.search).get('date')) {
     boot.style.display = 'none'; return;
   }
 
@@ -4459,23 +4459,16 @@ updateProgress();
   el.textContent = `SYS:ONLINE  //  AUTH:GRANTED  //  ENC:AES-256  //  DB:SYNCED  //  ${d}`;
 })();
 
-/* ══════════════════════════════════════
-   WIDGET DATE TAP: ?date=yyyy-MM-dd 처리
-══════════════════════════════════════ */
+/* ── 위젯 날짜 탭: ?date=yyyy-MM-dd 처리 ── */
 (function() {
   const params = new URLSearchParams(window.location.search);
   const dateParam = params.get('date');
   if (!dateParam) return;
-
   const d = new Date(dateParam + 'T00:00:00');
   if (isNaN(d.getTime())) return;
-
-  // 해당 월로 달력 이동
   calY = d.getFullYear();
   calM = d.getMonth();
   renderCal();
-
-  // 달력 렌더 후 해당 날짜 모달 열기
   setTimeout(function() {
     const evts = (typeof items !== 'undefined' ? items : []).filter(function(i) { return i.date === dateParam; });
     openDayModal(dateParam, evts);
