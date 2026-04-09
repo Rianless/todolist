@@ -1,35 +1,41 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Exact match to web app dark theme variables -->
 <resources>
-    <!-- Cyberpunk neon palette -->
-    <color name="cyber_cyan">#FF00E5FF</color>
-    <color name="cyber_magenta">#FFFF00FF</color>
-    <color name="cyber_yellow">#FFFFF000</color>
-    <color name="cyber_green">#FF00FF9C</color>
-    <color name="cyber_red">#FFFF2D6B</color>
-    <color name="cyber_orange">#FFFF6600</color>
+    <!-- Base backgrounds -->
+    <color name="bg_primary">#06070f</color>
+    <color name="bg_secondary">#0a0c1a</color>
+    <color name="panel">#0d0f1e</color>
+    <color name="panel2">#11142b</color>
 
-    <!-- Background -->
-    <color name="bg_primary">#050510</color>
-    <color name="bg_secondary">#0A0A1F</color>
+    <!-- Borders -->
+    <color name="border">#1e2140</color>
+    <color name="border2">#2a2d4a</color>
 
-    <!-- Surface -->
-    <color name="surface_card">#FF0E0E2A</color>
-    <color name="surface_glass">#CC050510</color>
+    <!-- Neon accents -->
+    <color name="cyber_cyan">#00ffe7</color>
+    <color name="cyber_magenta">#ff00aa</color>
+    <color name="cyber_purple">#9d00ff</color>
+    <color name="cyber_yellow">#ffe600</color>
+    <color name="cyber_red">#ff2d55</color>
+    <color name="cyber_green">#39ff14</color>
+    <color name="cyber_personal">#ff6ef7</color>
 
     <!-- Text -->
-    <color name="text_primary">#FFFFFFFF</color>
-    <color name="text_secondary">#B000E5FF</color>
-    <color name="text_tertiary">#6000E5FF</color>
+    <color name="text_primary">#e8eaf6</color>
+    <color name="text_secondary">#8891b4</color>
+    <color name="text_tertiary">#4a4f72</color>
+
+    <!-- Category colors (exact match to web app) -->
+    <color name="cat_밀착상담">#ff2d55</color>
+    <color name="cat_자신감회복">#ffcc00</color>
+    <color name="cat_취업역량강화">#00ffe7</color>
+    <color name="cat_진로탐색">#39ff14</color>
+    <color name="cat_지역맞춤형">#ff6600</color>
+    <color name="cat_사례관리">#cc44ff</color>
+    <color name="cat_개인">#ff6ef7</color>
+    <color name="cat_자율">#4a4f72</color>
 
     <!-- Widget -->
-    <color name="widget_bg_start">#F0050510</color>
-    <color name="widget_bg_end">#F00A0A1F</color>
-
-    <!-- Legacy aliases (used in category colors in code) -->
-    <color name="ios_blue">#FF00E5FF</color>
-    <color name="ios_green">#FF00FF9C</color>
-    <color name="ios_red">#FFFF2D6B</color>
-    <color name="ios_orange">#FFFF6600</color>
-    <color name="ios_purple">#FFFF00FF</color>
-    <color name="ios_pink">#FFFF2D6B</color>
+    <color name="widget_bg_start">#06070f</color>
+    <color name="widget_bg_end">#0a0c1a</color>
 </resources>

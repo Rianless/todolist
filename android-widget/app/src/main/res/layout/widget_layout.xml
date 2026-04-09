@@ -1,95 +1,102 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Cyberpunk widget -->
+<!-- Matches web app dark theme: bg=#06070f, panel=#0d0f1e -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
-    android:background="@drawable/widget_background"
-    android:padding="0dp">
+    android:background="@drawable/widget_background">
 
-    <!-- Neon top accent line -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="2dp"
-        android:background="#FF00E5FF" />
-
-    <!-- Header -->
+    <!-- Header (panel bg + subtle gradient) -->
     <LinearLayout
         android:id="@+id/widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
+        android:background="@drawable/bg_header_gradient"
         android:paddingHorizontal="12dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="6dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="8dp">
 
+        <!-- Top row: SYS label + progress + plus btn -->
         <LinearLayout
-            android:layout_width="0dp"
+            android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:orientation="horizontal"
+            android:gravity="center_vertical">
 
-            <!-- SYS: label -->
-            <TextView
+            <!-- Left: SYS label + title -->
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <!-- SYS: TASK_LIST -->
+                <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="SYS: TASK_LIST"
+                    android:textSize="7sp"
+                    android:letterSpacing="0.15"
+                    android:textColor="#9900ffe7"
+                    android:fontFamily="monospace" />
+
+                <!-- Date title (Orbitron-style → monospace bold) -->
+                <TextView
+                    android:id="@+id/widget_title"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="오늘"
+                    android:textSize="17sp"
+                    android:textStyle="bold"
+                    android:fontFamily="monospace"
+                    android:textColor="#e8eaf6"
+                    android:letterSpacing="0.04" />
+
+            </LinearLayout>
+
+            <!-- Right: progress + plus -->
+            <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="SYS:TASK"
-                android:textSize="8sp"
-                android:letterSpacing="0.3"
-                android:textColor="#FF00E5FF"
-                android:fontFamily="monospace" />
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginStart="8dp">
 
-            <TextView
-                android:id="@+id/widget_title"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="오늘"
-                android:textSize="16sp"
-                android:textStyle="bold"
-                android:fontFamily="monospace"
-                android:textColor="#FFFFFFFF"
-                android:letterSpacing="0.05" />
+                <!-- Progress e.g. "3/7" -->
+                <TextView
+                    android:id="@+id/widget_progress"
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:text="0/0"
+                    android:textSize="11sp"
+                    android:fontFamily="monospace"
+                    android:textColor="#00ffe7"
+                    android:layout_marginEnd="8dp" />
 
-        </LinearLayout>
+                <!-- Plus button -->
+                <TextView
+                    android:layout_width="26dp"
+                    android:layout_height="26dp"
+                    android:text="+"
+                    android:textSize="17sp"
+                    android:textColor="#8891b4"
+                    android:gravity="center"
+                    android:fontFamily="monospace"
+                    android:background="@drawable/bg_widget_btn" />
 
-        <!-- Progress + plus button -->
-        <LinearLayout
-            android:layout_width="wrap_content"
-            android:layout_height="wrap_content"
-            android:orientation="vertical"
-            android:gravity="end">
-
-            <TextView
-                android:id="@+id/widget_progress"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
-                android:text="0/0"
-                android:textSize="9sp"
-                android:fontFamily="monospace"
-                android:textColor="#FFFF00FF"
-                android:layout_marginBottom="4dp" />
-
-            <TextView
-                android:layout_width="24dp"
-                android:layout_height="24dp"
-                android:text="+"
-                android:textSize="16sp"
-                android:textColor="#FF00E5FF"
-                android:gravity="center"
-                android:fontFamily="monospace"
-                android:background="@drawable/bg_widget_btn" />
+            </LinearLayout>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Neon divider -->
+    <!-- Header bottom: cyan→purple→magenta gradient line -->
     <View
         android:layout_width="match_parent"
         android:layout_height="1dp"
-        android:background="#8000E5FF" />
+        android:background="@drawable/bg_header_line" />
 
     <!-- Todo List -->
     <ListView
@@ -97,28 +104,22 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:divider="#1500E5FF"
+        android:divider="#0D1e2140"
         android:dividerHeight="1dp"
-        android:paddingTop="2dp"
-        android:paddingBottom="2dp" />
+        android:paddingTop="3dp"
+        android:paddingBottom="3dp" />
 
-    <!-- Empty state -->
+    <!-- Empty state: matches web app style -->
     <TextView
         android:id="@+id/widget_empty"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="1"
         android:gravity="center"
-        android:padding="16dp"
-        android:text="[ NO TASKS FOUND ]"
+        android:text="[ NO ACTIVE TASKS ]"
         android:fontFamily="monospace"
-        android:textColor="#6000E5FF"
-        android:textSize="11sp"
+        android:textColor="#4a4f72"
+        android:textSize="10sp"
         android:letterSpacing="0.1" />
-
-    <!-- Neon bottom accent line -->
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="#FF00E5FF" />
 
 </LinearLayout>

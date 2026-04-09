@@ -101,15 +101,15 @@ class TodoRepository(private val dao: TodoDao) {
 
     private fun categoryToColor(category: String): String {
         return when (category) {
-            "밀착상담" -> "#FF6B6B"
-            "자신감회복" -> "#FFD93D"
-            "취업역량강화" -> "#34C759"
-            "진로탐색" -> "#5856D6"
-            "지역맞춤형" -> "#FF2D55"
-            "사례관리" -> "#AF52DE"
-            "자율활동" -> "#8E8E93"
-            "개인" -> "#FF9500"
-            else -> "#636366"
+            "밀착상담"    -> "#ff2d55"
+            "자신감회복"   -> "#ffcc00"
+            "취업역량강화"  -> "#00ffe7"
+            "진로탐색"    -> "#39ff14"
+            "지역맞춤형"   -> "#ff6600"
+            "사례관리"    -> "#cc44ff"
+            "개인"       -> "#ff6ef7"
+            "자율활동", "자율" -> "#4a4f72"
+            else         -> "#4a4f72"
         }
     }
 }
