@@ -1,5 +1,4 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Game HUD / Status Window style -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_root"
@@ -8,7 +7,7 @@
     android:orientation="vertical"
     android:background="@drawable/widget_background">
 
-    <!-- ╔═ TOP BRACKET LINE ══════════════════╗ -->
+    <!-- ╔ TOP LINE ╗ -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -17,7 +16,7 @@
         android:fontFamily="monospace"
         android:textColor="#4400ffe7"
         android:paddingHorizontal="4dp"
-        android:includeFontPadding="false" />
+        android:includeFontPadding="false"/>
 
     <!-- HEADER -->
     <LinearLayout
@@ -30,21 +29,18 @@
         android:paddingTop="2dp"
         android:paddingBottom="6dp">
 
-        <!-- Row 1: title + status + btn -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- Left -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- ◈ MISSION LOG label -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
@@ -52,9 +48,8 @@
                     android:textSize="8sp"
                     android:letterSpacing="0.2"
                     android:textColor="#9900ffe7"
-                    android:fontFamily="monospace" />
+                    android:fontFamily="monospace"/>
 
-                <!-- Date -->
                 <TextView
                     android:id="@+id/widget_title"
                     android:layout_width="wrap_content"
@@ -63,18 +58,16 @@
                     android:textSize="16sp"
                     android:textStyle="bold"
                     android:fontFamily="monospace"
-                    android:textColor="#e8eaf6" />
+                    android:textColor="#e8eaf6"/>
 
             </LinearLayout>
 
-            <!-- Right: DONE count + btn -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"
                 android:gravity="end">
 
-                <!-- DONE X/Y -->
                 <TextView
                     android:id="@+id/widget_progress"
                     android:layout_width="wrap_content"
@@ -83,9 +76,8 @@
                     android:textSize="9sp"
                     android:fontFamily="monospace"
                     android:textColor="#00ffe7"
-                    android:layout_marginBottom="4dp" />
+                    android:layout_marginBottom="4dp"/>
 
-                <!-- Refresh button -->
                 <TextView
                     android:id="@+id/widget_btn_refresh"
                     android:layout_width="24dp"
@@ -95,13 +87,13 @@
                     android:textColor="#00ffe7"
                     android:gravity="center"
                     android:fontFamily="monospace"
-                    android:background="@drawable/bg_widget_btn" />
+                    android:background="@drawable/bg_widget_btn"/>
 
             </LinearLayout>
 
         </LinearLayout>
 
-        <!-- Row 2: EXP Progress bar -->
+        <!-- PROG bar -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -114,10 +106,9 @@
                 android:layout_height="wrap_content"
                 android:text="PROG"
                 android:textSize="7sp"
-                android:letterSpacing="0.1"
                 android:textColor="#4a4f72"
                 android:fontFamily="monospace"
-                android:layout_marginEnd="5dp" />
+                android:layout_marginEnd="5dp"/>
 
             <ProgressBar
                 android:id="@+id/widget_progress_bar"
@@ -127,13 +118,13 @@
                 android:layout_weight="1"
                 android:progressDrawable="@drawable/bg_progress_drawable"
                 android:max="100"
-                android:progress="0" />
+                android:progress="0"/>
 
         </LinearLayout>
 
     </LinearLayout>
 
-    <!-- ╠═ DIVIDER ═══════════════════════════╣ -->
+    <!-- ╠ DIVIDER ╣ -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -142,16 +133,104 @@
         android:fontFamily="monospace"
         android:textColor="#4400ffe7"
         android:paddingHorizontal="4dp"
-        android:includeFontPadding="false" />
+        android:includeFontPadding="false"/>
 
-    <!-- TASK LIST -->
-    <ListView
-        android:id="@+id/widget_list"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="1"
-        android:divider="#0D1e2140"
-        android:dividerHeight="1dp" />
+    <!-- TODO ROWS (7개 고정) -->
+    <LinearLayout android:id="@id/row0" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:paddingEnd="10dp" android:visibility="gone">
+        <View android:id="@id/accent0" android:layout_width="3dp" android:layout_height="match_parent" android:layout_marginEnd="8dp" android:background="@drawable/bg_accent_bar"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@id/cat0" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@id/time0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+            </LinearLayout>
+            <TextView android:id="@id/title0" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+        </LinearLayout>
+        <TextView android:id="@id/done0" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#0D1e2140"/>
+
+    <LinearLayout android:id="@id/row1" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:paddingEnd="10dp" android:visibility="gone">
+        <View android:id="@id/accent1" android:layout_width="3dp" android:layout_height="match_parent" android:layout_marginEnd="8dp" android:background="@drawable/bg_accent_bar"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@id/cat1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@id/time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+            </LinearLayout>
+            <TextView android:id="@id/title1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+        </LinearLayout>
+        <TextView android:id="@id/done1" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#0D1e2140"/>
+
+    <LinearLayout android:id="@id/row2" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:paddingEnd="10dp" android:visibility="gone">
+        <View android:id="@id/accent2" android:layout_width="3dp" android:layout_height="match_parent" android:layout_marginEnd="8dp" android:background="@drawable/bg_accent_bar"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@id/cat2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@id/time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+            </LinearLayout>
+            <TextView android:id="@id/title2" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+        </LinearLayout>
+        <TextView android:id="@id/done2" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#0D1e2140"/>
+
+    <LinearLayout android:id="@id/row3" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:paddingEnd="10dp" android:visibility="gone">
+        <View android:id="@id/accent3" android:layout_width="3dp" android:layout_height="match_parent" android:layout_marginEnd="8dp" android:background="@drawable/bg_accent_bar"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@id/cat3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@id/time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+            </LinearLayout>
+            <TextView android:id="@id/title3" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+        </LinearLayout>
+        <TextView android:id="@id/done3" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#0D1e2140"/>
+
+    <LinearLayout android:id="@id/row4" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:paddingEnd="10dp" android:visibility="gone">
+        <View android:id="@id/accent4" android:layout_width="3dp" android:layout_height="match_parent" android:layout_marginEnd="8dp" android:background="@drawable/bg_accent_bar"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@id/cat4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@id/time4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+            </LinearLayout>
+            <TextView android:id="@id/title4" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+        </LinearLayout>
+        <TextView android:id="@id/done4" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#0D1e2140"/>
+
+    <LinearLayout android:id="@id/row5" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:paddingEnd="10dp" android:visibility="gone">
+        <View android:id="@id/accent5" android:layout_width="3dp" android:layout_height="match_parent" android:layout_marginEnd="8dp" android:background="@drawable/bg_accent_bar"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@id/cat5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@id/time5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+            </LinearLayout>
+            <TextView android:id="@id/title5" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+        </LinearLayout>
+        <TextView android:id="@id/done5" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+    </LinearLayout>
+
+    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="#0D1e2140"/>
+
+    <LinearLayout android:id="@id/row6" android:layout_width="match_parent" android:layout_height="0dp" android:layout_weight="1" android:orientation="horizontal" android:gravity="center_vertical" android:paddingEnd="10dp" android:visibility="gone">
+        <View android:id="@id/accent6" android:layout_width="3dp" android:layout_height="match_parent" android:layout_marginEnd="8dp" android:background="@drawable/bg_accent_bar"/>
+        <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@id/cat6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@id/time6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+            </LinearLayout>
+            <TextView android:id="@id/title6" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+        </LinearLayout>
+        <TextView android:id="@id/done6" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginStart="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+    </LinearLayout>
 
     <!-- EMPTY STATE -->
     <TextView
@@ -164,9 +243,9 @@
         android:fontFamily="monospace"
         android:textColor="#4a4f72"
         android:textSize="10sp"
-        android:letterSpacing="0.1" />
+        android:visibility="gone"/>
 
-    <!-- ╚═ BOTTOM BRACKET ══════════════════╝ -->
+    <!-- ╚ BOTTOM LINE ╝ -->
     <TextView
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
@@ -175,6 +254,6 @@
         android:fontFamily="monospace"
         android:textColor="#4400ffe7"
         android:paddingHorizontal="4dp"
-        android:includeFontPadding="false" />
+        android:includeFontPadding="false"/>
 
 </LinearLayout>

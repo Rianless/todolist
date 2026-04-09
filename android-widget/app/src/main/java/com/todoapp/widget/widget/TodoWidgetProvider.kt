@@ -5,12 +5,14 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.graphics.Color
 import android.net.Uri
+import android.view.View
 import android.widget.RemoteViews
-import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
 import kotlinx.coroutines.*
 import com.todoapp.widget.data.ApiSyncManager
+import com.todoapp.widget.data.Todo
 import com.todoapp.widget.data.TodoDatabase
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -18,108 +20,118 @@ import java.time.format.DateTimeFormatter
 class TodoWidgetProvider : AppWidgetProvider() {
 
     companion object {
-        const val ACTION_TOGGLE_DONE = "com.todoapp.widget.ACTION_TOGGLE_DONE"
         const val ACTION_SYNC = "com.todoapp.widget.ACTION_SYNC"
-        const val EXTRA_TODO_ID = "extra_todo_id"
-        const val EXTRA_DONE = "extra_done"
+
+        // 행 ID 배열
+        val ROW_IDS    = intArrayOf(R.id.row0, R.id.row1, R.id.row2, R.id.row3, R.id.row4, R.id.row5, R.id.row6)
+        val ACCENT_IDS = intArrayOf(R.id.accent0, R.id.accent1, R.id.accent2, R.id.accent3, R.id.accent4, R.id.accent5, R.id.accent6)
+        val CAT_IDS    = intArrayOf(R.id.cat0, R.id.cat1, R.id.cat2, R.id.cat3, R.id.cat4, R.id.cat5, R.id.cat6)
+        val TIME_IDS   = intArrayOf(R.id.time0, R.id.time1, R.id.time2, R.id.time3, R.id.time4, R.id.time5, R.id.time6)
+        val TITLE_IDS  = intArrayOf(R.id.title0, R.id.title1, R.id.title2, R.id.title3, R.id.title4, R.id.title5, R.id.title6)
+        val DONE_IDS   = intArrayOf(R.id.done0, R.id.done1, R.id.done2, R.id.done3, R.id.done4, R.id.done5, R.id.done6)
+        const val MAX_ROWS = 7
     }
 
-    override fun onUpdate(
-        context: Context,
-        appWidgetManager: AppWidgetManager,
-        appWidgetIds: IntArray
-    ) {
-        appWidgetIds.forEach { widgetId ->
-            updateWidget(context, appWidgetManager, widgetId)
-        }
+    override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
+        appWidgetIds.forEach { updateWidget(context, appWidgetManager, it) }
     }
 
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
-        when (intent.action) {
-            ACTION_TOGGLE_DONE -> {
-                val id = intent.getIntExtra(EXTRA_TODO_ID, -1)
-                val done = intent.getBooleanExtra(EXTRA_DONE, false)
-                if (id != -1) {
-                    CoroutineScope(Dispatchers.IO).launch {
-                        val dao = TodoDatabase.getDatabase(context).todoDao()
-                        dao.setDone(id, done)
-                        refreshAll(context)
-                    }
-                }
-            }
-            ACTION_SYNC -> {
-                CoroutineScope(Dispatchers.IO).launch {
-                    refreshAll(context)
-                }
-            }
+        if (intent.action == ACTION_SYNC) {
+            CoroutineScope(Dispatchers.IO).launch { refreshAll(context) }
         }
     }
 
     private suspend fun refreshAll(context: Context) {
         val manager = AppWidgetManager.getInstance(context)
         val provider = android.content.ComponentName(context, TodoWidgetProvider::class.java)
-        val ids = manager.getAppWidgetIds(provider)
-        ids.forEach { updateWidget(context, manager, it) }
+        manager.getAppWidgetIds(provider).forEach { updateWidget(context, manager, it) }
     }
 
     private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-        // Open TDL web app on click (whole widget + header)
-        val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(com.todoapp.widget.BuildConfig.WEB_URL))
+        // 위젯 전체 / 헤더 클릭 → 웹앱 열기
         val openPending = PendingIntent.getActivity(
-            context, 0, openIntent,
+            context, 0,
+            Intent(Intent.ACTION_VIEW, Uri.parse(com.todoapp.widget.BuildConfig.WEB_URL)),
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_root, openPending)
         views.setOnClickPendingIntent(R.id.widget_header, openPending)
 
-        // Refresh button → sync immediately
-        val syncIntent = Intent(context, TodoWidgetProvider::class.java).apply {
-            action = ACTION_SYNC
-        }
+        // 새로고침 버튼
         val syncPending = PendingIntent.getBroadcast(
-            context, widgetId, syncIntent,
+            context, widgetId,
+            Intent(context, TodoWidgetProvider::class.java).apply { action = ACTION_SYNC },
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_btn_refresh, syncPending)
 
-        // Set up list service
-        val serviceIntent = Intent(context, TodoWidgetService::class.java).apply {
-            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
-        }
-        views.setRemoteAdapter(R.id.widget_list, serviceIntent)
-        views.setEmptyView(R.id.widget_list, R.id.widget_empty)
+        // 모든 행 숨기기
+        ROW_IDS.forEach { views.setViewVisibility(it, View.GONE) }
+        views.setViewVisibility(R.id.widget_empty, View.GONE)
 
-        // Item click → open TDL web app
-        val itemPending = PendingIntent.getActivity(
-            context, 1, openIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
-        views.setPendingIntentTemplate(R.id.widget_list, itemPending)
-
-        // Sync from API then update stats
+        // 비동기: API 동기화 → DB 조회 → 행 채우기
         CoroutineScope(Dispatchers.IO).launch {
-            // Fetch from web API if URL is configured
             ApiSyncManager.syncFromApi(context)
 
             val dao = TodoDatabase.getDatabase(context).todoDao()
+            val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val todos = dao.getUpcomingTodos(today, MAX_ROWS)
             val total = dao.getCount()
-            val done = dao.getDoneCount()
-            val today = LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일"))
-
-            val pct = if (total > 0) (done * 100 / total) else 0
+            val doneCount = dao.getDoneCount()
+            val dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일"))
+            val pct = if (total > 0) (doneCount * 100 / total) else 0
 
             withContext(Dispatchers.Main) {
-                views.setTextViewText(R.id.widget_title, today)
-                views.setTextViewText(R.id.widget_progress, "$done/$total DONE")
+                views.setTextViewText(R.id.widget_title, dateStr)
+                views.setTextViewText(R.id.widget_progress, "$doneCount/$total DONE")
                 views.setProgressBar(R.id.widget_progress_bar, 100, pct, false)
+
+                if (todos.isEmpty()) {
+                    views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
+                } else {
+                    todos.forEachIndexed { i, todo ->
+                        if (i >= MAX_ROWS) return@forEachIndexed
+                        bindRow(views, i, todo)
+                        views.setViewVisibility(ROW_IDS[i], View.VISIBLE)
+                    }
+                }
+
                 manager.updateAppWidget(widgetId, views)
-                manager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_list)
             }
         }
 
         manager.updateAppWidget(widgetId, views)
+    }
+
+    private fun bindRow(views: RemoteViews, i: Int, todo: Todo) {
+        val color = try { Color.parseColor(todo.categoryColor) } catch (e: Exception) { Color.parseColor("#4a4f72") }
+
+        // 카테고리 색 바
+        views.setInt(ACCENT_IDS[i], "setBackgroundColor", color)
+
+        // 카테고리 [TAG]
+        views.setTextViewText(CAT_IDS[i], "[${todo.category}]")
+        views.setTextColor(CAT_IDS[i], color)
+
+        // 시간
+        val timeStr = when {
+            todo.allDay -> "ALL DAY"
+            todo.startTime.isNotEmpty() -> "${todo.startTime}${if (todo.endTime.isNotEmpty()) "-${todo.endTime}" else ""}"
+            else -> todo.date
+        }
+        views.setTextViewText(TIME_IDS[i], timeStr)
+
+        // 제목 (완료 시 투명도)
+        views.setTextViewText(TITLE_IDS[i], todo.title)
+        views.setFloat(TITLE_IDS[i], "setAlpha", if (todo.done) 0.4f else 1f)
+
+        // 완료 체크
+        views.setTextViewText(DONE_IDS[i], if (todo.done) "✓" else "")
+        views.setInt(DONE_IDS[i], "setBackgroundResource",
+            if (todo.done) R.drawable.bg_check_done else R.drawable.bg_widget_check)
     }
 }

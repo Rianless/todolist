@@ -44,11 +44,5 @@
                 android:resource="@xml/todo_widget_info" />
         </receiver>
 
-        <!-- Widget List Service -->
-        <service
-            android:name=".widget.TodoWidgetService"
-            android:exported="false"
-            android:permission="android.permission.BIND_REMOTEVIEWS" />
-
     </application>
 </manifest>
