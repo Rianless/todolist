@@ -103,7 +103,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
                     manager.updateAppWidget(widgetId, views)
                 }
-            } catch (_: Exception) {
+            } catch (e: Exception) {
                 // 어떤 예외도 프로세스 크래시 방지
                 withContext(Dispatchers.Main) {
                     views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
