@@ -1,0 +1,33 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+
+    <!-- Cyan checklist icon -->
+    <!-- Vertical line left -->
+    <path
+        android:fillColor="#00ffe7"
+        android:pathData="M36,28 L36,80 L40,80 L40,28 Z" />
+    <!-- Top bracket -->
+    <path
+        android:fillColor="#00ffe7"
+        android:pathData="M36,28 L72,28 L72,32 L36,32 Z" />
+    <!-- Bottom bracket -->
+    <path
+        android:fillColor="#00ffe7"
+        android:pathData="M36,76 L72,76 L72,80 L36,80 Z" />
+    <!-- Line 1 -->
+    <path
+        android:fillColor="#00ffe7"
+        android:pathData="M44,40 L72,40 L72,43 L44,43 Z" />
+    <!-- Line 2 -->
+    <path
+        android:fillColor="#9d00ff"
+        android:pathData="M44,51 L68,51 L68,54 L44,54 Z" />
+    <!-- Line 3 -->
+    <path
+        android:fillColor="#4a4f72"
+        android:pathData="M44,62 L60,62 L60,65 L44,65 Z" />
+</vector>
