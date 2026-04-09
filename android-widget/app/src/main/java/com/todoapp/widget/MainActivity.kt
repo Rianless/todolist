@@ -7,17 +7,22 @@ import android.content.Intent
 import android.os.Bundle
 import android.view.Menu
 import android.view.MenuItem
+import android.widget.EditText
 import android.widget.Toast
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.ViewModelProvider
+import androidx.lifecycle.lifecycleScope
 import androidx.recyclerview.widget.LinearLayoutManager
-import com.google.android.material.floatingactionbutton.FloatingActionButton
+import com.todoapp.widget.data.ApiSyncManager
 import com.todoapp.widget.databinding.ActivityMainBinding
 import com.todoapp.widget.ui.AddEditActivity
 import com.todoapp.widget.ui.TodoAdapter
 import com.todoapp.widget.ui.TodoViewModel
 import com.todoapp.widget.widget.TodoWidgetProvider
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 
 class MainActivity : AppCompatActivity() {
 
@@ -98,6 +103,14 @@ class MainActivity : AppCompatActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         return when (item.itemId) {
+            R.id.action_set_api_url -> {
+                showApiUrlDialog()
+                true
+            }
+            R.id.action_sync_now -> {
+                syncNow()
+                true
+            }
             R.id.action_import -> {
                 importLauncher.launch("application/json")
                 true
@@ -109,6 +122,41 @@ class MainActivity : AppCompatActivity() {
                 true
             }
             else -> super.onOptionsItemSelected(item)
+        }
+    }
+
+    private fun showApiUrlDialog() {
+        val currentUrl = ApiSyncManager.getApiUrl(this)
+        val input = EditText(this).apply {
+            setText(currentUrl)
+            hint = getString(R.string.hint_api_url)
+            setSingleLine(true)
+        }
+        AlertDialog.Builder(this)
+            .setTitle(getString(R.string.dialog_api_url_title))
+            .setView(input)
+            .setPositiveButton("저장") { _, _ ->
+                val url = input.text.toString().trim()
+                ApiSyncManager.setApiUrl(this, url)
+                if (url.isNotEmpty()) syncNow()
+            }
+            .setNegativeButton("취소", null)
+            .show()
+    }
+
+    private fun syncNow() {
+        val apiUrl = ApiSyncManager.getApiUrl(this)
+        if (apiUrl.isEmpty()) {
+            Toast.makeText(this, getString(R.string.sync_no_url), Toast.LENGTH_SHORT).show()
+            return
+        }
+        lifecycleScope.launch {
+            val success = withContext(Dispatchers.IO) {
+                ApiSyncManager.syncFromApi(this@MainActivity)
+            }
+            val msg = if (success) getString(R.string.sync_success) else getString(R.string.sync_fail)
+            Toast.makeText(this@MainActivity, msg, Toast.LENGTH_SHORT).show()
+            if (success) refreshWidget()
         }
     }
 

@@ -9,6 +9,7 @@ import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
 import kotlinx.coroutines.*
+import com.todoapp.widget.data.ApiSyncManager
 import com.todoapp.widget.data.TodoDatabase
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
@@ -75,8 +76,11 @@ class TodoWidgetProvider : AppWidgetProvider() {
         )
         views.setPendingIntentTemplate(R.id.widget_list, itemPending)
 
-        // Update stats async
+        // Sync from API then update stats
         CoroutineScope(Dispatchers.IO).launch {
+            // Fetch from web API if URL is configured
+            ApiSyncManager.syncFromApi(context)
+
             val dao = TodoDatabase.getDatabase(context).todoDao()
             val total = dao.getCount()
             val done = dao.getDoneCount()
