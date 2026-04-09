@@ -26,14 +26,14 @@
     <color name="text_tertiary">#4a4f72</color>
 
     <!-- Category colors (exact match to web app) -->
-    <color name="cat_밀착상담">#ff2d55</color>
-    <color name="cat_자신감회복">#ffcc00</color>
-    <color name="cat_취업역량강화">#00ffe7</color>
-    <color name="cat_진로탐색">#39ff14</color>
-    <color name="cat_지역맞춤형">#ff6600</color>
-    <color name="cat_사례관리">#cc44ff</color>
-    <color name="cat_개인">#ff6ef7</color>
-    <color name="cat_자율">#4a4f72</color>
+    <color name="cat_milchak">#ff2d55</color>
+    <color name="cat_jashingam">#ffcc00</color>
+    <color name="cat_chuup">#00ffe7</color>
+    <color name="cat_jinro">#39ff14</color>
+    <color name="cat_jiyeok">#ff6600</color>
+    <color name="cat_salyeol">#cc44ff</color>
+    <color name="cat_gaein">#ff6ef7</color>
+    <color name="cat_jayul">#4a4f72</color>
 
     <!-- Widget -->
     <color name="widget_bg_start">#06070f</color>
