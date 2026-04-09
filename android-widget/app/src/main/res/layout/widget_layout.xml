@@ -89,94 +89,94 @@
         android:background="@drawable/bg_header_line"/>
 
     <!-- ROW 0 -->
-    <LinearLayout android:id="@id/row0" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
-        <View android:id="@id/accent0" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
+    <LinearLayout android:id="@+id/row0" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
+        <View android:id="@+id/accent0" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@id/cat0" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
-                <TextView android:id="@id/time0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+                <TextView android:id="@+id/cat0" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@+id/time0" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
             </LinearLayout>
-            <TextView android:id="@id/title0" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+            <TextView android:id="@+id/title0" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
         </LinearLayout>
-        <TextView android:id="@id/done0" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+        <TextView android:id="@+id/done0" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
     </LinearLayout>
 
     <!-- ROW 1 -->
-    <LinearLayout android:id="@id/row1" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
-        <View android:id="@id/accent1" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
+    <LinearLayout android:id="@+id/row1" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
+        <View android:id="@+id/accent1" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@id/cat1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
-                <TextView android:id="@id/time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+                <TextView android:id="@+id/cat1" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@+id/time1" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
             </LinearLayout>
-            <TextView android:id="@id/title1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+            <TextView android:id="@+id/title1" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
         </LinearLayout>
-        <TextView android:id="@id/done1" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+        <TextView android:id="@+id/done1" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
     </LinearLayout>
 
     <!-- ROW 2 -->
-    <LinearLayout android:id="@id/row2" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
-        <View android:id="@id/accent2" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
+    <LinearLayout android:id="@+id/row2" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
+        <View android:id="@+id/accent2" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@id/cat2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
-                <TextView android:id="@id/time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+                <TextView android:id="@+id/cat2" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@+id/time2" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
             </LinearLayout>
-            <TextView android:id="@id/title2" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+            <TextView android:id="@+id/title2" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
         </LinearLayout>
-        <TextView android:id="@id/done2" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+        <TextView android:id="@+id/done2" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
     </LinearLayout>
 
     <!-- ROW 3 -->
-    <LinearLayout android:id="@id/row3" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
-        <View android:id="@id/accent3" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
+    <LinearLayout android:id="@+id/row3" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
+        <View android:id="@+id/accent3" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@id/cat3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
-                <TextView android:id="@id/time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+                <TextView android:id="@+id/cat3" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@+id/time3" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
             </LinearLayout>
-            <TextView android:id="@id/title3" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+            <TextView android:id="@+id/title3" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
         </LinearLayout>
-        <TextView android:id="@id/done3" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+        <TextView android:id="@+id/done3" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
     </LinearLayout>
 
     <!-- ROW 4 -->
-    <LinearLayout android:id="@id/row4" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
-        <View android:id="@id/accent4" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
+    <LinearLayout android:id="@+id/row4" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
+        <View android:id="@+id/accent4" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@id/cat4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
-                <TextView android:id="@id/time4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+                <TextView android:id="@+id/cat4" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@+id/time4" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
             </LinearLayout>
-            <TextView android:id="@id/title4" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+            <TextView android:id="@+id/title4" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
         </LinearLayout>
-        <TextView android:id="@id/done4" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+        <TextView android:id="@+id/done4" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
     </LinearLayout>
 
     <!-- ROW 5 -->
-    <LinearLayout android:id="@id/row5" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
-        <View android:id="@id/accent5" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
+    <LinearLayout android:id="@+id/row5" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
+        <View android:id="@+id/accent5" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@id/cat5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
-                <TextView android:id="@id/time5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+                <TextView android:id="@+id/cat5" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@+id/time5" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
             </LinearLayout>
-            <TextView android:id="@id/title5" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+            <TextView android:id="@+id/title5" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
         </LinearLayout>
-        <TextView android:id="@id/done5" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+        <TextView android:id="@+id/done5" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
     </LinearLayout>
 
     <!-- ROW 6 -->
-    <LinearLayout android:id="@id/row6" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
-        <View android:id="@id/accent6" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
+    <LinearLayout android:id="@+id/row6" android:layout_width="match_parent" android:layout_height="44dp" android:orientation="horizontal" android:gravity="center_vertical" android:paddingRight="10dp" android:visibility="gone">
+        <View android:id="@+id/accent6" android:layout_width="3dp" android:layout_height="28dp" android:layout_marginLeft="4dp" android:layout_marginRight="8dp" android:background="@drawable/bg_accent_bar"/>
         <LinearLayout android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:orientation="vertical">
             <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal">
-                <TextView android:id="@id/cat6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
-                <TextView android:id="@id/time6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
+                <TextView android:id="@+id/cat6" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#00ffe7" android:singleLine="true"/>
+                <TextView android:id="@+id/time6" android:layout_width="wrap_content" android:layout_height="wrap_content" android:textSize="8sp" android:fontFamily="monospace" android:textColor="#4a4f72"/>
             </LinearLayout>
-            <TextView android:id="@id/title6" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
+            <TextView android:id="@+id/title6" android:layout_width="match_parent" android:layout_height="wrap_content" android:textSize="12sp" android:fontFamily="monospace" android:textColor="#e8eaf6" android:singleLine="true" android:ellipsize="end"/>
         </LinearLayout>
-        <TextView android:id="@id/done6" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
+        <TextView android:id="@+id/done6" android:layout_width="14dp" android:layout_height="14dp" android:layout_marginLeft="6dp" android:gravity="center" android:textSize="8sp" android:textColor="#00ffe7" android:fontFamily="monospace" android:background="@drawable/bg_widget_check"/>
     </LinearLayout>
 
     <!-- EMPTY STATE -->
@@ -189,6 +189,6 @@
         android:fontFamily="monospace"
         android:textColor="#4a4f72"
         android:textSize="10sp"
-        android:visibility="gone"/>
+        android:visibility="visible"/>
 
 </LinearLayout>

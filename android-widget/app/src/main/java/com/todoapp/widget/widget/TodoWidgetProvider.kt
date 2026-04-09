@@ -114,7 +114,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
         }
 
         manager.updateAppWidget(widgetId, views)
-        } catch (e: Exception) { /* 메인스레드 크래시 방지 */ }
+        } catch (t: Throwable) { /* 크래시 방지 */ }
     }
 
     private fun bindRow(views: RemoteViews, i: Int, todo: Todo) {
