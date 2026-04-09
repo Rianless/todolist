@@ -14,4 +14,17 @@
     <color name="cp_text2">#8891B4</color>
     <color name="cp_text3">#4A4F72</color>
     <color name="cp_personal">#FF6EF7</color>
+
+    <!-- Legacy colors referenced by themes.xml and other layouts -->
+    <color name="ios_blue">#007AFF</color>
+    <color name="ios_green">#34C759</color>
+    <color name="ios_red">#FF3B30</color>
+    <color name="bg_primary">#0D0F1E</color>
+    <color name="bg_secondary">#11142B</color>
+    <color name="surface_card">#1A1C2E</color>
+    <color name="surface_glass">#1A1C2E</color>
+    <color name="text_primary">#FFFFFF</color>
+    <color name="text_secondary">#8891B4</color>
+    <color name="text_tertiary">#4A4F72</color>
+    <color name="border_subtle">#1E2140</color>
 </resources>
