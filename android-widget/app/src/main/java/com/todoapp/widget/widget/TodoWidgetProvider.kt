@@ -39,7 +39,8 @@ class TodoWidgetProvider : AppWidgetProvider() {
     override fun onReceive(context: Context, intent: Intent) {
         super.onReceive(context, intent)
         if (intent.action == ACTION_SYNC) {
-            CoroutineScope(Dispatchers.IO).launch { refreshAll(context) }
+            val handler = CoroutineExceptionHandler { _, _ -> }
+            CoroutineScope(Dispatchers.IO + handler).launch { refreshAll(context) }
         }
     }
 
@@ -74,31 +75,40 @@ class TodoWidgetProvider : AppWidgetProvider() {
         views.setViewVisibility(R.id.widget_empty, View.GONE)
 
         // 비동기: API 동기화 → DB 조회 → 행 채우기
-        CoroutineScope(Dispatchers.IO).launch {
-            ApiSyncManager.syncFromApi(context)
+        val handler = CoroutineExceptionHandler { _, _ -> /* 크래시 방지 */ }
+        CoroutineScope(Dispatchers.IO + handler).launch {
+            try {
+                ApiSyncManager.syncFromApi(context)
 
-            val dao = TodoDatabase.getDatabase(context).todoDao()
-            val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-            val todos = dao.getUpcomingTodos(today, MAX_ROWS)
-            val total = dao.getCount()
-            val doneCount = dao.getDoneCount()
-            val dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일"))
+                val dao = TodoDatabase.getDatabase(context).todoDao()
+                val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
+                val todos = dao.getUpcomingTodos(today, MAX_ROWS)
+                val total = dao.getCount()
+                val doneCount = dao.getDoneCount()
+                val dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일"))
 
-            withContext(Dispatchers.Main) {
-                views.setTextViewText(R.id.widget_title, dateStr)
-                views.setTextViewText(R.id.widget_progress, "$doneCount/$total DONE")
+                withContext(Dispatchers.Main) {
+                    views.setTextViewText(R.id.widget_title, dateStr)
+                    views.setTextViewText(R.id.widget_progress, "$doneCount/$total DONE")
 
-                if (todos.isEmpty()) {
-                    views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
-                } else {
-                    todos.forEachIndexed { i, todo ->
-                        if (i >= MAX_ROWS) return@forEachIndexed
-                        bindRow(views, i, todo)
-                        views.setViewVisibility(ROW_IDS[i], View.VISIBLE)
+                    if (todos.isEmpty()) {
+                        views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
+                    } else {
+                        todos.forEachIndexed { i, todo ->
+                            if (i >= MAX_ROWS) return@forEachIndexed
+                            bindRow(views, i, todo)
+                            views.setViewVisibility(ROW_IDS[i], View.VISIBLE)
+                        }
                     }
-                }
 
-                manager.updateAppWidget(widgetId, views)
+                    manager.updateAppWidget(widgetId, views)
+                }
+            } catch (_: Exception) {
+                // 어떤 예외도 프로세스 크래시 방지
+                withContext(Dispatchers.Main) {
+                    views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
+                    manager.updateAppWidget(widgetId, views)
+                }
             }
         }
 
