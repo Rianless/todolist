@@ -66,12 +66,13 @@ class TodoWidgetProvider : AppWidgetProvider() {
     private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-        // Open TDL web app on click
+        // Open TDL web app on click (whole widget + header)
         val openIntent = Intent(Intent.ACTION_VIEW, Uri.parse(com.todoapp.widget.BuildConfig.WEB_URL))
         val openPending = PendingIntent.getActivity(
             context, 0, openIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
+        views.setOnClickPendingIntent(R.id.widget_root, openPending)
         views.setOnClickPendingIntent(R.id.widget_header, openPending)
 
         // Refresh button → sync immediately
