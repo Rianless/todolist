@@ -83,12 +83,10 @@ class TodoWidgetProvider : AppWidgetProvider() {
             val total = dao.getCount()
             val doneCount = dao.getDoneCount()
             val dateStr = LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일"))
-            val pct = if (total > 0) (doneCount * 100 / total) else 0
 
             withContext(Dispatchers.Main) {
                 views.setTextViewText(R.id.widget_title, dateStr)
                 views.setTextViewText(R.id.widget_progress, "$doneCount/$total DONE")
-                views.setProgressBar(R.id.widget_progress_bar, 100, pct, false)
 
                 if (todos.isEmpty()) {
                     views.setViewVisibility(R.id.widget_empty, View.VISIBLE)
