@@ -51,6 +51,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
     }
 
     private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
+        try {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
         // 위젯 전체 / 헤더 클릭 → 웹앱 열기
@@ -113,6 +114,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
         }
 
         manager.updateAppWidget(widgetId, views)
+        } catch (e: Exception) { /* 메인스레드 크래시 방지 */ }
     }
 
     private fun bindRow(views: RemoteViews, i: Int, todo: Todo) {
