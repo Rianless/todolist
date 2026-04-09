@@ -1,14 +1,14 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- iOS-style frosted glass widget background -->
+<!-- Cyberpunk dark widget background -->
 <shape xmlns:android="http://schemas.android.com/apk/res/android"
     android:shape="rectangle">
     <gradient
         android:type="linear"
-        android:startColor="#CC1A1A2E"
-        android:endColor="#CC0F3460"
+        android:startColor="#F0050510"
+        android:endColor="#F00A0A1F"
         android:angle="135" />
-    <corners android:radius="20dp" />
+    <corners android:radius="4dp" />
     <stroke
-        android:width="0.5dp"
-        android:color="#33FFFFFF" />
+        android:width="1dp"
+        android:color="#FF00E5FF" />
 </shape>

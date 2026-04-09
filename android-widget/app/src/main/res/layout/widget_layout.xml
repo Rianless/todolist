@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- iOS-style frosted glass widget -->
+<!-- Cyberpunk widget -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -8,6 +8,12 @@
     android:background="@drawable/widget_background"
     android:padding="0dp">
 
+    <!-- Neon top accent line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="2dp"
+        android:background="#FF00E5FF" />
+
     <!-- Header -->
     <LinearLayout
         android:id="@+id/widget_header"
@@ -15,9 +21,9 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:gravity="center_vertical"
-        android:paddingHorizontal="14dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp">
+        android:paddingHorizontal="12dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="6dp">
 
         <LinearLayout
             android:layout_width="0dp"
@@ -25,44 +31,65 @@
             android:layout_weight="1"
             android:orientation="vertical">
 
+            <!-- SYS: label -->
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="SYS:TASK"
+                android:textSize="8sp"
+                android:letterSpacing="0.3"
+                android:textColor="#FF00E5FF"
+                android:fontFamily="monospace" />
+
             <TextView
                 android:id="@+id/widget_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:text="오늘"
-                android:textSize="17sp"
-                android:fontFamily="sans-serif-medium"
-                android:textColor="#FFFFFF"
-                android:textStyle="bold" />
+                android:textSize="16sp"
+                android:textStyle="bold"
+                android:fontFamily="monospace"
+                android:textColor="#FFFFFFFF"
+                android:letterSpacing="0.05" />
+
+        </LinearLayout>
+
+        <!-- Progress + plus button -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:gravity="end">
 
             <TextView
                 android:id="@+id/widget_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0/0 완료"
-                android:textSize="12sp"
-                android:textColor="#B0FFFFFF" />
+                android:text="0/0"
+                android:textSize="9sp"
+                android:fontFamily="monospace"
+                android:textColor="#FFFF00FF"
+                android:layout_marginBottom="4dp" />
+
+            <TextView
+                android:layout_width="24dp"
+                android:layout_height="24dp"
+                android:text="+"
+                android:textSize="16sp"
+                android:textColor="#FF00E5FF"
+                android:gravity="center"
+                android:fontFamily="monospace"
+                android:background="@drawable/bg_widget_btn" />
 
         </LinearLayout>
 
-        <!-- Plus button hint -->
-        <TextView
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:text="＋"
-            android:textSize="18sp"
-            android:textColor="#FFFFFFFF"
-            android:gravity="center"
-            android:background="@drawable/bg_widget_btn" />
-
     </LinearLayout>
 
-    <!-- Divider -->
+    <!-- Neon divider -->
     <View
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"
-        android:layout_marginHorizontal="14dp"
-        android:background="#33FFFFFF" />
+        android:layout_height="1dp"
+        android:background="#8000E5FF" />
 
     <!-- Todo List -->
     <ListView
@@ -70,20 +97,28 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
-        android:divider="@null"
-        android:dividerHeight="0dp"
-        android:paddingTop="4dp"
-        android:paddingBottom="4dp" />
+        android:divider="#1500E5FF"
+        android:dividerHeight="1dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="2dp" />
 
-    <!-- Empty view -->
+    <!-- Empty state -->
     <TextView
         android:id="@+id/widget_empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
-        android:padding="20dp"
-        android:text="일정이 없어요"
-        android:textColor="#80FFFFFF"
-        android:textSize="13sp" />
+        android:padding="16dp"
+        android:text="[ NO TASKS FOUND ]"
+        android:fontFamily="monospace"
+        android:textColor="#6000E5FF"
+        android:textSize="11sp"
+        android:letterSpacing="0.1" />
+
+    <!-- Neon bottom accent line -->
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#FF00E5FF" />
 
 </LinearLayout>

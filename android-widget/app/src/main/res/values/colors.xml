@@ -1,30 +1,35 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <!-- iOS-style colors -->
-    <color name="ios_blue">#007AFF</color>
-    <color name="ios_green">#34C759</color>
-    <color name="ios_red">#FF3B30</color>
-    <color name="ios_orange">#FF9500</color>
-    <color name="ios_purple">#5856D6</color>
-    <color name="ios_pink">#FF2D55</color>
+    <!-- Cyberpunk neon palette -->
+    <color name="cyber_cyan">#FF00E5FF</color>
+    <color name="cyber_magenta">#FFFF00FF</color>
+    <color name="cyber_yellow">#FFFFF000</color>
+    <color name="cyber_green">#FF00FF9C</color>
+    <color name="cyber_red">#FFFF2D6B</color>
+    <color name="cyber_orange">#FFFF6600</color>
 
     <!-- Background -->
-    <color name="bg_primary">#1A1A2E</color>
-    <color name="bg_secondary">#16213E</color>
+    <color name="bg_primary">#050510</color>
+    <color name="bg_secondary">#0A0A1F</color>
 
-    <!-- Surface (glass effect approximation) -->
-    <color name="surface_card">#FFFFFFFF</color>
-    <color name="surface_glass">#F5F5F7</color>
+    <!-- Surface -->
+    <color name="surface_card">#FF0E0E2A</color>
+    <color name="surface_glass">#CC050510</color>
 
     <!-- Text -->
-    <color name="text_primary">#1C1C1E</color>
-    <color name="text_secondary">#8E8E93</color>
-    <color name="text_tertiary">#C7C7CC</color>
-
-    <!-- Border -->
-    <color name="border_subtle">#10000000</color>
+    <color name="text_primary">#FFFFFFFF</color>
+    <color name="text_secondary">#B000E5FF</color>
+    <color name="text_tertiary">#6000E5FF</color>
 
     <!-- Widget -->
-    <color name="widget_bg_start">#CC1A1A2E</color>
-    <color name="widget_bg_end">#CC0F3460</color>
+    <color name="widget_bg_start">#F0050510</color>
+    <color name="widget_bg_end">#F00A0A1F</color>
+
+    <!-- Legacy aliases (used in category colors in code) -->
+    <color name="ios_blue">#FF00E5FF</color>
+    <color name="ios_green">#FF00FF9C</color>
+    <color name="ios_red">#FFFF2D6B</color>
+    <color name="ios_orange">#FFFF6600</color>
+    <color name="ios_purple">#FFFF00FF</color>
+    <color name="ios_pink">#FFFF2D6B</color>
 </resources>

@@ -1,4 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
+<!-- Cyberpunk todo item -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_item_root"
@@ -6,14 +7,14 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingHorizontal="14dp"
-    android:paddingVertical="7dp">
+    android:paddingHorizontal="12dp"
+    android:paddingVertical="6dp">
 
-    <!-- Color accent dot -->
+    <!-- Neon color accent bar -->
     <View
         android:id="@+id/widget_item_accent"
-        android:layout_width="4dp"
-        android:layout_height="36dp"
+        android:layout_width="3dp"
+        android:layout_height="32dp"
         android:layout_marginEnd="10dp"
         android:background="@drawable/bg_accent_bar" />
 
@@ -24,20 +25,22 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
+        <!-- Category + Time row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="1dp">
 
             <TextView
                 android:id="@+id/widget_item_category"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="9sp"
-                android:textColor="#B0FFFFFF"
-                android:fontFamily="sans-serif-medium" />
+                android:textSize="8sp"
+                android:textColor="#FFFF00FF"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.1" />
 
             <TextView
                 android:id="@+id/widget_item_time"
@@ -45,32 +48,35 @@
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:gravity="end"
-                android:textSize="10sp"
-                android:textColor="#80FFFFFF" />
+                android:textSize="8sp"
+                android:textColor="#8000E5FF"
+                android:fontFamily="monospace" />
 
         </LinearLayout>
 
+        <!-- Title -->
         <TextView
             android:id="@+id/widget_item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="13sp"
-            android:textColor="#F0FFFFFF"
-            android:fontFamily="sans-serif-medium"
+            android:textSize="12sp"
+            android:textColor="#FFFFFFFF"
+            android:fontFamily="monospace"
             android:singleLine="true"
             android:ellipsize="end" />
 
     </LinearLayout>
 
-    <!-- Check indicator -->
+    <!-- Check box -->
     <TextView
         android:id="@+id/widget_item_check"
-        android:layout_width="20dp"
-        android:layout_height="20dp"
+        android:layout_width="18dp"
+        android:layout_height="18dp"
         android:layout_marginStart="8dp"
         android:gravity="center"
         android:textSize="10sp"
-        android:textColor="@android:color/white"
+        android:textColor="#FF00E5FF"
+        android:fontFamily="monospace"
         android:background="@drawable/bg_widget_check" />
 
 </LinearLayout>
