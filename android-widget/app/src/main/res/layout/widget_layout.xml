@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Matches web app dark theme: bg=#06070f, panel=#0d0f1e -->
+<!-- Game HUD / Status Window style -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:layout_width="match_parent"
@@ -7,80 +7,89 @@
     android:orientation="vertical"
     android:background="@drawable/widget_background">
 
-    <!-- Header (panel bg + subtle gradient) -->
+    <!-- ╔═ TOP BRACKET LINE ══════════════════╗ -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="╔══════════════════════════════╗"
+        android:textSize="7sp"
+        android:fontFamily="monospace"
+        android:textColor="#4400ffe7"
+        android:paddingHorizontal="4dp"
+        android:includeFontPadding="false" />
+
+    <!-- HEADER -->
     <LinearLayout
         android:id="@+id/widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:orientation="vertical"
         android:background="@drawable/bg_header_gradient"
-        android:paddingHorizontal="12dp"
-        android:paddingTop="10dp"
-        android:paddingBottom="8dp">
+        android:paddingHorizontal="10dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="6dp">
 
-        <!-- Top row: SYS label + progress + plus btn -->
+        <!-- Row 1: title + status + btn -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical">
 
-            <!-- Left: SYS label + title -->
+            <!-- Left -->
             <LinearLayout
                 android:layout_width="0dp"
                 android:layout_height="wrap_content"
                 android:layout_weight="1"
                 android:orientation="vertical">
 
-                <!-- SYS: TASK_LIST -->
+                <!-- ◈ MISSION LOG label -->
                 <TextView
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="SYS: TASK_LIST"
-                    android:textSize="7sp"
-                    android:letterSpacing="0.15"
+                    android:text="◈ MISSION LOG"
+                    android:textSize="8sp"
+                    android:letterSpacing="0.2"
                     android:textColor="#9900ffe7"
                     android:fontFamily="monospace" />
 
-                <!-- Date title (Orbitron-style → monospace bold) -->
+                <!-- Date -->
                 <TextView
                     android:id="@+id/widget_title"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
                     android:text="오늘"
-                    android:textSize="17sp"
+                    android:textSize="16sp"
                     android:textStyle="bold"
                     android:fontFamily="monospace"
-                    android:textColor="#e8eaf6"
-                    android:letterSpacing="0.04" />
+                    android:textColor="#e8eaf6" />
 
             </LinearLayout>
 
-            <!-- Right: progress + plus -->
+            <!-- Right: DONE count + btn -->
             <LinearLayout
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:orientation="horizontal"
-                android:gravity="center_vertical"
-                android:layout_marginStart="8dp">
+                android:orientation="vertical"
+                android:gravity="end">
 
-                <!-- Progress e.g. "3/7" -->
+                <!-- DONE X/Y -->
                 <TextView
                     android:id="@+id/widget_progress"
                     android:layout_width="wrap_content"
                     android:layout_height="wrap_content"
-                    android:text="0/0"
-                    android:textSize="11sp"
+                    android:text="0/0 DONE"
+                    android:textSize="9sp"
                     android:fontFamily="monospace"
                     android:textColor="#00ffe7"
-                    android:layout_marginEnd="8dp" />
+                    android:layout_marginBottom="4dp" />
 
-                <!-- Plus button -->
+                <!-- + button -->
                 <TextView
-                    android:layout_width="26dp"
-                    android:layout_height="26dp"
+                    android:layout_width="24dp"
+                    android:layout_height="24dp"
                     android:text="+"
-                    android:textSize="17sp"
+                    android:textSize="15sp"
                     android:textColor="#8891b4"
                     android:gravity="center"
                     android:fontFamily="monospace"
@@ -90,36 +99,80 @@
 
         </LinearLayout>
 
+        <!-- Row 2: EXP Progress bar -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="5dp">
+
+            <TextView
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="PROG"
+                android:textSize="7sp"
+                android:letterSpacing="0.1"
+                android:textColor="#4a4f72"
+                android:fontFamily="monospace"
+                android:layout_marginEnd="5dp" />
+
+            <ProgressBar
+                android:id="@+id/widget_progress_bar"
+                style="@android:style/Widget.ProgressBar.Horizontal"
+                android:layout_width="0dp"
+                android:layout_height="4dp"
+                android:layout_weight="1"
+                android:progressDrawable="@drawable/bg_progress_drawable"
+                android:max="100"
+                android:progress="0" />
+
+        </LinearLayout>
+
     </LinearLayout>
 
-    <!-- Header bottom: cyan→purple→magenta gradient line -->
-    <View
+    <!-- ╠═ DIVIDER ═══════════════════════════╣ -->
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="1dp"
-        android:background="@drawable/bg_header_line" />
+        android:layout_height="wrap_content"
+        android:text="╠══════════════════════════════╣"
+        android:textSize="7sp"
+        android:fontFamily="monospace"
+        android:textColor="#4400ffe7"
+        android:paddingHorizontal="4dp"
+        android:includeFontPadding="false" />
 
-    <!-- Todo List -->
+    <!-- TASK LIST -->
     <ListView
         android:id="@+id/widget_list"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:divider="#0D1e2140"
-        android:dividerHeight="1dp"
-        android:paddingTop="3dp"
-        android:paddingBottom="3dp" />
+        android:dividerHeight="1dp" />
 
-    <!-- Empty state: matches web app style -->
+    <!-- EMPTY STATE -->
     <TextView
         android:id="@+id/widget_empty"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
         android:gravity="center"
-        android:text="[ NO ACTIVE TASKS ]"
+        android:text="[[ NO ACTIVE MISSIONS ]]"
         android:fontFamily="monospace"
         android:textColor="#4a4f72"
         android:textSize="10sp"
         android:letterSpacing="0.1" />
+
+    <!-- ╚═ BOTTOM BRACKET ══════════════════╝ -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:text="╚══════════════════════════════╝"
+        android:textSize="7sp"
+        android:fontFamily="monospace"
+        android:textColor="#4400ffe7"
+        android:paddingHorizontal="4dp"
+        android:includeFontPadding="false" />
 
 </LinearLayout>

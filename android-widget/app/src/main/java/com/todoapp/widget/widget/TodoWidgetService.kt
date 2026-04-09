@@ -45,31 +45,49 @@ class TodoWidgetFactory(
         val views = RemoteViews(context.packageName, R.layout.widget_item)
 
         // Accent color bar
-        try {
-            views.setInt(R.id.widget_item_accent, "setBackgroundColor", Color.parseColor(todo.categoryColor))
+        val accentColor = try {
+            Color.parseColor(todo.categoryColor)
         } catch (e: Exception) {
-            views.setInt(R.id.widget_item_accent, "setBackgroundColor", Color.parseColor("#636366"))
+            Color.parseColor("#4a4f72")
+        }
+        views.setInt(R.id.widget_item_accent, "setBackgroundColor", accentColor)
+
+        // Item number: 01, 02, ...
+        views.setTextViewText(R.id.widget_item_num, "%02d".format(position + 1))
+
+        // Status glyph: ▶ active / ✓ done
+        if (todo.done) {
+            views.setTextViewText(R.id.widget_item_status, "✓")
+            views.setTextColor(R.id.widget_item_status, Color.parseColor("#4a4f72"))
+        } else {
+            views.setTextViewText(R.id.widget_item_status, "▶")
+            views.setTextColor(R.id.widget_item_status, accentColor)
         }
 
-        // Title
+        // Title (dimmed if done)
         views.setTextViewText(R.id.widget_item_title, todo.title)
-        views.setFloat(R.id.widget_item_title, "setAlpha", if (todo.done) 0.45f else 1f)
+        views.setFloat(R.id.widget_item_title, "setAlpha", if (todo.done) 0.4f else 1f)
 
         // Time
         val timeStr = when {
-            todo.allDay -> "하루종일"
-            todo.startTime.isNotEmpty() -> "${todo.startTime}${if (todo.endTime.isNotEmpty()) "–${todo.endTime}" else ""}"
+            todo.allDay -> "ALL DAY"
+            todo.startTime.isNotEmpty() -> "${todo.startTime}${if (todo.endTime.isNotEmpty()) "-${todo.endTime}" else ""}"
             else -> todo.date
         }
         views.setTextViewText(R.id.widget_item_time, timeStr)
 
-        // Category
-        views.setTextViewText(R.id.widget_item_category, todo.category)
+        // Category as [TAG]
+        views.setTextViewText(R.id.widget_item_category, "[${todo.category}]")
+        views.setTextColor(R.id.widget_item_category, accentColor)
 
-        // Done indicator
+        // Check box
         views.setTextViewText(R.id.widget_item_check, if (todo.done) "✓" else "")
+        if (todo.done) {
+            views.setInt(R.id.widget_item_check, "setBackgroundResource", R.drawable.bg_check_done)
+        } else {
+            views.setInt(R.id.widget_item_check, "setBackgroundResource", R.drawable.bg_widget_check)
+        }
 
-        // Fill-in intent for item click (just open app for now)
         val fillIntent = Intent()
         views.setOnClickFillInIntent(R.id.widget_item_root, fillIntent)
 

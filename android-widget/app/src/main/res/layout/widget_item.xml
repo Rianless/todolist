@@ -1,5 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Matches web app .todo-card dark style: card-bg=#0d0f1e, left color bar, corner decoration -->
+<!-- Game quest log item: ▶01 [CATEGORY] title ··· time -->
 <LinearLayout
     xmlns:android="http://schemas.android.com/apk/res/android"
     android:id="@+id/widget_item_root"
@@ -7,18 +7,40 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:paddingTop="8dp"
-    android:paddingBottom="8dp"
+    android:paddingTop="6dp"
+    android:paddingBottom="6dp"
     android:paddingEnd="10dp">
 
-    <!-- Left color bar (3dp, matches web border-left: 3px solid var(--cc)) -->
+    <!-- Left color bar -->
     <View
         android:id="@+id/widget_item_accent"
-        android:layout_width="3dp"
+        android:layout_width="2dp"
         android:layout_height="match_parent"
-        android:minHeight="36dp"
-        android:layout_marginEnd="10dp"
+        android:minHeight="30dp"
         android:background="@drawable/bg_accent_bar" />
+
+    <!-- Status glyph: ▶ active / ✓ done -->
+    <TextView
+        android:id="@+id/widget_item_status"
+        android:layout_width="14dp"
+        android:layout_height="wrap_content"
+        android:text="▶"
+        android:textSize="8sp"
+        android:fontFamily="monospace"
+        android:textColor="#00ffe7"
+        android:gravity="center"
+        android:layout_marginHorizontal="4dp" />
+
+    <!-- Item number: 01 02 ... -->
+    <TextView
+        android:id="@+id/widget_item_num"
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:text="01"
+        android:textSize="8sp"
+        android:fontFamily="monospace"
+        android:textColor="#4a4f72"
+        android:layout_marginEnd="6dp" />
 
     <!-- Content -->
     <LinearLayout
@@ -27,27 +49,25 @@
         android:layout_weight="1"
         android:orientation="vertical">
 
-        <!-- Meta row: category badge + time -->
+        <!-- Category + time row -->
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:orientation="horizontal"
             android:gravity="center_vertical"
-            android:layout_marginBottom="2dp">
+            android:layout_marginBottom="1dp">
 
-            <!-- Category badge (text, colored per category) -->
+            <!-- [CATEGORY] tag -->
             <TextView
                 android:id="@+id/widget_item_category"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:textSize="8sp"
+                android:textSize="7sp"
                 android:fontFamily="monospace"
-                android:letterSpacing="0.05"
                 android:textColor="#00ffe7"
-                android:paddingHorizontal="4dp"
-                android:paddingVertical="1dp" />
+                android:letterSpacing="0.05" />
 
-            <!-- Time (text3 color) -->
+            <!-- Time -->
             <TextView
                 android:id="@+id/widget_item_time"
                 android:layout_width="0dp"
@@ -60,12 +80,12 @@
 
         </LinearLayout>
 
-        <!-- Title (Rajdhani→monospace, text color #e8eaf6) -->
+        <!-- Title -->
         <TextView
             android:id="@+id/widget_item_title"
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
-            android:textSize="13sp"
+            android:textSize="12sp"
             android:textColor="#e8eaf6"
             android:fontFamily="monospace"
             android:singleLine="true"
@@ -73,14 +93,14 @@
 
     </LinearLayout>
 
-    <!-- Check indicator (matches web app done state: cyan when done) -->
+    <!-- Check box -->
     <TextView
         android:id="@+id/widget_item_check"
-        android:layout_width="16dp"
-        android:layout_height="16dp"
-        android:layout_marginStart="8dp"
+        android:layout_width="15dp"
+        android:layout_height="15dp"
+        android:layout_marginStart="6dp"
         android:gravity="center"
-        android:textSize="9sp"
+        android:textSize="8sp"
         android:textColor="#00ffe7"
         android:fontFamily="monospace"
         android:background="@drawable/bg_widget_check" />
