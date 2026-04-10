@@ -982,6 +982,22 @@ body::after {
   border-radius: 6px; padding: 10px 12px; margin: 0 16px 12px;
   font-size: 13px; color: var(--text2); line-height: 1.6;
 }
+.detail-content-box {
+  border: 1px solid var(--border2); border-radius: 8px;
+  padding: 12px 14px; margin: 0 16px 12px;
+  font-size: 13px; color: var(--text); line-height: 1.75;
+  white-space: pre-wrap; word-break: break-word;
+  background: var(--panel2);
+}
+[data-theme="dark"] .detail-content-box {
+  border-color: rgba(0,255,231,0.15);
+  background: rgba(0,255,231,0.03);
+}
+.detail-content-label {
+  font-size: 10px; color: var(--text3); letter-spacing: 1.5px;
+  margin: 12px 16px 4px; display: block;
+}
+[data-theme="dark"] .detail-content-label { color: var(--cyan); opacity: 0.6; }
 
 /* ═══════════════════════════════════════
    CATEGORIES MODAL
@@ -2231,6 +2247,10 @@ body::after {
           <textarea class="form-textarea" id="f_memo" placeholder="메모 내용..."></textarea>
         </div>
         <div class="form-group">
+          <label class="form-label">내용</label>
+          <textarea class="form-textarea" id="f_content" placeholder="상세 내용 (할 일 상세 화면에서만 표시됩니다)" style="min-height:90px;"></textarea>
+        </div>
+        <div class="form-group">
           <label class="form-label">중요도</label>
           <div class="priority-row">
             <button class="prio-btn active-none" data-p="none" onclick="setPrio('none')">없음</button>
@@ -2309,6 +2329,8 @@ body::after {
       <img class="detail-photo-img" id="detailPhotoImg" src="" alt="" onclick="openPhotoViewer(this.src)">
     </div>
     <div class="detail-info" id="detailInfo"></div>
+    <span class="detail-content-label" id="detailContentLabel" style="display:none;">// 내용</span>
+    <div class="detail-content-box" id="detailContent" style="display:none;"></div>
     <div class="detail-note-box" id="detailNote" style="display:none;"></div>
     <div class="detail-actions">
       <button class="detail-btn done-btn" id="detailDoneBtn" onclick="detailToggleDone()">완료</button>
@@ -3704,6 +3726,7 @@ function openAdd(forSub=false, presetDate=null) {
   document.getElementById('f_et').value='';
   document.getElementById('f_loc').value='';
   document.getElementById('f_memo').value='';
+  document.getElementById('f_content').value='';
   document.getElementById('f_repeat').value='none';
   document.getElementById('f_repeatEnd').value='';
   document.getElementById('repeatEndWrap').style.visibility='hidden';
@@ -3740,6 +3763,7 @@ function openEdit(id) {
   document.getElementById('f_et').value = times[1]||'';
   document.getElementById('f_loc').value = item.location||'';
   document.getElementById('f_memo').value = item.memo||'';
+  document.getElementById('f_content').value = item.content||'';
   document.getElementById('f_cat').value = item.category;
   const repeatV = item.repeat||'none';
   document.getElementById('f_repeat').value = repeatV;
@@ -3873,6 +3897,7 @@ function saveItem() {
     time, floor: existing?.floor||'', sub: existing?.sub||'', instructor: existing?.instructor||'',
     location: document.getElementById('f_loc').value,
     memo: document.getElementById('f_memo').value,
+    content: document.getElementById('f_content').value,
     priority: selectedPrio, secret: isSecret, hideTitle: isHideTitle,
     photo: currentPhoto || null,
     repeat: repeatVal, repeatEnd: repeatVal!=='none' ? (document.getElementById('f_repeatEnd').value||null) : null,
@@ -3934,6 +3959,19 @@ function openDetail(id) {
   } else {
     photoWrap.style.display = 'none';
     photoImg.src = '';
+  }
+
+  const contentBox   = document.getElementById('detailContent');
+  const contentLabel = document.getElementById('detailContentLabel');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (item.content && item.content.trim()) {
+    contentBox.textContent = item.content;
+    contentBox.style.display = 'block';
+    contentLabel.textContent = isDark ? '// 내용' : '내용';
+    contentLabel.style.display = 'block';
+  } else {
+    contentBox.style.display = 'none';
+    contentLabel.style.display = 'none';
   }
 
   const noteBox = document.getElementById('detailNote');
