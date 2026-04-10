@@ -3255,14 +3255,18 @@ function _setupCalTouchDrag(dot, item) {
     active = false;
     ghost.style.display = 'none';
     document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
+    // lastT(마지막 touchmove 좌표)와 changedTouches 중 더 신뢰할 수 있는 값 사용
     const t = e.changedTouches[0];
-    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const x = lastT ? lastT.clientX : t.clientX;
+    const y = lastT ? lastT.clientY : t.clientY;
+    const el = document.elementFromPoint(x, y);
     const cell = el?.closest('[data-date]');
     if (cell && _calDragId !== null) {
       const it = items.find(i=>i.id===_calDragId);
       if (it && it.date !== cell.dataset.date) { it.date = cell.dataset.date; saveData(); renderCal(); }
     }
     _calDragId = null;
+    lastT = null;
   });
 
   dot.addEventListener('touchcancel', () => {
