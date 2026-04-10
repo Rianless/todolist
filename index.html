@@ -3199,12 +3199,13 @@ function renderCal() {
 
 function _setupCalTouchDrag(dot, item) {
   const ghost = document.getElementById('calDragGhost');
-  const LONG_PRESS_MS = 500;   // 꾹 눌러야 하는 시간 (ms)
-  const MOVE_THRESHOLD = 8;    // 롱프레스 판정 중 허용 이동 거리 (px)
+  const LONG_PRESS_MS = 250;   // 꾹 눌러야 하는 시간 (ms)
+  const MOVE_THRESHOLD = 12;   // 롱프레스 판정 중 허용 이동 거리 (px)
 
   let pressTimer  = null;
   let active      = false;
   let startX = 0, startY = 0;
+  let lastT = null;
 
   function cancelPress() {
     if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
@@ -3214,6 +3215,7 @@ function _setupCalTouchDrag(dot, item) {
     const t = e.touches[0];
     startX = t.clientX;
     startY = t.clientY;
+    lastT  = t;
 
     pressTimer = setTimeout(() => {
       pressTimer = null;
@@ -3221,25 +3223,24 @@ function _setupCalTouchDrag(dot, item) {
       _calDragId = item.id;
       ghost.textContent = item.title;
       ghost.style.display = 'block';
-      ghost.style.left = t.clientX + 'px';
-      ghost.style.top  = t.clientY + 'px';
-      // 햅틱 피드백 (지원 기기)
-      if (navigator.vibrate) navigator.vibrate(40);
+      ghost.style.left = lastT.clientX + 'px';
+      ghost.style.top  = lastT.clientY + 'px';
+      if (navigator.vibrate) navigator.vibrate(30);
     }, LONG_PRESS_MS);
   }, {passive: true});
 
   dot.addEventListener('touchmove', e => {
     const t = e.touches[0];
+    lastT = t;
 
-    // 롱프레스 대기 중 너무 많이 움직이면 취소
     if (!active) {
+      // 롱프레스 대기 중 많이 움직이면 취소 (스크롤로 간주)
       const dx = t.clientX - startX;
       const dy = t.clientY - startY;
       if (Math.hypot(dx, dy) > MOVE_THRESHOLD) cancelPress();
       return;
     }
 
-    // 드래그 활성 중
     ghost.style.left = t.clientX + 'px';
     ghost.style.top  = t.clientY + 'px';
     document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
