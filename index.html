@@ -4010,9 +4010,9 @@ function openDetail(id) {
 
   const color = getCatColor(item.category);
   const prioLabels = {high:'🔴 높음',mid:'🟡 중간',low:'🟢 낮음',none:'-'};
-  const cheondoLabel = isCheongdo(item.category) ? '<span style="font-size:10px;padding:2px 7px;border:1px solid rgba(157,0,255,0.4);color:var(--purple);border-radius:10px;margin-left:6px;">청도활동</span>' : '';
+  const cheondoLabel = isCheongdo(item.category) ? `<div style="margin-top:5px;"><span style="font-size:10px;padding:2px 7px;border:1px solid rgba(157,0,255,0.4);color:var(--purple);border-radius:10px;">청도활동</span></div>` : '';
 
-  document.getElementById('detailTitle').innerHTML = `${item.title}${cheondoLabel}`;
+  document.getElementById('detailTitle').innerHTML = `<div style="word-break:keep-all;line-height:1.4;">${item.title}</div>${cheondoLabel}`;
   document.getElementById('detailTitle').style.color = color;
 
   const info = document.getElementById('detailInfo');
