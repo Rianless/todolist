@@ -2506,20 +2506,26 @@ async function syncItemsToAPI() {
     const catMap = {};
     categories.forEach(c => { catMap[c.name] = c.color; });
 
-    const rows = items.map(item => ({
-      id: item.id,
-      date: item.date,
-      title: item.title,
-      start_time: item.startTime || '',
-      end_time: item.endTime || '',
-      all_day: item.allDay || false,
-      category: item.category || '기타',
-      category_color: catMap[item.category] || item.categoryColor || '#636366',
-      done: item.done || false,
-      location: item.location || '',
-      note: item.note || '',
-      content: item.content || ''
-    }));
+    const rows = items.map(item => {
+      // item.time 형식: "13:00~15:00" 또는 "13:00" 또는 ""
+      const timeParts = item.time ? item.time.split('~') : [];
+      const startTime = item.startTime || timeParts[0] || '';
+      const endTime   = item.endTime   || timeParts[1] || '';
+      return {
+        id: item.id,
+        date: item.date,
+        title: item.title,
+        start_time: startTime,
+        end_time: endTime,
+        all_day: item.allDay || false,
+        category: item.category || '기타',
+        category_color: catMap[item.category] || item.categoryColor || '#636366',
+        done: item.done || false,
+        location: item.location || '',
+        note: item.note || item.memo || '',
+        content: item.content || ''
+      };
+    });
     await fetch(API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
@@ -2574,17 +2580,23 @@ async function loadItemsFromAPI() {
       items = data.map(row => {
         const cat = row.category || '기타';
         const color = catMap[cat] || CAT_COLORS_DEFAULT[cat] || row.category_color || '#636366';
+        // start_time / end_time → time 필드로 재조합
+        const st = row.start_time || '';
+        const et = row.end_time   || '';
+        const time = st && et ? `${st}~${et}` : st;
         return {
           id: row.id,
           date: row.date,
           title: row.title,
-          startTime: row.start_time || '',
-          endTime: row.end_time || '',
+          time: time,
+          startTime: st,
+          endTime: et,
           allDay: row.all_day || false,
           category: cat,
           categoryColor: color,
           done: row.done || false,
           location: row.location || '',
+          memo: row.note || '',
           note: row.note || '',
           content: row.content || ''
         };
