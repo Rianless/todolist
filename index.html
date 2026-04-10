@@ -3,8 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-<title>TDL</title>
-<link rel="manifest" href="/manifest.json">
+<title>To Do List // Rianless</title>
 <style>
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
@@ -2478,6 +2477,9 @@ function isCheongdo(name) {
 const STORAGE_KEY = 'rianless_todo_v1';
 const API_URL = '/api/todos';
 
+// API 로드 완료 전에 빈 items로 Supabase 덮어쓰기 방지
+let itemsLoaded = false;
+
 // items는 API로, 나머지는 localStorage로 저장
 function saveData() {
   try {
@@ -2493,13 +2495,17 @@ function saveData() {
   } catch(e) {
     console.error('[saveData] localStorage 실패:', e);
   }
-  // items는 API로 저장 (비동기, fire-and-forget)
-  syncItemsToAPI();
+  // items는 API로 저장 (비동기, fire-and-forget) - 로드 완료 후에만
+  if (itemsLoaded) syncItemsToAPI();
 }
 
 async function syncItemsToAPI() {
   try {
     if (items.length === 0) return;
+    // 카테고리 색상 맵: 로컬 categories 우선
+    const catMap = {};
+    categories.forEach(c => { catMap[c.name] = c.color; });
+
     const rows = items.map(item => ({
       id: item.id,
       date: item.date,
@@ -2508,7 +2514,7 @@ async function syncItemsToAPI() {
       end_time: item.endTime || '',
       all_day: item.allDay || false,
       category: item.category || '기타',
-      category_color: item.categoryColor || '#636366',
+      category_color: catMap[item.category] || item.categoryColor || '#636366',
       done: item.done || false,
       location: item.location || '',
       note: item.note || '',
@@ -2561,21 +2567,30 @@ async function loadItemsFromAPI() {
     if (!res.ok) throw new Error('API 응답 오류: ' + res.status);
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
-      items = data.map(row => ({
-        id: row.id,
-        date: row.date,
-        title: row.title,
-        startTime: row.start_time || '',
-        endTime: row.end_time || '',
-        allDay: row.all_day || false,
-        category: row.category || '기타',
-        categoryColor: row.category_color || '#636366',
-        done: row.done || false,
-        location: row.location || '',
-        note: row.note || '',
-        content: row.content || ''
-      }));
+      // 카테고리 색상 맵: 로컬 categories → CAT_COLORS_DEFAULT → Supabase 저장값 순 우선순위
+      const catMap = {};
+      categories.forEach(c => { catMap[c.name] = c.color; });
+
+      items = data.map(row => {
+        const cat = row.category || '기타';
+        const color = catMap[cat] || CAT_COLORS_DEFAULT[cat] || row.category_color || '#636366';
+        return {
+          id: row.id,
+          date: row.date,
+          title: row.title,
+          startTime: row.start_time || '',
+          endTime: row.end_time || '',
+          allDay: row.all_day || false,
+          category: cat,
+          categoryColor: color,
+          done: row.done || false,
+          location: row.location || '',
+          note: row.note || '',
+          content: row.content || ''
+        };
+      });
       console.log('[loadItemsFromAPI] 불러오기 성공, items:', items.length);
+      itemsLoaded = true;
       // 화면 갱신
       buildFilters();
       buildCatSelect();
@@ -2584,6 +2599,7 @@ async function loadItemsFromAPI() {
     }
   } catch(e) {
     console.error('[loadItemsFromAPI] 실패:', e);
+    itemsLoaded = true; // 실패해도 새 항목 추가/저장은 허용
   }
 }
 
@@ -4356,7 +4372,12 @@ let _deferredInstall = null;
 window.addEventListener('beforeinstallprompt', e => {
   e.preventDefault();
   _deferredInstall = e;
-  // 설치 배너 숨김
+  const bar = document.getElementById('pwaBar');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  document.getElementById('pwaBarText').textContent = isDark
+    ? '// SYSTEM_INSTALL :: 홈 화면에 추가'
+    : '홈 화면에 추가하면 앱처럼 사용할 수 있어요';
+  bar.classList.add('show');
 });
 window.addEventListener('appinstalled', () => {
   document.getElementById('pwaBar').classList.remove('show');
@@ -4381,7 +4402,7 @@ function dismissPWA() {
   const boot = document.getElementById('bootScreen');
 
   // Skip if already booted this session
-  if (sessionStorage.getItem('booted') || new URLSearchParams(window.location.search).get('date')) {
+  if (sessionStorage.getItem('booted')) {
     boot.style.display = 'none'; return;
   }
 
@@ -4453,22 +4474,6 @@ updateProgress();
   const now = new Date();
   const d = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
   el.textContent = `SYS:ONLINE  //  AUTH:GRANTED  //  ENC:AES-256  //  DB:SYNCED  //  ${d}`;
-})();
-
-/* ── 위젯 날짜 탭: ?date=yyyy-MM-dd 처리 ── */
-(function() {
-  const params = new URLSearchParams(window.location.search);
-  const dateParam = params.get('date');
-  if (!dateParam) return;
-  const d = new Date(dateParam + 'T00:00:00');
-  if (isNaN(d.getTime())) return;
-  calY = d.getFullYear();
-  calM = d.getMonth();
-  renderCal();
-  setTimeout(function() {
-    const evts = (typeof items !== 'undefined' ? items : []).filter(function(i) { return i.date === dateParam; });
-    openDayModal(dateParam, evts);
-  }, 300);
 })();
 </script>
 </body>
