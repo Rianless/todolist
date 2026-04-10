@@ -1031,6 +1031,20 @@ body::after {
 .cat-act-btn:hover { border-color: var(--accent); color: var(--accent); }
 .cat-act-btn.del { border-color: rgba(255,45,85,0.3); color: var(--red); opacity:0.6; }
 .cat-act-btn.del:hover { opacity:1; }
+.cat-edit-form {
+  background: var(--panel2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 12px; margin: 4px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cat-edit-input {
+  flex: 1; background: var(--input-bg); border: 1px solid var(--border2);
+  color: var(--text); border-radius: 6px; padding: 7px 10px;
+  font-family: var(--font-main); font-size: 13px; width: 100%;
+}
+.cat-edit-input:focus { outline: none; border-color: var(--accent); }
+.cat-edit-btns { display: flex; gap: 8px; }
+.cat-edit-btns .btn-cancel { flex:1; padding: 8px; }
+.cat-edit-btns .btn-save   { flex:2; padding: 8px; }
 .add-cat-btn {
   width:100%; padding:10px; border:1px dashed var(--border2);
   background:transparent; color:var(--text3); cursor:pointer;
@@ -3426,6 +3440,7 @@ function renderSubs() {
 
 /* ── CATEGORY LIST (마이페이지 내) ── */
 function renderCatLists() {
+  _editingCatName = null;
   const cheongdoEl = document.getElementById('cheongdoCatList');
   const otherEl    = document.getElementById('otherCatList');
   cheongdoEl.innerHTML = '';
@@ -3449,6 +3464,7 @@ function renderCatLists() {
       <div class="cat-color-dot" style="background:${cat.color}"></div>
       <div class="cat-name">${cat.name}</div>
       <div class="cat-actions">
+        <button class="cat-act-btn" onclick="openEditCatForm('${cat.name}')">수정</button>
         <button class="cat-act-btn del" onclick="deleteCat(${globalIdx})">삭제</button>
       </div>`;
 
@@ -3555,6 +3571,86 @@ function saveNewCat() {
   renderCatLists();
   buildFilters();
   buildCatSelect();
+}
+
+let _editingCatName = null;
+let _editingCatColor = null;
+
+function openEditCatForm(catName) {
+  const existing = document.getElementById('catEditFormInline');
+  if (existing) existing.remove();
+  if (_editingCatName === catName) { _editingCatName = null; return; }
+
+  const cat = categories.find(c => c.name === catName);
+  if (!cat) return;
+  _editingCatName = catName;
+  _editingCatColor = cat.color;
+
+  const otherEl = document.getElementById('otherCatList');
+  const rows = otherEl.querySelectorAll('.cat-item');
+  let targetRow = null;
+  rows.forEach(r => { if (r.dataset.name === catName) targetRow = r; });
+  if (!targetRow) return;
+
+  const form = document.createElement('div');
+  form.id = 'catEditFormInline';
+  form.className = 'cat-edit-form';
+  form.innerHTML = `
+    <div>
+      <label class="form-label" style="font-size:11px;margin-bottom:6px;display:block;">카테고리 이름</label>
+      <input class="cat-edit-input" id="catEditName" type="text" value="${cat.name}">
+    </div>
+    <div>
+      <label class="form-label" style="font-size:11px;margin-bottom:6px;display:block;">색상</label>
+      <div class="color-swatches" id="catEditSwatches"></div>
+    </div>
+    <div class="cat-edit-btns">
+      <button class="btn-cancel" onclick="cancelEditCat()">취소</button>
+      <button class="btn-save" onclick="saveEditCat()">저장</button>
+    </div>`;
+  targetRow.insertAdjacentElement('afterend', form);
+  _buildEditSwatches();
+  document.getElementById('catEditName').focus();
+}
+
+function _buildEditSwatches() {
+  const el = document.getElementById('catEditSwatches');
+  if (!el) return;
+  el.innerHTML = '';
+  SWATCH_COLORS.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = `color-swatch${c === _editingCatColor ? ' selected' : ''}`;
+    sw.style.background = c;
+    sw.onclick = () => { _editingCatColor = c; _buildEditSwatches(); };
+    el.appendChild(sw);
+  });
+}
+
+function saveEditCat() {
+  const newName = (document.getElementById('catEditName').value || '').trim();
+  if (!newName) { document.getElementById('catEditName').focus(); return; }
+  if (newName !== _editingCatName && categories.find(c => c.name === newName)) {
+    alert('이미 있는 카테고리 이름입니다'); return;
+  }
+  const idx = categories.findIndex(c => c.name === _editingCatName);
+  if (idx === -1) return;
+  const oldName = _editingCatName;
+  categories[idx].name  = newName;
+  categories[idx].color = _editingCatColor;
+  if (oldName !== newName) {
+    items.forEach(item => { if (item.category === oldName) item.category = newName; });
+  }
+  _editingCatName = null;
+  saveData();
+  buildFilters();
+  buildCatSelect();
+  renderCatLists();
+}
+
+function cancelEditCat() {
+  _editingCatName = null;
+  const form = document.getElementById('catEditFormInline');
+  if (form) form.remove();
 }
 
 function deleteCat(i) {
