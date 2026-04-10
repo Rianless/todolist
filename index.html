@@ -982,6 +982,22 @@ body::after {
   border-radius: 6px; padding: 10px 12px; margin: 0 16px 12px;
   font-size: 13px; color: var(--text2); line-height: 1.6;
 }
+.detail-content-box {
+  border: 1px solid var(--border2); border-radius: 8px;
+  padding: 12px 14px; margin: 0 16px 12px;
+  font-size: 13px; color: var(--text); line-height: 1.75;
+  white-space: pre-wrap; word-break: break-word;
+  background: var(--panel2);
+}
+[data-theme="dark"] .detail-content-box {
+  border-color: rgba(0,255,231,0.15);
+  background: rgba(0,255,231,0.03);
+}
+.detail-content-label {
+  font-size: 10px; color: var(--text3); letter-spacing: 1.5px;
+  margin: 12px 16px 4px; display: block;
+}
+[data-theme="dark"] .detail-content-label { color: var(--cyan); opacity: 0.6; }
 
 /* ═══════════════════════════════════════
    CATEGORIES MODAL
@@ -1004,6 +1020,11 @@ body::after {
 /* calendar drag */
 .cal-dot[draggable="true"] { cursor: grab; }
 .cal-dot[draggable="true"]:active { cursor: grabbing; }
+.cal-dot.drag-ready {
+  opacity: 0.6;
+  outline: 1px dashed var(--accent);
+  border-radius: 3px;
+}
 .cal-cell.drag-over {
   background: rgba(0,255,231,0.08) !important;
   outline: 1px dashed var(--accent);
@@ -1031,6 +1052,20 @@ body::after {
 .cat-act-btn:hover { border-color: var(--accent); color: var(--accent); }
 .cat-act-btn.del { border-color: rgba(255,45,85,0.3); color: var(--red); opacity:0.6; }
 .cat-act-btn.del:hover { opacity:1; }
+.cat-edit-form {
+  background: var(--panel2); border: 1px solid var(--border2);
+  border-radius: 8px; padding: 12px; margin: 4px 0;
+  display: flex; flex-direction: column; gap: 10px;
+}
+.cat-edit-input {
+  flex: 1; background: var(--input-bg); border: 1px solid var(--border2);
+  color: var(--text); border-radius: 6px; padding: 7px 10px;
+  font-family: var(--font-main); font-size: 13px; width: 100%;
+}
+.cat-edit-input:focus { outline: none; border-color: var(--accent); }
+.cat-edit-btns { display: flex; gap: 8px; }
+.cat-edit-btns .btn-cancel { flex:1; padding: 8px; }
+.cat-edit-btns .btn-save   { flex:2; padding: 8px; }
 .add-cat-btn {
   width:100%; padding:10px; border:1px dashed var(--border2);
   background:transparent; color:var(--text3); cursor:pointer;
@@ -1042,10 +1077,11 @@ body::after {
 /* Color picker */
 .color-swatches { display:flex; flex-wrap:wrap; gap:6px; margin-top:6px; }
 .color-swatch {
-  width:24px; height:24px; border-radius:50%; cursor:pointer;
-  border: 2px solid transparent; transition: border 0.15s;
+  width:22px; height:22px; border-radius:50%; cursor:pointer;
+  border: 2px solid transparent; transition: border 0.15s, transform 0.1s;
 }
-.color-swatch.selected { border-color: var(--text); }
+.color-swatch:active { transform: scale(0.9); }
+.color-swatch.selected { border-color: var(--text); transform: scale(1.15); }
 
 /* ═══════════════════════════════════════
    UTILITIES
@@ -2213,8 +2249,12 @@ body::after {
           </div>
         </div>
         <div class="form-group">
+          <label class="form-label">내용</label>
+          <textarea class="form-textarea" id="f_content" placeholder="상세 내용 (할 일 상세 화면에서만 표시됩니다)" style="min-height:90px;"></textarea>
+        </div>
+        <div class="form-group">
           <label class="form-label">메모</label>
-          <textarea class="form-textarea" id="f_memo" placeholder="메모 내용..."></textarea>
+          <textarea class="form-textarea" id="f_memo" placeholder="메모 내용..." style="min-height:40px;max-height:60px;resize:none;"></textarea>
         </div>
         <div class="form-group">
           <label class="form-label">중요도</label>
@@ -2295,6 +2335,8 @@ body::after {
       <img class="detail-photo-img" id="detailPhotoImg" src="" alt="" onclick="openPhotoViewer(this.src)">
     </div>
     <div class="detail-info" id="detailInfo"></div>
+    <span class="detail-content-label" id="detailContentLabel" style="display:none;">// 내용</span>
+    <div class="detail-content-box" id="detailContent" style="display:none;"></div>
     <div class="detail-note-box" id="detailNote" style="display:none;"></div>
     <div class="detail-actions">
       <button class="detail-btn done-btn" id="detailDoneBtn" onclick="detailToggleDone()">완료</button>
@@ -2410,7 +2452,24 @@ const CAT_COLORS_DEFAULT = {
 // 청도활동 그룹에 속하는 카테고리들
 const CHEONGDO_CATS = ['밀착상담','자신감회복','취업역량강화','진로탐색','지역맞춤형','사례관리'];
 
-const SWATCH_COLORS = ['#ff2d55','#ff6600','#ffcc00','#39ff14','#00d4ff','#0055ff','#9d00ff','#ff6ef7','#ff00aa','#00ffe7','#4a4f72','#888888'];
+const SWATCH_COLORS = [
+  // 레드-핑크
+  '#ff2d55','#ff3b30','#ff6b6b','#ff8fa3','#ffb3c1',
+  // 오렌지-옐로우
+  '#ff6600','#ff9500','#ffcc00','#ffd60a','#fff176',
+  // 그린
+  '#39ff14','#30d158','#34c759','#a8ff78','#b5ead7',
+  // 블루-시안
+  '#00ffe7','#00d4ff','#0055ff','#007aff','#64d2ff',
+  // 퍼플-마젠타
+  '#9d00ff','#bf5af2','#ff00aa','#ff6ef7','#d4a5ff',
+  // 브라운-뉴트럴
+  '#a0522d','#c8956c','#d4a574','#e8c49a','#f5deb3',
+  // 다크-그레이
+  '#1c1c2e','#2c2c4e','#4a4f72','#636363','#888888',
+  // 화이트 계열
+  '#aaaaaa','#cccccc','#e0e0e0','#ffffff',
+];
 
 let categories = Object.entries(CAT_COLORS_DEFAULT).map(([name,color]) => ({name,color}));
 
@@ -2477,7 +2536,7 @@ function isCheongdo(name) {
 const STORAGE_KEY = 'rianless_todo_v1';
 const API_URL = '/api/todos';
 
-// API 로드 완료 전 빈 items로 Supabase 덮어쓰기 방지
+// API 로드 완료 전에 빈 items로 Supabase 덮어쓰기 방지
 let itemsLoaded = false;
 
 // items는 API로, 나머지는 localStorage로 저장
@@ -2502,27 +2561,35 @@ function saveData() {
 async function syncItemsToAPI() {
   try {
     if (items.length === 0) return;
+    // 카테고리 색상 맵: 로컬 categories 우선
     const catMap = {};
     categories.forEach(c => { catMap[c.name] = c.color; });
 
     const rows = items.map(item => {
-      // time 필드('13:00~15:00')에서 start/end 분리
+      // item.time 형식: "13:00~15:00" 또는 "13:00" 또는 ""
       const timeParts = item.time ? item.time.split('~') : [];
-      const st = item.startTime || timeParts[0]?.trim() || '';
-      const et = item.endTime   || timeParts[1]?.trim() || '';
+      const startTime = item.startTime || timeParts[0] || '';
+      const endTime   = item.endTime   || timeParts[1] || '';
       return {
         id: item.id,
         date: item.date,
         title: item.title,
-        start_time: st,
-        end_time: et,
+        start_time: startTime,
+        end_time: endTime,
         all_day: item.allDay || false,
         category: item.category || '기타',
-        category_color: catMap[item.category] || CAT_COLORS_DEFAULT[item.category] || item.categoryColor || '#636366',
+        category_color: catMap[item.category] || item.categoryColor || '#636366',
         done: item.done || false,
         location: item.location || '',
         note: item.note || item.memo || '',
-        content: item.content || ''
+        content: item.content || '',
+        secret: item.secret || false,
+        hide_title: item.hideTitle || false,
+        priority: item.priority || 'none',
+        photo: item.photo || '',
+        repeat: item.repeat || 'none',
+        repeat_end: item.repeatEnd || '',
+        memo: item.memo || ''
       };
     });
     await fetch(API_URL, {
@@ -2572,15 +2639,17 @@ async function loadItemsFromAPI() {
     if (!res.ok) throw new Error('API 응답 오류: ' + res.status);
     const data = await res.json();
     if (Array.isArray(data) && data.length > 0) {
+      // 카테고리 색상 맵: 로컬 categories → CAT_COLORS_DEFAULT → Supabase 저장값 순 우선순위
       const catMap = {};
       categories.forEach(c => { catMap[c.name] = c.color; });
 
       items = data.map(row => {
         const cat = row.category || '기타';
         const color = catMap[cat] || CAT_COLORS_DEFAULT[cat] || row.category_color || '#636366';
+        // start_time / end_time → time 필드로 재조합
         const st = row.start_time || '';
         const et = row.end_time   || '';
-        const time = st && et ? st + '~' + et : st;
+        const time = st && et ? `${st}~${et}` : st;
         return {
           id: row.id,
           date: row.date,
@@ -2593,9 +2662,15 @@ async function loadItemsFromAPI() {
           categoryColor: color,
           done: row.done || false,
           location: row.location || '',
-          memo: row.note || '',
+          memo: row.memo || row.note || '',
           note: row.note || '',
-          content: row.content || ''
+          content: row.content || '',
+          secret: row.secret || false,
+          hideTitle: row.hide_title || false,
+          priority: row.priority || 'none',
+          photo: row.photo || null,
+          repeat: row.repeat || 'none',
+          repeatEnd: row.repeat_end || null
         };
       });
       console.log('[loadItemsFromAPI] 불러오기 성공, items:', items.length);
@@ -2608,7 +2683,7 @@ async function loadItemsFromAPI() {
     }
   } catch(e) {
     console.error('[loadItemsFromAPI] 실패:', e);
-    itemsLoaded = true; // 실패해도 새 항목 추가/저장 허용
+    itemsLoaded = true; // 실패해도 새 항목 추가/저장은 허용
   }
 }
 
@@ -3137,24 +3212,50 @@ function renderCal() {
 
 function _setupCalTouchDrag(dot, item) {
   const ghost = document.getElementById('calDragGhost');
-  let active = false;
+  const LONG_PRESS_MS = 250;   // 꾹 눌러야 하는 시간 (ms)
+  const MOVE_THRESHOLD = 12;   // 롱프레스 판정 중 허용 이동 거리 (px)
+
+  let pressTimer  = null;
+  let active      = false;
+  let startX = 0, startY = 0;
+  let lastT = null;
+
+  function cancelPress() {
+    if (pressTimer) { clearTimeout(pressTimer); pressTimer = null; }
+  }
 
   dot.addEventListener('touchstart', e => {
-    active = true;
-    _calDragId = item.id;
-    ghost.textContent = item.title;
-    ghost.style.display = 'block';
     const t = e.touches[0];
-    ghost.style.left = t.clientX + 'px';
-    ghost.style.top  = t.clientY + 'px';
+    startX = t.clientX;
+    startY = t.clientY;
+    lastT  = t;
+
+    pressTimer = setTimeout(() => {
+      pressTimer = null;
+      active = true;
+      _calDragId = item.id;
+      ghost.textContent = item.title;
+      ghost.style.display = 'block';
+      ghost.style.left = lastT.clientX + 'px';
+      ghost.style.top  = lastT.clientY + 'px';
+      if (navigator.vibrate) navigator.vibrate(30);
+    }, LONG_PRESS_MS);
   }, {passive: true});
 
   dot.addEventListener('touchmove', e => {
-    if (!active) return;
     const t = e.touches[0];
+    lastT = t;
+
+    if (!active) {
+      // 롱프레스 대기 중 많이 움직이면 취소 (스크롤로 간주)
+      const dx = t.clientX - startX;
+      const dy = t.clientY - startY;
+      if (Math.hypot(dx, dy) > MOVE_THRESHOLD) cancelPress();
+      return;
+    }
+
     ghost.style.left = t.clientX + 'px';
     ghost.style.top  = t.clientY + 'px';
-    // 현재 셀 강조
     document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
     const el = document.elementFromPoint(t.clientX, t.clientY);
     el?.closest('[data-date]')?.classList.add('drag-over');
@@ -3162,17 +3263,30 @@ function _setupCalTouchDrag(dot, item) {
   }, {passive: false});
 
   dot.addEventListener('touchend', e => {
+    cancelPress();
     if (!active) return;
     active = false;
     ghost.style.display = 'none';
     document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
+    // lastT(마지막 touchmove 좌표)와 changedTouches 중 더 신뢰할 수 있는 값 사용
     const t = e.changedTouches[0];
-    const el = document.elementFromPoint(t.clientX, t.clientY);
+    const x = lastT ? lastT.clientX : t.clientX;
+    const y = lastT ? lastT.clientY : t.clientY;
+    const el = document.elementFromPoint(x, y);
     const cell = el?.closest('[data-date]');
     if (cell && _calDragId !== null) {
       const it = items.find(i=>i.id===_calDragId);
-      if (it && it.date !== cell.dataset.date) { it.date = cell.dataset.date; renderCal(); }
+      if (it && it.date !== cell.dataset.date) { it.date = cell.dataset.date; saveData(); renderCal(); }
     }
+    _calDragId = null;
+    lastT = null;
+  });
+
+  dot.addEventListener('touchcancel', () => {
+    cancelPress();
+    active = false;
+    ghost.style.display = 'none';
+    document.querySelectorAll('.cal-cell.drag-over').forEach(c=>c.classList.remove('drag-over'));
     _calDragId = null;
   });
 }
@@ -3423,6 +3537,7 @@ function renderSubs() {
 
 /* ── CATEGORY LIST (마이페이지 내) ── */
 function renderCatLists() {
+  _editingCatName = null;
   const cheongdoEl = document.getElementById('cheongdoCatList');
   const otherEl    = document.getElementById('otherCatList');
   cheongdoEl.innerHTML = '';
@@ -3446,6 +3561,7 @@ function renderCatLists() {
       <div class="cat-color-dot" style="background:${cat.color}"></div>
       <div class="cat-name">${cat.name}</div>
       <div class="cat-actions">
+        <button class="cat-act-btn" onclick="openEditCatForm('${cat.name}')">수정</button>
         <button class="cat-act-btn del" onclick="deleteCat(${globalIdx})">삭제</button>
       </div>`;
 
@@ -3554,6 +3670,86 @@ function saveNewCat() {
   buildCatSelect();
 }
 
+let _editingCatName = null;
+let _editingCatColor = null;
+
+function openEditCatForm(catName) {
+  const existing = document.getElementById('catEditFormInline');
+  if (existing) existing.remove();
+  if (_editingCatName === catName) { _editingCatName = null; return; }
+
+  const cat = categories.find(c => c.name === catName);
+  if (!cat) return;
+  _editingCatName = catName;
+  _editingCatColor = cat.color;
+
+  const otherEl = document.getElementById('otherCatList');
+  const rows = otherEl.querySelectorAll('.cat-item');
+  let targetRow = null;
+  rows.forEach(r => { if (r.dataset.name === catName) targetRow = r; });
+  if (!targetRow) return;
+
+  const form = document.createElement('div');
+  form.id = 'catEditFormInline';
+  form.className = 'cat-edit-form';
+  form.innerHTML = `
+    <div>
+      <label class="form-label" style="font-size:11px;margin-bottom:6px;display:block;">카테고리 이름</label>
+      <input class="cat-edit-input" id="catEditName" type="text" value="${cat.name}">
+    </div>
+    <div>
+      <label class="form-label" style="font-size:11px;margin-bottom:6px;display:block;">색상</label>
+      <div class="color-swatches" id="catEditSwatches"></div>
+    </div>
+    <div class="cat-edit-btns">
+      <button class="btn-cancel" onclick="cancelEditCat()">취소</button>
+      <button class="btn-save" onclick="saveEditCat()">저장</button>
+    </div>`;
+  targetRow.insertAdjacentElement('afterend', form);
+  _buildEditSwatches();
+  document.getElementById('catEditName').focus();
+}
+
+function _buildEditSwatches() {
+  const el = document.getElementById('catEditSwatches');
+  if (!el) return;
+  el.innerHTML = '';
+  SWATCH_COLORS.forEach(c => {
+    const sw = document.createElement('div');
+    sw.className = `color-swatch${c === _editingCatColor ? ' selected' : ''}`;
+    sw.style.background = c;
+    sw.onclick = () => { _editingCatColor = c; _buildEditSwatches(); };
+    el.appendChild(sw);
+  });
+}
+
+function saveEditCat() {
+  const newName = (document.getElementById('catEditName').value || '').trim();
+  if (!newName) { document.getElementById('catEditName').focus(); return; }
+  if (newName !== _editingCatName && categories.find(c => c.name === newName)) {
+    alert('이미 있는 카테고리 이름입니다'); return;
+  }
+  const idx = categories.findIndex(c => c.name === _editingCatName);
+  if (idx === -1) return;
+  const oldName = _editingCatName;
+  categories[idx].name  = newName;
+  categories[idx].color = _editingCatColor;
+  if (oldName !== newName) {
+    items.forEach(item => { if (item.category === oldName) item.category = newName; });
+  }
+  _editingCatName = null;
+  saveData();
+  buildFilters();
+  buildCatSelect();
+  renderCatLists();
+}
+
+function cancelEditCat() {
+  _editingCatName = null;
+  const form = document.getElementById('catEditFormInline');
+  if (form) form.remove();
+}
+
 function deleteCat(i) {
   if (isCheongdo(categories[i].name)) { alert('청도활동 카테고리는 삭제할 수 없습니다'); return; }
   if (!confirm(`"${categories[i].name}" 카테고리를 삭제할까요?`)) return;
@@ -3605,6 +3801,7 @@ function openAdd(forSub=false, presetDate=null) {
   document.getElementById('f_et').value='';
   document.getElementById('f_loc').value='';
   document.getElementById('f_memo').value='';
+  document.getElementById('f_content').value='';
   document.getElementById('f_repeat').value='none';
   document.getElementById('f_repeatEnd').value='';
   document.getElementById('repeatEndWrap').style.visibility='hidden';
@@ -3641,6 +3838,7 @@ function openEdit(id) {
   document.getElementById('f_et').value = times[1]||'';
   document.getElementById('f_loc').value = item.location||'';
   document.getElementById('f_memo').value = item.memo||'';
+  document.getElementById('f_content').value = item.content||'';
   document.getElementById('f_cat').value = item.category;
   const repeatV = item.repeat||'none';
   document.getElementById('f_repeat').value = repeatV;
@@ -3774,6 +3972,7 @@ function saveItem() {
     time, floor: existing?.floor||'', sub: existing?.sub||'', instructor: existing?.instructor||'',
     location: document.getElementById('f_loc').value,
     memo: document.getElementById('f_memo').value,
+    content: document.getElementById('f_content').value,
     priority: selectedPrio, secret: isSecret, hideTitle: isHideTitle,
     photo: currentPhoto || null,
     repeat: repeatVal, repeatEnd: repeatVal!=='none' ? (document.getElementById('f_repeatEnd').value||null) : null,
@@ -3835,6 +4034,19 @@ function openDetail(id) {
   } else {
     photoWrap.style.display = 'none';
     photoImg.src = '';
+  }
+
+  const contentBox   = document.getElementById('detailContent');
+  const contentLabel = document.getElementById('detailContentLabel');
+  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
+  if (item.content && item.content.trim()) {
+    contentBox.textContent = item.content;
+    contentBox.style.display = 'block';
+    contentLabel.textContent = isDark ? '// 내용' : '내용';
+    contentLabel.style.display = 'block';
+  } else {
+    contentBox.style.display = 'none';
+    contentLabel.style.display = 'none';
   }
 
   const noteBox = document.getElementById('detailNote');
