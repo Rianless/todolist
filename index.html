@@ -4737,6 +4737,28 @@ updateProgress();
   const d = `${now.getFullYear()}.${String(now.getMonth()+1).padStart(2,'0')}.${String(now.getDate()).padStart(2,'0')}`;
   el.textContent = `SYS:ONLINE  //  AUTH:GRANTED  //  ENC:AES-256  //  DB:SYNCED  //  ${d}`;
 })();
+
+// 위젯에서 ?openDetail=<id> 로 열렸을 때 자동으로 상세 팝업 띄우기
+(function() {
+  const params = new URLSearchParams(window.location.search);
+  const detailId = params.get('openDetail');
+  if (!detailId) return;
+  // loadData()가 비동기일 수 있으므로 items가 채워질 때까지 잠시 대기
+  function tryOpen(attempts) {
+    const id = parseInt(detailId, 10);
+    if (typeof openDetail === 'function' && typeof items !== 'undefined' && items.length > 0) {
+      const found = items.find(i => i.id === id);
+      if (found) {
+        openDetail(id);
+        // URL에서 파라미터 제거 (히스토리 오염 방지)
+        history.replaceState({}, '', window.location.pathname);
+        return;
+      }
+    }
+    if (attempts > 0) setTimeout(() => tryOpen(attempts - 1), 200);
+  }
+  setTimeout(() => tryOpen(15), 300);
+})();
 </script>
 </body>
 </html>
