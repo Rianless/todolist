@@ -487,6 +487,24 @@ body::after {
 }
 [data-theme="light"] .cat-badge { font-family: 'Noto Sans KR', sans-serif; }
 .todo-time { font-size: 9px; color: var(--text3); }
+
+.allday-label {
+  display: inline-flex; align-items: center; gap: 8px;
+  cursor: pointer; user-select: none;
+}
+.allday-label-text {
+  font-size: 12px; color: var(--text2); font-family: var(--font-main);
+  letter-spacing: 0.5px;
+}
+[data-theme="dark"] .allday-label-text { letter-spacing: 1.5px; color: var(--cyan); opacity: 0.8; }
+.allday-badge {
+  display: inline-block;
+  font-size: 9px; padding: 1px 7px;
+  border: 1px solid var(--accent); border-radius: 10px;
+  color: var(--accent); background: rgba(0,85,255,0.07);
+  font-family: var(--font-main); letter-spacing: 0.5px;
+}
+[data-theme="dark"] .allday-badge { background: rgba(0,255,231,0.08); }
 .importance-star { font-size: 10px; }
 
 .todo-title {
@@ -2208,7 +2226,13 @@ body::after {
             <select class="form-select" id="f_cat"></select>
           </div>
         </div>
-        <div class="form-group form-row-2">
+        <div class="form-group" style="margin-bottom:6px;">
+          <label class="allday-label" for="f_allday">
+            <input type="checkbox" id="f_allday" onchange="toggleAlldayMode(this.checked)" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer;">
+            <span class="allday-label-text">하루종일</span>
+          </label>
+        </div>
+        <div class="form-group form-row-2" id="timeInputWrap">
           <div>
             <label class="form-label">시작 시간</label>
             <input class="form-input" id="f_st" type="time">
@@ -3006,7 +3030,7 @@ function makeCard(item) {
           <div class="todo-meta">
             <span class="cat-badge" style="color:${color};border-color:${color};">${item.category}</span>
             ${cheongdoBadge}
-            ${item.time ? `<span class="todo-time">${item.time}</span>` : ''}
+            ${item.time ? `<span class="todo-time">${item.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : item.time}</span>` : ''}
             ${star ? `<span class="importance-star">${star}</span>` : ''}
           </div>
           <div class="todo-title">${item.hideTitle ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>' : item.title}</div>
@@ -3360,7 +3384,7 @@ function makeCardForDayModal(item, ds, evts) {
         <div class="todo-body">
           <div class="todo-meta">
             <span class="cat-badge" style="color:${color};border-color:${color};">${item.category}</span>
-            ${item.time ? `<span class="todo-time">${item.time}</span>` : ''}
+            ${item.time ? `<span class="todo-time">${item.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : item.time}</span>` : ''}
             ${star ? `<span class="importance-star">${star}</span>` : ''}
           </div>
           <div class="todo-title">${item.hideTitle ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>' : item.title}</div>
@@ -3799,6 +3823,8 @@ function openAdd(forSub=false, presetDate=null) {
   document.getElementById('f_date').value= presetDate || fmtDate(new Date());
   document.getElementById('f_st').value='';
   document.getElementById('f_et').value='';
+  document.getElementById('f_allday').checked = false;
+  document.getElementById('timeInputWrap').style.display = '';
   document.getElementById('f_loc').value='';
   document.getElementById('f_memo').value='';
   document.getElementById('f_content').value='';
@@ -3834,8 +3860,11 @@ function openEdit(id) {
   document.getElementById('f_title').value = item.title;
   document.getElementById('f_date').value = item.date || '';
   const times = item.time ? item.time.split('~') : [];
-  document.getElementById('f_st').value = times[0]||'';
-  document.getElementById('f_et').value = times[1]||'';
+  const isAlldayVal = item.time === 'allday';
+  document.getElementById('f_allday').checked = isAlldayVal;
+  document.getElementById('timeInputWrap').style.display = isAlldayVal ? 'none' : '';
+  document.getElementById('f_st').value = isAlldayVal ? '' : (times[0]||'');
+  document.getElementById('f_et').value = isAlldayVal ? '' : (times[1]||'');
   document.getElementById('f_loc').value = item.location||'';
   document.getElementById('f_memo').value = item.memo||'';
   document.getElementById('f_content').value = item.content||'';
@@ -3964,7 +3993,8 @@ function saveItem() {
 
   const st = document.getElementById('f_st').value;
   const et = document.getElementById('f_et').value;
-  const time = st && et ? `${st}~${et}` : st||'';
+  const isAllday = document.getElementById('f_allday').checked;
+  const time = isAllday ? 'allday' : (st && et ? `${st}~${et}` : st||'');
   const existing = editingId !== null ? items.find(i=>i.id===editingId) : null;
   const repeatVal = document.getElementById('f_repeat').value;
   const obj = {
@@ -4019,7 +4049,7 @@ function openDetail(id) {
   info.innerHTML = `
     <div class="detail-row"><span class="dr-key">카테고리</span><span class="dr-val" style="color:${color}">${item.category}</span></div>
     <div class="detail-row"><span class="dr-key">날짜</span><span class="dr-val">${item.date||'개별'}</span></div>
-    ${item.time?`<div class="detail-row"><span class="dr-key">시간</span><span class="dr-val">${item.time}</span></div>`:''}
+    ${item.time?`<div class="detail-row"><span class="dr-key">시간</span><span class="dr-val">${item.time === 'allday' ? '하루종일' : item.time}</span></div>`:''}
     ${item.location?`<div class="detail-row"><span class="dr-key">장소</span><span class="dr-val">${item.location}</span></div>`:''}
     ${item.instructor?`<div class="detail-row"><span class="dr-key">강사</span><span class="dr-val">${item.instructor}</span></div>`:''}
     ${item.repeat&&item.repeat!=='none'?`<div class="detail-row"><span class="dr-key">반복</span><span class="dr-val">${{daily:'매일',weekly:'매주',monthly:'매월'}[item.repeat]||''}${item.repeatEnd?' · ~'+item.repeatEnd:''}</span></div>`:''}
@@ -4219,7 +4249,7 @@ function doSearch(q) {
   }
   res.innerHTML = matches.map(it => {
     const color = getCatColor(it.category);
-    const meta = [it.date, it.time, it.location].filter(Boolean).join(' · ');
+    const meta = [it.date, it.time === 'allday' ? '하루종일' : it.time, it.location].filter(Boolean).join(' · ');
     return `<div class="search-item" onclick="closeSearch();openDetail(${it.id})">
       <div class="search-item-title" style="color:${color}">${it.hideTitle?'// 비공개':it.title}</div>
       <div class="search-item-meta">${it.category} ${meta?'// '+meta:''}</div>
@@ -4376,7 +4406,7 @@ function renderWeekDayList(dmap) {
           <div class="todo-body">
             <div class="todo-meta">
               <span class="cat-badge" style="--cc:${color}">${it.category||''}</span>
-              ${it.time?`<span class="todo-time">${it.time}</span>`:''}
+              ${it.time?`<span class="todo-time">${it.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : it.time}</span>`:''}
             </div>
             <div class="todo-title">${title}</div>
           </div>
@@ -4520,6 +4550,17 @@ function generateRepeatInstances(item, rangeStart, rangeEnd) {
   return instances;
 }
 
+function toggleAlldayMode(isAllday) {
+  const wrap = document.getElementById('timeInputWrap');
+  if (isAllday) {
+    wrap.style.display = 'none';
+    document.getElementById('f_st').value = '';
+    document.getElementById('f_et').value = '';
+  } else {
+    wrap.style.display = '';
+  }
+}
+
 function onRepeatChange() {
   const v = document.getElementById('f_repeat').value;
   document.getElementById('repeatEndWrap').style.visibility = v==='none' ? 'hidden' : 'visible';
@@ -4566,7 +4607,7 @@ function scheduleNotifications() {
   const now = Date.now();
   const DAY = 24 * 60 * 60 * 1000;
   items.forEach(item => {
-    if (!item.date || !item.time || item.done || item.secret) return;
+    if (!item.date || !item.time || item.time === 'allday' || item.done || item.secret) return;
     const startStr = item.time.split('~')[0];
     if (!startStr || !startStr.includes(':')) return;
     const [h, m] = startStr.split(':').map(Number);
