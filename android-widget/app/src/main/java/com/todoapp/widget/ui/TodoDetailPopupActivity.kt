@@ -8,6 +8,7 @@ import android.os.Bundle
 import android.view.View
 import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
+import androidx.appcompat.app.AlertDialog
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
 import com.google.android.material.dialog.MaterialAlertDialogBuilder
@@ -28,7 +29,7 @@ class TodoDetailPopupActivity : AppCompatActivity() {
     }
 
     private var currentTodo: Todo? = null
-    private var currentDialog: android.app.AlertDialog? = null
+    private var currentDialog: AlertDialog? = null
 
     private val editLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
