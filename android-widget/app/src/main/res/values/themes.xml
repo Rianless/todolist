@@ -12,15 +12,14 @@
         <item name="android:fontFamily">sans-serif</item>
     </style>
 
-    <!-- Popup theme: transparent, floats over current app/home screen -->
-    <style name="Theme.TodoWidget.Popup" parent="Theme.MaterialComponents.Light.NoActionBar">
+    <!-- Popup theme: dialog-style floating window over home screen -->
+    <style name="Theme.TodoWidget.Popup" parent="Theme.MaterialComponents.Light.Dialog">
         <item name="colorPrimary">@color/ios_blue</item>
         <item name="colorOnPrimary">@android:color/white</item>
-        <item name="android:windowIsTranslucent">true</item>
         <item name="android:windowBackground">@android:color/transparent</item>
         <item name="android:backgroundDimEnabled">true</item>
         <item name="android:backgroundDimAmount">0.6</item>
-        <item name="android:windowAnimationStyle">@style/Animation.AppCompat.Dialog</item>
         <item name="android:windowNoTitle">true</item>
+        <item name="android:windowIsFloating">false</item>
     </style>
 </resources>
