@@ -4,17 +4,16 @@ import android.appwidget.AppWidgetManager
 import android.content.ComponentName
 import android.content.Intent
 import android.graphics.Color
-import android.os.Build
 import android.os.Bundle
 import android.view.View
-import android.view.WindowManager
+import android.widget.TextView
 import androidx.activity.result.contract.ActivityResultContracts
 import androidx.appcompat.app.AppCompatActivity
 import androidx.lifecycle.lifecycleScope
+import com.google.android.material.dialog.MaterialAlertDialogBuilder
 import com.todoapp.widget.R
 import com.todoapp.widget.data.Todo
 import com.todoapp.widget.data.TodoDatabase
-import com.todoapp.widget.databinding.ActivityPopupTodoDetailBinding
 import com.todoapp.widget.widget.TodoWidgetProvider
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -28,148 +27,125 @@ class TodoDetailPopupActivity : AppCompatActivity() {
         const val EXTRA_TODO_ID = "extra_todo_id"
     }
 
-    private lateinit var binding: ActivityPopupTodoDetailBinding
     private var currentTodo: Todo? = null
+    private var currentDialog: android.app.AlertDialog? = null
 
     private val editLauncher = registerForActivityResult(
         ActivityResultContracts.StartActivityForResult()
     ) { result ->
         if (result.resultCode == RESULT_OK) {
-            // Reload todo after editing
-            val id = intent.getIntExtra(EXTRA_TODO_ID, -1)
-            if (id != -1) loadTodo(id)
             refreshWidget()
+            // Reload and re-show dialog with updated data
+            val id = currentTodo?.id ?: return@registerForActivityResult
+            loadAndShow(id)
         }
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-        binding = ActivityPopupTodoDetailBinding.inflate(layoutInflater)
-        setContentView(binding.root)
-
-        // Tap outside the card to dismiss
-        binding.popupScrim.setOnClickListener { finish() }
-        binding.popupCard.setOnClickListener { /* consume to prevent dismiss */ }
-
-        binding.popupBtnClose.setOnClickListener { finish() }
-
-        binding.popupBtnEdit.setOnClickListener {
-            currentTodo?.let { todo ->
-                val intent = Intent(this, AddEditActivity::class.java).apply {
-                    putExtra(AddEditActivity.EXTRA_TODO_ID, todo.id)
-                }
-                editLauncher.launch(intent)
-            }
-        }
-
-        binding.popupBtnDone.setOnClickListener {
-            currentTodo?.let { todo ->
-                lifecycleScope.launch {
-                    val dao = TodoDatabase.getDatabase(this@TodoDetailPopupActivity).todoDao()
-                    withContext(Dispatchers.IO) { dao.setDone(todo.id, !todo.done) }
-                    val updated = withContext(Dispatchers.IO) { dao.getTodoById(todo.id) }
-                    if (updated != null) {
-                        currentTodo = updated
-                        updateDoneButton(updated.done)
-                    }
-                    refreshWidget()
-                }
-            }
-        }
 
         val todoId = intent.getIntExtra(EXTRA_TODO_ID, -1)
-        if (todoId == -1) {
-            finish()
-            return
-        }
-        loadTodo(todoId)
+        if (todoId == -1) { finish(); return }
+
+        loadAndShow(todoId)
     }
 
-    private fun loadTodo(id: Int) {
+    private fun loadAndShow(id: Int) {
         lifecycleScope.launch {
-            val dao = TodoDatabase.getDatabase(this@TodoDetailPopupActivity).todoDao()
-            val todo = withContext(Dispatchers.IO) { dao.getTodoById(id) }
-            if (todo == null) {
-                finish()
-                return@launch
+            val todo = withContext(Dispatchers.IO) {
+                TodoDatabase.getDatabase(this@TodoDetailPopupActivity).todoDao().getTodoById(id)
             }
+            if (todo == null) { finish(); return@launch }
             currentTodo = todo
-            displayTodo(todo)
+            currentDialog?.dismiss()
+            showDialog(todo)
         }
     }
 
-    private fun displayTodo(todo: Todo) {
-        // Accent bar color
+    private fun showDialog(todo: Todo) {
+        val view = layoutInflater.inflate(R.layout.dialog_todo_detail, null)
+
+        // Accent color bar
+        val accentBar = view.findViewById<View>(R.id.dialog_accent_bar)
         try {
-            binding.popupAccentBar.setBackgroundColor(Color.parseColor(todo.categoryColor))
+            accentBar.setBackgroundColor(Color.parseColor(todo.categoryColor))
         } catch (e: Exception) {
-            binding.popupAccentBar.setBackgroundColor(Color.parseColor("#636366"))
+            accentBar.setBackgroundColor(Color.parseColor("#636366"))
         }
 
-        // Category pill
-        binding.popupCategory.text = todo.category
+        // Category
+        view.findViewById<TextView>(R.id.dialog_category).text = todo.category
 
-        // Done badge
-        updateDoneButton(todo.done)
-
-        // Title (strikethrough if done)
-        binding.popupTitle.text = todo.title
-        binding.popupTitle.alpha = if (todo.done) 0.45f else 1f
+        // Title
+        val titleView = view.findViewById<TextView>(R.id.dialog_title)
+        titleView.text = todo.title
+        titleView.alpha = if (todo.done) 0.45f else 1f
 
         // Date
+        val dateView = view.findViewById<TextView>(R.id.dialog_date)
         try {
             val parsed = LocalDate.parse(todo.date, DateTimeFormatter.ISO_LOCAL_DATE)
-            val formatted = parsed.format(DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)"))
-            binding.popupDate.text = formatted
+            dateView.text = parsed.format(DateTimeFormatter.ofPattern("yyyy년 M월 d일 (E)"))
         } catch (e: Exception) {
-            binding.popupDate.text = todo.date
+            dateView.text = todo.date
         }
 
         // Time
-        val timeStr = when {
+        view.findViewById<TextView>(R.id.dialog_time).text = when {
             todo.allDay -> "하루종일"
             todo.startTime.isNotEmpty() ->
                 "${todo.startTime}${if (todo.endTime.isNotEmpty()) " – ${todo.endTime}" else ""}"
             else -> "시간 미설정"
         }
-        binding.popupTime.text = timeStr
 
-        // Optional fields
-        setOptionalRow(binding.popupRowModule, binding.popupModule, todo.module)
-        setOptionalRow(binding.popupRowInstructor, binding.popupInstructor, todo.instructor)
+        // Optional rows
+        setRow(view, R.id.dialog_row_module, R.id.dialog_module, todo.module)
+        setRow(view, R.id.dialog_row_instructor, R.id.dialog_instructor, todo.instructor)
+        val location = listOf(todo.location, todo.room).filter { it.isNotEmpty() }.joinToString(" ")
+        setRow(view, R.id.dialog_row_location, R.id.dialog_location, location)
+        setRow(view, R.id.dialog_row_note, R.id.dialog_note, todo.note)
+        setRow(view, R.id.dialog_row_content, R.id.dialog_content, todo.content)
 
-        val locationStr = listOf(todo.location, todo.room)
-            .filter { it.isNotEmpty() }
-            .joinToString(" ")
-        setOptionalRow(binding.popupRowLocation, binding.popupLocation, locationStr)
+        val doneLabel = if (todo.done) "미완료로 변경" else "완료로 변경"
 
-        setOptionalRow(binding.popupRowNote, binding.popupNote, todo.note)
-        setOptionalRow(binding.popupRowContent, binding.popupContent, todo.content)
+        currentDialog = MaterialAlertDialogBuilder(this)
+            .setView(view)
+            .setPositiveButton("편집") { _, _ ->
+                val intent = Intent(this, AddEditActivity::class.java).apply {
+                    putExtra(AddEditActivity.EXTRA_TODO_ID, todo.id)
+                }
+                editLauncher.launch(intent)
+            }
+            .setNeutralButton(doneLabel) { _, _ ->
+                lifecycleScope.launch {
+                    withContext(Dispatchers.IO) {
+                        TodoDatabase.getDatabase(this@TodoDetailPopupActivity)
+                            .todoDao().setDone(todo.id, !todo.done)
+                    }
+                    refreshWidget()
+                    finish()
+                }
+            }
+            .setNegativeButton("닫기") { _, _ -> finish() }
+            .setOnCancelListener { finish() }
+            .show()
     }
 
-    private fun setOptionalRow(row: View, textView: android.widget.TextView, value: String) {
+    private fun setRow(root: View, rowId: Int, textId: Int, value: String) {
+        val row = root.findViewById<View>(rowId)
         if (value.isNotEmpty()) {
             row.visibility = View.VISIBLE
-            textView.text = value
+            root.findViewById<TextView>(textId).text = value
         } else {
             row.visibility = View.GONE
-        }
-    }
-
-    private fun updateDoneButton(done: Boolean) {
-        if (done) {
-            binding.popupBtnDone.text = "미완료"
-        } else {
-            binding.popupBtnDone.text = "완료"
         }
     }
 
     private fun refreshWidget() {
         val manager = AppWidgetManager.getInstance(this)
         val ids = manager.getAppWidgetIds(ComponentName(this, TodoWidgetProvider::class.java))
-        val intent = Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
+        sendBroadcast(Intent(AppWidgetManager.ACTION_APPWIDGET_UPDATE).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_IDS, ids)
-        }
-        sendBroadcast(intent)
+        })
     }
 }
