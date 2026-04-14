@@ -31,6 +31,15 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Todo detail popup (shown over home screen from widget click) -->
+        <activity
+            android:name=".ui.TodoPopupActivity"
+            android:exported="false"
+            android:taskAffinity=""
+            android:excludeFromRecents="true"
+            android:noHistory="true"
+            android:theme="@style/Theme.TodoWidget.Popup" />
+
         <!-- Widget Provider -->
         <receiver
             android:name=".widget.TodoWidgetProvider"

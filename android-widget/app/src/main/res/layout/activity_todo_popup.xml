@@ -1,0 +1,131 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- Full-screen transparent overlay; clicking the dim area dismisses popup -->
+<FrameLayout
+    xmlns:android="http://schemas.android.com/apk/res/android"
+    xmlns:app="http://schemas.android.com/apk/res-auto"
+    android:id="@+id/popup_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#99000000"
+    android:clickable="true"
+    android:focusable="true">
+
+    <androidx.cardview.widget.CardView
+        android:id="@+id/popup_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:layout_marginHorizontal="32dp"
+        android:clickable="true"
+        android:focusable="true"
+        app:cardCornerRadius="20dp"
+        app:cardElevation="16dp"
+        app:cardBackgroundColor="#FF1C1C1E">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="vertical"
+            android:padding="20dp">
+
+            <!-- Category color bar + category label + close button -->
+            <LinearLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:orientation="horizontal"
+                android:gravity="center_vertical"
+                android:layout_marginBottom="14dp">
+
+                <View
+                    android:id="@+id/popup_category_color"
+                    android:layout_width="4dp"
+                    android:layout_height="24dp"
+                    android:layout_marginEnd="10dp"
+                    android:background="@drawable/bg_accent_bar" />
+
+                <TextView
+                    android:id="@+id/popup_category"
+                    android:layout_width="0dp"
+                    android:layout_height="wrap_content"
+                    android:layout_weight="1"
+                    android:textSize="12sp"
+                    android:textColor="#8E8E93"
+                    android:fontFamily="sans-serif-medium"
+                    android:letterSpacing="0.04" />
+
+                <!-- Close button -->
+                <TextView
+                    android:id="@+id/popup_close_btn"
+                    android:layout_width="28dp"
+                    android:layout_height="28dp"
+                    android:text="✕"
+                    android:textSize="13sp"
+                    android:textColor="#AEAEB2"
+                    android:gravity="center"
+                    android:background="@drawable/bg_widget_btn"
+                    android:clickable="true"
+                    android:focusable="true" />
+
+            </LinearLayout>
+
+            <!-- Title -->
+            <TextView
+                android:id="@+id/popup_title"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="20sp"
+                android:textColor="#FFFFFF"
+                android:fontFamily="sans-serif-medium"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Thin divider -->
+            <View
+                android:layout_width="match_parent"
+                android:layout_height="0.5dp"
+                android:background="#33FFFFFF"
+                android:layout_marginBottom="10dp" />
+
+            <!-- Date and time -->
+            <TextView
+                android:id="@+id/popup_datetime"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#AEAEB2"
+                android:layout_marginBottom="5dp" />
+
+            <!-- Location / Room (hidden if empty) -->
+            <TextView
+                android:id="@+id/popup_location"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#AEAEB2"
+                android:layout_marginBottom="5dp"
+                android:visibility="gone" />
+
+            <!-- Module / Instructor (hidden if empty) -->
+            <TextView
+                android:id="@+id/popup_module"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="13sp"
+                android:textColor="#AEAEB2"
+                android:layout_marginBottom="5dp"
+                android:visibility="gone" />
+
+            <!-- Note / Content (hidden if empty) -->
+            <TextView
+                android:id="@+id/popup_note"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:textSize="14sp"
+                android:textColor="#C7C7CC"
+                android:lineSpacingMultiplier="1.4"
+                android:layout_marginTop="5dp"
+                android:visibility="gone" />
+
+        </LinearLayout>
+    </androidx.cardview.widget.CardView>
+
+</FrameLayout>

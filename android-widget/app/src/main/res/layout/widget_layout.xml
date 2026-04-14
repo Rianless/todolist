@@ -45,8 +45,9 @@
 
         </LinearLayout>
 
-        <!-- Plus button hint -->
+        <!-- App icon button (opens app) -->
         <TextView
+            android:id="@+id/widget_icon_btn"
             android:layout_width="28dp"
             android:layout_height="28dp"
             android:text="＋"

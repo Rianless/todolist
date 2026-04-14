@@ -18,6 +18,9 @@ interface TodoDao {
     @Query("SELECT * FROM todos WHERE date = :date ORDER BY startTime ASC")
     suspend fun getTodosByDateSync(date: String): List<Todo>
 
+    @Query("SELECT * FROM todos WHERE id = :id")
+    suspend fun getById(id: Int): Todo?
+
     @Query("SELECT * FROM todos WHERE date >= :fromDate ORDER BY date ASC, startTime ASC LIMIT :limit")
     suspend fun getUpcomingTodos(fromDate: String, limit: Int = 5): List<Todo>
 

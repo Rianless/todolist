@@ -5,9 +5,11 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
+import com.todoapp.widget.ui.TodoPopupActivity
 import kotlinx.coroutines.*
 import com.todoapp.widget.data.TodoDatabase
 import java.time.LocalDate
@@ -52,13 +54,14 @@ class TodoWidgetProvider : AppWidgetProvider() {
     private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
         val views = RemoteViews(context.packageName, R.layout.widget_layout)
 
-        // Open app on header click
+        // [Task 1] Widget icon (+ button) and header click → open app
         val openAppIntent = Intent(context, MainActivity::class.java)
         val openAppPending = PendingIntent.getActivity(
             context, 0, openAppIntent,
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
         )
         views.setOnClickPendingIntent(R.id.widget_header, openAppPending)
+        views.setOnClickPendingIntent(R.id.widget_icon_btn, openAppPending)
 
         // Set up list service
         val serviceIntent = Intent(context, TodoWidgetService::class.java).apply {
@@ -67,13 +70,16 @@ class TodoWidgetProvider : AppWidgetProvider() {
         views.setRemoteAdapter(R.id.widget_list, serviceIntent)
         views.setEmptyView(R.id.widget_list, R.id.widget_empty)
 
-        // Item click → open app
-        val itemIntent = Intent(context, MainActivity::class.java)
-        val itemPending = PendingIntent.getActivity(
-            context, 1, itemIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        // [Task 2] Item click → show popup (not open app)
+        // FLAG_MUTABLE required on API 31+ so fill intents (todo_id) can be merged at click time
+        val mutableFlag = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S)
+            PendingIntent.FLAG_MUTABLE else 0
+        val popupIntent = Intent(context, TodoPopupActivity::class.java)
+        val popupPending = PendingIntent.getActivity(
+            context, 1, popupIntent,
+            PendingIntent.FLAG_UPDATE_CURRENT or mutableFlag
         )
-        views.setPendingIntentTemplate(R.id.widget_list, itemPending)
+        views.setPendingIntentTemplate(R.id.widget_list, popupPending)
 
         // Update stats async
         CoroutineScope(Dispatchers.IO).launch {
