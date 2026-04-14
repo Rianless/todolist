@@ -5,9 +5,11 @@ import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
+import android.os.Build
 import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
+import com.todoapp.widget.ui.TodoDetailPopupActivity
 import kotlinx.coroutines.*
 import com.todoapp.widget.data.TodoDatabase
 import java.time.LocalDate
@@ -67,12 +69,14 @@ class TodoWidgetProvider : AppWidgetProvider() {
         views.setRemoteAdapter(R.id.widget_list, serviceIntent)
         views.setEmptyView(R.id.widget_list, R.id.widget_empty)
 
-        // Item click → open app
-        val itemIntent = Intent(context, MainActivity::class.java)
-        val itemPending = PendingIntent.getActivity(
-            context, 1, itemIntent,
-            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
-        )
+        // Item click → open popup with todo details
+        val itemIntent = Intent(context, TodoDetailPopupActivity::class.java)
+        val itemFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val itemPending = PendingIntent.getActivity(context, 1, itemIntent, itemFlags)
         views.setPendingIntentTemplate(R.id.widget_list, itemPending)
 
         // Update stats async

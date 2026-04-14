@@ -31,6 +31,14 @@
             android:exported="false"
             android:windowSoftInputMode="adjustResize" />
 
+        <!-- Widget Todo Detail Popup -->
+        <activity
+            android:name=".ui.TodoDetailPopupActivity"
+            android:exported="true"
+            android:theme="@style/Theme.TodoWidget.Popup"
+            android:launchMode="singleTask"
+            android:excludeFromRecents="true" />
+
         <!-- Widget Provider -->
         <receiver
             android:name=".widget.TodoWidgetProvider"

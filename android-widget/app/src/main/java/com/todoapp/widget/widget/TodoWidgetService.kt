@@ -69,8 +69,10 @@ class TodoWidgetFactory(
         // Done indicator
         views.setTextViewText(R.id.widget_item_check, if (todo.done) "✓" else "")
 
-        // Fill-in intent for item click (just open app for now)
-        val fillIntent = Intent()
+        // Fill-in intent carries the todo ID to the popup activity
+        val fillIntent = Intent().apply {
+            putExtra(TodoWidgetProvider.EXTRA_TODO_ID, todo.id)
+        }
         views.setOnClickFillInIntent(R.id.widget_item_root, fillIntent)
 
         return views

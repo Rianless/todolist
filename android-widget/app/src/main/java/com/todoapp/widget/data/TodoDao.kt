@@ -24,6 +24,9 @@ interface TodoDao {
     @Query("SELECT * FROM todos WHERE done = 0 ORDER BY date ASC, startTime ASC LIMIT :limit")
     suspend fun getPendingTodos(limit: Int = 5): List<Todo>
 
+    @Query("SELECT * FROM todos WHERE id = :id")
+    suspend fun getTodoById(id: Int): Todo?
+
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTodo(todo: Todo): Long
 
