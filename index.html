@@ -445,7 +445,9 @@ body::after {
 [data-theme="light"] .todo-card { box-shadow: var(--shadow); }
 
 .todo-card:active { opacity: 0.75; transform: scale(0.99); }
-.todo-card.done { opacity: 0.4; }
+.todo-card.done { opacity: 1; }
+.todo-card.done .todo-real { opacity: 0.42; }
+.todo-card.done .corner-d { opacity: 0.15; }
 
 .todo-card.secret-locked .secret-mask { display: flex; }
 .todo-card.secret-locked .todo-real { display: none; }
@@ -516,6 +518,52 @@ body::after {
 }
 [data-theme="light"] .todo-title { font-size: 15px; }
 .todo-card.done .todo-title { text-decoration: line-through; text-decoration-color: var(--text3); }
+
+/* ── TODO CHECK CIRCLE ── */
+.todo-check-btn {
+  width: 26px; height: 26px;
+  border-radius: 50%;
+  border: 2px solid var(--border2);
+  background: transparent;
+  color: transparent;
+  font-size: 13px; font-weight: 700;
+  display: flex; align-items: center; justify-content: center;
+  cursor: pointer; flex-shrink: 0; align-self: center;
+  transition: all 0.18s; padding: 0; line-height: 1;
+  margin-right: 2px;
+}
+.todo-check-btn.checked {
+  background: var(--green); border-color: var(--green); color: #000;
+}
+[data-theme="dark"] .todo-check-btn.checked { box-shadow: 0 0 8px rgba(57,255,20,0.35); }
+.todo-check-btn:active { transform: scale(0.82); }
+
+/* ── DAY MODAL — iOS card style todos ── */
+.day-todo-card {
+  display: flex; align-items: stretch;
+  background: var(--card-bg); border: 1px solid var(--border);
+  border-radius: 12px; overflow: hidden;
+  margin-bottom: 8px; cursor: pointer;
+  transition: opacity 0.15s, transform 0.15s;
+}
+[data-theme="dark"] .day-todo-card { border-color: var(--border2); }
+[data-theme="light"] .day-todo-card { box-shadow: 0 2px 8px rgba(0,0,0,0.07); }
+.day-todo-card:active { opacity: 0.75; transform: scale(0.99); }
+
+.day-todo-accent { width: 4px; flex-shrink: 0; }
+
+.day-todo-content { flex: 1; padding: 10px 12px; min-width: 0; }
+.day-todo-meta { display: flex; align-items: center; gap: 6px; margin-bottom: 4px; flex-wrap: wrap; }
+.day-todo-title {
+  font-family: var(--font-body); font-size: 14px; font-weight: 600;
+  color: var(--text); line-height: 1.3;
+}
+[data-theme="light"] .day-todo-title { font-size: 15px; }
+.day-todo-sub { font-size: 10px; color: var(--text3); margin-top: 2px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.day-todo-check { display: flex; align-items: center; justify-content: center; padding: 0 14px; flex-shrink: 0; }
+
+.day-todo-card.done .day-todo-content { opacity: 0.42; }
+.day-todo-card.done .day-todo-title { text-decoration: line-through; text-decoration-color: var(--text3); }
 
 .todo-sub {
   font-size: 10px; color: var(--text3); margin-top: 2px;
@@ -3036,11 +3084,16 @@ function makeCard(item) {
           <div class="todo-title">${item.hideTitle ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>' : item.title}</div>
           ${item.sub ? `<div class="todo-sub">${item.sub}</div>` : ''}
         </div>
+        <button class="todo-check-btn${item.done?' checked':''}" aria-label="완료 토글">${item.done ? '✓' : ''}</button>
       </div>
     </div>
     <div class="corner-d"></div>`;
 
-  card.addEventListener('click', () => {
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('.todo-check-btn')) {
+      quickToggleDone(item.id);
+      return;
+    }
     if (isItemSecret && !item._unlocked) {
       item._unlocked = true;
       card.classList.remove('secret-locked');
@@ -3363,42 +3416,55 @@ function makeCardForDayModal(item, ds, evts) {
   const color = getCatColor(item.category);
   const card = document.createElement('div');
   const isItemSecret = item.secret;
-  const lockClass = isItemSecret ? (item._unlocked ? 'secret-unlocked' : 'secret-locked') : '';
-  card.className = `todo-card cat-custom ${item.done?'done':''} ${lockClass}`;
-  card.style.setProperty('--cc', color);
+  card.className = `day-todo-card${item.done?' done':''}`;
 
-  const prioClass = item.priority === 'high' ? 'p-high' : item.priority === 'mid' ? 'p-mid' : item.priority === 'low' ? 'p-low' : 'p-none';
-  const star = item.priority === 'high' ? '⭐' : item.priority === 'mid' ? '🔸' : item.priority === 'low' ? '🔹' : '';
+  const star = item.priority === 'high' ? '⭐ ' : item.priority === 'mid' ? '🔸 ' : item.priority === 'low' ? '🔹 ' : '';
+  const displayTitle = isItemSecret && !item._unlocked
+    ? '🔒 CLASSIFIED'
+    : (item.hideTitle ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>' : (star + (item.title||'')));
 
-  const secretMask = isItemSecret ? `
-    <div class="secret-mask">
-      <span class="secret-icon">🔒</span>
-      <span class="secret-text">CLASSIFIED :: ${Array(8).fill(0).map(()=>'■□▪▫'[Math.floor(Math.random()*4)]).join('')} :: ACCESS_DENIED</span>
-    </div>` : '';
+  const timeHtml = item.time
+    ? `<span class="todo-time">${item.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : item.time}</span>`
+    : '';
 
   card.innerHTML = `
-    ${secretMask}
-    <div class="todo-real">
-      <div class="todo-row">
-        <div class="priority-bar ${prioClass}"></div>
-        <div class="todo-body">
-          <div class="todo-meta">
-            <span class="cat-badge" style="color:${color};border-color:${color};">${item.category}</span>
-            ${item.time ? `<span class="todo-time">${item.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : item.time}</span>` : ''}
-            ${star ? `<span class="importance-star">${star}</span>` : ''}
-          </div>
-          <div class="todo-title">${item.hideTitle ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>' : item.title}</div>
-          ${item.sub ? `<div class="todo-sub">${item.sub}</div>` : ''}
-        </div>
+    <div class="day-todo-accent" style="background:${color}"></div>
+    <div class="day-todo-content">
+      <div class="day-todo-meta">
+        <span class="cat-badge" style="color:${color};border-color:${color};">${item.category||''}</span>
+        ${timeHtml}
       </div>
+      <div class="day-todo-title">${displayTitle}</div>
+      ${item.sub ? `<div class="day-todo-sub">${item.sub}</div>` : ''}
     </div>
-    <div class="corner-d"></div>`;
+    <div class="day-todo-check">
+      <button class="todo-check-btn${item.done?' checked':''}" aria-label="완료 토글">${item.done ? '✓' : ''}</button>
+    </div>`;
 
-  card.addEventListener('click', () => {
+  const checkBtn = card.querySelector('.todo-check-btn');
+  checkBtn.addEventListener('click', (e) => {
+    e.stopPropagation();
+    const found = items.find(i => i.id === item.id);
+    if (!found) return;
+    found.done = !found.done;
+    saveData();
+    updateProgress();
+    card.classList.toggle('done', found.done);
+    checkBtn.classList.toggle('checked', found.done);
+    checkBtn.textContent = found.done ? '✓' : '';
+    if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
+    else renderList();
+  });
+
+  card.addEventListener('click', (e) => {
+    if (e.target.closest('.todo-check-btn')) return;
     if (isItemSecret && !item._unlocked) {
       item._unlocked = true;
-      card.classList.remove('secret-locked');
-      card.classList.add('secret-unlocked');
+      const content = card.querySelector('.day-todo-content');
+      const titleEl = card.querySelector('.day-todo-title');
+      if (titleEl) titleEl.innerHTML = item.hideTitle
+        ? '<span style="opacity:0.4;letter-spacing:2px;">// 비공개</span>'
+        : (item.title||'');
       return;
     }
     if (item.isSub) return;
@@ -4113,6 +4179,19 @@ function detailToggleDone() {
   updateProgress();
 }
 
+function quickToggleDone(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  item.done = !item.done;
+  saveData();
+  renderList();
+  updateProgress();
+  if (currentMainTab === 'calendar') {
+    if (currentCalSubTab === 'cal') renderCal();
+    else if (currentCalSubTab === 'list') renderList();
+  }
+}
+
 function detailEdit() { openEdit(detailId); }
 
 function detailDelete() {
@@ -4400,18 +4479,18 @@ function renderWeekDayList(dmap) {
     tasks.forEach(it => {
       const color = getCatColor(it.category);
       const title = it.hideTitle ? '// 비공개' : (it.secret&&!it._unlocked ? '🔒 CLASSIFIED' : it.title);
-      html += `<div class="todo-card${it.done?' done':''}" onclick="openDetail(${it.id})" style="margin-bottom:6px;">
-        <div class="todo-row">
-          <div class="priority-bar p-${it.priority||'none'}"></div>
-          <div class="todo-body">
-            <div class="todo-meta">
-              <span class="cat-badge" style="--cc:${color}">${it.category||''}</span>
-              ${it.time?`<span class="todo-time">${it.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : it.time}</span>`:''}
-            </div>
-            <div class="todo-title">${title}</div>
+      html += `<div class="day-todo-card${it.done?' done':''}" onclick="openDetail(${it.id})" style="">
+        <div class="day-todo-accent" style="background:${color}"></div>
+        <div class="day-todo-content">
+          <div class="day-todo-meta">
+            <span class="cat-badge" style="color:${color};border-color:${color};">${it.category||''}</span>
+            ${it.time?`<span class="todo-time">${it.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : it.time}</span>`:''}
           </div>
+          <div class="day-todo-title">${title}</div>
         </div>
-        <div class="corner-d"></div>
+        <div class="day-todo-check">
+          <button class="todo-check-btn${it.done?' checked':''}" onclick="event.stopPropagation();quickToggleDone(${it.id})" aria-label="완료 토글">${it.done ? '✓' : ''}</button>
+        </div>
       </div>`;
     });
   }
