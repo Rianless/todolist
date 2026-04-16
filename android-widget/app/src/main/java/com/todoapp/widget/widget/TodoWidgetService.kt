@@ -9,6 +9,7 @@ import com.todoapp.widget.R
 import com.todoapp.widget.data.Todo
 import com.todoapp.widget.data.TodoDatabase
 import kotlinx.coroutines.runBlocking
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -30,9 +31,12 @@ class TodoWidgetFactory(
     override fun onDataSetChanged() {
         runBlocking {
             val dao = TodoDatabase.getDatabase(context).todoDao()
-            val today = LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
-            // Show today's + upcoming todos (max 10)
-            todos = dao.getUpcomingTodos(today, 10)
+            val today = LocalDate.now()
+            val monday = today.with(DayOfWeek.MONDAY)
+            val sunday = today.with(DayOfWeek.SUNDAY)
+            val startDate = monday.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val endDate = sunday.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            todos = dao.getWeeklyTodos(startDate, endDate)
         }
     }
 
@@ -55,11 +59,25 @@ class TodoWidgetFactory(
         views.setTextViewText(R.id.widget_item_title, todo.title)
         views.setFloat(R.id.widget_item_title, "setAlpha", if (todo.done) 0.45f else 1f)
 
+        // Day of week label
+        val dayLabel = try {
+            val date = LocalDate.parse(todo.date, DateTimeFormatter.ISO_LOCAL_DATE)
+            when (date.dayOfWeek) {
+                DayOfWeek.MONDAY -> "월"
+                DayOfWeek.TUESDAY -> "화"
+                DayOfWeek.WEDNESDAY -> "수"
+                DayOfWeek.THURSDAY -> "목"
+                DayOfWeek.FRIDAY -> "금"
+                DayOfWeek.SATURDAY -> "토"
+                DayOfWeek.SUNDAY -> "일"
+            }
+        } catch (e: Exception) { "" }
+
         // Time
         val timeStr = when {
-            todo.allDay -> "하루종일"
-            todo.startTime.isNotEmpty() -> "${todo.startTime}${if (todo.endTime.isNotEmpty()) "–${todo.endTime}" else ""}"
-            else -> todo.date
+            todo.allDay -> "$dayLabel · 하루종일"
+            todo.startTime.isNotEmpty() -> "$dayLabel · ${todo.startTime}${if (todo.endTime.isNotEmpty()) "–${todo.endTime}" else ""}"
+            else -> dayLabel
         }
         views.setTextViewText(R.id.widget_item_time, timeStr)
 

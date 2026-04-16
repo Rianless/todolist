@@ -10,6 +10,7 @@ import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
 import kotlinx.coroutines.*
 import com.todoapp.widget.data.TodoDatabase
+import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
@@ -78,12 +79,17 @@ class TodoWidgetProvider : AppWidgetProvider() {
         // Update stats async
         CoroutineScope(Dispatchers.IO).launch {
             val dao = TodoDatabase.getDatabase(context).todoDao()
-            val total = dao.getCount()
-            val done = dao.getDoneCount()
-            val today = LocalDate.now().format(DateTimeFormatter.ofPattern("M월 d일"))
+            val today = LocalDate.now()
+            val monday = today.with(DayOfWeek.MONDAY)
+            val sunday = today.with(DayOfWeek.SUNDAY)
+            val startDate = monday.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val endDate = sunday.format(DateTimeFormatter.ISO_LOCAL_DATE)
+            val total = dao.getWeeklyCount(startDate, endDate)
+            val done = dao.getWeeklyDoneCount(startDate, endDate)
+            val weekRange = "${monday.format(DateTimeFormatter.ofPattern("M/d"))}–${sunday.format(DateTimeFormatter.ofPattern("M/d"))}"
 
             withContext(Dispatchers.Main) {
-                views.setTextViewText(R.id.widget_title, today)
+                views.setTextViewText(R.id.widget_title, "이번 주  $weekRange")
                 views.setTextViewText(R.id.widget_progress, "$done/$total 완료")
                 manager.updateAppWidget(widgetId, views)
                 manager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_list)

@@ -21,6 +21,15 @@ interface TodoDao {
     @Query("SELECT * FROM todos WHERE date >= :fromDate ORDER BY date ASC, startTime ASC LIMIT :limit")
     suspend fun getUpcomingTodos(fromDate: String, limit: Int = 5): List<Todo>
 
+    @Query("SELECT * FROM todos WHERE date >= :startDate AND date <= :endDate ORDER BY date ASC, startTime ASC")
+    suspend fun getWeeklyTodos(startDate: String, endDate: String): List<Todo>
+
+    @Query("SELECT COUNT(*) FROM todos WHERE date >= :startDate AND date <= :endDate")
+    suspend fun getWeeklyCount(startDate: String, endDate: String): Int
+
+    @Query("SELECT COUNT(*) FROM todos WHERE date >= :startDate AND date <= :endDate AND done = 1")
+    suspend fun getWeeklyDoneCount(startDate: String, endDate: String): Int
+
     @Query("SELECT * FROM todos WHERE done = 0 ORDER BY date ASC, startTime ASC LIMIT :limit")
     suspend fun getPendingTodos(limit: Int = 5): List<Todo>
 
