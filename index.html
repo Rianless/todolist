@@ -2020,6 +2020,200 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 .fchip { transition: all 0.18s ease; }
 .fchip:hover:not(.active) { border-color: var(--accent); color: var(--text); }
 
+/* ── TOAST NOTIFICATIONS ── */
+#toastContainer {
+  position: fixed;
+  top: 16px;
+  left: 50%;
+  transform: translateX(-50%);
+  z-index: 10000;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  pointer-events: none;
+  width: calc(100% - 32px);
+  max-width: 448px;
+}
+.toast {
+  pointer-events: auto;
+  background: var(--panel);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--accent);
+  color: var(--text);
+  padding: 12px 14px;
+  border-radius: 8px;
+  box-shadow: 0 8px 24px rgba(0,0,0,0.35);
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 13px;
+  font-family: var(--font-body);
+  animation: toastIn 0.25s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] .toast {
+  clip-path: polygon(0 0, calc(100% - 8px) 0, 100% 8px, 100% 100%, 8px 100%, 0 calc(100% - 8px));
+  border-radius: 0;
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.5px;
+}
+.toast.success { border-left-color: var(--green); }
+.toast.error { border-left-color: var(--red); }
+.toast.info { border-left-color: var(--accent); }
+.toast-icon { font-size: 16px; line-height: 1; flex-shrink: 0; }
+.toast-msg { flex: 1; line-height: 1.3; }
+.toast-action {
+  background: none;
+  border: 1px solid var(--accent);
+  color: var(--accent);
+  font-weight: 700;
+  font-family: inherit;
+  cursor: pointer;
+  padding: 5px 10px;
+  border-radius: 4px;
+  font-size: 11px;
+  letter-spacing: 1px;
+  flex-shrink: 0;
+  transition: all 0.15s;
+}
+.toast-action:hover { background: var(--tab-act); }
+.toast.out { animation: toastOut 0.2s ease forwards; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-12px) scale(0.96); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+@keyframes toastOut {
+  from { opacity: 1; transform: translateY(0); }
+  to { opacity: 0; transform: translateY(-12px); }
+}
+
+/* ── CUSTOM CONFIRM DIALOG ── */
+.confirm-sheet {
+  width: min(320px, calc(100% - 32px)) !important;
+  background: var(--panel) !important;
+  border: 1px solid var(--border2) !important;
+  border-radius: 12px !important;
+  padding: 24px 20px 16px !important;
+  text-align: center;
+  animation: confirmIn 0.2s cubic-bezier(.4,0,.2,1);
+}
+[data-theme="dark"] .confirm-sheet {
+  clip-path: polygon(0 0, calc(100% - 10px) 0, 100% 10px, 100% 100%, 10px 100%, 0 calc(100% - 10px));
+  border-radius: 0 !important;
+}
+.confirm-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+  display: block;
+}
+.confirm-msg {
+  font-size: 14px;
+  color: var(--text);
+  line-height: 1.5;
+  margin-bottom: 18px;
+  font-family: var(--font-body);
+}
+[data-theme="dark"] .confirm-msg {
+  font-family: 'Share Tech Mono', monospace;
+  letter-spacing: 0.5px;
+}
+.confirm-actions {
+  display: flex;
+  gap: 8px;
+}
+.confirm-ok.danger {
+  background: var(--red);
+  border-color: var(--red);
+  color: #fff;
+}
+.confirm-ok.danger:hover { opacity: 0.9; }
+@keyframes confirmIn {
+  from { opacity: 0; transform: scale(0.92); }
+  to { opacity: 1; transform: scale(1); }
+}
+
+/* ── SKELETON LOADER ── */
+.skeleton-card {
+  background: var(--card-bg);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--border2);
+  border-radius: 0 6px 6px 0;
+  padding: 12px;
+  margin-bottom: 4px;
+}
+[data-theme="dark"] .skeleton-card {
+  clip-path: polygon(0 0, calc(100% - 7px) 0, 100% 7px, 100% 100%, 7px 100%, 0 calc(100% - 7px));
+  border-radius: 0;
+}
+.skeleton-line {
+  height: 10px;
+  background: linear-gradient(90deg, var(--border), var(--border2), var(--border));
+  background-size: 200% 100%;
+  border-radius: 4px;
+  animation: skeletonShimmer 1.4s ease-in-out infinite;
+  margin-bottom: 7px;
+}
+.skeleton-line:last-child { margin-bottom: 0; }
+.skeleton-line.sk-short { width: 35%; height: 8px; }
+.skeleton-line.sk-long { width: 80%; height: 14px; }
+@keyframes skeletonShimmer {
+  0% { background-position: 200% 0; }
+  100% { background-position: -200% 0; }
+}
+
+/* ── TODO CARD: swipe + complete animation ── */
+.todo-card {
+  touch-action: pan-y;
+  transition: transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s ease, border-color 0.2s, background-color 0.2s;
+}
+.todo-card.swiping { transition: none; }
+.todo-card.swipe-complete {
+  background: linear-gradient(90deg, rgba(57,255,20,0.18), transparent);
+}
+.todo-card.swipe-delete {
+  background: linear-gradient(-90deg, rgba(255,45,85,0.2), transparent);
+}
+.todo-card.removing {
+  transform: translateX(-120%) !important;
+  opacity: 0;
+}
+.todo-card.done .todo-title {
+  transition: color 0.3s, text-decoration-color 0.3s;
+}
+.todo-card .todo-row::before {
+  content: '';
+  position: absolute;
+  left: -16px;
+  top: 50%;
+  width: 16px;
+  height: 16px;
+  background: var(--green);
+  border-radius: 50%;
+  transform: translateY(-50%) scale(0);
+  opacity: 0;
+  transition: transform 0.3s cubic-bezier(.34,1.56,.64,1), opacity 0.2s;
+  pointer-events: none;
+}
+.todo-card.just-done .todo-row::before {
+  transform: translateY(-50%) scale(1);
+  opacity: 1;
+}
+
+/* ── CALENDAR HEATMAP ── */
+.cal-cell[data-density="1"] {
+  background: color-mix(in srgb, var(--accent) 4%, var(--card-bg));
+}
+.cal-cell[data-density="2"] {
+  background: color-mix(in srgb, var(--accent) 8%, var(--card-bg));
+}
+.cal-cell[data-density="3"] {
+  background: color-mix(in srgb, var(--accent) 14%, var(--card-bg));
+}
+[data-theme="dark"] .cal-cell[data-density="1"] { background: rgba(0,255,231,0.04); }
+[data-theme="dark"] .cal-cell[data-density="2"] { background: rgba(0,255,231,0.08); }
+[data-theme="dark"] .cal-cell[data-density="3"] { background: rgba(0,255,231,0.14); }
+[data-theme="dark"] .cal-cell.today[data-density] { background: rgba(0,255,231,0.18); }
+[data-theme="light"] .cal-cell.today[data-density] { background: rgba(0,85,255,0.12); }
+
 /* Reduced motion — respect user's system preference */
 @media (prefers-reduced-motion: reduce) {
   *, *::before, *::after {
@@ -2549,6 +2743,21 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
   </div>
 </div>
 
+<!-- TOAST CONTAINER -->
+<div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
+
+<!-- CUSTOM CONFIRM MODAL -->
+<div class="modal-overlay" id="confirmModal" role="alertdialog" aria-modal="true" aria-labelledby="confirmMsg" style="z-index:9500;">
+  <div class="modal-sheet confirm-sheet">
+    <span class="confirm-icon" id="confirmIcon" aria-hidden="true">⚠️</span>
+    <div class="confirm-msg" id="confirmMsg"></div>
+    <div class="confirm-actions">
+      <button class="btn-cancel confirm-cancel" type="button">취소</button>
+      <button class="btn-save confirm-ok" type="button">확인</button>
+    </div>
+  </div>
+</div>
+
 <!-- DAY DETAIL MODAL -->
 <div class="modal-overlay" id="dayModal">
   <div class="modal-sheet day-sheet">
@@ -2565,6 +2774,76 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 </div>
 
 <script>
+/* ══════════════════════════════════════
+   UI UTILS — toast, confirm, skeleton
+══════════════════════════════════════ */
+function showToast(msg, opts = {}) {
+  const container = document.getElementById('toastContainer');
+  if (!container) return;
+  const type = opts.type || 'success';
+  const duration = opts.duration ?? 2500;
+  const icons = { success: '✓', error: '✕', info: 'ⓘ' };
+  const toast = document.createElement('div');
+  toast.className = `toast ${type}`;
+  toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
+  toast.innerHTML = `<span class="toast-icon" aria-hidden="true">${icons[type] || ''}</span><span class="toast-msg"></span>`;
+  toast.querySelector('.toast-msg').textContent = msg;
+  if (opts.action) {
+    const btn = document.createElement('button');
+    btn.className = 'toast-action';
+    btn.type = 'button';
+    btn.textContent = opts.action.label;
+    btn.onclick = () => {
+      try { opts.action.onClick(); } finally { _removeToast(toast); }
+    };
+    toast.appendChild(btn);
+  }
+  container.appendChild(toast);
+  if (duration > 0) {
+    toast._timer = setTimeout(() => _removeToast(toast), duration);
+  }
+  return toast;
+}
+function _removeToast(toast) {
+  if (!toast || toast._removed) return;
+  toast._removed = true;
+  clearTimeout(toast._timer);
+  toast.classList.add('out');
+  setTimeout(() => toast.remove(), 220);
+}
+
+function customConfirm(msg, opts = {}) {
+  return new Promise(resolve => {
+    const overlay = document.getElementById('confirmModal');
+    if (!overlay) { resolve(window.confirm(msg)); return; }
+    overlay.querySelector('#confirmMsg').textContent = msg;
+    overlay.querySelector('#confirmIcon').textContent = opts.icon || (opts.danger ? '⚠️' : '❓');
+    const okBtn = overlay.querySelector('.confirm-ok');
+    const cancelBtn = overlay.querySelector('.confirm-cancel');
+    okBtn.textContent = opts.okLabel || '확인';
+    cancelBtn.textContent = opts.cancelLabel || '취소';
+    okBtn.className = 'btn-save confirm-ok' + (opts.danger ? ' danger' : '');
+    const close = (result) => {
+      overlay.classList.remove('open');
+      okBtn.onclick = null;
+      cancelBtn.onclick = null;
+      setTimeout(() => resolve(result), 0);
+    };
+    okBtn.onclick = () => close(true);
+    cancelBtn.onclick = () => close(false);
+    overlay.classList.add('open');
+    setTimeout(() => okBtn.focus(), 50);
+  });
+}
+
+function renderSkeleton(targetId, count = 4) {
+  const el = document.getElementById(targetId);
+  if (!el) return;
+  el.innerHTML = Array.from({ length: count }, () =>
+    '<div class="skeleton-card"><div class="skeleton-line sk-short"></div><div class="skeleton-line sk-long"></div></div>'
+  ).join('');
+}
+
 /* ══════════════════════════════════════
    DATA
 ══════════════════════════════════════ */
@@ -3064,6 +3343,11 @@ function setFilter(cat, btn) {
 ══════════════════════════════════════ */
 function renderList() {
   const el = document.getElementById('todoList');
+  if (!itemsLoaded && items.length === 0) {
+    renderSkeleton('todoList', 5);
+    buildFilters();
+    return;
+  }
   el.innerHTML = '';
   buildFilters();
 
@@ -3154,7 +3438,133 @@ function makeCard(item) {
     openDetail(item.id);
   });
 
+  _attachSwipe(card, item);
   return card;
+}
+
+/* ── SWIPE GESTURES on todo cards ──
+   좌측으로 스와이프: 삭제
+   우측으로 스와이프: 완료 토글
+*/
+function _attachSwipe(card, item) {
+  let startX = 0, startY = 0, dx = 0, dy = 0;
+  let isDragging = false, axisLocked = false, axis = '';
+  let moved = false;
+  const THRESHOLD = 72; // px
+  const MAX_PULL = 120;
+
+  const reset = (withTransition = true) => {
+    if (!withTransition) card.classList.add('swiping');
+    else card.classList.remove('swiping');
+    card.style.transform = '';
+    card.classList.remove('swipe-delete', 'swipe-complete');
+  };
+
+  card.addEventListener('touchstart', (e) => {
+    if (e.touches.length !== 1) return;
+    startX = e.touches[0].clientX;
+    startY = e.touches[0].clientY;
+    dx = 0; dy = 0;
+    isDragging = true; axisLocked = false; axis = ''; moved = false;
+  }, { passive: true });
+
+  card.addEventListener('touchmove', (e) => {
+    if (!isDragging || e.touches.length !== 1) return;
+    dx = e.touches[0].clientX - startX;
+    dy = e.touches[0].clientY - startY;
+    if (!axisLocked) {
+      if (Math.abs(dx) > 8 || Math.abs(dy) > 8) {
+        axis = Math.abs(dx) > Math.abs(dy) ? 'x' : 'y';
+        axisLocked = true;
+      }
+    }
+    if (axis !== 'x') return;
+    moved = true;
+    card.classList.add('swiping');
+    const clamped = Math.max(-MAX_PULL, Math.min(MAX_PULL, dx));
+    card.style.transform = `translateX(${clamped}px)`;
+    card.classList.toggle('swipe-delete', clamped < -THRESHOLD * 0.5);
+    card.classList.toggle('swipe-complete', clamped > THRESHOLD * 0.5);
+  }, { passive: true });
+
+  card.addEventListener('touchend', () => {
+    if (!isDragging) return;
+    isDragging = false;
+    if (axis !== 'x' || !moved) { reset(); return; }
+    if (dx <= -THRESHOLD) {
+      // 삭제 스와이프
+      card.classList.remove('swiping');
+      card.style.transform = '';
+      _swipeDelete(card, item);
+    } else if (dx >= THRESHOLD) {
+      // 완료 스와이프
+      card.classList.remove('swiping');
+      card.style.transform = '';
+      card.classList.remove('swipe-complete');
+      _swipeToggleDone(card, item);
+    } else {
+      reset();
+    }
+  });
+
+  card.addEventListener('touchcancel', () => {
+    isDragging = false;
+    reset();
+  });
+}
+
+function _swipeToggleDone(card, item) {
+  const wasNotDone = !item.done;
+  item.done = !item.done;
+  if (wasNotDone) {
+    card.classList.add('just-done');
+    setTimeout(() => card.classList.remove('just-done'), 600);
+  }
+  card.classList.toggle('done', item.done);
+  saveData();
+  updateProgress();
+  if (wasNotDone) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1500 });
+}
+
+async function _swipeDelete(card, item) {
+  const ok = await customConfirm(`"${item.title}"을(를) 삭제할까요?`, {
+    danger: true, icon: '🗑', okLabel: '삭제'
+  });
+  if (!ok) {
+    card.style.transform = '';
+    card.classList.remove('swipe-delete');
+    return;
+  }
+  const snapshot = JSON.parse(JSON.stringify(item));
+  card.classList.add('removing');
+  setTimeout(() => {
+    items = items.filter(i => i.id !== item.id);
+    saveData();
+    if (currentMainTab === 'calendar') {
+      if (currentCalSubTab === 'cal') renderCal();
+      else if (currentCalSubTab === 'list') renderList();
+    }
+    updateProgress();
+  }, 220);
+
+  let undone = false;
+  showToast('일정이 삭제되었습니다', {
+    type: 'success',
+    duration: 5000,
+    action: {
+      label: '되돌리기',
+      onClick: () => {
+        undone = true;
+        items.push(snapshot);
+        saveData();
+        if (currentCalSubTab === 'cal') renderCal();
+        else if (currentCalSubTab === 'list') renderList();
+        updateProgress();
+        showToast('복구되었습니다', { type: 'info', duration: 1800 });
+      }
+    }
+  });
+  setTimeout(() => { if (!undone) deleteItemFromAPI(item.id); }, 5100);
 }
 
 /* ══════════════════════════════════════
@@ -3271,6 +3681,10 @@ function renderCal() {
 
     const cell=document.createElement('div');
     cell.className=`cal-cell${isToday?' today':''}${dow===0?' sun':dow===6?' sat':''}${evts.length?' has-events':''}`;
+    if (evts.length > 0) {
+      const density = evts.length >= 4 ? 3 : evts.length >= 2 ? 2 : 1;
+      cell.setAttribute('data-density', density);
+    }
 
     const num=document.createElement('span');
     num.className='cal-daynum';
@@ -4137,6 +4551,7 @@ function saveItem() {
   }
   updateProgress();
   scheduleNotifications();
+  showToast(editingId !== null ? '수정되었습니다' : '일정이 추가되었습니다', { type: 'success', duration: 1800 });
 }
 
 /* ══════════════════════════════════════
@@ -4212,6 +4627,7 @@ function closeDetail() { document.getElementById('detailModal').classList.remove
 function detailToggleDone() {
   const item = items.find(i=>i.id===detailId);
   if (!item) return;
+  const wasNotDone = !item.done;
   item.done = !item.done;
   saveData();
   openDetail(detailId);
@@ -4220,15 +4636,25 @@ function detailToggleDone() {
     else if (currentCalSubTab === 'list') renderList();
   }
   updateProgress();
+  if (wasNotDone) {
+    showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
+  }
 }
 
 function detailEdit() { openEdit(detailId); }
 
-function detailDelete() {
-  if (!confirm('이 일정을 삭제할까요?')) return;
+async function detailDelete() {
+  const ok = await customConfirm('이 일정을 삭제할까요?', {
+    danger: true,
+    icon: '🗑',
+    okLabel: '삭제'
+  });
+  if (!ok) return;
   const deletedId = detailId;
+  const deletedItem = items.find(i => i.id === deletedId);
+  if (!deletedItem) return;
+  const snapshot = JSON.parse(JSON.stringify(deletedItem));
   items = items.filter(i=>i.id!==deletedId);
-  deleteItemFromAPI(deletedId);
   saveData();
   closeDetail();
   if (currentMainTab === 'calendar') {
@@ -4236,6 +4662,29 @@ function detailDelete() {
     else if (currentCalSubTab === 'list') renderList();
   }
   updateProgress();
+
+  let undone = false;
+  showToast('일정이 삭제되었습니다', {
+    type: 'success',
+    duration: 5000,
+    action: {
+      label: '되돌리기',
+      onClick: () => {
+        undone = true;
+        items.push(snapshot);
+        saveData();
+        if (currentMainTab === 'calendar') {
+          if (currentCalSubTab === 'cal') renderCal();
+          else if (currentCalSubTab === 'list') renderList();
+        }
+        updateProgress();
+        showToast('복구되었습니다', { type: 'info', duration: 1800 });
+      }
+    }
+  });
+  setTimeout(() => {
+    if (!undone) deleteItemFromAPI(deletedId);
+  }, 5100);
 }
 
 /* ══════════════════════════════════════
