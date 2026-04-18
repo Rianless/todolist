@@ -1,6 +1,16 @@
 {
+  "headers": [
+    {
+      "source": "/manifest.json",
+      "headers": [{ "key": "Content-Type", "value": "application/manifest+json" }]
+    }
+  ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
+    { "source": "/sw.js", "destination": "/sw.js" },
+    { "source": "/manifest.json", "destination": "/manifest.json" },
+    { "source": "/icon-192.png", "destination": "/icon-192.png" },
+    { "source": "/icon-512.png", "destination": "/icon-512.png" },
     { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
