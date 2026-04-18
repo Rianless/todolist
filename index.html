@@ -4951,29 +4951,24 @@ function renderWeekDayList(dmap) {
     ? `${String(selDate.getMonth()+1).padStart(2,'0')}.${String(selDate.getDate()).padStart(2,'0')} ${DOW_EN_FULL[dowIdx]}`
     : `${selDate.getMonth()+1}월 ${selDate.getDate()}일 (${DOW_KO_FULL[dowIdx]})`;
 
-  let html = `<div class="week-day-list-header">${dateStr}</div>`;
+  container.innerHTML = '';
+  const header = document.createElement('div');
+  header.className = 'week-day-list-header';
+  header.textContent = dateStr;
+  container.appendChild(header);
+
   if (!tasks.length) {
-    html += `<div class="week-empty">${isDark ? '// NO_TASKS' : '일정이 없습니다'}</div>`;
-  } else {
-    tasks.forEach(it => {
-      const color = getCatColor(it.category);
-      const title = it.hideTitle ? '// 비공개' : (it.secret&&!it._unlocked ? '🔒 CLASSIFIED' : it.title);
-      html += `<div class="todo-card${it.done?' done':''}" onclick="openDetail(${it.id})" style="margin-bottom:6px;">
-        <div class="todo-row">
-          <div class="priority-bar p-${it.priority||'none'}"></div>
-          <div class="todo-body">
-            <div class="todo-meta">
-              <span class="cat-badge" style="--cc:${color}">${it.category||''}</span>
-              ${it.time?`<span class="todo-time">${it.time === 'allday' ? '<span class="allday-badge">하루종일</span>' : it.time}</span>`:''}
-            </div>
-            <div class="todo-title">${title}</div>
-          </div>
-        </div>
-        <div class="corner-d"></div>
-      </div>`;
-    });
+    const empty = document.createElement('div');
+    empty.className = 'week-empty';
+    empty.textContent = isDark ? '// NO_TASKS' : '일정이 없습니다';
+    container.appendChild(empty);
+    return;
   }
-  container.innerHTML = html;
+  tasks.forEach(it => {
+    const card = makeCard(it);
+    card.style.marginBottom = '6px';
+    container.appendChild(card);
+  });
 }
 
 /* ══════════════════════════════════════
