@@ -1975,6 +1975,28 @@ button:focus:not(:focus-visible),
   outline: none;
 }
 
+/* Disable long-press text selection / context menu on interactive elements */
+button,
+.tab-item,
+.cal-subtab,
+.fchip,
+.todo-card,
+.cal-cell,
+.cal-dot,
+.week-strip-day,
+.mp-card-header,
+.memo-item,
+.subs-item,
+.ledger-entry,
+.detail-btn,
+.prio-btn,
+.hbadge,
+.toggle-switch {
+  -webkit-user-select: none;
+  user-select: none;
+  -webkit-touch-callout: none;
+}
+
 /* Larger touch targets — WCAG 2.5.5 recommends min 44x44 */
 .theme-btn,
 .notif-btn {
@@ -2163,6 +2185,9 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 /* ── TODO CARD: swipe + complete animation ── */
 .todo-card {
   touch-action: pan-y;
+  user-select: none;
+  -webkit-user-select: none;
+  -webkit-touch-callout: none;
   transition: transform 0.22s cubic-bezier(.4,0,.2,1), opacity 0.22s ease, border-color 0.2s, background-color 0.2s;
 }
 .todo-card.swiping { transition: none; }
