@@ -6268,6 +6268,16 @@ async function loadItemsFromAPI() {
 
     itemsLoaded = true; // 실패해도 새 항목 추가/저장은 허용
 
+    // API 없으면 하드코딩 데이터로 화면 갱신
+
+    buildFilters();
+
+    buildCatSelect();
+
+    renderCal();
+
+    updateProgress();
+
   }
 
 }
