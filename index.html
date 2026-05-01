@@ -3488,39 +3488,6 @@ body::after {
 
 
 
-/* ══ PWA INSTALL BAR ══ */
-
-#pwaBar {
-
-  display: none; position: fixed; bottom: 0; left: 50%; transform: translateX(-50%);
-
-  width: 100%; max-width: 480px;
-
-  background: var(--panel2);
-
-  border-top: 1px solid var(--border2);
-
-  padding: 12px 16px; z-index: 8500;
-
-  align-items: center; justify-content: space-between; gap: 12px;
-
-}
-
-[data-theme="dark"] #pwaBar {
-
-  border-top-color: rgba(0,255,231,0.4);
-
-  box-shadow: 0 -4px 30px rgba(0,255,231,0.08);
-
-}
-
-#pwaBar.show { display: flex; }
-
-.pwa-bar-text {
-
-  font-size: 10px; color: var(--text2); letter-spacing: 1.5px; flex: 1;
-
-}
 
 [data-theme="light"] .pwa-bar-text {
 
@@ -5446,23 +5413,6 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 
 
 
-<!-- PWA INSTALL BAR -->
-
-<div id="pwaBar">
-
-  <span class="pwa-bar-text" id="pwaBarText">// SYSTEM_INSTALL :: 홈 화면에 추가</span>
-
-  <div class="pwa-bar-btns">
-
-    <button class="pwa-btn-install" onclick="installPWA()">INSTALL</button>
-
-    <button class="pwa-btn-dismiss" onclick="dismissPWA()">✕</button>
-
-  </div>
-
-</div>
-
-
 
 <!-- LEDGER ADD MODAL -->
 
@@ -5902,7 +5852,7 @@ let currentTab = 'cal';
 
 let statPeriod = 'week';
 
-const _initDate = new Date(); let calY = _initDate.getFullYear(), calM = _initDate.getMonth();
+let calY = 2026, calM = 3;
 
 let calSelectedDate = null;
 
@@ -6309,18 +6259,6 @@ function toggleTheme() {
   else if (currentCalSubTab === 'list') renderList();
 
   else renderCal();
-
-  // update PWA bar text
-
-  if (_deferredInstall) {
-
-    document.getElementById('pwaBarText').textContent = !isDark
-
-      ? '// SYSTEM_INSTALL :: 홈 화면에 추가'
-
-      : '홈 화면에 추가하면 앱처럼 사용할 수 있어요';
-
-  }
 
 }
 
@@ -7384,17 +7322,11 @@ function renderCal() {
 
     if(!sub.date) return;
 
-    const cycleLabel = {weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[sub.cycle]||'';
-
-    const subDates = getSubDatesForMonth(sub, calY, calM);
-
-    subDates.forEach(dateStr => {
-
     const subItem = {
 
-      id: 'sub_'+sub.name+'_'+dateStr,
+      id: 'sub_'+sub.name,
 
-      date: dateStr,
+      date: sub.date,
 
       category: sub.category||'구독',
 
@@ -7402,7 +7334,7 @@ function renderCal() {
 
       title: `🔖 ${sub.name}`,
 
-      sub: `₩${Number(sub.amount||0).toLocaleString()} · ${cycleLabel}`,
+      sub: `₩${Number(sub.amount||0).toLocaleString()} · ${{weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[sub.cycle]||''}`,
 
       priority: 'none',
 
@@ -7414,11 +7346,9 @@ function renderCal() {
 
     };
 
-    if(!dmap[dateStr]) dmap[dateStr]=[];
+    if(!dmap[sub.date]) dmap[sub.date]=[];
 
-    dmap[dateStr].push(subItem);
-
-    }); // subDates.forEach
+    dmap[sub.date].push(subItem);
 
   });
 
@@ -8160,32 +8090,6 @@ function renderStats() {
 
 /* ── SUBSCRIPTIONS ── */
 
-function getSubDatesForMonth(sub, y, m) {
-  const origDt = new Date(sub.date + 'T00:00:00');
-  const origDay = origDt.getDate();
-  const daysInMonth = new Date(y, m + 1, 0).getDate();
-  const pad = s => String(s).padStart(2, '0');
-  const fmt = (y2, m2, d2) => `${y2}-${pad(m2+1)}-${pad(d2)}`;
-  const clampDay = (y2, m2, d) => Math.min(d, new Date(y2, m2+1, 0).getDate());
-  const results = [];
-  if (sub.cycle === 'monthly') {
-    const monthDiff = (y - origDt.getFullYear()) * 12 + (m - origDt.getMonth());
-    if (monthDiff >= 0) { const d = clampDay(y, m, origDay); results.push(fmt(y, m, d)); }
-  } else if (sub.cycle === 'yearly') {
-    if (origDt.getMonth() === m && y >= origDt.getFullYear()) { const d = clampDay(y, m, origDay); results.push(fmt(y, m, d)); }
-  } else if (sub.cycle === 'bimonthly') {
-    const monthDiff = (y - origDt.getFullYear()) * 12 + (m - origDt.getMonth());
-    if (monthDiff >= 0 && monthDiff % 2 === 0) { const d = clampDay(y, m, origDay); results.push(fmt(y, m, d)); }
-  } else if (sub.cycle === 'weekly') {
-    const dow = origDt.getDay();
-    for (let d = 1; d <= daysInMonth; d++) { const dt = new Date(y, m, d); if (dt >= origDt && dt.getDay() === dow) results.push(fmt(y, m, d)); }
-  } else if (sub.cycle === 'biweekly') {
-    for (let d = 1; d <= daysInMonth; d++) { const dt = new Date(y, m, d); if (dt >= origDt) { const diff = Math.round((dt - origDt) / 86400000); if (diff % 14 === 0) results.push(fmt(y, m, d)); } }
-  } else {
-    if (origDt.getFullYear() === y && origDt.getMonth() === m) results.push(sub.date);
-  }
-  return results;
-}
 function renderSubs() {
 
   const el = document.getElementById('subsList');
@@ -10496,63 +10400,9 @@ function scheduleNotifications() {
 
 
 
-/* ══════════════════════════════════════
 
-   PWA INSTALL
 
-══════════════════════════════════════ */
 
-let _deferredInstall = null;
-
-window.addEventListener('beforeinstallprompt', e => {
-
-  e.preventDefault();
-
-  _deferredInstall = e;
-
-  const bar = document.getElementById('pwaBar');
-
-  const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
-
-  document.getElementById('pwaBarText').textContent = isDark
-
-    ? '// SYSTEM_INSTALL :: 홈 화면에 추가'
-
-    : '홈 화면에 추가하면 앱처럼 사용할 수 있어요';
-
-  bar.classList.add('show');
-
-});
-
-window.addEventListener('appinstalled', () => {
-
-  document.getElementById('pwaBar').classList.remove('show');
-
-  _deferredInstall = null;
-
-});
-
-function installPWA() {
-
-  if (!_deferredInstall) return;
-
-  _deferredInstall.prompt();
-
-  _deferredInstall.userChoice.then(() => {
-
-    _deferredInstall = null;
-
-    document.getElementById('pwaBar').classList.remove('show');
-
-  });
-
-}
-
-function dismissPWA() {
-
-  document.getElementById('pwaBar').classList.remove('show');
-
-}
 
 
 
