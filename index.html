@@ -5902,7 +5902,7 @@ let currentTab = 'cal';
 
 let statPeriod = 'week';
 
-let calY = 2026, calM = 3;
+const _initDate = new Date(); let calY = _initDate.getFullYear(), calM = _initDate.getMonth();
 
 let calSelectedDate = null;
 
@@ -7384,11 +7384,17 @@ function renderCal() {
 
     if(!sub.date) return;
 
+    const cycleLabel = {weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[sub.cycle]||'';
+
+    const subDates = getSubDatesForMonth(sub, calY, calM);
+
+    subDates.forEach(dateStr => {
+
     const subItem = {
 
-      id: 'sub_'+sub.name,
+      id: 'sub_'+sub.name+'_'+dateStr,
 
-      date: sub.date,
+      date: dateStr,
 
       category: sub.category||'구독',
 
@@ -7396,7 +7402,7 @@ function renderCal() {
 
       title: `🔖 ${sub.name}`,
 
-      sub: `₩${Number(sub.amount||0).toLocaleString()} · ${{weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[sub.cycle]||''}`,
+      sub: `₩${Number(sub.amount||0).toLocaleString()} · ${cycleLabel}`,
 
       priority: 'none',
 
@@ -7408,9 +7414,11 @@ function renderCal() {
 
     };
 
-    if(!dmap[sub.date]) dmap[sub.date]=[];
+    if(!dmap[dateStr]) dmap[dateStr]=[];
 
-    dmap[sub.date].push(subItem);
+    dmap[dateStr].push(subItem);
+
+    }); // subDates.forEach
 
   });
 
@@ -8152,6 +8160,32 @@ function renderStats() {
 
 /* ── SUBSCRIPTIONS ── */
 
+function getSubDatesForMonth(sub, y, m) {
+  const origDt = new Date(sub.date + 'T00:00:00');
+  const origDay = origDt.getDate();
+  const daysInMonth = new Date(y, m + 1, 0).getDate();
+  const pad = s => String(s).padStart(2, '0');
+  const fmt = (y2, m2, d2) => `${y2}-${pad(m2+1)}-${pad(d2)}`;
+  const clampDay = (y2, m2, d) => Math.min(d, new Date(y2, m2+1, 0).getDate());
+  const results = [];
+  if (sub.cycle === 'monthly') {
+    const monthDiff = (y - origDt.getFullYear()) * 12 + (m - origDt.getMonth());
+    if (monthDiff >= 0) { const d = clampDay(y, m, origDay); results.push(fmt(y, m, d)); }
+  } else if (sub.cycle === 'yearly') {
+    if (origDt.getMonth() === m && y >= origDt.getFullYear()) { const d = clampDay(y, m, origDay); results.push(fmt(y, m, d)); }
+  } else if (sub.cycle === 'bimonthly') {
+    const monthDiff = (y - origDt.getFullYear()) * 12 + (m - origDt.getMonth());
+    if (monthDiff >= 0 && monthDiff % 2 === 0) { const d = clampDay(y, m, origDay); results.push(fmt(y, m, d)); }
+  } else if (sub.cycle === 'weekly') {
+    const dow = origDt.getDay();
+    for (let d = 1; d <= daysInMonth; d++) { const dt = new Date(y, m, d); if (dt >= origDt && dt.getDay() === dow) results.push(fmt(y, m, d)); }
+  } else if (sub.cycle === 'biweekly') {
+    for (let d = 1; d <= daysInMonth; d++) { const dt = new Date(y, m, d); if (dt >= origDt) { const diff = Math.round((dt - origDt) / 86400000); if (diff % 14 === 0) results.push(fmt(y, m, d)); } }
+  } else {
+    if (origDt.getFullYear() === y && origDt.getMonth() === m) results.push(sub.date);
+  }
+  return results;
+}
 function renderSubs() {
 
   const el = document.getElementById('subsList');
@@ -10749,5 +10783,3 @@ if ('serviceWorker' in navigator) {
 </body>
 
 </html>
-
-
