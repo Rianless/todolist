@@ -5868,6 +5868,7 @@ let calSelectedDate = null;
 let editingId = null;
 
 let detailId = null;
+let _lastSecretCard = null;
 
 let isSecret = false;
 
@@ -7908,6 +7909,8 @@ function makeCardForDayModal(item, ds, evts) {
 
     document.getElementById('dayModal').classList.remove('open');
 
+    _lastSecretCard = isItemSecret ? card : null;
+
     openDetail(item.id);
 
   });
@@ -9330,7 +9333,14 @@ function closeDetail() {
   document.getElementById('detailModal').classList.remove('open');
   if (detailId !== null) {
     const it = items.find(x => x.id === detailId);
-    if (it) it._unlocked = false;
+    if (it && it.secret) {
+      it._unlocked = false;
+      if (_lastSecretCard) {
+        _lastSecretCard.classList.remove('secret-unlocked');
+        _lastSecretCard.classList.add('secret-locked');
+        _lastSecretCard = null;
+      }
+    }
   }
 }
 
