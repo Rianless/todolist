@@ -4634,13 +4634,15 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
   /* ── 메인 콘텐츠 영역 ── */
   #mainContent {
     grid-area: main;
-    padding: 20px 28px 0;
-    overflow-y: auto;
-    overflow-x: hidden;
+    padding: 0;
+    overflow: hidden;
+    height: 100%;
+    display: flex;
+    flex-direction: column;
   }
 
   /* 달력 그리드 셀 세로로 꽉 채우기 */
-  #viewCal { display: flex; flex-direction: column; height: 100%; }
+  #viewCal { display: flex; flex-direction: column; height: 100%; overflow: hidden; }
   #viewCal .cal-nav { flex-shrink: 0; }
   #viewCal #calGrid {
     flex: 1;
@@ -4652,27 +4654,54 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
   #viewCal #calDayList { flex-shrink: 0; }
   .cal-cell { height: auto; min-height: 0; }
 
-  /* 달력 뷰가 세로를 꽉 채우도록 height 체인 */
-  #mainContent {
-    height: 100%;
-    padding-bottom: 0;
-    display: flex;
+  /* 모든 메인 뷰 */
+  #mainContent > .view { display: none !important; }
+  #mainContent > .view.active {
+    display: flex !important;
     flex-direction: column;
+    flex: 1;
+    min-height: 0;
+    padding: 20px 28px 0;
   }
-  /* .view들이 mainContent 안에서 flex item */
-  #mainContent > .view { display: none; flex: 1; min-height: 0; overflow-y: auto; }
-  #mainContent > .view.active { display: flex; flex-direction: column; }
 
+  /* 달력 뷰 — 스크롤 없이 꽉 채움 */
   #viewCalendar .cal-subtab-bar { flex-shrink: 0; }
 
-  /* 서브뷰: 월/주/리스트 전환 */
+  /* 서브뷰 전환 */
   .cal-subview { display: none !important; }
+
+  /* 월 뷰: 남은 공간 꽉 채움, 스크롤 없음 */
+  #viewCal.cal-subview.active,
   .cal-subview.active {
     display: flex !important;
     flex-direction: column;
     flex: 1;
     min-height: 0;
+  }
+
+  /* 리스트 / 주 뷰: 내용이 넘치면 스크롤 */
+  #viewList.cal-subview.active,
+  #viewWeek.cal-subview.active {
+    overflow: visible;
+    padding-bottom: 0;
+  }
+
+  /* 리스트 뷰 내부 — action-bar/filter 고정, todoList만 스크롤 */
+  #viewList .action-bar { flex-shrink: 0; }
+  #viewList .filter-scroll { flex-shrink: 0; }
+  #viewList #todoList {
+    flex: 1;
     overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 40px;
+    min-height: 0;
+  }
+
+  /* 주 뷰 스크롤 */
+  #viewWeek {
+    overflow-y: auto;
+    overflow-x: hidden;
+    padding-bottom: 40px;
   }
 
   /* 요일 헤더 크게 + 셀과 딱 붙이기 */
