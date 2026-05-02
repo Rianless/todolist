@@ -8090,6 +8090,8 @@ function openDayModal(ds, evts) {
 
     evts.forEach(item => {
 
+      item._unlocked = false;
+
       const card = makeCardForDayModal(item, ds, evts);
 
       body.appendChild(card);
