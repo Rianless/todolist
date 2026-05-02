@@ -9618,14 +9618,12 @@ function openDetail(id) {
 
 function closeDetail() {
   document.getElementById('detailModal').classList.remove('open');
-  if (_lastSecretCard) {
-    _lastSecretCard.classList.remove('secret-unlocked');
-    _lastSecretCard.classList.add('secret-locked');
-    _lastSecretCard = null;
-  }
   if (detailId !== null) {
     const it = items.find(x => x.id === detailId);
-    if (it) it._unlocked = false;
+    if (it && it.secret) {
+      it._unlocked = false;
+      renderCal();
+    }
   }
 }
 
