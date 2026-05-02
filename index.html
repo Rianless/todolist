@@ -9620,13 +9620,6 @@ function openDetail(id) {
 
 function closeDetail() {
   document.getElementById('detailModal').classList.remove('open');
-  if (detailId !== null) {
-    const it = items.find(x => x.id === detailId);
-    if (it && it.secret) {
-      it._unlocked = false;
-      renderCal();
-    }
-  }
 }
 
 
