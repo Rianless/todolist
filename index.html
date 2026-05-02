@@ -6,7 +6,7 @@
 
 <meta charset="UTF-8">
 
-<meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 
 <title>To Do List // Rianless</title>
 
@@ -1196,7 +1196,7 @@ body::after {
 
   border: 1px solid var(--border);
 
-  height: 68px;
+  height: 100px;
 
   padding: 4px 3px 3px;
 
@@ -4487,6 +4487,207 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 
   [data-theme="dark"] .header-title { animation: none !important; }
 
+}
+
+
+
+/* ═══════════════════════════════════════════════════════════
+   PC / DESKTOP LAYOUT  (≥ 900px)
+═══════════════════════════════════════════════════════════ */
+
+@media (min-width: 900px) {
+
+  html, body { overflow: hidden; height: 100%; }
+
+  /* ── 데스크톱 바디 레이아웃 ── */
+  #app {
+    max-width: 100%;
+    height: 100dvh;
+    display: grid;
+    grid-template-columns: 280px 1fr;
+    grid-template-rows: auto 1fr;
+    grid-template-areas:
+      "sidebar  topbar"
+      "sidebar  main";
+  }
+
+  /* ── 사이드바 (왼쪽 패널) ── */
+  .app-header {
+    grid-area: sidebar;
+    display: flex;
+    flex-direction: column;
+    border-bottom: none;
+    border-right: 1px solid var(--border);
+    padding: 24px 20px 16px;
+    height: 100dvh;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  [data-theme="dark"] .app-header {
+    border-right-color: rgba(0,255,231,0.18);
+  }
+
+  [data-theme="dark"] .app-header::after {
+    display: none;
+  }
+
+  /* 사이드바 헤더 내부 ── */
+  .header-top { flex-direction: column; gap: 0; align-items: flex-start; }
+
+  .header-controls {
+    flex-direction: row;
+    padding-top: 16px;
+    gap: 8px;
+    align-items: center;
+  }
+
+  .header-sys { font-size: 9px; }
+
+  .header-title { font-size: 22px; margin-top: 6px; height: auto; }
+
+  .header-badges { margin-top: 10px; }
+
+  .hbadge { font-size: 9px; padding: 3px 9px; }
+
+  .progress-bar-wrap { margin-top: 20px; }
+
+  .header-sys-extra { margin-top: 12px; font-size: 8px; }
+
+  /* ── 사이드바 하단: 탭바를 세로로 ── */
+  .tab-bar {
+    flex-direction: column;
+    border-top: none;
+    border-right: none;
+    background: transparent;
+    padding: 0;
+    margin-top: auto;
+    padding-top: 24px;
+    gap: 2px;
+  }
+
+  .tab-item {
+    flex-direction: row;
+    justify-content: flex-start;
+    padding: 10px 14px;
+    border-radius: 6px;
+    gap: 12px;
+    border: 1px solid transparent;
+    transition: all 0.18s;
+  }
+
+  .tab-item:hover {
+    background: var(--panel2);
+    border-color: var(--border2);
+  }
+
+  .tab-item.active {
+    background: var(--tab-act);
+    border-color: var(--border2);
+  }
+
+  [data-theme="dark"] .tab-item.active {
+    border-color: rgba(0,255,231,0.25);
+    background: rgba(0,255,231,0.08);
+  }
+
+  .tab-item::before { display: none; }
+
+  .tab-icon { font-size: 16px; }
+
+  .tab-label {
+    font-size: 11px;
+    letter-spacing: 0.5px;
+  }
+
+  [data-theme="dark"] .tab-label { font-size: 11px; letter-spacing: 1.5px; }
+
+  /* ── 오른쪽 상단 툴바 (탭바가 사이드바로 이동했으므로 숨기기) ── */
+  .pc-topbar {
+    grid-area: topbar;
+    display: flex;
+    align-items: center;
+    padding: 0 24px;
+    border-bottom: 1px solid var(--border);
+    background: var(--panel);
+    height: 48px;
+    flex-shrink: 0;
+    gap: 16px;
+  }
+
+  [data-theme="dark"] .pc-topbar {
+    background: linear-gradient(90deg, rgba(0,255,231,0.03), rgba(157,0,255,0.03));
+    border-bottom-color: rgba(0,255,231,0.12);
+  }
+
+  .pc-topbar-title {
+    font-family: var(--font-title);
+    font-size: 12px;
+    letter-spacing: 3px;
+    color: var(--text3);
+  }
+
+  [data-theme="dark"] .pc-topbar-title { color: rgba(0,255,231,0.5); }
+
+  .pc-topbar-spacer { flex: 1; }
+
+  /* ── 메인 콘텐츠 영역 ── */
+  #mainContent {
+    grid-area: main;
+    padding: 20px 28px 0;
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
+  /* 달력 그리드 셀 더 크게 */
+  .cal-cell { min-height: 130px; height: 130px; }
+
+  /* 캘린더 이벤트 dots 더 보이게 */
+  .cal-ev { font-size: 10px; padding: 2px 6px; }
+
+  /* 투두 카드 호버 강조 */
+  .todo-card:hover { transform: translateX(2px); }
+
+  /* FAB 위치 조정 */
+  #fabAdd {
+    bottom: 32px;
+    right: 32px;
+    width: 52px;
+    height: 52px;
+    font-size: 26px;
+  }
+
+  /* 모달 최대폭 */
+  .modal-box {
+    max-width: 520px;
+    width: 90vw;
+  }
+
+  /* 상세 모달 더 넓게 */
+  .detail-box {
+    max-width: 560px;
+    width: 90vw;
+  }
+
+  /* 검색 모달 */
+  .search-box {
+    max-width: 540px;
+    width: 90vw;
+  }
+
+  /* 주간뷰 가로 확장 */
+  .week-strip { gap: 4px; }
+
+  /* 메모탭 */
+  #viewMemo .memo-card { padding: 14px 18px; }
+
+}
+
+/* ── PC 전용 topbar HTML 요소 (JS로 삽입) ── */
+.pc-topbar { display: none; }
+
+@media (min-width: 900px) {
+  .pc-topbar { display: flex; }
 }
 
 </style>
@@ -10686,6 +10887,44 @@ if ('serviceWorker' in navigator) {
 
 }
 
+</script>
+
+<script>
+/* ── PC 레이아웃 초기화 ── */
+(function() {
+  function initPCLayout() {
+    if (window.innerWidth < 900) return;
+
+    const app    = document.getElementById('app');
+    const header = app.querySelector('.app-header');
+    const tabBar = app.querySelector('.tab-bar');
+    const mainContent = document.getElementById('mainContent');
+
+    // 1) topbar 삽입 (header 뒤, mainContent 위)
+    if (!document.getElementById('pcTopbar')) {
+      const topbar = document.createElement('div');
+      topbar.id = 'pcTopbar';
+      topbar.className = 'pc-topbar';
+      topbar.innerHTML =
+        '<span class="pc-topbar-title">// RIANLESS SCHEDULE SYS //</span>' +
+        '<span class="pc-topbar-spacer"></span>';
+      app.insertBefore(topbar, mainContent);
+    }
+
+    // 2) 탭바를 사이드바(header) 맨 아래로 이동
+    if (tabBar && tabBar.parentElement !== header) {
+      header.appendChild(tabBar);
+    }
+  }
+
+  // DOM 준비 후 실행 + 리사이즈 대응
+  if (document.readyState === 'loading') {
+    document.addEventListener('DOMContentLoaded', initPCLayout);
+  } else {
+    initPCLayout();
+  }
+  window.addEventListener('resize', initPCLayout);
+})();
 </script>
 
 </body>
