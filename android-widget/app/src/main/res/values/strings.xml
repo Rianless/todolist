@@ -1,8 +1,5 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <string name="app_name">Todo 위젯</string>
-    <string name="add_todo">할 일 추가</string>
-    <string name="widget_description">오늘의 할 일을 홈 화면에서 바로 확인하세요</string>
-    <string name="action_import">JSON 가져오기</string>
-    <string name="action_export">JSON 내보내기</string>
+    <string name="app_name">TodoList Widget</string>
+    <string name="widget_description">사이버펑크 투두리스트 주간 위젯</string>
 </resources>

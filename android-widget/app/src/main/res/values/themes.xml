@@ -1,14 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <style name="Theme.TodoWidget" parent="Theme.MaterialComponents.Light.NoActionBar">
-        <item name="colorPrimary">@color/ios_blue</item>
-        <item name="colorPrimaryVariant">#0062CC</item>
-        <item name="colorOnPrimary">@android:color/white</item>
-        <item name="colorSurface">@color/surface_glass</item>
-        <item name="colorOnSurface">@color/text_primary</item>
-        <item name="android:windowBackground">@color/bg_primary</item>
-        <item name="android:statusBarColor">@color/bg_primary</item>
-        <item name="android:navigationBarColor">@color/bg_primary</item>
-        <item name="android:fontFamily">sans-serif</item>
+    <style name="Theme.TodoWidget" parent="android:Theme.DeviceDefault.NoActionBar">
+        <item name="android:windowBackground">@color/bg</item>
     </style>
 </resources>

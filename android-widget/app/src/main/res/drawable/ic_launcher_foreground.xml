@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="utf-8"?>
+<vector xmlns:android="http://schemas.android.com/apk/res/android"
+    android:width="108dp"
+    android:height="108dp"
+    android:viewportWidth="108"
+    android:viewportHeight="108">
+    <!-- Horizontal bar of T -->
+    <path
+        android:fillColor="#00FFE7"
+        android:pathData="M18,42 L90,42 L90,52 L18,52 Z"/>
+    <!-- Vertical bar of T -->
+    <path
+        android:fillColor="#00FFE7"
+        android:pathData="M44,42 L64,42 L64,90 L44,90 Z"/>
+    <!-- Glow dot accent -->
+    <path
+        android:fillColor="#FF2D55"
+        android:pathData="M64,42 L90,42 L90,52 L64,52 Z"/>
+</vector>
