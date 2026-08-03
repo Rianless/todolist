@@ -3629,6 +3629,15 @@ body::after {
 
 .ledger-entry-del { background: none; border: none; color: var(--text3); font-size: 14px; cursor: pointer; padding: 0 2px; }
 
+.ledger-entry-edit { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; padding: 0 3px; }
+
+.ledger-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
+
+.ledger-export-btn {
+  border: 1px solid var(--border2); background: transparent; color: var(--text2);
+  border-radius: 6px; padding: 0 12px; cursor: pointer; font-size: 11px;
+}
+
 .ledger-type-toggle {
 
   display: flex; border: 1px solid var(--border2); overflow: hidden; margin-bottom: 12px;
@@ -5062,7 +5071,10 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 
               <div id="ledgerList"></div>
 
-              <button class="ledger-add-btn" onclick="openLedger();event.stopPropagation()">+ 수입 / 지출 추가</button>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openLedger();event.stopPropagation()">+ 수입 / 지출 추가</button>
+                <button class="ledger-export-btn" onclick="exportLedgerCSV();event.stopPropagation()" aria-label="현재 월 가계부 CSV 내보내기">CSV</button>
+              </div>
 
             </div>
 
@@ -5750,7 +5762,7 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 
           <label class="form-label">금액 (원) *</label>
 
-          <input class="form-input" id="l_amount" type="number" placeholder="0" inputmode="numeric">
+          <input class="form-input" id="l_amount" type="text" placeholder="0" inputmode="numeric" autocomplete="off" oninput="formatLedgerAmount(this)">
 
         </div>
 
@@ -6180,6 +6192,8 @@ let ledgerY = new Date().getFullYear();
 let ledgerM = new Date().getMonth();
 
 let ledgerType = 'expense'; // 현재 입력 유형
+
+let editingLedgerId = null;
 
 let calWeekOffset = 0;      // 주 뷰 오프셋 (week탭용)
 
@@ -10326,6 +10340,8 @@ function renderWeekDayList(dmap) {
 
 function openLedger() {
 
+  editingLedgerId = null;
+
   ledgerType = 'expense';
 
   document.getElementById('l_date').value = fmtDate(new Date());
@@ -10337,6 +10353,8 @@ function openLedger() {
   document.getElementById('l_cat').value = '';
 
   document.getElementById('l_memo').value = '';
+
+  document.getElementById('ledgerModalTitle').textContent = '수입 / 지출 추가';
 
   setLedgerType('expense');
 
@@ -10362,11 +10380,42 @@ function setLedgerType(type) {
 
 }
 
+function formatLedgerAmount(input) {
+  const digits = input.value.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '');
+  input.value = digits ? Number(digits).toLocaleString('ko-KR') : '';
+}
+
+function parseLedgerAmount(value) {
+  return Number(String(value || '').replace(/[^\d]/g, ''));
+}
+
+function editLedgerEntry(id) {
+  const entry = ledger.find(e => e.id === id);
+  if (!entry) return;
+
+  editingLedgerId = id;
+  document.getElementById('ledgerModalTitle').textContent = '가계부 내역 수정';
+  document.getElementById('l_date').value = entry.date || fmtDate(new Date());
+  document.getElementById('l_amount').value = Number(entry.amount || 0).toLocaleString('ko-KR');
+  document.getElementById('l_title').value = entry.title || '';
+  document.getElementById('l_cat').value = entry.category || '';
+  document.getElementById('l_memo').value = entry.memo || '';
+  setLedgerType(entry.type === 'income' ? 'income' : 'expense');
+  document.getElementById('ledgerModal').classList.add('open');
+  history.pushState({modal:'ledger'}, '');
+}
+
+function escapeLedgerText(value) {
+  return String(value || '').replace(/[&<>"']/g, ch => ({
+    '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;'
+  })[ch]);
+}
+
 
 
 function saveLedger() {
 
-  const amount = parseInt(document.getElementById('l_amount').value, 10);
+  const amount = parseLedgerAmount(document.getElementById('l_amount').value);
 
   if (!amount || amount <= 0) {
 
@@ -10378,10 +10427,7 @@ function saveLedger() {
 
   }
 
-  ledger.push({
-
-    id: ledgerNextId++,
-
+  const entry = {
     date: document.getElementById('l_date').value || fmtDate(new Date()),
 
     type: ledgerType,
@@ -10394,7 +10440,17 @@ function saveLedger() {
 
     memo: document.getElementById('l_memo').value.trim()
 
-  });
+  };
+
+  if (editingLedgerId !== null) {
+    const index = ledger.findIndex(e => e.id === editingLedgerId);
+    if (index > -1) ledger[index] = { ...ledger[index], ...entry };
+  } else {
+    ledger.push({ id: ledgerNextId++, ...entry });
+  }
+
+  const wasEditing = editingLedgerId !== null;
+  editingLedgerId = null;
 
   closeLedger();
 
@@ -10404,17 +10460,23 @@ function saveLedger() {
 
   if (currentMainTab === 'calendar') { if(currentCalSubTab==='cal') renderCal(); else if(currentCalSubTab==='week') renderWeek(); }
 
+  showToast(wasEditing ? '가계부 내역을 수정했습니다' : `${ledgerType === 'income' ? '수입' : '지출'}을 저장했습니다`, { type: 'success', duration: 1800 });
+
 }
 
 
 
 function deleteLedgerEntry(id) {
 
+  const deleted = ledger.find(e => e.id === id);
+
   ledger = ledger.filter(e => e.id !== id);
 
   saveData();
 
   renderCategoryView();
+
+  if (deleted) showToast('가계부 내역을 삭제했습니다', { type: 'info', duration: 1600 });
 
 }
 
@@ -10518,20 +10580,52 @@ function renderLedgerCard() {
 
       <div class="ledger-entry-info">
 
-        <div class="ledger-entry-title">${e.title}</div>
+        <div class="ledger-entry-title">${escapeLedgerText(e.title)}</div>
 
-        ${e.category?`<div class="ledger-entry-cat">${e.category}</div>`:''}
+        ${e.category?`<div class="ledger-entry-cat">${escapeLedgerText(e.category)}</div>`:''}
 
       </div>
 
       <div class="ledger-entry-amount ${e.type}">${sign}${e.amount.toLocaleString()}원</div>
 
-      <button class="ledger-entry-del" onclick="deleteLedgerEntry(${e.id});event.stopPropagation()">✕</button>
+      <button class="ledger-entry-edit" onclick="editLedgerEntry(${e.id});event.stopPropagation()" aria-label="${escapeLedgerText(e.title)} 수정">수정</button>
+
+      <button class="ledger-entry-del" onclick="deleteLedgerEntry(${e.id});event.stopPropagation()" aria-label="${escapeLedgerText(e.title)} 삭제">✕</button>
 
     </div>`;
 
   }).join('');
 
+}
+
+function exportLedgerCSV() {
+  const mm = String(ledgerM + 1).padStart(2, '0');
+  const monthStr = `${ledgerY}-${mm}`;
+  const rows = ledger
+    .filter(e => e.date && e.date.startsWith(monthStr))
+    .sort((a, b) => a.date.localeCompare(b.date));
+
+  if (!rows.length) {
+    showToast('내보낼 가계부 내역이 없습니다', { type: 'info', duration: 1800 });
+    return;
+  }
+
+  const csvCell = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
+  const csv = [
+    ['날짜', '유형', '항목명', '카테고리', '금액', '메모'],
+    ...rows.map(e => [e.date, e.type === 'income' ? '수입' : '지출', e.title, e.category, e.amount, e.memo])
+  ].map(row => row.map(csvCell).join(',')).join('\r\n');
+
+  const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
+  const url = URL.createObjectURL(blob);
+  const link = document.createElement('a');
+  link.href = url;
+  link.download = `가계부_${monthStr}.csv`;
+  document.body.appendChild(link);
+  link.click();
+  link.remove();
+  URL.revokeObjectURL(url);
+  showToast('가계부 CSV를 저장했습니다', { type: 'success', duration: 1800 });
 }
 
 
