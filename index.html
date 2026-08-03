@@ -4975,6 +4975,30 @@ body::before, body::after, #bootScreen { display: none !important; }
 }
 .cal-subtab.active { background: var(--panel); color: var(--text); box-shadow: 0 2px 8px rgba(30,35,55,.08); }
 
+.list-month-nav {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+.list-month-nav strong {
+  min-width: 78px;
+  color: var(--text);
+  font-size: 13px;
+  text-align: center;
+}
+.list-month-arrow {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--panel2);
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 18px;
+  cursor: pointer;
+}
+.list-month-arrow:hover { background: var(--tab-act); color: var(--accent); }
+
 .cal-nav { margin-bottom: 14px; }
 .cal-month, [data-theme="dark"] .cal-month {
   color: var(--text);
@@ -5649,7 +5673,12 @@ body::before, body::after, #bootScreen { display: none !important; }
 
         <div class="action-bar">
 
-          <button class="today-btn" onclick="goToday()">TODAY</button>
+          <div class="list-month-nav" aria-label="리스트 월 이동">
+            <button type="button" class="list-month-arrow" onclick="changeListMonth(-1)" aria-label="이전 달">‹</button>
+            <strong id="listMonthLabel"></strong>
+            <button type="button" class="list-month-arrow" onclick="changeListMonth(1)" aria-label="다음 달">›</button>
+            <button class="today-btn" onclick="goToday()">TODAY</button>
+          </div>
 
           <button class="add-btn" onclick="openAdd()">+ 일정 추가</button>
 
@@ -7824,6 +7853,9 @@ function setFilter(cat, btn) {
 function renderList() {
 
   const el = document.getElementById('todoList');
+  const monthLabel = document.getElementById('listMonthLabel');
+  const monthKey = `${calY}-${String(calM + 1).padStart(2, '0')}`;
+  if (monthLabel) monthLabel.textContent = `${calY}.${String(calM + 1).padStart(2, '0')}`;
 
   if (!itemsLoaded && items.length === 0) {
 
@@ -7851,6 +7883,8 @@ function renderList() {
 
   else filtered = items.filter(i=>i.category===filterCat);
 
+  filtered = filtered.filter(item => item.date && item.date.startsWith(monthKey));
+
 
 
   const byDate = {};
@@ -7871,7 +7905,7 @@ function renderList() {
 
   if (!keys.length) {
 
-    el.innerHTML = '<div class="empty-state">// NO_DATA_FOUND<br>일정이 없습니다</div>';
+    el.innerHTML = `<div class="empty-state">${calY}년 ${calM + 1}월<br>등록된 일정이 없습니다</div>`;
 
     return;
 
@@ -8284,35 +8318,30 @@ async function _swipeDelete(card, item) {
 function goToday() {
 
   const t = new Date();
+  calY = t.getFullYear();
+  calM = t.getMonth();
+  filterCat = 'all';
+  document.querySelectorAll('.fchip').forEach(button => {
+    button.classList.toggle('active', button.textContent.trim() === '전체');
+  });
+  renderList();
 
-  setFilter('all', document.querySelector('.fchip'));
+  requestAnimationFrame(() => {
+    const todayLabel = `${String(t.getMonth()+1).padStart(2,'0')}.${String(t.getDate()).padStart(2,'0')}`;
+    const divider = [...document.querySelectorAll('.date-divider .dd-text')]
+      .find(node => node.textContent.includes(todayLabel));
+    (divider?.closest('.date-divider') || document.getElementById('viewList'))
+      ?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  });
 
-  setTimeout(() => {
+}
 
-    const dividers = document.querySelectorAll('.date-divider .dd-text');
-
-    const mm = String(t.getMonth()+1).padStart(2,'0');
-
-    const dd = String(t.getDate()).padStart(2,'0');
-
-    const label = `${mm}.${dd}`;
-
-    for (const d of dividers) {
-
-      if (d.textContent.includes(label)) {
-
-        d.closest('.date-divider').scrollIntoView({behavior:'smooth', block:'start'});
-
-        break;
-
-      }
-
-    }
-
-    calY = t.getFullYear(); calM = t.getMonth();
-
-  }, 100);
-
+function changeListMonth(delta) {
+  const next = new Date(calY, calM + delta, 1);
+  calY = next.getFullYear();
+  calM = next.getMonth();
+  renderList();
+  document.getElementById('viewList')?.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 
