@@ -5,7 +5,7 @@ module.exports = async (req, res) => {
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
-  const SUPABASE_KEY = process.env.SUPABASE_KEY;
+  const SUPABASE_KEY = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;
   if (!SUPABASE_URL || !SUPABASE_KEY) {
     return res.status(503).json({ error: '데이터 저장소 설정이 필요합니다.' });
   }

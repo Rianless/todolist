@@ -6263,6 +6263,12 @@ const STORAGE_KEY = 'rianless_todo_v1';
 
 const API_URL = '/api/todos';
 
+const STATE_API_URL = '/api/state';
+
+let cloudStateLoaded = false;
+
+let cloudSyncTimer = null;
+
 
 
 // API 로드 완료 전에 빈 items로 Supabase 덮어쓰기 방지
@@ -6305,6 +6311,92 @@ function saveData() {
 
   if (itemsLoaded) syncItemsToAPI();
 
+  queueCloudStateSync();
+
+}
+
+function getCloudStatePayload() {
+  return {
+    subscriptions,
+    categories,
+    ledger,
+    nextId,
+    ledgerNextId,
+    memos,
+    memoNextId,
+    nickname: localStorage.getItem('rianless_nickname') || 'Rianless',
+    theme: document.documentElement.getAttribute('data-theme') || 'dark'
+  };
+}
+
+function queueCloudStateSync() {
+  if (!cloudStateLoaded) return;
+  clearTimeout(cloudSyncTimer);
+  cloudSyncTimer = setTimeout(syncCloudState, 450);
+}
+
+async function syncCloudState() {
+  try {
+    const response = await fetch(STATE_API_URL, {
+      method: 'POST',
+      headers: { 'Content-Type': 'application/json' },
+      body: JSON.stringify(getCloudStatePayload())
+    });
+    if (!response.ok) throw new Error(`클라우드 저장 오류: ${response.status}`);
+  } catch (error) {
+    console.error('[syncCloudState]', error);
+    showToast('클라우드 동기화에 실패했습니다', { type: 'error', duration: 2200 });
+  }
+}
+
+function hasLocalUserData() {
+  return ledger.length > 0 || subscriptions.length > 0 || memos.length > 0;
+}
+
+function applyCloudState(payload) {
+  if (Array.isArray(payload.subscriptions)) subscriptions = payload.subscriptions;
+  if (Array.isArray(payload.categories)) categories = payload.categories;
+  if (Array.isArray(payload.ledger)) ledger = payload.ledger;
+  if (Array.isArray(payload.memos)) memos = payload.memos;
+  if (Number.isFinite(payload.nextId)) nextId = payload.nextId;
+  if (Number.isFinite(payload.ledgerNextId)) ledgerNextId = payload.ledgerNextId;
+  if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
+  if (payload.nickname) localStorage.setItem('rianless_nickname', payload.nickname);
+  if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
+
+  localStorage.setItem(STORAGE_KEY, JSON.stringify({
+    subscriptions, categories, ledger, nextId, ledgerNextId,
+    theme: document.documentElement.getAttribute('data-theme') || 'dark'
+  }));
+  localStorage.setItem('rianless_memos', JSON.stringify(memos));
+
+  buildFilters();
+  buildCatSelect();
+  renderCal();
+  renderCategoryView();
+  renderMypageView();
+}
+
+async function loadCloudState() {
+  try {
+    const response = await fetch(STATE_API_URL, { cache: 'no-store' });
+    if (response.status === 404) {
+      cloudStateLoaded = true;
+      if (hasLocalUserData()) {
+        await syncCloudState();
+        showToast('이 기기의 데이터를 클라우드에 연결했습니다', { type: 'success', duration: 2400 });
+      }
+      return;
+    }
+    if (!response.ok) throw new Error(`클라우드 불러오기 오류: ${response.status}`);
+    const result = await response.json();
+    applyCloudState(result.data || {});
+    cloudStateLoaded = true;
+    showToast('클라우드 동기화 완료', { type: 'success', duration: 1500 });
+  } catch (error) {
+    console.error('[loadCloudState]', error);
+    cloudStateLoaded = false;
+  }
 }
 
 
@@ -6859,6 +6951,7 @@ function saveNickname() {
   const val = document.getElementById('nicknameInput').value.trim() || 'Rianless';
 
   localStorage.setItem('rianless_nickname', val);
+  queueCloudStateSync();
 
   document.getElementById('nicknameCurrent').textContent = val;
 
@@ -6921,6 +7014,7 @@ function deleteMemo(id) {
 function saveMemos() {
 
   try { localStorage.setItem('rianless_memos', JSON.stringify(memos)); } catch(e) {}
+  queueCloudStateSync();
 
 }
 
@@ -11070,6 +11164,8 @@ buildCatSelect();
 loadData();
 
 loadMemos();
+
+loadCloudState();
 
 buildFilters();
 
