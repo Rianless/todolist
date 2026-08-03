@@ -5420,6 +5420,9 @@ body::before, body::after, #bootScreen { display: none !important; }
 
 @media (max-width: 600px) {
   #fabAdd { display: none !important; }
+  #mainContent {
+    padding-bottom: 8px;
+  }
   .calendar-surface { margin-inline: -3px; padding-inline: 7px; border-radius: 20px; }
   .calendar-stage { display: flex; flex-direction: column; }
   .calendar-surface { order: 1; }
@@ -5453,6 +5456,7 @@ body::before, body::after, #bootScreen { display: none !important; }
     font-size: 9px;
     line-height: 15px;
   }
+  .agenda-empty { min-height: 88px; }
 }
 
 @media (min-width: 900px) {
