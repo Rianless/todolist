@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 
-<html lang="ko" data-theme="dark">
+<html lang="ko" data-theme="light">
 
 <head>
 
@@ -8,11 +8,11 @@
 
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 
-<title>To Do List // Rianless</title>
+<title>나의 하루 · 일정관리</title>
 
 <link rel="manifest" href="/manifest.json">
 
-<meta name="theme-color" content="#06070F">
+<meta name="theme-color" content="#f6f7fb">
 
 <meta name="mobile-web-app-capable" content="yes">
 
@@ -4817,6 +4817,369 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
   .pc-topbar { display: flex; }
 }
 
+/* ═══════════════════════════════════════
+   2026 CALM PRODUCTIVITY REDESIGN
+═══════════════════════════════════════ */
+:root {
+  --radius-sm: 10px;
+  --radius-md: 16px;
+  --radius-lg: 24px;
+}
+
+[data-theme="light"] {
+  --bg: #f6f7fb;
+  --bg2: #eef1f7;
+  --panel: #ffffff;
+  --panel2: #f4f6fa;
+  --border: #e7e9f0;
+  --border2: #d9dde8;
+  --cyan: #6269e8;
+  --magenta: #d85d8b;
+  --purple: #7467d9;
+  --yellow: #d99b37;
+  --text: #20232d;
+  --text2: #626777;
+  --text3: #9499a8;
+  --red: #e45f68;
+  --green: #2da77a;
+  --personal: #8b6edb;
+  --accent: #6269e8;
+  --tab-bg: rgba(255,255,255,.94);
+  --tab-act: #eef0ff;
+  --card-bg: #ffffff;
+  --input-bg: #f7f8fb;
+  --shadow: 0 12px 36px rgba(31,38,62,.08);
+  --font-main: 'Noto Sans KR', sans-serif;
+  --font-title: 'Noto Sans KR', sans-serif;
+  --font-body: 'Noto Sans KR', sans-serif;
+  --scanlines: 0;
+}
+
+[data-theme="dark"] {
+  --bg: #15171c;
+  --bg2: #1b1e24;
+  --panel: #202329;
+  --panel2: #282c34;
+  --border: #30343d;
+  --border2: #3b404b;
+  --cyan: #9298ff;
+  --magenta: #e786a8;
+  --purple: #a69af5;
+  --yellow: #e2b260;
+  --text: #f2f3f6;
+  --text2: #b0b4c0;
+  --text3: #777c89;
+  --red: #f27a82;
+  --green: #5fc59d;
+  --personal: #b19bf2;
+  --accent: #9298ff;
+  --tab-bg: rgba(32,35,41,.94);
+  --tab-act: rgba(146,152,255,.14);
+  --card-bg: #202329;
+  --input-bg: #282c34;
+  --shadow: 0 16px 40px rgba(0,0,0,.24);
+  --font-main: 'Noto Sans KR', sans-serif;
+  --font-title: 'Noto Sans KR', sans-serif;
+  --font-body: 'Noto Sans KR', sans-serif;
+  --scanlines: 0;
+}
+
+body {
+  background: var(--bg);
+  font-family: 'Noto Sans KR', sans-serif;
+  letter-spacing: -.01em;
+}
+body::before, body::after, #bootScreen { display: none !important; }
+
+#app {
+  max-width: 520px;
+  background: var(--bg);
+  box-shadow: 0 0 0 1px var(--border), 0 24px 80px rgba(30,35,55,.1);
+}
+
+.app-header,
+[data-theme="dark"] .app-header {
+  padding: 22px 20px 14px;
+  background: color-mix(in srgb, var(--panel) 92%, transparent);
+  border-color: var(--border);
+  box-shadow: none;
+  backdrop-filter: blur(18px);
+}
+[data-theme="dark"] .app-header::after { display: none; }
+.header-sys, .header-badges, .header-sys-extra { display: none !important; }
+.header-left::after {
+  content: '일정과 생활을 한곳에서';
+  display: block;
+  margin-top: 3px;
+  color: var(--text3);
+  font-size: 12px;
+  font-weight: 400;
+}
+.header-title,
+[data-theme="dark"] .header-title {
+  height: auto;
+  margin: 0;
+  color: var(--text);
+  font-family: 'Noto Sans KR', sans-serif;
+  font-size: 24px;
+  font-weight: 800;
+  letter-spacing: -.045em;
+  text-shadow: none;
+}
+.header-controls { gap: 8px; padding-top: 0; }
+.theme-btn, .notif-btn {
+  width: 38px; height: 38px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel2);
+  color: var(--text2);
+  box-shadow: none;
+  font-size: 15px;
+}
+.progress-bar-wrap {
+  margin-top: 16px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: var(--panel2);
+}
+.prog-label { color: var(--text2); font-size: 10px; letter-spacing: 0; }
+.prog-track { height: 6px; border: 0; border-radius: 999px; background: var(--border); }
+.prog-fill { border-radius: 999px; background: linear-gradient(90deg, #6269e8, #9398ff); box-shadow: none; }
+.prog-pct { color: var(--accent); font-size: 11px; }
+
+#mainContent { padding: 18px 16px 112px; }
+.view { animation: none; }
+
+.cal-subtab-bar {
+  width: fit-content;
+  margin: 0 auto 16px;
+  padding: 4px;
+  border: 0;
+  border-radius: 12px;
+  background: var(--panel2);
+}
+.cal-subtab {
+  min-width: 58px;
+  padding: 8px 14px;
+  border: 0;
+  border-radius: 9px;
+  color: var(--text3);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.cal-subtab.active { background: var(--panel); color: var(--text); box-shadow: 0 2px 8px rgba(30,35,55,.08); }
+
+.cal-nav { margin-bottom: 14px; }
+.cal-month, [data-theme="dark"] .cal-month {
+  color: var(--text);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+}
+.nav-btn, .today-btn {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel);
+  color: var(--text2);
+  font-family: inherit;
+  box-shadow: none;
+}
+.today-btn { padding: 7px 11px; font-size: 10px; letter-spacing: 0; }
+.cal-grid { gap: 5px; }
+.cal-dow, [data-theme="light"] .cal-dow {
+  padding: 5px 0;
+  color: var(--text3);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0;
+}
+.cal-cell, [data-theme="dark"] .cal-cell {
+  height: 74px;
+  padding: 7px 5px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--panel);
+  clip-path: none;
+}
+.cal-cell.today {
+  border-color: var(--accent);
+  background: var(--tab-act);
+  box-shadow: inset 0 0 0 1px var(--accent);
+}
+.cal-daynum, [data-theme="light"] .cal-daynum {
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 600;
+}
+.cal-dot, [data-theme="dark"] .cal-dot, [data-theme="light"] .cal-dot {
+  padding: 2px 4px;
+  border: 0;
+  border-radius: 4px;
+  background: var(--panel2);
+  color: var(--text2) !important;
+  font-family: inherit;
+  font-size: 7px;
+  font-weight: 500;
+  text-shadow: none;
+  box-shadow: none;
+}
+.cal-ledger-total { background: var(--panel2); color: var(--text2); border-radius: 4px; }
+
+.todo-card, .mp-card, .stat-card, .note-card, .ledger-sum-box {
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  background: var(--panel);
+  box-shadow: none;
+  clip-path: none !important;
+}
+.todo-card { margin-bottom: 9px; overflow: hidden; }
+.todo-card:hover { transform: translateY(-1px); border-color: var(--border2); }
+.corner-d, .dc { display: none !important; }
+.cat-badge, .allday-badge {
+  border: 0 !important;
+  border-radius: 999px;
+  background: var(--panel2);
+  padding: 3px 8px;
+}
+.todo-title { font-family: inherit; font-weight: 700; letter-spacing: -.02em; }
+
+.mp-card { margin-bottom: 10px; overflow: hidden; }
+.mp-card.open { border-color: var(--border2); box-shadow: var(--shadow); }
+.mp-card-header { min-height: 58px; padding: 14px 16px; }
+.mp-card-label, [data-theme="dark"] .mp-card-label {
+  color: var(--text);
+  font-family: inherit;
+  font-size: 14px;
+  font-weight: 700;
+  letter-spacing: -.02em;
+  text-shadow: none;
+}
+.mp-card-icon { width: 32px; height: 32px; border-radius: 10px; background: var(--panel2); display: grid; place-items: center; }
+.mp-card-inner { padding: 4px 16px 16px; }
+.ledger-summary { gap: 7px; }
+.ledger-sum-box { padding: 12px 8px; }
+.ledger-sum-label { font-size: 10px; letter-spacing: 0; }
+.ledger-sum-val { font-size: 14px; }
+.ledger-entry { padding: 11px 4px; }
+.ledger-add-btn, .ledger-export-btn, .add-btn {
+  min-height: 42px;
+  border: 1px solid var(--border2);
+  border-radius: 12px;
+  background: var(--panel2);
+  color: var(--text);
+  font-family: inherit;
+  letter-spacing: 0;
+}
+
+.modal-overlay { background: rgba(24,27,34,.48); backdrop-filter: blur(8px); }
+.modal-sheet, .detail-sheet, [data-theme="dark"] .modal-sheet, [data-theme="dark"] .detail-sheet {
+  width: min(100%, 460px);
+  border: 1px solid var(--border);
+  border-radius: 24px !important;
+  background: var(--panel);
+  box-shadow: 0 28px 90px rgba(14,18,30,.28);
+  clip-path: none;
+}
+.modal-header { padding: 18px 20px 12px; }
+.modal-title, [data-theme="dark"] .modal-title {
+  color: var(--text);
+  font-family: inherit;
+  font-size: 18px;
+  font-weight: 800;
+  letter-spacing: -.03em;
+  text-shadow: none;
+}
+.modal-body { padding: 8px 20px 20px; }
+.modal-actions { padding: 14px 20px 20px; border-top: 1px solid var(--border); }
+.form-label { color: var(--text2); font-family: inherit; font-size: 11px; letter-spacing: 0; }
+.form-input, .form-select, .form-textarea {
+  min-height: 46px;
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  background: var(--input-bg);
+  color: var(--text);
+  font-family: inherit;
+}
+.form-input:focus, .form-select:focus, .form-textarea:focus {
+  border-color: var(--accent);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--accent) 15%, transparent);
+}
+.btn-save, .btn-cancel {
+  min-height: 44px;
+  border-radius: 12px;
+  font-family: inherit;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+.btn-save { background: var(--accent); color: #fff; box-shadow: none; }
+.btn-cancel { background: var(--panel2); color: var(--text2); border-color: var(--border); }
+
+.fab-add {
+  right: max(20px, calc((100vw - 500px)/2 + 20px));
+  bottom: 88px;
+  width: 54px; height: 54px;
+  border: 0;
+  border-radius: 18px;
+  background: var(--accent);
+  color: #fff;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--accent) 28%, transparent);
+}
+.fab-add:hover { transform: translateY(-2px); box-shadow: 0 16px 34px color-mix(in srgb, var(--accent) 32%, transparent); }
+
+.tab-bar {
+  left: 12px; right: 12px; bottom: 12px;
+  width: auto;
+  border: 1px solid var(--border);
+  border-radius: 20px;
+  background: var(--tab-bg);
+  padding: 7px;
+  box-shadow: 0 14px 40px rgba(27,32,49,.14);
+  backdrop-filter: blur(18px);
+}
+.tab-item { min-height: 52px; border-radius: 14px; color: var(--text3); }
+.tab-item.active { background: var(--tab-act); color: var(--accent); }
+.tab-item::before { display: none; }
+.tab-icon { font-size: 17px; }
+.tab-label, [data-theme="dark"] .tab-label { font-family: inherit; font-size: 10px; font-weight: 600; letter-spacing: 0; }
+
+.toast { border: 1px solid var(--border); border-left: 0; border-radius: 14px; background: var(--panel); box-shadow: var(--shadow); }
+.pc-topbar-title { font-family: inherit; letter-spacing: 0; }
+
+@media (min-width: 900px) {
+  body { background: var(--bg2); }
+  #app { max-width: none; box-shadow: none; }
+  .app-header, [data-theme="dark"] .app-header {
+    padding: 30px 22px 22px;
+    border-right: 1px solid var(--border);
+    background: var(--panel);
+  }
+  .header-top { align-items: stretch; }
+  .header-controls { padding-top: 22px; }
+  .tab-bar {
+    position: static;
+    margin-top: auto;
+    padding: 6px;
+    border: 0;
+    border-radius: 16px;
+    background: var(--panel2);
+    box-shadow: none;
+  }
+  .tab-item { min-height: 46px; }
+  .tab-item:hover { border-color: transparent; background: var(--tab-act); }
+  #mainContent > .view.active { padding: 24px 30px 0; }
+  .pc-topbar { height: 58px; padding: 0 30px; background: var(--panel); border-color: var(--border); }
+  [data-theme="dark"] .pc-topbar { background: var(--panel); border-color: var(--border); }
+  .pc-topbar-title::before { content: '오늘의 일정'; font-size: 14px; font-weight: 700; color: var(--text); }
+  .pc-topbar-title { font-size: 0; }
+  #viewCal #calGrid { gap: 7px; }
+  .cal-cell, [data-theme="dark"] .cal-cell { border-radius: 14px; padding: 9px 8px; }
+}
+
 </style>
 
 </head>
@@ -4871,7 +5234,7 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 
         <div class="header-sys" id="headerSys" aria-hidden="true">// SYS::Rianless // NODE_03 // AUTH_OK</div>
 
-        <h1 class="header-title">To Do<span> List</span></h1>
+        <h1 class="header-title">나의 하루</h1>
 
         <div class="header-badges" aria-hidden="true">
 

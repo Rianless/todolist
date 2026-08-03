@@ -1,11 +1,11 @@
 {
-  "name": "TDL",
-  "short_name": "TDL",
-  "description": "청년 프로그램 일정 관리",
+  "name": "나의 하루",
+  "short_name": "나의 하루",
+  "description": "일정과 생활을 한곳에서 관리하는 개인 플래너",
   "start_url": "/",
   "display": "standalone",
-  "background_color": "#06070F",
-  "theme_color": "#06070F",
+  "background_color": "#f6f7fb",
+  "theme_color": "#f6f7fb",
   "orientation": "portrait",
   "icons": [
     {
