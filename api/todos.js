@@ -6,6 +6,9 @@ module.exports = async (req, res) => {
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
   const SUPABASE_KEY = process.env.SUPABASE_KEY;
+  if (!SUPABASE_URL || !SUPABASE_KEY) {
+    return res.status(503).json({ error: '데이터 저장소 설정이 필요합니다.' });
+  }
   const base = `${SUPABASE_URL}/rest/v1/todos`;
   const headers = {
     'apikey': SUPABASE_KEY,
@@ -17,7 +20,7 @@ module.exports = async (req, res) => {
   if (req.method === 'GET') {
     const r = await fetch(`${base}?order=created_at`, { headers });
     const data = await r.json();
-    return res.status(200).json(data);
+    return res.status(r.status).json(data);
   }
 
   if (req.method === 'POST') {
@@ -27,12 +30,14 @@ module.exports = async (req, res) => {
       body: JSON.stringify(req.body)
     });
     const data = await r.json();
-    return res.status(200).json(data);
+    return res.status(r.status).json(data);
   }
 
   if (req.method === 'DELETE') {
     const { id } = req.query;
-    await fetch(`${base}?id=eq.${id}`, { method: 'DELETE', headers });
+    if (!id) return res.status(400).json({ error: '삭제할 일정 ID가 필요합니다.' });
+    const r = await fetch(`${base}?id=eq.${encodeURIComponent(id)}`, { method: 'DELETE', headers });
+    if (!r.ok) return res.status(r.status).json({ error: '일정 삭제에 실패했습니다.' });
     return res.status(200).json({ success: true });
   }
 
