@@ -4957,6 +4957,7 @@ body::before, body::after, #bootScreen { display: none !important; }
   border: 0;
   border-radius: 12px;
   background: var(--panel2);
+  flex-wrap: nowrap;
 }
 .cal-subtab {
   min-width: 58px;
@@ -4968,6 +4969,9 @@ body::before, body::after, #bootScreen { display: none !important; }
   font-size: 12px;
   font-weight: 600;
   letter-spacing: 0;
+  white-space: nowrap;
+  word-break: keep-all;
+  flex-shrink: 0;
 }
 .cal-subtab.active { background: var(--panel); color: var(--text); box-shadow: 0 2px 8px rgba(30,35,55,.08); }
 
@@ -5180,6 +5184,274 @@ body::before, body::after, #bootScreen { display: none !important; }
   .cal-cell, [data-theme="dark"] .cal-cell { border-radius: 14px; padding: 9px 8px; }
 }
 
+/* Calendar v2 — focused month + agenda layout */
+#viewCalendar .cal-subtab-bar {
+  margin-left: 0;
+  margin-right: 0;
+}
+
+.cal-nav {
+  min-height: 52px;
+  margin-bottom: 12px;
+}
+.cal-nav .cal-month {
+  text-align: left;
+  font-size: 25px;
+  font-weight: 800;
+}
+.cal-arrow {
+  width: 38px;
+  height: 38px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  color: var(--text2);
+  font-size: 24px;
+}
+.cal-arrow:hover { background: var(--panel2); color: var(--text); }
+.cal-today-btn {
+  min-height: 36px;
+  padding: 0 13px;
+  border: 0;
+  border-radius: 11px;
+  background: var(--tab-act);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0;
+}
+
+.calendar-stage { display: flex; flex-direction: column; gap: 14px; min-height: 0; }
+.calendar-surface {
+  padding: 12px 10px 10px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: 0 12px 40px rgba(30,35,55,.055);
+}
+.calendar-surface .cal-grid { gap: 2px; }
+.calendar-surface .cal-dow {
+  padding: 5px 0 11px;
+  font-size: 10px;
+  font-weight: 700;
+}
+.calendar-surface .cal-cell,
+[data-theme="dark"] .calendar-surface .cal-cell {
+  min-width: 0;
+  height: 62px;
+  padding: 5px 3px;
+  border: 0;
+  border-radius: 12px;
+  background: transparent;
+  box-shadow: none;
+  transition: background .15s ease, transform .15s ease;
+}
+.calendar-surface .cal-cell:hover { background: var(--panel2); }
+.calendar-surface .cal-cell:active { transform: scale(.96); }
+.calendar-surface .cal-cell.selected { background: var(--tab-act); }
+.calendar-surface .cal-cell.today { background: transparent; box-shadow: none; }
+.calendar-surface .cal-cell.today.selected { background: var(--tab-act); }
+.calendar-surface .cal-daynum,
+[data-theme="light"] .calendar-surface .cal-daynum {
+  width: 26px;
+  height: 26px;
+  margin: 0 auto 3px;
+  display: grid;
+  place-items: center;
+  border-radius: 50%;
+  color: var(--text2);
+  font-size: 11px;
+  font-weight: 600;
+}
+.calendar-surface .cal-cell.today .cal-daynum {
+  background: var(--accent);
+  color: #fff;
+}
+.calendar-surface .cal-cell.sun .cal-daynum { color: var(--red); }
+.calendar-surface .cal-cell.sat .cal-daynum { color: var(--accent); }
+.calendar-surface .cal-cell.today.sun .cal-daynum,
+.calendar-surface .cal-cell.today.sat .cal-daynum { color: #fff; }
+.calendar-surface .cal-dot {
+  width: calc(100% - 4px);
+  height: 16px;
+  margin: 2px auto 0;
+  padding: 1px 5px;
+  overflow: hidden;
+  border: 0;
+  border-radius: 5px;
+  background: color-mix(in srgb, var(--event-color, var(--accent)) 14%, transparent) !important;
+  color: var(--event-color, var(--accent)) !important;
+  font-size: 8px;
+  font-weight: 700;
+  line-height: 14px;
+  text-align: left;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.calendar-surface .cal-more {
+  display: block;
+  margin-top: 1px;
+  padding: 0;
+  color: var(--text3);
+  font-size: 7px;
+  text-align: center;
+}
+.calendar-surface .cal-ledger-bar { position: absolute; right: 5px; top: 7px; margin: 0; }
+.calendar-surface .cal-ledger-pip { width: 4px; height: 4px; }
+.calendar-surface .cal-ledger-total { display: none; }
+
+.cal-agenda {
+  min-height: 180px;
+  padding: 18px;
+  border: 1px solid var(--border);
+  border-radius: 22px;
+  background: var(--panel);
+  box-shadow: 0 12px 40px rgba(30,35,55,.055);
+}
+.agenda-head { display: flex; align-items: flex-end; justify-content: space-between; gap: 12px; }
+.agenda-eyebrow { margin-bottom: 3px; color: var(--accent); font-size: 10px; font-weight: 700; }
+.agenda-title { color: var(--text); font-size: 18px; font-weight: 800; letter-spacing: -.035em; }
+.agenda-count {
+  min-width: 34px;
+  padding: 5px 9px;
+  border-radius: 999px;
+  background: var(--panel2);
+  color: var(--text3);
+  font-size: 10px;
+  font-weight: 700;
+  text-align: center;
+}
+.agenda-actions { display: flex; gap: 7px; margin: 14px 0 12px; }
+.agenda-actions button {
+  min-height: 35px;
+  padding: 0 12px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: var(--panel2);
+  color: var(--text2);
+  font-family: inherit;
+  font-size: 11px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.agenda-actions button:hover { border-color: var(--accent); color: var(--accent); }
+.agenda-list { display: flex; flex-direction: column; gap: 7px; }
+.agenda-row {
+  width: 100%;
+  min-height: 58px;
+  display: grid;
+  grid-template-columns: 43px minmax(0,1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 9px 11px;
+  border: 0;
+  border-radius: 14px;
+  background: var(--panel2);
+  color: var(--text);
+  font-family: inherit;
+  text-align: left;
+  cursor: pointer;
+}
+.agenda-row:hover { background: var(--tab-act); }
+.agenda-time { color: var(--agenda-color, var(--accent)); font-size: 10px; font-weight: 800; }
+.agenda-row-body { min-width: 0; display: flex; flex-direction: column; gap: 2px; }
+.agenda-row-body strong { overflow: hidden; color: var(--text); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
+.agenda-row-body small { overflow: hidden; color: var(--text3); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
+.agenda-arrow { color: var(--text3); font-size: 18px; }
+.agenda-money-icon {
+  width: 32px;
+  height: 32px;
+  display: grid;
+  place-items: center;
+  border-radius: 10px;
+  background: rgba(45,167,122,.11);
+  color: var(--green);
+  font-size: 16px;
+}
+.agenda-row.ledger.expense .agenda-money-icon { background: rgba(228,95,104,.11); color: var(--red); }
+.agenda-amount { color: var(--green); font-size: 11px; font-weight: 800; white-space: nowrap; }
+.agenda-row.expense .agenda-amount { color: var(--red); }
+.agenda-empty {
+  min-height: 115px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  color: var(--text3);
+  text-align: center;
+}
+.agenda-empty span {
+  width: 34px; height: 34px;
+  display: grid; place-items: center;
+  margin-bottom: 4px;
+  border-radius: 50%;
+  background: var(--tab-act);
+  color: var(--accent);
+  font-weight: 800;
+}
+.agenda-empty strong { color: var(--text2); font-size: 12px; }
+.agenda-empty small { font-size: 10px; }
+
+@media (max-width: 420px) {
+  #fabAdd { display: none !important; }
+  .calendar-surface { margin-inline: -3px; padding-inline: 7px; border-radius: 20px; }
+  .calendar-stage { display: flex; flex-direction: column; }
+  .calendar-surface { order: 1; }
+  .cal-agenda {
+    position: fixed;
+    z-index: 70;
+    right: 12px;
+    bottom: calc(72px + env(safe-area-inset-bottom));
+    left: 12px;
+    width: auto;
+    min-height: 0;
+    max-height: 104px;
+    margin: 0;
+    padding: 16px;
+    overflow-y: auto;
+    border-radius: 20px;
+    clip-path: inset(0 round 20px);
+    box-shadow: 0 18px 55px rgba(30,35,55,.2);
+  }
+  .calendar-surface .cal-cell, [data-theme="dark"] .calendar-surface .cal-cell { height: 56px; padding-top: 4px; }
+  .calendar-surface .cal-daynum, [data-theme="light"] .calendar-surface .cal-daynum {
+    width: 22px;
+    height: 22px;
+    margin-bottom: 1px;
+  }
+  .calendar-surface .cal-dot {
+    height: 16px;
+    margin-top: 1px;
+    padding-inline: 4px;
+    font-size: 8px;
+    line-height: 14px;
+  }
+}
+
+@media (min-width: 900px) {
+  #viewCal.cal-subview.active { overflow: hidden; }
+  .calendar-stage {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) 330px;
+    align-items: stretch;
+    flex: 1;
+  }
+  .calendar-surface { min-height: 0; display: flex; flex-direction: column; }
+  .calendar-surface .cal-grid {
+    flex: 1;
+    grid-template-rows: auto repeat(6,minmax(64px,1fr)) !important;
+  }
+  .calendar-surface .cal-cell,
+  [data-theme="dark"] .calendar-surface .cal-cell {
+    height: auto;
+    min-height: 64px;
+    padding-top: 8px;
+  }
+  .cal-agenda { min-height: 0; overflow-y: auto; }
+}
+
 </style>
 
 </head>
@@ -5320,9 +5592,12 @@ body::before, body::after, #bootScreen { display: none !important; }
 
         </div>
 
-        <div class="cal-grid" id="calGrid"></div>
-
-        <div id="calDayList" style="margin-top:12px;"></div>
+        <div class="calendar-stage">
+          <div class="calendar-surface">
+            <div class="cal-grid" id="calGrid"></div>
+          </div>
+          <div id="calDayList" class="cal-agenda"></div>
+        </div>
 
       </div>
 
@@ -6632,6 +6907,10 @@ let cloudStateLoaded = false;
 
 let cloudSyncTimer = null;
 
+let cloudSyncAvailable = null;
+
+let cloudFailureNotified = false;
+
 
 
 // API 로드 완료 전에 빈 items로 Supabase 덮어쓰기 방지
@@ -6693,22 +6972,34 @@ function getCloudStatePayload() {
 }
 
 function queueCloudStateSync() {
-  if (!cloudStateLoaded) return;
+  if (!cloudStateLoaded || cloudSyncAvailable === false) return;
   clearTimeout(cloudSyncTimer);
   cloudSyncTimer = setTimeout(syncCloudState, 450);
 }
 
 async function syncCloudState() {
+  if (cloudSyncAvailable === false) return;
   try {
     const response = await fetch(STATE_API_URL, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json' },
       body: JSON.stringify(getCloudStatePayload())
     });
-    if (!response.ok) throw new Error(`클라우드 저장 오류: ${response.status}`);
+    if (!response.ok) {
+      const error = new Error(`클라우드 저장 오류: ${response.status}`);
+      error.status = response.status;
+      throw error;
+    }
+    cloudSyncAvailable = true;
+    cloudFailureNotified = false;
   } catch (error) {
     console.error('[syncCloudState]', error);
-    showToast('클라우드 동기화에 실패했습니다', { type: 'error', duration: 2200 });
+    if ([404, 405, 501].includes(error.status)) cloudSyncAvailable = false;
+    const isLocalPreview = ['localhost', '127.0.0.1'].includes(location.hostname);
+    if (!isLocalPreview && !cloudFailureNotified) {
+      cloudFailureNotified = true;
+      showToast('클라우드 저장 서버에 연결할 수 없습니다', { type: 'error', duration: 2600 });
+    }
   }
 }
 
@@ -6744,6 +7035,13 @@ async function loadCloudState() {
   try {
     const response = await fetch(STATE_API_URL, { cache: 'no-store' });
     if (response.status === 404) {
+      const missingState = await response.json().catch(() => null);
+      if (!missingState?.empty) {
+        const error = new Error('클라우드 API를 사용할 수 없습니다');
+        error.status = 404;
+        throw error;
+      }
+      cloudSyncAvailable = true;
       cloudStateLoaded = true;
       if (hasLocalUserData()) {
         await syncCloudState();
@@ -6754,11 +7052,13 @@ async function loadCloudState() {
     if (!response.ok) throw new Error(`클라우드 불러오기 오류: ${response.status}`);
     const result = await response.json();
     applyCloudState(result.data || {});
+    cloudSyncAvailable = true;
     cloudStateLoaded = true;
     showToast('클라우드 동기화 완료', { type: 'success', duration: 1500 });
   } catch (error) {
     console.error('[loadCloudState]', error);
     cloudStateLoaded = false;
+    cloudSyncAvailable = false;
   }
 }
 
@@ -8090,6 +8390,11 @@ function renderCal() {
   const daysInMonth = new Date(calY,calM+1,0).getDate();
 
   const today = new Date();
+  const currentMonthKey = `${calY}-${mm}`;
+  const todayKey = fmtDate(today);
+  if (!calSelectedDate || !calSelectedDate.startsWith(currentMonthKey)) {
+    calSelectedDate = todayKey.startsWith(currentMonthKey) ? todayKey : `${currentMonthKey}-01`;
+  }
 
 
 
@@ -8209,7 +8514,7 @@ function renderCal() {
 
     const cell=document.createElement('div');
 
-    cell.className=`cal-cell${isToday?' today':''}${dow===0?' sun':dow===6?' sat':''}${evts.length?' has-events':''}`;
+    cell.className=`cal-cell${isToday?' today':''}${ds===calSelectedDate?' selected':''}${dow===0?' sun':dow===6?' sat':''}${evts.length?' has-events':''}`;
 
     if (evts.length > 0) {
 
@@ -8256,31 +8561,19 @@ function renderCal() {
 
 
 
-    evts.slice(0,3).forEach(item=>{
+    evts.slice(0,2).forEach(item=>{
 
       const dot=document.createElement('span');
 
       dot.className='cal-dot'+(item.done?' done':'');
 
       const dotColor = item.isSub ? '#9d00ff' : getCatColor(item.category);
-
-      if (isDark) {
-
-        dot.style.color = dotColor;
-
-      } else {
-
-        dot.style.background = dotColor;
-
-        dot.style.borderColor = dotColor;
-
-      }
-
-      const ts=item.time?item.time.split('~')[0]+' ':'';
+      dot.style.setProperty('--event-color', dotColor);
 
       const displayTitle = item.hideTitle ? '// 비공개' : item.title;
 
-      dot.textContent=(item.secret&&!item._unlocked?'🔒 CLASSIFIED':ts+displayTitle);
+      dot.textContent=(item.secret&&!item._unlocked?'🔒 비공개':displayTitle);
+      dot.title = item.time ? `${item.time.split('~')[0]} ${displayTitle}` : displayTitle;
 
 
 
@@ -8310,13 +8603,13 @@ function renderCal() {
 
     });
 
-    if(evts.length>3){
+    if(evts.length>2){
 
       const more=document.createElement('span');
 
       more.className='cal-more';
 
-      more.textContent=`+${evts.length-3}`;
+      more.textContent=`+${evts.length-2}`;
 
       cell.appendChild(more);
 
@@ -8356,7 +8649,8 @@ function renderCal() {
 
       if (_calDragId !== null) return; // 드래그 중 클릭 무시
 
-      openDayModal(ds, dmap[ds]||[]);
+      calSelectedDate = ds;
+      renderCal();
 
     });
 
@@ -8366,8 +8660,108 @@ function renderCal() {
 
 
 
-  if(calSelectedDate) renderCalDayList(calSelectedDate);
+  renderCalDayList(calSelectedDate);
 
+}
+
+function renderCalDayList(ds) {
+  const container = document.getElementById('calDayList');
+  if (!container || !ds) return;
+  container.innerHTML = '';
+
+  const date = new Date(ds + 'T00:00:00');
+  const dayItems = items
+    .filter(item => item.date === ds)
+    .sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+  const dayLedger = ledger.filter(entry => entry.date === ds);
+
+  const header = document.createElement('div');
+  header.className = 'agenda-head';
+  const headingWrap = document.createElement('div');
+  const eyebrow = document.createElement('div');
+  eyebrow.className = 'agenda-eyebrow';
+  eyebrow.textContent = `${date.getMonth() + 1}월 ${date.getDate()}일 · ${DOW_KO[date.getDay()]}요일`;
+  const heading = document.createElement('h3');
+  heading.className = 'agenda-title';
+  heading.textContent = ds === fmtDate(new Date()) ? '오늘의 일정' : '선택한 날';
+  headingWrap.append(eyebrow, heading);
+
+  const count = document.createElement('span');
+  count.className = 'agenda-count';
+  count.textContent = `${dayItems.length + dayLedger.length}개`;
+  header.append(headingWrap, count);
+  container.appendChild(header);
+
+  const actions = document.createElement('div');
+  actions.className = 'agenda-actions';
+  const addSchedule = document.createElement('button');
+  addSchedule.type = 'button';
+  addSchedule.textContent = '+ 일정';
+  addSchedule.onclick = () => openAdd(false, ds);
+  const addLedger = document.createElement('button');
+  addLedger.type = 'button';
+  addLedger.textContent = '+ 가계부';
+  addLedger.onclick = () => openLedger(ds);
+  actions.append(addSchedule, addLedger);
+  container.appendChild(actions);
+
+  if (!dayItems.length && !dayLedger.length) {
+    const empty = document.createElement('div');
+    empty.className = 'agenda-empty';
+    empty.innerHTML = '<span>✓</span><strong>여유로운 하루예요</strong><small>일정이나 가계부 내역을 추가해 보세요.</small>';
+    container.appendChild(empty);
+    return;
+  }
+
+  const list = document.createElement('div');
+  list.className = 'agenda-list';
+
+  dayItems.forEach(item => {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'agenda-row';
+    row.style.setProperty('--agenda-color', getCatColor(item.category));
+    const time = document.createElement('span');
+    time.className = 'agenda-time';
+    time.textContent = item.time === 'allday' ? '종일' : (item.time ? item.time.split('~')[0] : '—');
+    const body = document.createElement('span');
+    body.className = 'agenda-row-body';
+    const title = document.createElement('strong');
+    title.textContent = item.hideTitle ? '비공개 일정' : item.title;
+    const meta = document.createElement('small');
+    meta.textContent = [item.category, item.location].filter(Boolean).join(' · ');
+    body.append(title, meta);
+    const arrow = document.createElement('span');
+    arrow.className = 'agenda-arrow';
+    arrow.textContent = '›';
+    row.append(time, body, arrow);
+    row.onclick = () => openDetail(item.id);
+    list.appendChild(row);
+  });
+
+  dayLedger.forEach(entry => {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = `agenda-row ledger ${entry.type}`;
+    const icon = document.createElement('span');
+    icon.className = 'agenda-money-icon';
+    icon.textContent = entry.type === 'income' ? '↗' : '↘';
+    const body = document.createElement('span');
+    body.className = 'agenda-row-body';
+    const title = document.createElement('strong');
+    title.textContent = entry.title || (entry.type === 'income' ? '수입' : '지출');
+    const meta = document.createElement('small');
+    meta.textContent = entry.category || '가계부';
+    body.append(title, meta);
+    const amount = document.createElement('span');
+    amount.className = 'agenda-amount';
+    amount.textContent = `${entry.type === 'income' ? '+' : '-'}${Number(entry.amount || 0).toLocaleString()}원`;
+    row.append(icon, body, amount);
+    row.onclick = () => editLedgerEntry(entry.id);
+    list.appendChild(row);
+  });
+
+  container.appendChild(list);
 }
 
 

@@ -1,0 +1,80 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>모바일 미리보기 · 나의 하루</title>
+  <style>
+    * { box-sizing: border-box; }
+    html, body { min-height: 100%; }
+    body {
+      margin: 0;
+      display: grid;
+      place-items: center;
+      padding: 28px;
+      overflow: auto;
+      background:
+        radial-gradient(circle at 20% 10%, rgba(108, 92, 231, .12), transparent 28rem),
+        #eef0f7;
+      color: #202230;
+      font-family: Inter, "Noto Sans KR", system-ui, sans-serif;
+    }
+    .preview-shell { text-align: center; }
+    .preview-label {
+      margin: 0 0 12px;
+      color: #696d80;
+      font-size: 13px;
+      font-weight: 700;
+    }
+    .phone {
+      width: 414px;
+      padding: 10px;
+      border: 1px solid rgba(27, 30, 44, .16);
+      border-radius: 42px;
+      background: #171821;
+      box-shadow: 0 30px 80px rgba(35, 38, 56, .28);
+    }
+    .screen {
+      position: relative;
+      width: 390px;
+      height: 844px;
+      overflow: hidden;
+      border-radius: 32px;
+      background: #fff;
+    }
+    .island {
+      position: absolute;
+      z-index: 5;
+      top: 9px;
+      left: 50%;
+      width: 104px;
+      height: 27px;
+      border-radius: 20px;
+      background: #111218;
+      transform: translateX(-50%);
+      pointer-events: none;
+    }
+    iframe {
+      width: 390px;
+      height: 844px;
+      border: 0;
+      background: #fff;
+    }
+    @media (max-height: 940px) {
+      .phone { transform: scale(.82); transform-origin: top center; }
+      .preview-shell { height: 730px; }
+    }
+  </style>
+</head>
+<body>
+  <main class="preview-shell">
+    <p class="preview-label">모바일 미리보기 · 390 × 844</p>
+    <div class="phone">
+      <div class="screen">
+        <div class="island" aria-hidden="true"></div>
+        <iframe src="/?preview=mobile-frame-v15" title="나의 하루 모바일 미리보기"></iframe>
+      </div>
+    </div>
+  </main>
+</body>
+</html>
