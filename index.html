@@ -6938,6 +6938,7 @@ const API_URL = '/api/todos';
 const STATE_API_URL = '/api/state';
 
 let cloudStateLoaded = false;
+let cloudItemsAuthoritative = false;
 
 let cloudSyncTimer = null;
 
@@ -6961,6 +6962,7 @@ function saveData() {
 
     const payload = {
 
+      items,
       subscriptions,
 
       categories,
@@ -6993,6 +6995,7 @@ function saveData() {
 
 function getCloudStatePayload() {
   return {
+    items,
     subscriptions,
     categories,
     ledger,
@@ -7012,7 +7015,7 @@ function queueCloudStateSync() {
 }
 
 async function syncCloudState() {
-  if (cloudSyncAvailable === false) return;
+  if (cloudSyncAvailable === false) return false;
   try {
     const response = await fetch(STATE_API_URL, {
       method: 'POST',
@@ -7026,6 +7029,7 @@ async function syncCloudState() {
     }
     cloudSyncAvailable = true;
     cloudFailureNotified = false;
+    return true;
   } catch (error) {
     console.error('[syncCloudState]', error);
     if ([404, 405, 501].includes(error.status)) cloudSyncAvailable = false;
@@ -7034,14 +7038,19 @@ async function syncCloudState() {
       cloudFailureNotified = true;
       showToast('클라우드 저장 서버에 연결할 수 없습니다', { type: 'error', duration: 2600 });
     }
+    return false;
   }
 }
 
 function hasLocalUserData() {
-  return ledger.length > 0 || subscriptions.length > 0 || memos.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0;
 }
 
 function applyCloudState(payload) {
+  if (Array.isArray(payload.items)) {
+    items = payload.items;
+    cloudItemsAuthoritative = true;
+  }
   if (Array.isArray(payload.subscriptions)) subscriptions = payload.subscriptions;
   if (Array.isArray(payload.categories)) categories = payload.categories;
   if (Array.isArray(payload.ledger)) ledger = payload.ledger;
@@ -7053,7 +7062,7 @@ function applyCloudState(payload) {
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    subscriptions, categories, ledger, nextId, ledgerNextId,
+    items, subscriptions, categories, ledger, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -7166,7 +7175,7 @@ async function syncItemsToAPI() {
 
     });
 
-    await fetch(API_URL, {
+    const response = await fetch(API_URL, {
 
       method: 'POST',
 
@@ -7175,10 +7184,15 @@ async function syncItemsToAPI() {
       body: JSON.stringify(rows)
 
     });
+    if (!response.ok) {
+      throw new Error(`일정 저장 오류: ${response.status}`);
+    }
+    return true;
 
   } catch(e) {
 
     console.error('[syncItemsToAPI] 실패:', e);
+    return false;
 
   }
 
@@ -7212,6 +7226,7 @@ function loadData() {
 
       const payload = JSON.parse(raw);
 
+      if (Array.isArray(payload.items)) items = payload.items;
       if (payload.subscriptions) subscriptions = payload.subscriptions;
 
       if (payload.categories)    categories    = payload.categories;
@@ -7268,7 +7283,7 @@ async function loadItemsFromAPI() {
 
 
 
-      items = data.map(row => {
+      const apiItems = data.map(row => {
 
         const cat = row.category || '기타';
 
@@ -7327,6 +7342,18 @@ async function loadItemsFromAPI() {
         };
 
       });
+
+      if (!cloudItemsAuthoritative) {
+        const mergedItems = new Map(apiItems.map(item => [String(item.id), item]));
+        items.forEach(item => mergedItems.set(String(item.id), { ...mergedItems.get(String(item.id)), ...item }));
+        items = [...mergedItems.values()];
+      }
+
+      const maxNumericId = items.reduce((max, item) => {
+        const id = Number(item.id);
+        return Number.isFinite(id) ? Math.max(max, id) : max;
+      }, 0);
+      nextId = Math.max(nextId, maxNumericId + 1);
 
       console.log('[loadItemsFromAPI] 불러오기 성공, items:', items.length);
 
@@ -10394,7 +10421,7 @@ function closePhotoViewer() {
 
 
 
-function saveItem() {
+async function saveItem() {
 
   if (isSub) {
 
@@ -10447,6 +10474,7 @@ function saveItem() {
   const time = isAllday ? 'allday' : (st && et ? `${st}~${et}` : st||'');
 
   const existing = editingId !== null ? items.find(i=>i.id===editingId) : null;
+  const wasEditing = editingId !== null;
 
   const repeatVal = document.getElementById('f_repeat').value;
 
@@ -10494,9 +10522,13 @@ function saveItem() {
 
 
 
-  closeAdd();
-
   saveData();
+  const [todosSaved, stateSaved] = await Promise.all([
+    syncItemsToAPI(),
+    syncCloudState()
+  ]);
+
+  closeAdd();
 
   if (currentMainTab === 'calendar') {
 
@@ -10512,7 +10544,12 @@ function saveItem() {
 
   scheduleNotifications();
 
-  showToast(editingId !== null ? '수정되었습니다' : '일정이 추가되었습니다', { type: 'success', duration: 1800 });
+  const savedLabel = wasEditing ? '수정되었습니다' : '일정이 추가되었습니다';
+  if (todosSaved || stateSaved) {
+    showToast(`${savedLabel} · 클라우드 저장 완료`, { type: 'success', duration: 2200 });
+  } else {
+    showToast(`${savedLabel} · 이 기기에 저장됨`, { type: 'info', duration: 2600 });
+  }
 
 }
 
