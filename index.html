@@ -3676,6 +3676,40 @@ body::after {
 
 }
 
+.cal-ledger-total {
+  display: block; margin-top: 2px; padding: 1px 3px; border-radius: 3px;
+  font-size: 6px; line-height: 1.35; white-space: nowrap; overflow: hidden;
+  text-overflow: ellipsis; color: var(--text2); background: rgba(127,127,127,0.08);
+}
+
+.day-ledger-section { margin-top: 14px; padding-top: 12px; border-top: 1px solid var(--border2); }
+.day-ledger-heading {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin-bottom: 8px; color: var(--text2); font-size: 11px; font-weight: 700;
+}
+.day-ledger-balance { color: var(--accent); }
+.day-ledger-entry {
+  display: grid; grid-template-columns: minmax(0,1fr) auto auto; align-items: center;
+  gap: 8px; padding: 9px 10px; margin-bottom: 6px; border: 1px solid var(--border);
+  border-radius: 6px; background: var(--card-bg);
+}
+.day-ledger-info { min-width: 0; }
+.day-ledger-title { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font-size: 12px; }
+.day-ledger-meta { margin-top: 2px; color: var(--text3); font-size: 9px; }
+.day-ledger-amount { white-space: nowrap; font-size: 12px; font-weight: 700; }
+.day-ledger-amount.income { color: var(--green); }
+.day-ledger-amount.expense { color: var(--red); }
+.day-ledger-edit {
+  min-height: 32px; border: 1px solid var(--border2); border-radius: 5px;
+  background: transparent; color: var(--accent); padding: 0 9px; cursor: pointer; font-size: 11px;
+}
+
+@media (max-width: 480px) {
+  .cal-ledger-total { font-size: 5.5px; padding-inline: 2px; }
+  .day-ledger-entry { grid-template-columns: minmax(0,1fr) auto; }
+  .day-ledger-edit { grid-column: 1 / -1; width: 100%; }
+}
+
 
 
 /* FAB add button */
@@ -7752,6 +7786,15 @@ function renderCal() {
 
       cell.appendChild(bar);
 
+      const total = document.createElement('span');
+      total.className = 'cal-ledger-total';
+      const incomeText = lmap[ds].income ? `+${compactLedgerAmount(lmap[ds].income)}` : '';
+      const expenseText = lmap[ds].expense ? `-${compactLedgerAmount(lmap[ds].expense)}` : '';
+      const dayBalance = lmap[ds].income - lmap[ds].expense;
+      total.textContent = [incomeText, expenseText].filter(Boolean).join(' / ');
+      total.title = `가계부 잔액 ${dayBalance >= 0 ? '+' : ''}${dayBalance.toLocaleString()}원`;
+      cell.appendChild(total);
+
     }
 
 
@@ -8052,6 +8095,13 @@ function calGoToday() {
 
 }
 
+function compactLedgerAmount(amount) {
+  const value = Number(amount || 0);
+  if (Math.abs(value) >= 100000000) return `${Math.round(value / 10000000) / 10}억`;
+  if (Math.abs(value) >= 10000) return `${Math.round(value / 1000) / 10}만`;
+  return value.toLocaleString('ko-KR');
+}
+
 
 
 function openDayModal(ds, evts) {
@@ -8116,10 +8166,74 @@ function openDayModal(ds, evts) {
 
 
 
+  const dayLedger = ledger.filter(entry => entry.date === ds);
+  const ledgerSection = document.createElement('section');
+  ledgerSection.className = 'day-ledger-section';
+  const dayIncome = dayLedger.filter(entry => entry.type === 'income').reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+  const dayExpense = dayLedger.filter(entry => entry.type === 'expense').reduce((sum, entry) => sum + Number(entry.amount || 0), 0);
+  const dayBalance = dayIncome - dayExpense;
+
+  const ledgerHeading = document.createElement('div');
+  ledgerHeading.className = 'day-ledger-heading';
+  ledgerHeading.innerHTML = `<span>💰 가계부 ${dayLedger.length ? `(${dayLedger.length})` : ''}</span><span class="day-ledger-balance">잔액 ${dayBalance >= 0 ? '+' : ''}${dayBalance.toLocaleString()}원</span>`;
+  ledgerSection.appendChild(ledgerHeading);
+
+  if (!dayLedger.length) {
+    const emptyLedger = document.createElement('div');
+    emptyLedger.className = 'empty-state';
+    emptyLedger.textContent = '가계부 내역이 없습니다';
+    ledgerSection.appendChild(emptyLedger);
+  } else {
+    dayLedger.forEach(entry => ledgerSection.appendChild(makeLedgerCardForDayModal(entry)));
+  }
+
+  const addLedgerBtn = document.createElement('button');
+  addLedgerBtn.className = 'add-btn';
+  addLedgerBtn.style.cssText = 'width:100%;margin-top:8px;display:block;';
+  addLedgerBtn.textContent = '+ 이 날에 수입 / 지출 추가';
+  addLedgerBtn.onclick = () => {
+    document.getElementById('dayModal').classList.remove('open');
+    openLedger(ds);
+  };
+  ledgerSection.appendChild(addLedgerBtn);
+  body.appendChild(ledgerSection);
+
   history.pushState({modal:'day'}, '');
 
   document.getElementById('dayModal').classList.add('open');
 
+}
+
+function makeLedgerCardForDayModal(entry) {
+  const card = document.createElement('div');
+  card.className = 'day-ledger-entry';
+
+  const info = document.createElement('div');
+  info.className = 'day-ledger-info';
+  const title = document.createElement('div');
+  title.className = 'day-ledger-title';
+  title.textContent = entry.title || (entry.type === 'income' ? '수입' : '지출');
+  const meta = document.createElement('div');
+  meta.className = 'day-ledger-meta';
+  meta.textContent = [entry.category, entry.memo].filter(Boolean).join(' · ') || (entry.type === 'income' ? '수입' : '지출');
+  info.append(title, meta);
+
+  const amount = document.createElement('div');
+  amount.className = `day-ledger-amount ${entry.type}`;
+  amount.textContent = `${entry.type === 'income' ? '+' : '-'}${Number(entry.amount || 0).toLocaleString()}원`;
+
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'day-ledger-edit';
+  edit.textContent = '수정';
+  edit.setAttribute('aria-label', `${entry.title || '가계부 내역'} 수정`);
+  edit.onclick = event => {
+    event.stopPropagation();
+    editLedgerEntry(entry.id);
+  };
+
+  card.append(info, amount, edit);
+  return card;
 }
 
 
@@ -10338,13 +10452,13 @@ function renderWeekDayList(dmap) {
 
 ══════════════════════════════════════ */
 
-function openLedger() {
+function openLedger(date) {
 
   editingLedgerId = null;
 
   ledgerType = 'expense';
 
-  document.getElementById('l_date').value = fmtDate(new Date());
+  document.getElementById('l_date').value = date || fmtDate(new Date());
 
   document.getElementById('l_amount').value = '';
 
@@ -10394,6 +10508,7 @@ function editLedgerEntry(id) {
   if (!entry) return;
 
   editingLedgerId = id;
+  document.getElementById('dayModal').classList.remove('open');
   document.getElementById('ledgerModalTitle').textContent = '가계부 내역 수정';
   document.getElementById('l_date').value = entry.date || fmtDate(new Date());
   document.getElementById('l_amount').value = Number(entry.amount || 0).toLocaleString('ko-KR');
