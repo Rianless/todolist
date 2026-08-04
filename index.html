@@ -5468,6 +5468,39 @@ body::before, body::after, #bootScreen { display: none !important; }
 .hidden-category .cheongdo-visibility-btn { background: var(--panel); color: var(--text3); }
 
 @media (max-width: 600px) {
+  #detailModal {
+    align-items: flex-end;
+    padding: 12px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  }
+  #detailModal .detail-sheet {
+    width: 100%;
+    max-height: calc(100dvh - 24px - env(safe-area-inset-bottom));
+    border-radius: 24px !important;
+  }
+  #detailModal .sheet-scroll {
+    min-height: 0;
+    max-height: 100%;
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    -webkit-overflow-scrolling: touch;
+    touch-action: pan-y;
+  }
+  #detailModal .detail-content-box,
+  #detailModal .detail-note-box {
+    max-height: none;
+    overflow: visible;
+    white-space: pre-wrap;
+    overflow-wrap: anywhere;
+  }
+  #detailModal .detail-actions {
+    position: sticky;
+    bottom: 0;
+    z-index: 2;
+    margin-top: 16px;
+    padding-bottom: calc(12px + env(safe-area-inset-bottom));
+    background: var(--panel);
+  }
   #fabAdd { display: none !important; }
   #mainContent {
     padding-bottom: 8px;
@@ -6419,6 +6452,8 @@ body::before, body::after, #bootScreen { display: none !important; }
     <span class="detail-content-label" id="detailContentLabel" style="display:none;">// 내용</span>
 
     <div class="detail-content-box" id="detailContent" style="display:none;"></div>
+
+    <span class="detail-content-label" id="detailNoteLabel" style="display:none;">메모</span>
 
     <div class="detail-note-box" id="detailNote" style="display:none;"></div>
 
@@ -10771,15 +10806,21 @@ function openDetail(id) {
 
   const noteBox = document.getElementById('detailNote');
 
+  const noteLabel = document.getElementById('detailNoteLabel');
+
   if (item.memo && item.memo.trim()) {
 
     noteBox.textContent = item.memo;
 
     noteBox.style.display = 'block';
 
+    noteLabel.style.display = 'block';
+
   } else {
 
     noteBox.style.display = 'none';
+
+    noteLabel.style.display = 'none';
 
   }
 
