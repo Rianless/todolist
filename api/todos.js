@@ -1,6 +1,6 @@
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
-  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PUT, DELETE, OPTIONS');
+  res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
@@ -18,7 +18,13 @@ module.exports = async (req, res) => {
   };
 
   if (req.method === 'GET') {
-    const r = await fetch(`${base}?order=created_at`, { headers });
+    const filters = [];
+    if (req.query.id) filters.push(`id=eq.${encodeURIComponent(req.query.id)}`);
+    if (req.query.date) filters.push(`date=eq.${encodeURIComponent(req.query.date)}`);
+    if (req.query.from) filters.push(`date=gte.${encodeURIComponent(req.query.from)}`);
+    if (req.query.to) filters.push(`date=lte.${encodeURIComponent(req.query.to)}`);
+    filters.push('order=date.asc,start_time.asc,created_at.asc');
+    const r = await fetch(`${base}?${filters.join('&')}`, { headers });
     const data = await r.json();
     return res.status(r.status).json(data);
   }
@@ -27,6 +33,18 @@ module.exports = async (req, res) => {
     const r = await fetch(base, {
       method: 'POST',
       headers: { ...headers, 'Prefer': 'resolution=merge-duplicates,return=representation' },
+      body: JSON.stringify(req.body)
+    });
+    const data = await r.json();
+    return res.status(r.status).json(data);
+  }
+
+  if (req.method === 'PATCH' || req.method === 'PUT') {
+    const { id } = req.query;
+    if (!id) return res.status(400).json({ error: '수정할 일정 ID가 필요합니다.' });
+    const r = await fetch(`${base}?id=eq.${encodeURIComponent(id)}`, {
+      method: 'PATCH',
+      headers,
       body: JSON.stringify(req.body)
     });
     const data = await r.json();
