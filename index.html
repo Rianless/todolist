@@ -5418,6 +5418,55 @@ body::before, body::after, #bootScreen { display: none !important; }
 .agenda-empty strong { color: var(--text2); font-size: 12px; }
 .agenda-empty small { font-size: 10px; }
 
+.cheongdo-manager-btn {
+  width: 100%;
+  min-height: 52px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  margin-top: 14px;
+  padding: 0 14px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--panel2);
+  color: var(--text);
+  font-family: inherit;
+  font-size: 12px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.cheongdo-manager-btn small { color: var(--accent); font-size: 10px; }
+.cheongdo-manager-sheet { width: min(calc(100% - 24px), 430px); }
+.cheongdo-manager-help { margin-top: 4px; color: var(--text3); font-size: 10px; }
+.cheongdo-manager-list { display: flex; flex-direction: column; gap: 8px; }
+.cheongdo-manager-row {
+  min-height: 54px;
+  display: grid;
+  grid-template-columns: 12px minmax(0, 1fr) auto;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 12px;
+  border-radius: 13px;
+  background: var(--panel2);
+}
+.cheongdo-manager-row.hidden-category { opacity: .58; }
+.cheongdo-manager-row .cat-color-dot { width: 10px; height: 10px; }
+.cheongdo-manager-name { color: var(--text); font-size: 12px; font-weight: 700; }
+.cheongdo-visibility-btn {
+  min-width: 64px;
+  min-height: 32px;
+  border: 0;
+  border-radius: 10px;
+  background: var(--tab-act);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: 10px;
+  font-weight: 700;
+  cursor: pointer;
+}
+.hidden-category .cheongdo-visibility-btn { background: var(--panel); color: var(--text3); }
+
 @media (max-width: 600px) {
   #fabAdd { display: none !important; }
   #mainContent {
@@ -5798,36 +5847,6 @@ body::before, body::after, #bootScreen { display: none !important; }
 
 
 
-        <!-- ── 메모 카드 ── -->
-
-        <div class="mp-card" id="mpCardMemo">
-
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardMemo')">
-
-            <span class="mp-card-icon">📝</span>
-
-            <span class="mp-card-label" id="memoSysLabel">메모</span>
-
-            <span class="mp-card-chevron">▼</span>
-
-          </div>
-
-          <div class="mp-card-body">
-
-            <div class="mp-card-inner">
-
-              <div id="memoList"></div>
-
-              <button class="ledger-add-btn" style="margin-top:10px;" onclick="openMemoAdd()">+ 메모 추가</button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-
       </div>
 
     </div>
@@ -5912,15 +5931,10 @@ body::before, body::after, #bootScreen { display: none !important; }
 
               <div id="otherCatList"></div>
 
-              <div class="cat-group-header" style="margin-top:14px;margin-bottom:8px;">
-
-                <span class="cat-group-tag">청도활동</span>
-
-                <span style="font-size:10px;color:var(--text3);">고정 카테고리</span>
-
-              </div>
-
-              <div id="cheongdoCatList"></div>
+              <button class="cheongdo-manager-btn" id="cheongdoManagerSummary" type="button" onclick="openCheongdoManager()">
+                <span>🎯 청도활동 고정 카테고리</span>
+                <small>표시 설정</small>
+              </button>
 
               <button class="add-cat-btn" style="margin-top:10px;" onclick="showInlineAddCatForm()">+ 카테고리 추가</button>
 
@@ -5951,6 +5965,34 @@ body::before, body::after, #bootScreen { display: none !important; }
                 </div>
 
               </div>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ── 메모 카드 ── -->
+
+        <div class="mp-card" id="mpCardMemo">
+
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardMemo')">
+
+            <span class="mp-card-icon">📝</span>
+
+            <span class="mp-card-label" id="memoSysLabel">메모</span>
+
+            <span class="mp-card-chevron">▼</span>
+
+          </div>
+
+          <div class="mp-card-body">
+
+            <div class="mp-card-inner">
+
+              <div id="memoList"></div>
+
+              <button class="ledger-add-btn" style="margin-top:10px;" onclick="openMemoAdd()">+ 메모 추가</button>
 
             </div>
 
@@ -5990,9 +6032,9 @@ body::before, body::after, #bootScreen { display: none !important; }
 
     <button class="tab-item" id="mainTab-category" role="tab" aria-selected="false" aria-controls="viewCategory" onclick="setMainTab('category',this)">
 
-      <div class="tab-icon" aria-hidden="true">🏷️</div>
+      <div class="tab-icon" aria-hidden="true">💰</div>
 
-      <div class="tab-label">카테고리</div>
+      <div class="tab-label">가계부</div>
 
     </button>
 
@@ -6007,6 +6049,22 @@ body::before, body::after, #bootScreen { display: none !important; }
   </nav>
 
 </div><!-- end app -->
+
+<!-- 청도활동 고정 카테고리 표시 설정 -->
+<div class="modal-overlay" id="cheongdoManagerModal" role="dialog" aria-modal="true" aria-labelledby="cheongdoManagerTitle">
+  <div class="modal-sheet cheongdo-manager-sheet">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="cheongdoManagerTitle">청도활동 카테고리</div>
+        <div class="cheongdo-manager-help">일정 추가 화면에 표시할 항목을 선택하세요.</div>
+      </div>
+      <button class="modal-close" type="button" onclick="closeCheongdoManager()" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <div id="cheongdoManagerList" class="cheongdo-manager-list"></div>
+    </div>
+  </div>
+</div>
 
 
 
@@ -6745,6 +6803,11 @@ const CAT_COLORS_DEFAULT = {
 // 청도활동 그룹에 속하는 카테고리들
 
 const CHEONGDO_CATS = ['밀착상담','자신감회복','취업역량강화','진로탐색','지역맞춤형','사례관리'];
+let hiddenCheongdoCats = [];
+
+function isCheongdoVisible(name) {
+  return CHEONGDO_CATS.includes(name) && !hiddenCheongdoCats.includes(name);
+}
 
 
 
@@ -6974,6 +7037,7 @@ function saveData() {
       subscriptions,
 
       categories,
+      hiddenCheongdoCats,
 
       ledger,
 
@@ -7006,6 +7070,7 @@ function getCloudStatePayload() {
     items,
     subscriptions,
     categories,
+    hiddenCheongdoCats,
     ledger,
     nextId,
     ledgerNextId,
@@ -7061,6 +7126,7 @@ function applyCloudState(payload) {
   }
   if (Array.isArray(payload.subscriptions)) subscriptions = payload.subscriptions;
   if (Array.isArray(payload.categories)) categories = payload.categories;
+  if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
   if (Array.isArray(payload.ledger)) ledger = payload.ledger;
   if (Array.isArray(payload.memos)) memos = payload.memos;
   if (Number.isFinite(payload.nextId)) nextId = payload.nextId;
@@ -7070,7 +7136,7 @@ function applyCloudState(payload) {
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, ledger, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledger, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -7238,6 +7304,7 @@ function loadData() {
       if (payload.subscriptions) subscriptions = payload.subscriptions;
 
       if (payload.categories)    categories    = payload.categories;
+      if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
 
       if (payload.ledger)        ledger        = payload.ledger;
 
@@ -7648,8 +7715,6 @@ function renderCategoryView() {
 
   if (document.getElementById('mpCardLedger').classList.contains('open')) renderLedgerCard();
 
-  if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
-
 }
 
 
@@ -7673,6 +7738,7 @@ function renderMypageView() {
   document.getElementById('nicknameAvatar').textContent = saved.charAt(0).toUpperCase();
 
   if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
+  if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
 
 }
 
@@ -7824,7 +7890,7 @@ function buildFilters() {
 
   // 청도활동 그룹 chip
 
-  if (!fs.querySelector('[data-cat="청도활동"]')) {
+  if (CHEONGDO_CATS.some(isCheongdoVisible) && !fs.querySelector('[data-cat="청도활동"]')) {
 
     const grpBtn = document.createElement('button');
 
@@ -7920,7 +7986,7 @@ function renderList() {
 
   else if (filterCat === '중요') filtered = items.filter(i=>i.priority==='high');
 
-  else if (filterCat === '청도활동') filtered = items.filter(i=>CHEONGDO_CATS.includes(i.category));
+  else if (filterCat === '청도활동') filtered = items.filter(i=>isCheongdoVisible(i.category));
 
   else filtered = items.filter(i=>i.category===filterCat);
 
@@ -9615,11 +9681,7 @@ function renderCatLists() {
 
   _editingCatName = null;
 
-  const cheongdoEl = document.getElementById('cheongdoCatList');
-
   const otherEl    = document.getElementById('otherCatList');
-
-  cheongdoEl.innerHTML = '';
 
   otherEl.innerHTML    = '';
 
@@ -9775,26 +9837,72 @@ function renderCatLists() {
 
 
 
-  // 청도활동 (고정, 아래)
+  updateCheongdoManagerSummary();
 
-  categories.filter(c => isCheongdo(c.name)).forEach(cat => {
+}
 
+function updateCheongdoManagerSummary() {
+  const button = document.getElementById('cheongdoManagerSummary');
+  if (!button) return;
+  const visibleCount = CHEONGDO_CATS.filter(isCheongdoVisible).length;
+  const summary = button.querySelector('small');
+  if (summary) summary.textContent = `${visibleCount}/${CHEONGDO_CATS.length}개 표시`;
+}
+
+function openCheongdoManager() {
+  renderCheongdoManager();
+  document.getElementById('cheongdoManagerModal').classList.add('open');
+}
+
+function closeCheongdoManager() {
+  document.getElementById('cheongdoManagerModal').classList.remove('open');
+}
+
+function renderCheongdoManager() {
+  const list = document.getElementById('cheongdoManagerList');
+  if (!list) return;
+  list.innerHTML = '';
+
+  CHEONGDO_CATS.forEach(name => {
+    const cat = categories.find(category => category.name === name);
+    if (!cat) return;
+    const visible = isCheongdoVisible(name);
     const row = document.createElement('div');
+    row.className = `cheongdo-manager-row${visible ? '' : ' hidden-category'}`;
 
-    row.className = 'cat-item';
+    const dot = document.createElement('span');
+    dot.className = 'cat-color-dot';
+    dot.style.background = cat.color;
 
-    row.innerHTML = `
+    const label = document.createElement('span');
+    label.className = 'cheongdo-manager-name';
+    label.textContent = name;
 
-      <div class="cat-color-dot" style="background:${cat.color}"></div>
+    const toggle = document.createElement('button');
+    toggle.type = 'button';
+    toggle.className = 'cheongdo-visibility-btn';
+    toggle.textContent = visible ? '표시 중' : '숨김';
+    toggle.setAttribute('aria-pressed', String(visible));
+    toggle.setAttribute('aria-label', `${name} ${visible ? '숨기기' : '표시하기'}`);
+    toggle.onclick = () => toggleCheongdoVisibility(name);
 
-      <div class="cat-name">${cat.name}</div>
-
-      <div class="cat-actions"><span style="font-size:10px;color:var(--text3);padding:0 6px;">고정</span></div>`;
-
-    cheongdoEl.appendChild(row);
-
+    row.append(dot, label, toggle);
+    list.appendChild(row);
   });
+}
 
+function toggleCheongdoVisibility(name) {
+  if (!CHEONGDO_CATS.includes(name)) return;
+  if (hiddenCheongdoCats.includes(name)) {
+    hiddenCheongdoCats = hiddenCheongdoCats.filter(category => category !== name);
+  } else {
+    hiddenCheongdoCats = [...hiddenCheongdoCats, name];
+  }
+  saveData();
+  buildFilters();
+  buildCatSelect();
+  renderCheongdoManager();
+  updateCheongdoManagerSummary();
 }
 
 
@@ -10093,7 +10201,7 @@ function buildCatSelect() {
 
   grp.label = '🎯 청도활동';
 
-  CHEONGDO_CATS.forEach(name => {
+  CHEONGDO_CATS.filter(isCheongdoVisible).forEach(name => {
 
     const cat = categories.find(c=>c.name===name);
 
@@ -10107,7 +10215,7 @@ function buildCatSelect() {
 
   });
 
-  sel.appendChild(grp);
+  if (grp.children.length) sel.appendChild(grp);
 
 }
 
