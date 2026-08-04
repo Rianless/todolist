@@ -5478,6 +5478,14 @@ body::before, body::after, #bootScreen { display: none !important; }
     min-height: 64px;
     padding-top: 8px;
   }
+  .calendar-surface .cal-dot {
+    height: 28px;
+    margin-top: 5px;
+    padding: 5px 9px;
+    border-radius: 8px;
+    font-size: 12px;
+    line-height: 18px;
+  }
   .cal-agenda { min-height: 0; overflow-y: auto; }
 }
 
@@ -8652,10 +8660,10 @@ function renderCal() {
 
         dot.setAttribute('role', 'button');
         dot.setAttribute('tabindex', '0');
-        dot.setAttribute('aria-label', `${displayTitle} 일정 수정`);
+        dot.setAttribute('aria-label', `${displayTitle} 일정 상세`);
         const editFromCalendar = event => {
           event.stopPropagation();
-          openEdit(item.id);
+          openDetail(item.id);
         };
         dot.addEventListener('click', editFromCalendar);
         dot.addEventListener('keydown', event => {
