@@ -8759,20 +8759,7 @@ function renderCal() {
 
       if (!item.isSub) {
 
-        dot.setAttribute('role', 'button');
-        dot.setAttribute('tabindex', '0');
-        dot.setAttribute('aria-label', `${displayTitle} 일정 상세`);
-        const editFromCalendar = event => {
-          event.stopPropagation();
-          openDetail(item.id);
-        };
-        dot.addEventListener('click', editFromCalendar);
-        dot.addEventListener('keydown', event => {
-          if (event.key === 'Enter' || event.key === ' ') {
-            event.preventDefault();
-            editFromCalendar(event);
-          }
-        });
+        dot.setAttribute('aria-label', `${displayTitle} 일정`);
 
         dot.setAttribute('draggable','true');
 
