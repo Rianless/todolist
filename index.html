@@ -7453,11 +7453,7 @@ async function loadItemsFromAPI() {
 
       });
 
-      if (!cloudItemsAuthoritative) {
-        const mergedItems = new Map(apiItems.map(item => [String(item.id), item]));
-        items.forEach(item => mergedItems.set(String(item.id), { ...mergedItems.get(String(item.id)), ...item }));
-        items = [...mergedItems.values()];
-      }
+      items = apiItems;
 
       const maxNumericId = items.reduce((max, item) => {
         const id = Number(item.id);
