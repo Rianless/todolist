@@ -6972,6 +6972,10 @@ let statPeriod = 'week';
 
 const _initDate = new Date(); let calY = _initDate.getFullYear(), calM = _initDate.getMonth();
 
+let lastKnownToday = fmtDate(_initDate);
+
+let midnightRefreshTimer = null;
+
 let calSelectedDate = null;
 
 let editingId = null;
@@ -8458,6 +8462,7 @@ function goToday() {
   const t = new Date();
   calY = t.getFullYear();
   calM = t.getMonth();
+  calSelectedDate = fmtDate(t);
   filterCat = 'all';
   document.querySelectorAll('.fchip').forEach(button => {
     button.classList.toggle('active', button.textContent.trim() === '전체');
@@ -8473,6 +8478,36 @@ function goToday() {
   });
 
 }
+
+function scheduleMidnightRefresh() {
+  clearTimeout(midnightRefreshTimer);
+  const now = new Date();
+  const nextMidnight = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1, 0, 0, 1);
+  midnightRefreshTimer = setTimeout(handleDateChange, Math.max(1000, nextMidnight - now));
+}
+
+function handleDateChange() {
+  const now = new Date();
+  const today = fmtDate(now);
+  if (today !== lastKnownToday) {
+    const wasFollowingToday = !calSelectedDate || calSelectedDate === lastKnownToday;
+    lastKnownToday = today;
+    if (wasFollowingToday) {
+      calSelectedDate = today;
+      calY = now.getFullYear();
+      calM = now.getMonth();
+    }
+    renderCal();
+    if (currentCalSubTab === 'list') renderList();
+    updateProgress();
+  }
+  scheduleMidnightRefresh();
+}
+
+window.addEventListener('focus', handleDateChange);
+document.addEventListener('visibilitychange', () => {
+  if (!document.hidden) handleDateChange();
+});
 
 function changeListMonth(delta) {
   const next = new Date(calY, calM + delta, 1);
@@ -12188,6 +12223,8 @@ ledgerY = new Date().getFullYear(); ledgerM = new Date().getMonth();
 renderCal();
 
 updateProgress();
+
+scheduleMidnightRefresh();
 
 (function() {
 
