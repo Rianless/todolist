@@ -4826,6 +4826,110 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
   --radius-lg: 24px;
 }
 
+.checklist-editor-list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.checklist-editor-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.checklist-editor-check {
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  accent-color: var(--accent, #6366f1);
+}
+
+.checklist-editor-input {
+  min-width: 0;
+  flex: 1;
+}
+
+.checklist-remove-btn {
+  width: 34px;
+  height: 34px;
+  flex: 0 0 34px;
+  border: 1px solid var(--border);
+  border-radius: 11px;
+  background: var(--surface2, #f5f6fa);
+  color: var(--text3);
+  font-size: 17px;
+  cursor: pointer;
+}
+
+.checklist-add-btn {
+  width: 100%;
+  margin-top: 8px;
+  padding: 10px 12px;
+  border: 1px dashed rgba(99, 102, 241, .35);
+  border-radius: 12px;
+  background: rgba(99, 102, 241, .07);
+  color: #6366f1;
+  font-weight: 700;
+  cursor: pointer;
+}
+
+.detail-checklist-box {
+  display: flex;
+  flex-direction: column;
+  gap: 7px;
+  margin-top: 8px;
+  padding: 12px;
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  background: var(--surface2, #f7f8fc);
+}
+
+.detail-checklist-item {
+  display: flex;
+  align-items: flex-start;
+  gap: 9px;
+  width: 100%;
+  padding: 7px 8px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--text);
+  text-align: left;
+  cursor: pointer;
+}
+
+.detail-checklist-item:active { background: rgba(99, 102, 241, .08); }
+
+.detail-checklist-check {
+  display: grid;
+  place-items: center;
+  width: 22px;
+  height: 22px;
+  flex: 0 0 22px;
+  border: 1.5px solid #b8bdcb;
+  border-radius: 7px;
+  color: #fff;
+  font-size: 13px;
+  font-weight: 900;
+}
+
+.detail-checklist-item.done .detail-checklist-check {
+  border-color: #6366f1;
+  background: #6366f1;
+}
+
+.detail-checklist-text {
+  padding-top: 1px;
+  line-height: 1.5;
+  word-break: break-word;
+}
+
+.detail-checklist-item.done .detail-checklist-text {
+  color: var(--text3);
+  text-decoration: line-through;
+}
+
 [data-theme="light"] {
   --bg: #f6f7fb;
   --bg2: #eef1f7;
@@ -6285,6 +6389,16 @@ body::before, body::after, #bootScreen { display: none !important; }
 
         <div class="form-group">
 
+          <label class="form-label">체크리스트</label>
+
+          <div class="checklist-editor-list" id="f_checklist"></div>
+
+          <button class="checklist-add-btn" type="button" onclick="addChecklistItem()">+ 체크 항목 추가</button>
+
+        </div>
+
+        <div class="form-group">
+
           <label class="form-label">메모</label>
 
           <textarea class="form-textarea" id="f_memo" placeholder="메모 내용..." style="min-height:40px;max-height:60px;resize:none;"></textarea>
@@ -6452,6 +6566,10 @@ body::before, body::after, #bootScreen { display: none !important; }
     <span class="detail-content-label" id="detailContentLabel" style="display:none;">// 내용</span>
 
     <div class="detail-content-box" id="detailContent" style="display:none;"></div>
+
+    <span class="detail-content-label" id="detailChecklistLabel" style="display:none;">체크리스트</span>
+
+    <div class="detail-checklist-box" id="detailChecklist" style="display:none;"></div>
 
     <span class="detail-content-label" id="detailNoteLabel" style="display:none;">메모</span>
 
@@ -6980,6 +7098,8 @@ let calSelectedDate = null;
 
 let editingId = null;
 
+let editingChecklist = [];
+
 let detailId = null;
 let _lastSecretCard = null;
 
@@ -7397,6 +7517,8 @@ async function loadItemsFromAPI() {
 
 
 
+      const existingItemsById = new Map(items.map(item => [String(item.id), item]));
+
       const apiItems = data.map(row => {
 
         const cat = row.category || '기타';
@@ -7411,6 +7533,7 @@ async function loadItemsFromAPI() {
 
         const time = st && et ? `${st}~${et}` : st;
 
+        const existingItem = existingItemsById.get(String(row.id));
         return {
 
           id: row.id,
@@ -7451,7 +7574,9 @@ async function loadItemsFromAPI() {
 
           repeat: row.repeat || 'none',
 
-          repeatEnd: row.repeat_end || null
+          repeatEnd: row.repeat_end || null,
+
+          checklist: normalizeChecklist(row.checklist || existingItem?.checklist)
 
         };
 
@@ -10288,6 +10413,8 @@ function openAdd(forSub=false, presetDate=null) {
 
   currentPhoto = null;
 
+  editingChecklist = [];
+
   document.getElementById('addModalTitle').textContent = forSub ? '구독 추가' : '새 일정';
 
   document.getElementById('f_title').value='';
@@ -10307,6 +10434,8 @@ function openAdd(forSub=false, presetDate=null) {
   document.getElementById('f_memo').value='';
 
   document.getElementById('f_content').value='';
+
+  renderChecklistEditor();
 
   document.getElementById('f_repeat').value='none';
 
@@ -10362,6 +10491,8 @@ function openEdit(id) {
 
   selectedPrio = item.priority || 'none';
 
+  editingChecklist = normalizeChecklist(item.checklist);
+
   document.getElementById('addModalTitle').textContent = '일정 수정';
 
   buildCatSelect();
@@ -10387,6 +10518,8 @@ function openEdit(id) {
   document.getElementById('f_memo').value = item.memo||'';
 
   document.getElementById('f_content').value = item.content||'';
+
+  renderChecklistEditor();
 
   document.getElementById('f_cat').value = item.category;
 
@@ -10421,6 +10554,91 @@ function openEdit(id) {
 
 
 function closeAdd() { document.getElementById('addModal').classList.remove('open'); }
+
+
+
+function normalizeChecklist(list) {
+  if (!Array.isArray(list)) return [];
+  return list
+    .map((entry, index) => {
+      if (typeof entry === 'string') {
+        return { id: `legacy-${index}-${entry.length}`, text: entry.trim(), done: false };
+      }
+      return {
+        id: String(entry?.id || `legacy-${index}-${Date.now()}`),
+        text: String(entry?.text || '').trim(),
+        done: Boolean(entry?.done)
+      };
+    })
+    .filter(entry => entry.text);
+}
+
+function createChecklistId() {
+  return `check-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function addChecklistItem(text = '') {
+  const id = createChecklistId();
+  editingChecklist.push({ id, text, done: false });
+  renderChecklistEditor(id);
+}
+
+function removeChecklistItem(id) {
+  editingChecklist = editingChecklist.filter(entry => entry.id !== id);
+  renderChecklistEditor();
+}
+
+function updateChecklistItem(id, field, value) {
+  const entry = editingChecklist.find(item => item.id === id);
+  if (!entry) return;
+  entry[field] = field === 'done' ? Boolean(value) : String(value);
+}
+
+function checklistEditorKeydown(event, id) {
+  if (event.key !== 'Enter' || event.isComposing) return;
+  event.preventDefault();
+  const current = editingChecklist.find(entry => entry.id === id);
+  if (current && !current.text.trim()) return;
+  addChecklistItem();
+}
+
+function renderChecklistEditor(focusId = null) {
+  const container = document.getElementById('f_checklist');
+  if (!container) return;
+  container.replaceChildren();
+
+  editingChecklist.forEach(entry => {
+    const row = document.createElement('div');
+    row.className = 'checklist-editor-item';
+
+    const check = document.createElement('input');
+    check.type = 'checkbox';
+    check.className = 'checklist-editor-check';
+    check.checked = Boolean(entry.done);
+    check.setAttribute('aria-label', '체크 항목 완료');
+    check.addEventListener('change', () => updateChecklistItem(entry.id, 'done', check.checked));
+
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-input checklist-editor-input';
+    input.placeholder = '할 일을 입력하세요';
+    input.value = entry.text;
+    input.addEventListener('input', () => updateChecklistItem(entry.id, 'text', input.value));
+    input.addEventListener('keydown', event => checklistEditorKeydown(event, entry.id));
+
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'checklist-remove-btn';
+    remove.textContent = '×';
+    remove.setAttribute('aria-label', '체크 항목 삭제');
+    remove.addEventListener('click', () => removeChecklistItem(entry.id));
+
+    row.append(check, input, remove);
+    container.appendChild(row);
+
+    if (focusId === entry.id) setTimeout(() => input.focus(), 0);
+  });
+}
 
 
 
@@ -10659,6 +10877,10 @@ async function saveItem() {
 
     content: document.getElementById('f_content').value,
 
+    checklist: editingChecklist
+      .map(entry => ({ id: entry.id, text: entry.text.trim(), done: Boolean(entry.done) }))
+      .filter(entry => entry.text),
+
     priority: selectedPrio, secret: isSecret, hideTitle: isHideTitle,
 
     photo: currentPhoto || null,
@@ -10730,7 +10952,7 @@ async function saveItem() {
 
 ══════════════════════════════════════ */
 
-function openDetail(id) {
+function openDetail(id, skipHistory = false) {
 
   detailId = id;
 
@@ -10820,6 +11042,8 @@ function openDetail(id) {
 
   }
 
+  renderDetailChecklist(item);
+
 
 
   const noteBox = document.getElementById('detailNote');
@@ -10858,10 +11082,62 @@ function openDetail(id) {
 
 
 
-  history.pushState({modal:'detail'}, '');
+  if (!skipHistory) history.pushState({modal:'detail'}, '');
 
   document.getElementById('detailModal').classList.add('open');
 
+}
+
+function renderDetailChecklist(item) {
+  const box = document.getElementById('detailChecklist');
+  const label = document.getElementById('detailChecklistLabel');
+  const checklist = normalizeChecklist(item.checklist);
+
+  box.replaceChildren();
+  if (!checklist.length) {
+    box.style.display = 'none';
+    label.style.display = 'none';
+    return;
+  }
+
+  const completed = checklist.filter(entry => entry.done).length;
+  label.textContent = `체크리스트 ${completed}/${checklist.length}`;
+  label.style.display = 'block';
+  box.style.display = 'flex';
+
+  checklist.forEach(entry => {
+    const button = document.createElement('button');
+    button.type = 'button';
+    button.className = `detail-checklist-item${entry.done ? ' done' : ''}`;
+    button.setAttribute('aria-pressed', String(entry.done));
+    button.setAttribute('aria-label', `${entry.text} ${entry.done ? '완료 취소' : '완료 처리'}`);
+
+    const check = document.createElement('span');
+    check.className = 'detail-checklist-check';
+    check.textContent = entry.done ? '✓' : '';
+    check.setAttribute('aria-hidden', 'true');
+
+    const text = document.createElement('span');
+    text.className = 'detail-checklist-text';
+    text.textContent = entry.text;
+
+    button.append(check, text);
+    button.addEventListener('click', event => toggleChecklistItem(item.id, entry.id, event));
+    box.appendChild(button);
+  });
+}
+
+function toggleChecklistItem(itemId, checklistId, event) {
+  event?.stopPropagation();
+  const item = items.find(entry => entry.id === itemId);
+  if (!item) return;
+  item.checklist = normalizeChecklist(item.checklist);
+  const checklistItem = item.checklist.find(entry => entry.id === checklistId);
+  if (!checklistItem) return;
+
+  checklistItem.done = !checklistItem.done;
+  saveData();
+  renderDetailChecklist(item);
 }
 
 
@@ -11219,6 +11495,10 @@ function doSearch(q) {
     (it.title||'').toLowerCase().includes(q) ||
 
     (it.memo||'').toLowerCase().includes(q) ||
+
+    (it.content||'').toLowerCase().includes(q) ||
+
+    normalizeChecklist(it.checklist).some(entry => entry.text.toLowerCase().includes(q)) ||
 
     (it.location||'').toLowerCase().includes(q) ||
 
