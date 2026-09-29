@@ -8971,7 +8971,7 @@ function renderCal() {
 
   });
 
-  subscriptions.forEach(sub=>{
+  subscriptions.forEach((sub, subIndex)=>{
 
     if(!sub.date) return;
 
@@ -8998,6 +8998,8 @@ function renderCal() {
         amount: Number(sub.amount||0),
 
         cycleLabel,
+
+        subIndex,
 
         priority: 'none',
 
@@ -9318,7 +9320,8 @@ function renderCalDayList(ds, dayEvents) {
   });
 
   daySubs.forEach(sub => {
-    const row = document.createElement('div');
+    const row = document.createElement('button');
+    row.type = 'button';
     row.className = 'agenda-row ledger expense subscription';
     const icon = document.createElement('span');
     icon.className = 'agenda-money-icon';
@@ -9334,6 +9337,7 @@ function renderCalDayList(ds, dayEvents) {
     amount.className = 'agenda-amount';
     amount.textContent = `-${Number(sub.amount || 0).toLocaleString()}원`;
     row.append(icon, body, amount);
+    row.onclick = () => editSubscription(sub.subIndex);
     list.appendChild(row);
   });
 
@@ -12027,6 +12031,8 @@ function openLedger(date, forSub=false) {
 
   editingLedgerId = null;
 
+  editingSubIndex = null;
+
   ledgerType = 'expense';
 
   document.getElementById('l_date').value = date || fmtDate(new Date());
@@ -12066,6 +12072,7 @@ function openLedger(date, forSub=false) {
 }
 
 let ledgerSub = false;
+let editingSubIndex = null;
 
 function toggleLedgerSub() {
   updateLedgerSubToggle(!ledgerSub);
@@ -12076,7 +12083,7 @@ function updateLedgerSubToggle(val) {
   document.getElementById('ledgerSubToggle').className = 'toggle-switch' + (val ? ' on' : '');
   document.getElementById('ledgerFields').style.display = val ? 'none' : 'block';
   document.getElementById('ledgerSubFields').style.display = val ? 'block' : 'none';
-  document.getElementById('ledgerModalTitle').textContent = val ? '구독 추가' : (editingLedgerId !== null ? '가계부 내역 수정' : '수입 / 지출 추가');
+  document.getElementById('ledgerModalTitle').textContent = val ? (editingSubIndex !== null ? '구독 수정' : '구독 추가') : (editingLedgerId !== null ? '가계부 내역 수정' : '수입 / 지출 추가');
 }
 
 function saveSubscription() {
@@ -12087,19 +12094,23 @@ function saveSubscription() {
     setTimeout(() => nameInput.classList.remove('form-error'), 1500);
     return;
   }
-  subscriptions.push({
+  const sub = {
     name,
     amount: document.getElementById('f_subamt').value,
     cycle: document.getElementById('f_subcycle').value,
     date: document.getElementById('f_subdate').value,
     category: document.getElementById('f_subcat').value,
     memo: document.getElementById('f_submemo').value
-  });
+  };
+  const wasEditing = editingSubIndex !== null && subscriptions[editingSubIndex];
+  if (wasEditing) subscriptions[editingSubIndex] = { ...subscriptions[editingSubIndex], ...sub };
+  else subscriptions.push(sub);
+  editingSubIndex = null;
   closeLedger();
   saveData();
   if (currentMainTab === 'category') renderCategoryView();
   if (currentMainTab === 'calendar') { if (currentCalSubTab === 'cal') renderCal(); else if (currentCalSubTab === 'week') renderWeek(); }
-  showToast('구독을 저장했습니다', { type: 'success', duration: 1800 });
+  showToast(wasEditing ? '구독을 수정했습니다' : '구독을 저장했습니다', { type: 'success', duration: 1800 });
 }
 
 function closeLedger() { document.getElementById('ledgerModal').classList.remove('open'); }
@@ -12130,6 +12141,7 @@ function editLedgerEntry(id) {
   if (!entry) return;
 
   editingLedgerId = id;
+  editingSubIndex = null;
   document.getElementById('dayModal').classList.remove('open');
   document.getElementById('ledgerSubToggleArea').style.display = 'none';
   updateLedgerSubToggle(false);
@@ -12139,6 +12151,24 @@ function editLedgerEntry(id) {
   document.getElementById('l_cat').value = entry.category || '';
   document.getElementById('l_memo').value = entry.memo || '';
   setLedgerType(entry.type === 'income' ? 'income' : 'expense');
+  document.getElementById('ledgerModal').classList.add('open');
+  history.pushState({modal:'ledger'}, '');
+}
+
+function editSubscription(index) {
+  const sub = subscriptions[index];
+  if (!sub) return;
+
+  editingLedgerId = null;
+  editingSubIndex = index;
+  document.getElementById('f_subname').value = sub.name || '';
+  document.getElementById('f_subamt').value = sub.amount || '';
+  document.getElementById('f_subcycle').value = sub.cycle || 'monthly';
+  document.getElementById('f_subdate').value = sub.date || fmtDate(new Date());
+  document.getElementById('f_subcat').value = sub.category || '';
+  document.getElementById('f_submemo').value = sub.memo || '';
+  document.getElementById('ledgerSubToggleArea').style.display = 'none';
+  updateLedgerSubToggle(true);
   document.getElementById('ledgerModal').classList.add('open');
   history.pushState({modal:'ledger'}, '');
 }
