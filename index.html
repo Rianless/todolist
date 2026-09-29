@@ -9228,6 +9228,7 @@ function renderCalDayList(ds) {
     .filter(item => item.date === ds)
     .sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
   const dayLedger = ledger.filter(entry => entry.date === ds);
+  const daySubs = getDaySubscriptions(ds);
 
   const header = document.createElement('div');
   header.className = 'agenda-head';
@@ -9242,7 +9243,7 @@ function renderCalDayList(ds) {
 
   const count = document.createElement('span');
   count.className = 'agenda-count';
-  count.textContent = `${dayItems.length + dayLedger.length}개`;
+  count.textContent = `${dayItems.length + dayLedger.length + daySubs.length}개`;
   header.append(headingWrap, count);
   container.appendChild(header);
 
@@ -9259,10 +9260,10 @@ function renderCalDayList(ds) {
   actions.append(addSchedule, addLedger);
   container.appendChild(actions);
 
-  if (!dayItems.length && !dayLedger.length) {
+  if (!dayItems.length && !dayLedger.length && !daySubs.length) {
     const empty = document.createElement('div');
     empty.className = 'agenda-empty';
-    empty.innerHTML = '<span>✓</span><strong>여유로운 하루예요</strong><small>일정이나 가계부 내역을 추가해 보세요.</small>';
+    empty.innerHTML = '<span>✓</span><strong>여유로운 하루예요</strong><small>일정, 가계부, 구독을 추가해 보세요.</small>';
     container.appendChild(empty);
     return;
   }
@@ -9312,6 +9313,26 @@ function renderCalDayList(ds) {
     amount.textContent = `${entry.type === 'income' ? '+' : '-'}${Number(entry.amount || 0).toLocaleString()}원`;
     row.append(icon, body, amount);
     row.onclick = () => editLedgerEntry(entry.id);
+    list.appendChild(row);
+  });
+
+  daySubs.forEach(sub => {
+    const row = document.createElement('div');
+    row.className = 'agenda-row ledger expense subscription';
+    const icon = document.createElement('span');
+    icon.className = 'agenda-money-icon';
+    icon.textContent = '🔖';
+    const body = document.createElement('span');
+    body.className = 'agenda-row-body';
+    const title = document.createElement('strong');
+    title.textContent = sub.name;
+    const meta = document.createElement('small');
+    meta.textContent = ['구독', sub.category !== '구독' ? sub.category : '', sub.cycleLabel].filter(Boolean).join(' · ');
+    body.append(title, meta);
+    const amount = document.createElement('span');
+    amount.className = 'agenda-amount';
+    amount.textContent = `-${sub.amount.toLocaleString()}원`;
+    row.append(icon, body, amount);
     list.appendChild(row);
   });
 
@@ -9590,6 +9611,36 @@ function openDayModal(ds, evts) {
     ledgerSection.appendChild(emptyLedger);
   } else {
     dayLedger.forEach(entry => ledgerSection.appendChild(makeLedgerCardForDayModal(entry)));
+  }
+
+  const daySubs = getDaySubscriptions(ds);
+  if (daySubs.length) {
+    const subSection = document.createElement('section');
+    subSection.className = 'day-ledger-section';
+    const subHeading = document.createElement('div');
+    subHeading.className = 'day-ledger-heading';
+    const subTotal = daySubs.reduce((sum, sub) => sum + sub.amount, 0);
+    subHeading.innerHTML = `<span>🔖 구독 (${daySubs.length})</span><span class="day-ledger-balance">-${subTotal.toLocaleString()}원</span>`;
+    subSection.appendChild(subHeading);
+    daySubs.forEach(sub => {
+      const card = document.createElement('div');
+      card.className = 'day-ledger-entry';
+      const info = document.createElement('div');
+      info.className = 'day-ledger-info';
+      const title = document.createElement('div');
+      title.className = 'day-ledger-title';
+      title.textContent = sub.name;
+      const meta = document.createElement('div');
+      meta.className = 'day-ledger-meta';
+      meta.textContent = [sub.category, sub.cycleLabel, sub.memo].filter(Boolean).join(' · ');
+      info.append(title, meta);
+      const amount = document.createElement('div');
+      amount.className = 'day-ledger-amount expense';
+      amount.textContent = `-${sub.amount.toLocaleString()}원`;
+      card.append(info, amount);
+      subSection.appendChild(card);
+    });
+    body.appendChild(subSection);
   }
 
   const addLedgerBtn = document.createElement('button');
@@ -9957,6 +10008,19 @@ function getSubDatesForMonth(sub, y, m) {
   }
   return results;
 }
+function getDaySubscriptions(ds) {
+  const dt = new Date(ds + 'T00:00:00');
+  const cycleLabels = {weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'};
+  const result = [];
+  subscriptions.forEach(sub => {
+    if (!sub.date) return;
+    if (getSubDatesForMonth(sub, dt.getFullYear(), dt.getMonth()).includes(ds)) {
+      result.push({ name: sub.name, category: sub.category || '구독', amount: Number(sub.amount || 0), cycleLabel: cycleLabels[sub.cycle] || '', memo: sub.memo || '' });
+    }
+  });
+  return result;
+}
+
 function renderSubs() {
 
   const el = document.getElementById('subsList');
