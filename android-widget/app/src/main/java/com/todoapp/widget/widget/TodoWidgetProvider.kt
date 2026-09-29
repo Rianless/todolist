@@ -13,6 +13,7 @@ import android.os.Build
 import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
+import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.ui.AddEditActivity
 import com.todoapp.widget.ui.TodoDetailPopupActivity
 import kotlinx.coroutines.CoroutineScope
@@ -479,13 +480,16 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val todos = fetchDateTodos(today)
+            val extras = runCatching { CloudStateClient.fetchDayExtras(today) }.getOrDefault(emptyList())
             val first = todos.firstOrNull { !it.done } ?: todos.firstOrNull()
             val updated = RemoteViews(context.packageName, R.layout.widget_layout_compact).apply {
                 setTextViewText(R.id.compact_date, "$dateText ${dowText}요일")
-                setTextViewText(R.id.compact_count, "${todos.size}개")
+                setTextViewText(R.id.compact_count, "${todos.size + extras.size}개")
                 setTextViewText(
                     R.id.compact_title,
-                    first?.let { if (it.done) "✓ ${it.title}" else it.title } ?: "오늘 일정이 없습니다"
+                    first?.let { if (it.done) "✓ ${it.title}" else it.title }
+                        ?: extras.firstOrNull()?.summary
+                        ?: "오늘 일정이 없습니다"
                 )
                 setOnClickPendingIntent(R.id.widget_root, openWebPending)
                 setOnClickPendingIntent(R.id.compact_add, addPending)
@@ -544,7 +548,8 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
         CoroutineScope(Dispatchers.IO).launch {
             val todos = fetchDateTodos(today)
-            manager.updateAppWidget(widgetId, createViews("${todos.size}개 · 스크롤"))
+            val extras = runCatching { CloudStateClient.fetchDayExtras(today) }.getOrDefault(emptyList())
+            manager.updateAppWidget(widgetId, createViews("${todos.size + extras.size}개 · 스크롤"))
             manager.notifyAppWidgetViewDataChanged(widgetId, R.id.wide_compact_list)
         }
     }

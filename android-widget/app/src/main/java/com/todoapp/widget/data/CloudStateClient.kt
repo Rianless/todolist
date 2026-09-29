@@ -4,6 +4,8 @@ import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.time.LocalDate
+import java.time.temporal.ChronoUnit
 
 data class ChecklistItem(
     val id: String,
@@ -11,8 +13,91 @@ data class ChecklistItem(
     var done: Boolean
 )
 
+/** 선택한 날짜의 가계부 내역 / 구독 결제 한 건 (웹앱의 "오늘의 일정"과 같은 항목) */
+data class DayExtra(
+    val kind: String,        // "income" | "expense" | "subscription"
+    val title: String,
+    val category: String,
+    val amount: Long
+) {
+    val kindLabel: String
+        get() = when (kind) {
+            "income" -> "수입"
+            "expense" -> "지출"
+            else -> "구독"
+        }
+
+    val amountText: String
+        get() = "${if (kind == "income") "+" else "-"}${"%,d".format(amount)}원"
+
+    val summary: String
+        get() = "${if (kind == "subscription") "\uD83D\uDD16 " else ""}$title · $amountText"
+}
+
 object CloudStateClient {
     private const val STATE_API_URL = "https://todolist-liart-mu.vercel.app/api/state"
+
+    /**
+     * 웹앱 상태(/api/state)에서 해당 날짜의 가계부 내역과 구독 결제를 가져온다.
+     * 네트워크 오류 시 빈 목록을 돌려준다.
+     */
+    fun fetchDayExtras(date: LocalDate): List<DayExtra> {
+        val state = fetchState() ?: return emptyList()
+        val dateValue = date.toString()
+        val result = mutableListOf<DayExtra>()
+
+        val ledger = state.optJSONArray("ledger")
+        if (ledger != null) {
+            for (index in 0 until ledger.length()) {
+                val entry = ledger.optJSONObject(index) ?: continue
+                if (entry.optString("date") != dateValue) continue
+                val type = if (entry.optString("type") == "income") "income" else "expense"
+                result.add(
+                    DayExtra(
+                        kind = type,
+                        title = entry.optString("title").ifBlank { if (type == "income") "수입" else "지출" },
+                        category = entry.optString("category"),
+                        amount = parseAmount(entry.optString("amount"))
+                    )
+                )
+            }
+        }
+
+        val subscriptions = state.optJSONArray("subscriptions")
+        if (subscriptions != null) {
+            for (index in 0 until subscriptions.length()) {
+                val sub = subscriptions.optJSONObject(index) ?: continue
+                if (!subscriptionOccursOn(sub, date)) continue
+                result.add(
+                    DayExtra(
+                        kind = "subscription",
+                        title = sub.optString("name"),
+                        category = sub.optString("category"),
+                        amount = parseAmount(sub.optString("amount"))
+                    )
+                )
+            }
+        }
+        return result
+    }
+
+    private fun parseAmount(raw: String): Long =
+        raw.replace(",", "").trim().toDoubleOrNull()?.toLong() ?: 0L
+
+    /** 웹앱 index.html의 getSubDatesForMonth 와 같은 결제일 계산 */
+    private fun subscriptionOccursOn(sub: JSONObject, date: LocalDate): Boolean {
+        val start = runCatching { LocalDate.parse(sub.optString("date")) }.getOrNull() ?: return false
+        val monthDiff = (date.year - start.year) * 12 + (date.monthValue - start.monthValue)
+        val sameDayOfMonth = date.dayOfMonth == minOf(start.dayOfMonth, date.lengthOfMonth())
+        return when (sub.optString("cycle")) {
+            "monthly" -> monthDiff >= 0 && sameDayOfMonth
+            "bimonthly" -> monthDiff >= 0 && monthDiff % 2 == 0 && sameDayOfMonth
+            "yearly" -> date.year >= start.year && date.monthValue == start.monthValue && sameDayOfMonth
+            "weekly" -> !date.isBefore(start) && date.dayOfWeek == start.dayOfWeek
+            "biweekly" -> !date.isBefore(start) && ChronoUnit.DAYS.between(start, date) % 14 == 0L
+            else -> date == start
+        }
+    }
 
     fun fetchChecklist(todoId: Int): MutableList<ChecklistItem> {
         val state = fetchState() ?: return mutableListOf()

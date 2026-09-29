@@ -3,9 +3,12 @@ package com.todoapp.widget.widget
 import android.content.Context
 import android.content.Intent
 import android.graphics.Color
+import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.todoapp.widget.R
+import com.todoapp.widget.data.CloudStateClient
+import com.todoapp.widget.data.DayExtra
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import java.net.HttpURLConnection
@@ -37,6 +40,7 @@ class TodoWidgetFactory(
 ) : RemoteViewsService.RemoteViewsFactory {
 
     private var todos: List<TodoItem> = emptyList()
+    private var extras: List<DayExtra> = emptyList()
     private val selectedDate: String =
         intent.getStringExtra(TodoWidgetProvider.EXTRA_DATE)
             ?: LocalDate.now().format(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -78,13 +82,22 @@ class TodoWidgetFactory(
             }.onFailure {
                 todos = emptyList()
             }
+
+            // 웹앱과 같이 가계부 · 구독도 함께 표시
+            extras = runCatching {
+                CloudStateClient.fetchDayExtras(LocalDate.parse(selectedDate))
+            }.getOrDefault(emptyList())
         }
     }
 
     override fun onDestroy() {}
-    override fun getCount(): Int = todos.size
+    override fun getCount(): Int = todos.size + extras.size
 
     override fun getViewAt(position: Int): RemoteViews {
+        val extraIndex = position - todos.size
+        if (extraIndex in extras.indices) {
+            return buildExtraView(extras[extraIndex])
+        }
         if (position !in todos.indices) {
             return RemoteViews(context.packageName, R.layout.widget_item)
         }
@@ -130,6 +143,10 @@ class TodoWidgetFactory(
             views.setTextViewText(R.id.widget_item_title, todo.title)
         }
 
+        // 가계부/구독 행과 뷰를 재사용하므로 값을 되돌려 둔다
+        views.setTextViewText(R.id.widget_item_sub, "")
+        views.setViewVisibility(R.id.widget_item_check, View.VISIBLE)
+
         // 완료 동그라미
         if (todo.done) {
             views.setInt(R.id.widget_item_check, "setBackgroundResource", R.drawable.bg_widget_check_done)
@@ -146,8 +163,30 @@ class TodoWidgetFactory(
         return views
     }
 
+    /** 가계부(수입/지출)·구독 한 줄. 일정 카드와 같은 레이아웃을 쓴다. */
+    private fun buildExtraView(extra: DayExtra): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.widget_item)
+        val accent = when (extra.kind) {
+            "income" -> "#2DA77A"
+            "expense" -> "#E45F68"
+            else -> "#9D00FF"
+        }
+        views.setInt(R.id.widget_item_accent, "setBackgroundColor", Color.parseColor(accent))
+        views.setTextViewText(R.id.widget_item_category, extra.kindLabel)
+        views.setTextViewText(R.id.widget_item_date, "")
+        views.setTextViewText(R.id.widget_item_time, extra.amountText)
+        views.setFloat(R.id.widget_item_title, "setAlpha", 1f)
+        views.setTextViewText(R.id.widget_item_title, extra.title)
+        views.setTextViewText(R.id.widget_item_sub, extra.category)
+        views.setViewVisibility(R.id.widget_item_check, View.GONE)
+        // 일정 상세 팝업 대상이 아니므로 id 없이 빈 인텐트 (팝업은 id가 없으면 바로 닫힘)
+        views.setOnClickFillInIntent(R.id.widget_item_root, Intent())
+        return views
+    }
+
     override fun getLoadingView(): RemoteViews? = null
     override fun getViewTypeCount(): Int = 1
-    override fun getItemId(position: Int): Long = todos.getOrNull(position)?.id?.toLong() ?: position.toLong()
+    override fun getItemId(position: Int): Long =
+        todos.getOrNull(position)?.id?.toLong() ?: -(position - todos.size + 1L)
     override fun hasStableIds(): Boolean = true
 }
