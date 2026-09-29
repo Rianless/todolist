@@ -6147,7 +6147,7 @@ button:active:not(:disabled) {
 
               <div id="subsList"></div>
 
-              <button class="mypage-add-sub-btn" onclick="openAdd(true)">🔖 구독 항목 추가</button>
+              <button class="mypage-add-sub-btn" onclick="openLedger(null, true)">🔖 구독 항목 추가</button>
 
             </div>
 
@@ -6451,28 +6451,6 @@ button:active:not(:disabled) {
 
 
 
-      <!-- Subscription toggle -->
-
-      <div class="sub-toggle-area">
-
-        <div class="toggle-row" style="border:none;padding:0;margin:0;">
-
-          <div>
-
-            <div class="sub-toggle-title">🔖 구독 항목</div>
-
-            <div style="font-size:10px;color:var(--text3);">켜면 구독에 저장됩니다</div>
-
-          </div>
-
-          <div class="toggle-switch" id="subToggle" onclick="toggleSub()"></div>
-
-        </div>
-
-      </div>
-
-
-
       <!-- Regular fields -->
 
       <div id="regularFields">
@@ -6659,82 +6637,6 @@ button:active:not(:disabled) {
 
       </div>
 
-
-
-      <!-- Subscription fields -->
-
-      <div id="subFields" style="display:none;">
-
-        <div class="form-group">
-
-          <label class="form-label">서비스명 *</label>
-
-          <input class="form-input" id="f_subname" type="text" placeholder="Netflix, Spotify 등">
-
-        </div>
-
-        <div class="form-group form-row-2">
-
-          <div>
-
-            <label class="form-label">금액 (원)</label>
-
-            <input class="form-input" id="f_subamt" type="number" placeholder="0">
-
-          </div>
-
-          <div>
-
-            <label class="form-label">결제 주기</label>
-
-            <select class="form-select" id="f_subcycle">
-
-              <option value="weekly">주간</option>
-
-              <option value="biweekly">격주</option>
-
-              <option value="monthly">월간</option>
-
-              <option value="bimonthly">격월</option>
-
-              <option value="yearly">연간</option>
-
-            </select>
-
-          </div>
-
-        </div>
-
-        <div class="form-group form-row-2">
-
-          <div>
-
-            <label class="form-label">결제일</label>
-
-            <input class="form-input" id="f_subdate" type="date">
-
-          </div>
-
-          <div>
-
-            <label class="form-label">카테고리</label>
-
-            <input class="form-input" id="f_subcat" type="text" placeholder="엔터테인먼트">
-
-          </div>
-
-        </div>
-
-        <div class="form-group">
-
-          <label class="form-label">메모</label>
-
-          <input class="form-input" id="f_submemo" type="text" placeholder="메모">
-
-        </div>
-
-      </div>
-
     </div>
 
     <div class="modal-actions">
@@ -6885,6 +6787,26 @@ button:active:not(:disabled) {
 
       <div class="modal-body">
 
+        <div class="sub-toggle-area" id="ledgerSubToggleArea">
+
+          <div class="toggle-row" style="border:none;padding:0;margin:0;">
+
+            <div>
+
+              <div class="sub-toggle-title">🔖 구독 항목</div>
+
+              <div style="font-size:10px;color:var(--text3);">켜면 구독에 저장됩니다</div>
+
+            </div>
+
+            <div class="toggle-switch" id="ledgerSubToggle" onclick="toggleLedgerSub()"></div>
+
+          </div>
+
+        </div>
+
+        <div id="ledgerFields">
+
         <div class="ledger-type-toggle">
 
           <button class="ledger-type-btn income" id="lTypeIncome" onclick="setLedgerType('income')">수입</button>
@@ -6932,6 +6854,80 @@ button:active:not(:disabled) {
           <input class="form-input" id="l_memo" type="text" placeholder="메모 (선택)">
 
         </div>
+
+        </div>
+
+        <div id="ledgerSubFields" style="display:none;">
+
+        <div class="form-group">
+
+          <label class="form-label">서비스명 *</label>
+
+          <input class="form-input" id="f_subname" type="text" placeholder="Netflix, Spotify 등">
+
+        </div>
+
+        <div class="form-group form-row-2">
+
+          <div>
+
+            <label class="form-label">금액 (원)</label>
+
+            <input class="form-input" id="f_subamt" type="number" placeholder="0">
+
+          </div>
+
+          <div>
+
+            <label class="form-label">결제 주기</label>
+
+            <select class="form-select" id="f_subcycle">
+
+              <option value="weekly">주간</option>
+
+              <option value="biweekly">격주</option>
+
+              <option value="monthly">월간</option>
+
+              <option value="bimonthly">격월</option>
+
+              <option value="yearly">연간</option>
+
+            </select>
+
+          </div>
+
+        </div>
+
+        <div class="form-group form-row-2">
+
+          <div>
+
+            <label class="form-label">결제일</label>
+
+            <input class="form-input" id="f_subdate" type="date">
+
+          </div>
+
+          <div>
+
+            <label class="form-label">카테고리</label>
+
+            <input class="form-input" id="f_subcat" type="text" placeholder="엔터테인먼트">
+
+          </div>
+
+        </div>
+
+        <div class="form-group">
+
+          <label class="form-label">메모</label>
+
+          <input class="form-input" id="f_submemo" type="text" placeholder="메모">
+
+        </div>
+
+      </div>
 
       </div>
 
@@ -7323,7 +7319,6 @@ let _lastSecretCard = null;
 
 let isSecret = false;
 
-let isSub = false;
 
 let isHideTitle = false;
 
@@ -9258,7 +9253,7 @@ function renderCalDayList(ds, dayEvents) {
   const addSchedule = document.createElement('button');
   addSchedule.type = 'button';
   addSchedule.textContent = '+ 일정';
-  addSchedule.onclick = () => openAdd(false, ds);
+  addSchedule.onclick = () => openAdd(ds);
   const addLedger = document.createElement('button');
   addLedger.type = 'button';
   addLedger.textContent = '+ 가계부';
@@ -9564,7 +9559,7 @@ function openDayModal(ds, evts) {
 
     document.getElementById('dayModal').classList.remove('open');
 
-    openAdd(false, ds);
+    openAdd(ds);
 
   };
 
@@ -10644,7 +10639,7 @@ function buildCatSelect() {
 
 
 
-function openAdd(forSub=false, presetDate=null) {
+function openAdd(presetDate=null) {
 
   editingId = null;
 
@@ -10652,15 +10647,13 @@ function openAdd(forSub=false, presetDate=null) {
 
   isHideTitle = false;
 
-  isSub = forSub;
-
   selectedPrio = 'none';
 
   currentPhoto = null;
 
   editingChecklist = [];
 
-  document.getElementById('addModalTitle').textContent = forSub ? '구독 추가' : '새 일정';
+  document.getElementById('addModalTitle').textContent = '새 일정';
 
   document.getElementById('f_title').value='';
 
@@ -10690,16 +10683,6 @@ function openAdd(forSub=false, presetDate=null) {
 
   removePhoto();
 
-  document.getElementById('f_subname').value='';
-
-  document.getElementById('f_subamt').value='';
-
-  document.getElementById('f_subdate').value= presetDate || fmtDate(new Date());
-
-  document.getElementById('f_subcat').value='';
-
-  document.getElementById('f_submemo').value='';
-
   buildCatSelect();
 
   setPrio('none');
@@ -10708,13 +10691,11 @@ function openAdd(forSub=false, presetDate=null) {
 
   updateHideTitleToggle();
 
-  updateSubToggle(forSub);
-
   history.pushState({modal:'add'}, '');
 
   document.getElementById('addModal').classList.add('open');
 
-  setTimeout(()=>document.getElementById(forSub?'f_subname':'f_title').focus(),300);
+  setTimeout(()=>document.getElementById('f_title').focus(),300);
 
 }
 
@@ -10731,8 +10712,6 @@ function openEdit(id) {
   isSecret = item.secret;
 
   isHideTitle = !!item.hideTitle;
-
-  isSub = false;
 
   selectedPrio = item.priority || 'none';
 
@@ -10785,8 +10764,6 @@ function openEdit(id) {
   updateSecretToggle();
 
   updateHideTitleToggle();
-
-  updateSubToggle(false);
 
   closeDetail();
 
@@ -10883,28 +10860,6 @@ function renderChecklistEditor(focusId = null) {
 
     if (focusId === entry.id) setTimeout(() => input.focus(), 0);
   });
-}
-
-
-
-function toggleSub() {
-
-  isSub = !isSub;
-
-  updateSubToggle(isSub);
-
-}
-
-function updateSubToggle(val) {
-
-  isSub = val;
-
-  document.getElementById('subToggle').className = 'toggle-switch'+(val?' on':'');
-
-  document.getElementById('regularFields').style.display = val?'none':'block';
-
-  document.getElementById('subFields').style.display = val?'block':'none';
-
 }
 
 
@@ -11054,40 +11009,6 @@ function closePhotoViewer() {
 
 
 async function saveItem() {
-
-  if (isSub) {
-
-    const name = document.getElementById('f_subname').value.trim();
-
-    if (!name) { document.getElementById('f_subname').classList.add('form-error'); return; }
-
-    subscriptions.push({
-
-      name, amount: document.getElementById('f_subamt').value,
-
-      cycle: document.getElementById('f_subcycle').value,
-
-      date: document.getElementById('f_subdate').value,
-
-      category: document.getElementById('f_subcat').value,
-
-      memo: document.getElementById('f_submemo').value
-
-    });
-
-    saveData();
-
-    closeAdd();
-
-    renderCal();
-
-    if (currentMainTab === 'category') renderCategoryView();
-
-    return;
-
-  }
-
-
 
   const title = document.getElementById('f_title').value.trim();
 
@@ -12102,7 +12023,7 @@ function renderWeekDayList(dmap) {
 
 ══════════════════════════════════════ */
 
-function openLedger(date) {
+function openLedger(date, forSub=false) {
 
   editingLedgerId = null;
 
@@ -12118,16 +12039,67 @@ function openLedger(date) {
 
   document.getElementById('l_memo').value = '';
 
-  document.getElementById('ledgerModalTitle').textContent = '수입 / 지출 추가';
+  document.getElementById('f_subname').value = '';
+
+  document.getElementById('f_subamt').value = '';
+
+  document.getElementById('f_subcycle').value = 'monthly';
+
+  document.getElementById('f_subdate').value = date || fmtDate(new Date());
+
+  document.getElementById('f_subcat').value = '';
+
+  document.getElementById('f_submemo').value = '';
+
+  document.getElementById('ledgerSubToggleArea').style.display = '';
 
   setLedgerType('expense');
+
+  updateLedgerSubToggle(forSub);
 
   history.pushState({modal:'ledger'}, '');
 
   document.getElementById('ledgerModal').classList.add('open');
 
-  setTimeout(() => document.getElementById('l_amount').focus(), 200);
+  setTimeout(() => document.getElementById(forSub ? 'f_subname' : 'l_amount').focus(), 200);
 
+}
+
+let ledgerSub = false;
+
+function toggleLedgerSub() {
+  updateLedgerSubToggle(!ledgerSub);
+}
+
+function updateLedgerSubToggle(val) {
+  ledgerSub = val;
+  document.getElementById('ledgerSubToggle').className = 'toggle-switch' + (val ? ' on' : '');
+  document.getElementById('ledgerFields').style.display = val ? 'none' : 'block';
+  document.getElementById('ledgerSubFields').style.display = val ? 'block' : 'none';
+  document.getElementById('ledgerModalTitle').textContent = val ? '구독 추가' : (editingLedgerId !== null ? '가계부 내역 수정' : '수입 / 지출 추가');
+}
+
+function saveSubscription() {
+  const nameInput = document.getElementById('f_subname');
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameInput.classList.add('form-error');
+    setTimeout(() => nameInput.classList.remove('form-error'), 1500);
+    return;
+  }
+  subscriptions.push({
+    name,
+    amount: document.getElementById('f_subamt').value,
+    cycle: document.getElementById('f_subcycle').value,
+    date: document.getElementById('f_subdate').value,
+    category: document.getElementById('f_subcat').value,
+    memo: document.getElementById('f_submemo').value
+  });
+  closeLedger();
+  saveData();
+  if (currentMainTab === 'category') renderCategoryView();
+  if (currentMainTab === 'calendar') { if (currentCalSubTab === 'cal') renderCal(); else if (currentCalSubTab === 'week') renderWeek(); }
+  showToast('구독을 저장했습니다', { type: 'success', duration: 1800 });
 }
 
 function closeLedger() { document.getElementById('ledgerModal').classList.remove('open'); }
@@ -12159,7 +12131,8 @@ function editLedgerEntry(id) {
 
   editingLedgerId = id;
   document.getElementById('dayModal').classList.remove('open');
-  document.getElementById('ledgerModalTitle').textContent = '가계부 내역 수정';
+  document.getElementById('ledgerSubToggleArea').style.display = 'none';
+  updateLedgerSubToggle(false);
   document.getElementById('l_date').value = entry.date || fmtDate(new Date());
   document.getElementById('l_amount').value = Number(entry.amount || 0).toLocaleString('ko-KR');
   document.getElementById('l_title').value = entry.title || '';
@@ -12179,6 +12152,8 @@ function escapeLedgerText(value) {
 
 
 function saveLedger() {
+
+  if (ledgerSub) { saveSubscription(); return; }
 
   const amount = parseLedgerAmount(document.getElementById('l_amount').value);
 
