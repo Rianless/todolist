@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v31-angular';
+const CACHE_NAME = 'todolist-v32-fresh-html';
 const ASSETS = [
   './',
   './index.html',
@@ -27,7 +27,8 @@ self.addEventListener('activate', e => {
 
 // fetch 전략:
 //   - /api/*: 네트워크 우선 (최신 데이터), 실패 시 캐시
-//   - 정적 자산: stale-while-revalidate (즉시 응답 + 백그라운드 갱신)
+//   - 페이지(HTML): 네트워크 우선 (새 배포가 바로 반영), 실패 시 캐시
+//   - 그 외 정적 자산: stale-while-revalidate (즉시 응답 + 백그라운드 갱신)
 self.addEventListener('fetch', e => {
   const req = e.request;
   if (req.method !== 'GET') return;
@@ -50,6 +51,22 @@ self.addEventListener('fetch', e => {
   }
 
   if (!isSameOrigin) return; // 외부 리소스는 브라우저 기본 처리
+
+  const isPage = req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html');
+  if (isPage) {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && res.status === 200) {
+            const clone = res.clone();
+            caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+          }
+          return res;
+        })
+        .catch(() => caches.match(req).then(c => c || caches.match('./index.html')))
+    );
+    return;
+  }
 
   e.respondWith(
     caches.match(req).then(cached => {
