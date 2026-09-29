@@ -9240,10 +9240,11 @@ function renderCalDayList(ds, dayEvents) {
   const headingWrap = document.createElement('div');
   const eyebrow = document.createElement('div');
   eyebrow.className = 'agenda-eyebrow';
-  eyebrow.textContent = `${date.getMonth() + 1}월 ${date.getDate()}일 · ${DOW_KO[date.getDay()]}요일`;
+  const isToday = ds === fmtDate(new Date());
+  eyebrow.textContent = isToday ? `${date.getMonth() + 1}월 ${date.getDate()}일 · ${DOW_KO[date.getDay()]}요일` : `${date.getFullYear()}년`;
   const heading = document.createElement('h3');
   heading.className = 'agenda-title';
-  heading.textContent = ds === fmtDate(new Date()) ? '오늘의 일정' : '선택한 날';
+  heading.textContent = isToday ? '오늘의 일정' : `${date.getMonth() + 1}월 ${date.getDate()}일 ${DOW_KO[date.getDay()]}요일`;
   headingWrap.append(eyebrow, heading);
 
   const count = document.createElement('span');
