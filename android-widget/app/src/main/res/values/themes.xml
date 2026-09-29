@@ -7,8 +7,27 @@
         <item name="colorSurface">@color/surface_glass</item>
         <item name="colorOnSurface">@color/text_primary</item>
         <item name="android:windowBackground">@color/bg_primary</item>
-        <item name="android:statusBarColor">@color/bg_primary</item>
-        <item name="android:navigationBarColor">@color/bg_primary</item>
-        <item name="android:fontFamily">sans-serif</item>
+    </style>
+
+    <style name="Theme.TodoWidget.Popup" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorPrimary">@color/ios_blue</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.6</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="windowActionBar">false</item>
+    </style>
+
+    <style name="Theme.TodoWidget.EditPopup" parent="Theme.MaterialComponents.Light.Dialog.Alert">
+        <item name="colorPrimary">#6366F1</item>
+        <item name="android:windowBackground">@android:color/transparent</item>
+        <item name="android:windowNoTitle">true</item>
+        <item name="android:backgroundDimEnabled">true</item>
+        <item name="android:backgroundDimAmount">0.45</item>
+        <item name="android:windowIsFloating">true</item>
+        <item name="android:windowMinWidthMajor">92%</item>
+        <item name="android:windowMinWidthMinor">92%</item>
+        <item name="windowActionBar">false</item>
     </style>
 </resources>

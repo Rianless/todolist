@@ -1,0 +1,73 @@
+<?xml version="1.0" encoding="utf-8"?>
+<FrameLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/popup_scrim"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="#A6060913"
+    android:padding="18dp">
+
+    <LinearLayout
+        android:id="@+id/popup_card"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_gravity="center"
+        android:background="@drawable/bg_popup_cyber"
+        android:elevation="16dp"
+        android:orientation="vertical"
+        android:padding="18dp">
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:gravity="top"
+            android:orientation="horizontal">
+
+            <LinearLayout
+                android:layout_width="0dp"
+                android:layout_height="wrap_content"
+                android:layout_weight="1"
+                android:orientation="vertical">
+
+                <TextView android:id="@+id/popup_title" android:layout_width="match_parent" android:layout_height="wrap_content" android:textColor="#1F2430" android:textSize="22sp" android:fontFamily="sans-serif-medium" android:lineSpacingExtra="2dp" />
+                <TextView android:id="@+id/popup_subtitle" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="4dp" android:textColor="#6366F1" android:textSize="13sp" android:fontFamily="sans-serif-medium" />
+                <TextView android:id="@+id/popup_category" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginTop="10dp" android:background="@drawable/bg_popup_chip" android:paddingHorizontal="10dp" android:paddingVertical="4dp" android:textColor="#6366F1" android:textSize="11sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+
+            <TextView android:id="@+id/popup_btn_close" android:layout_width="32dp" android:layout_height="32dp" android:background="@drawable/bg_widget_btn" android:gravity="center" android:text="X" android:textColor="#767B8D" android:textSize="18sp" android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+        <LinearLayout android:id="@+id/popup_content_table" android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="14dp" android:orientation="vertical">
+            <LinearLayout android:id="@+id/popup_row_category" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_popup_row" android:orientation="horizontal" android:paddingVertical="11dp">
+                <TextView android:layout_width="86dp" android:layout_height="wrap_content" android:text="카테고리" android:textColor="#8A90A2" android:textSize="12sp" />
+                <TextView android:id="@+id/popup_category_value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:textColor="#6366F1" android:textSize="15sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/popup_row_date" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_popup_row" android:orientation="horizontal" android:paddingVertical="11dp">
+                <TextView android:layout_width="86dp" android:layout_height="wrap_content" android:text="날짜" android:textColor="#8A90A2" android:textSize="12sp" />
+                <TextView android:id="@+id/popup_date" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:textColor="#1F2430" android:textSize="15sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/popup_row_time" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_popup_row" android:orientation="horizontal" android:paddingVertical="11dp">
+                <TextView android:layout_width="86dp" android:layout_height="wrap_content" android:text="시간" android:textColor="#8A90A2" android:textSize="12sp" />
+                <TextView android:id="@+id/popup_time" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:textColor="#1F2430" android:textSize="15sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/popup_row_location" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_popup_row" android:orientation="horizontal" android:paddingVertical="11dp">
+                <TextView android:layout_width="86dp" android:layout_height="wrap_content" android:text="장소" android:textColor="#8A90A2" android:textSize="12sp" />
+                <TextView android:id="@+id/popup_location" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:textColor="#1F2430" android:textSize="15sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/popup_row_note" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_popup_row" android:orientation="horizontal" android:paddingVertical="11dp">
+                <TextView android:layout_width="86dp" android:layout_height="wrap_content" android:text="메모" android:textColor="#8A90A2" android:textSize="12sp" />
+                <TextView android:id="@+id/popup_note" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:textColor="#1F2430" android:textSize="15sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+            <LinearLayout android:id="@+id/popup_row_content" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@drawable/bg_popup_row" android:orientation="horizontal" android:paddingVertical="11dp">
+                <TextView android:layout_width="86dp" android:layout_height="wrap_content" android:text="상태" android:textColor="#8A90A2" android:textSize="12sp" />
+                <TextView android:id="@+id/popup_done_value" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="end" android:textColor="#1F2430" android:textSize="15sp" android:fontFamily="sans-serif-medium" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:layout_marginTop="18dp" android:orientation="horizontal">
+            <TextView android:id="@+id/popup_btn_done" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:background="@drawable/bg_widget_btn" android:gravity="center" android:text="완료" android:textColor="#188A5A" android:textSize="14sp" android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/popup_btn_edit" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:layout_marginStart="10dp" android:background="@drawable/bg_widget_btn" android:gravity="center" android:text="수정" android:textColor="#6366F1" android:textSize="14sp" android:fontFamily="sans-serif-medium" />
+            <TextView android:id="@+id/popup_btn_delete" android:layout_width="0dp" android:layout_height="44dp" android:layout_weight="1" android:layout_marginStart="10dp" android:background="@drawable/bg_widget_btn" android:gravity="center" android:text="삭제" android:textColor="#D94D5D" android:textSize="14sp" android:fontFamily="sans-serif-medium" />
+        </LinearLayout>
+
+    </LinearLayout>
+</FrameLayout>

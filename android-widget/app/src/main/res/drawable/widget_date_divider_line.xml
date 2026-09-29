@@ -1,0 +1,9 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/widget_date_divider_line.xml -->
+<!-- dd-line: purple #9d00ff fade to transparent, 40% opacity -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#669d00ff"
+        android:endColor="#009d00ff"
+        android:angle="0"/>
+</shape>

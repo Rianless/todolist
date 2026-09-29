@@ -1,211 +1,161 @@
 <?xml version="1.0" encoding="utf-8"?>
-<androidx.coordinatorlayout.widget.CoordinatorLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<ScrollView xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@color/bg_primary">
+    android:background="#F4F5FA"
+    android:clipToPadding="false"
+    android:fillViewport="true">
 
-    <com.google.android.material.appbar.AppBarLayout
+    <LinearLayout
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:background="@color/surface_glass"
-        app:elevation="0dp">
+        android:orientation="vertical"
+        android:padding="20dp">
 
         <androidx.appcompat.widget.Toolbar
             android:id="@+id/toolbar"
             android:layout_width="match_parent"
-            android:layout_height="?attr/actionBarSize"
+            android:layout_height="52dp"
+            android:background="@android:color/transparent"
             app:titleTextColor="@color/text_primary" />
 
-    </com.google.android.material.appbar.AppBarLayout>
-
-    <ScrollView
-        android:layout_width="match_parent"
-        android:layout_height="match_parent"
-        android:clipToPadding="false"
-        android:paddingBottom="24dp"
-        app:layout_behavior="@string/appbar_scrolling_view_behavior">
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:text="기본 정보"
+            android:textColor="#8A90A2"
+            android:textSize="12sp" />
 
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_content_box"
             android:orientation="vertical"
-            android:padding="16dp">
+            android:paddingHorizontal="14dp">
 
-            <!-- Basic info card -->
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_subtle"
-                app:strokeWidth="0.5dp">
+            <LinearLayout android:layout_width="match_parent" android:layout_height="54dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:layout_width="72dp" android:layout_height="wrap_content" android:text="날짜" android:textColor="#333846" android:textSize="14sp" />
+                <EditText android:id="@+id/etDate" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@null" android:gravity="end" android:hint="YYYY-MM-DD" android:inputType="date" android:textColor="#555B6D" android:textSize="14sp" />
+            </LinearLayout>
 
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E8EAF1" />
 
-                    <!-- Date -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content"
-                            android:text="날짜" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etDate" android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary"
-                            android:hint="YYYY-MM-DD" android:gravity="end" android:inputType="date"/>
-                    </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="54dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:layout_width="72dp" android:layout_height="wrap_content" android:text="제목" android:textColor="#333846" android:textSize="14sp" />
+                <EditText android:id="@+id/etTitle" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@null" android:gravity="end" android:hint="일정 제목" android:singleLine="true" android:textColor="#555B6D" android:textSize="14sp" />
+            </LinearLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E8EAF1" />
 
-                    <!-- Title -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content"
-                            android:text="제목" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etTitle" android:layout_width="match_parent" android:layout_height="wrap_content"
-                            android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary"
-                            android:hint="제목 입력" android:gravity="end"/>
-                    </LinearLayout>
+            <LinearLayout android:layout_width="match_parent" android:layout_height="54dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:layout_width="72dp" android:layout_height="wrap_content" android:text="시간" android:textColor="#333846" android:textSize="14sp" />
+                <EditText android:id="@+id/etStartTime" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@null" android:gravity="center" android:hint="09:00" android:inputType="time" android:textColor="#555B6D" android:textSize="14sp" />
+                <TextView android:layout_width="24dp" android:layout_height="wrap_content" android:gravity="center" android:text="~" android:textColor="#A8ADBC" />
+                <EditText android:id="@+id/etEndTime" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@null" android:gravity="center" android:hint="10:00" android:inputType="time" android:textColor="#555B6D" android:textSize="14sp" />
+            </LinearLayout>
 
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E8EAF1" />
 
-                    <!-- Time -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content"
-                            android:text="시작" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etStartTime" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                            android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary"
-                            android:hint="09:00" android:gravity="center" android:inputType="time"/>
-                        <TextView android:layout_width="20dp" android:layout_height="wrap_content"
-                            android:text="–" android:textColor="@color/text_tertiary" android:gravity="center"/>
-                        <EditText android:id="@+id/etEndTime" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                            android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary"
-                            android:hint="10:00" android:gravity="center" android:inputType="time"/>
-                    </LinearLayout>
-
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
-
-                    <!-- All day -->
-                    <LinearLayout
-                        android:layout_width="match_parent"
-                        android:layout_height="52dp"
-                        android:orientation="horizontal"
-                        android:paddingHorizontal="16dp"
-                        android:gravity="center_vertical">
-                        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1"
-                            android:text="하루종일" android:textSize="14sp" android:textColor="@color/text_secondary"/>
-                        <CheckBox android:id="@+id/checkAllDay" android:layout_width="wrap_content" android:layout_height="wrap_content"
-                            android:buttonTint="@color/ios_blue"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Category -->
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="카테고리" android:textSize="12sp" android:textColor="@color/text_tertiary"
-                android:textAllCaps="true" android:letterSpacing="0.08" android:layout_marginBottom="6dp" android:layout_marginStart="4dp"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="12dp"
-                app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_subtle"
-                app:strokeWidth="0.5dp">
-                <Spinner android:id="@+id/spinnerCategory"
-                    android:layout_width="match_parent"
-                    android:layout_height="52dp"
-                    android:paddingHorizontal="16dp"/>
-            </com.google.android.material.card.MaterialCardView>
-
-            <!-- Extra info -->
-            <TextView android:layout_width="match_parent" android:layout_height="wrap_content"
-                android:text="추가 정보" android:textSize="12sp" android:textColor="@color/text_tertiary"
-                android:textAllCaps="true" android:letterSpacing="0.08" android:layout_marginBottom="6dp" android:layout_marginStart="4dp"/>
-
-            <com.google.android.material.card.MaterialCardView
-                android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:layout_marginBottom="24dp"
-                app:cardBackgroundColor="@color/surface_card"
-                app:cardCornerRadius="16dp"
-                app:cardElevation="0dp"
-                app:strokeColor="@color/border_subtle"
-                app:strokeWidth="0.5dp">
-
-                <LinearLayout
-                    android:layout_width="match_parent"
-                    android:layout_height="wrap_content"
-                    android:orientation="vertical">
-
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="52dp" android:orientation="horizontal" android:paddingHorizontal="16dp" android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="모듈" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etModule" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary" android:hint="모듈명" android:gravity="end"/>
-                    </LinearLayout>
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
-
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="52dp" android:orientation="horizontal" android:paddingHorizontal="16dp" android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="강사" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etInstructor" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary" android:hint="이름" android:gravity="end"/>
-                    </LinearLayout>
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
-
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="52dp" android:orientation="horizontal" android:paddingHorizontal="16dp" android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="장소" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etLocation" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary" android:hint="장소" android:gravity="end"/>
-                    </LinearLayout>
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
-
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="52dp" android:orientation="horizontal" android:paddingHorizontal="16dp" android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="강의실" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etRoom" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary" android:hint="강의실" android:gravity="end"/>
-                    </LinearLayout>
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
-
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="52dp" android:orientation="horizontal" android:paddingHorizontal="16dp" android:gravity="center_vertical">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="비고" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium"/>
-                        <EditText android:id="@+id/etNote" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary" android:hint="비고" android:gravity="end"/>
-                    </LinearLayout>
-                    <View android:layout_width="match_parent" android:layout_height="0.5dp" android:background="@color/border_subtle" android:layout_marginStart="16dp"/>
-
-                    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingHorizontal="16dp" android:paddingVertical="12dp">
-                        <TextView android:layout_width="60dp" android:layout_height="wrap_content" android:text="내용" android:textSize="14sp" android:textColor="@color/text_primary" android:fontFamily="sans-serif-medium" android:paddingTop="2dp"/>
-                        <EditText android:id="@+id/etContent" android:layout_width="match_parent" android:layout_height="wrap_content" android:background="@null" android:textSize="14sp" android:textColor="@color/text_secondary" android:hint="내용 입력" android:gravity="top|end" android:minLines="3" android:inputType="textMultiLine"/>
-                    </LinearLayout>
-
-                </LinearLayout>
-            </com.google.android.material.card.MaterialCardView>
-
-            <Button android:id="@+id/btnSave"
-                android:layout_width="match_parent"
-                android:layout_height="52dp"
-                android:text="저장"
-                android:textSize="16sp"
-                android:fontFamily="sans-serif-medium"
-                android:backgroundTint="@color/ios_blue"
-                app:cornerRadius="16dp"/>
-
+            <LinearLayout android:layout_width="match_parent" android:layout_height="54dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:text="하루 종일" android:textColor="#333846" android:textSize="14sp" />
+                <CheckBox android:id="@+id/checkAllDay" android:layout_width="wrap_content" android:layout_height="wrap_content" android:buttonTint="#6366F1" />
+            </LinearLayout>
         </LinearLayout>
-    </ScrollView>
 
-</androidx.coordinatorlayout.widget.CoordinatorLayout>
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="카테고리"
+            android:textColor="#8A90A2"
+            android:textSize="12sp" />
+
+        <Spinner
+            android:id="@+id/spinnerCategory"
+            android:layout_width="match_parent"
+            android:layout_height="54dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_content_box"
+            android:paddingHorizontal="14dp" />
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="추가 정보"
+            android:textColor="#8A90A2"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_content_box"
+            android:orientation="vertical"
+            android:paddingHorizontal="14dp">
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="54dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:layout_width="72dp" android:layout_height="wrap_content" android:text="장소" android:textColor="#333846" android:textSize="14sp" />
+                <EditText android:id="@+id/etLocation" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@null" android:gravity="end" android:hint="선택 사항" android:textColor="#555B6D" android:textSize="14sp" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E8EAF1" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="54dp" android:gravity="center_vertical" android:orientation="horizontal">
+                <TextView android:layout_width="72dp" android:layout_height="wrap_content" android:text="메모" android:textColor="#333846" android:textSize="14sp" />
+                <EditText android:id="@+id/etNote" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@null" android:gravity="end" android:hint="선택 사항" android:textColor="#555B6D" android:textSize="14sp" />
+            </LinearLayout>
+
+            <View android:layout_width="match_parent" android:layout_height="1dp" android:background="#E8EAF1" />
+
+            <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingVertical="12dp">
+                <TextView android:layout_width="72dp" android:layout_height="wrap_content" android:paddingTop="4dp" android:text="내용" android:textColor="#333846" android:textSize="14sp" />
+                <EditText android:id="@+id/etContent" android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:background="@null" android:gravity="top|end" android:hint="상세 내용" android:inputType="textMultiLine" android:minLines="3" android:textColor="#555B6D" android:textSize="14sp" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="16dp"
+            android:text="체크리스트"
+            android:textColor="#8A90A2"
+            android:textSize="12sp" />
+
+        <LinearLayout
+            android:id="@+id/checklistEditor"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_content_box"
+            android:orientation="vertical"
+            android:padding="10dp" />
+
+        <Button
+            android:id="@+id/btnAddChecklist"
+            android:layout_width="match_parent"
+            android:layout_height="46dp"
+            android:layout_marginTop="8dp"
+            android:background="@drawable/bg_widget_btn"
+            android:backgroundTint="@null"
+            android:text="+ 체크 항목 추가"
+            android:textColor="#6366F1"
+            android:textSize="13sp"
+            app:cornerRadius="2dp" />
+
+        <Button
+            android:id="@+id/btnSave"
+            android:layout_width="match_parent"
+            android:layout_height="52dp"
+            android:layout_marginTop="20dp"
+            android:background="@drawable/bg_primary_btn"
+            android:backgroundTint="@null"
+            android:text="저장"
+            android:textColor="#FFFFFF"
+            android:textSize="15sp"
+            app:cornerRadius="2dp" />
+    </LinearLayout>
+</ScrollView>
