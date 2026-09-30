@@ -18,11 +18,17 @@ interface TodoDao {
     @Query("SELECT * FROM todos WHERE date = :date ORDER BY startTime ASC")
     suspend fun getTodosByDateSync(date: String): List<Todo>
 
+    @Query("SELECT * FROM todos WHERE date >= :fromDate AND date <= :toDate ORDER BY date ASC, startTime ASC")
+    suspend fun getTodosInRange(fromDate: String, toDate: String): List<Todo>
+
     @Query("SELECT * FROM todos WHERE date >= :fromDate ORDER BY date ASC, startTime ASC LIMIT :limit")
     suspend fun getUpcomingTodos(fromDate: String, limit: Int = 5): List<Todo>
 
     @Query("SELECT * FROM todos WHERE done = 0 ORDER BY date ASC, startTime ASC LIMIT :limit")
     suspend fun getPendingTodos(limit: Int = 5): List<Todo>
+
+    @Query("SELECT * FROM todos WHERE id = :id")
+    suspend fun getTodoById(id: Int): Todo?
 
     @Insert(onConflict = OnConflictStrategy.REPLACE)
     suspend fun insertTodo(todo: Todo): Long
@@ -47,4 +53,10 @@ interface TodoDao {
 
     @Query("SELECT COUNT(*) FROM todos WHERE done = 1")
     suspend fun getDoneCount(): Int
+
+    @Query("SELECT COUNT(*) FROM todos WHERE date >= :fromDate AND date <= :toDate")
+    suspend fun getCountInRange(fromDate: String, toDate: String): Int
+
+    @Query("SELECT COUNT(*) FROM todos WHERE done = 1 AND date >= :fromDate AND date <= :toDate")
+    suspend fun getDoneCountInRange(fromDate: String, toDate: String): Int
 }

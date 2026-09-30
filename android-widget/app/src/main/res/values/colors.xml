@@ -9,8 +9,8 @@
     <color name="ios_pink">#FF2D55</color>
 
     <!-- Background -->
-    <color name="bg_primary">#1A1A2E</color>
-    <color name="bg_secondary">#16213E</color>
+    <color name="bg_primary">#F4F5FA</color>
+    <color name="bg_secondary">#FFFFFF</color>
 
     <!-- Surface (glass effect approximation) -->
     <color name="surface_card">#FFFFFFFF</color>

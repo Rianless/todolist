@@ -1,0 +1,23 @@
+{
+  "name": "todolist-desktop-widget",
+  "version": "1.0.0",
+  "description": "나의 하루 - PC 데스크톱 위젯 (웹앱, 폰 위젯과 같은 서버 데이터를 표시)",
+  "main": "main.js",
+  "private": true,
+  "scripts": {
+    "start": "electron .",
+    "test": "node test/logic.test.js",
+    "dist": "electron-builder --win --publish never"
+  },
+  "devDependencies": {
+    "electron": "^33.2.0",
+    "electron-builder": "^25.1.8"
+  },
+  "build": {
+    "appId": "com.todoapp.desktopwidget",
+    "productName": "MyDayWidget",
+    "files": ["main.js", "preload.js", "icon.png", "renderer/**/*", "package.json"],
+    "directories": { "output": "dist", "buildResources": "build" },
+    "win": { "target": ["portable"], "artifactName": "MyDayWidget-${version}.exe" }
+  }
+}

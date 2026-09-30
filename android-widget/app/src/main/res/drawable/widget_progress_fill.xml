@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- res/drawable/widget_progress_fill.xml -->
+<!-- prog-fill: gradient 90deg, cyan #00ffe7 to purple #9d00ff -->
+<shape xmlns:android="http://schemas.android.com/apk/res/android">
+    <gradient
+        android:startColor="#00ffe7"
+        android:endColor="#9d00ff"
+        android:angle="0"/>
+    <corners android:radius="2dp"/>
+</shape>

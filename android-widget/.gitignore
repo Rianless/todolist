@@ -1,0 +1,6 @@
+# 로컬 환경/빌드 산출물
+local.properties
+.gradle/
+.idea/
+build/
+*.bak

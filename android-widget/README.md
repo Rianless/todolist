@@ -79,3 +79,13 @@ app/src/main/
 - Android 8.0 (API 26) 이상
 - Android Studio Hedgehog (2023.1.1) 이상
 - Kotlin 1.9.0+
+
+## 위젯에 표시되는 항목
+
+위젯의 일정 목록(큰 위젯, 가로로 넓은 작은 위젯)은 선택한 날짜의 항목을 웹앱과 같이 보여줍니다.
+
+- 일정 (`/api/todos`)
+- 가계부 수입/지출 (`/api/state`의 `ledger`)
+- 구독 결제 (`/api/state`의 `subscriptions`, 웹앱과 같은 결제일 계산)
+
+가계부/구독 줄은 보기 전용이며, 수정은 웹앱에서 합니다.

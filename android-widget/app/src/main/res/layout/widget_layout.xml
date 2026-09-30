@@ -1,70 +1,574 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- iOS-style frosted glass widget -->
-<LinearLayout
-    xmlns:android="http://schemas.android.com/apk/res/android"
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:background="@drawable/widget_background"
     android:padding="0dp">
 
-    <!-- Header -->
+    <!-- 헤더: 타이틀 영역 + 버튼 행 (2단 구조) -->
     <LinearLayout
         android:id="@+id/widget_header"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:orientation="horizontal"
-        android:gravity="center_vertical"
+        android:orientation="vertical"
         android:paddingHorizontal="14dp"
-        android:paddingTop="12dp"
-        android:paddingBottom="8dp">
+        android:paddingTop="10dp"
+        android:paddingBottom="6dp">
 
-        <LinearLayout
-            android:layout_width="0dp"
+        <!-- 상단: TASK_MANAGER 라벨 -->
+        <TextView
+            android:layout_width="wrap_content"
             android:layout_height="wrap_content"
-            android:layout_weight="1"
-            android:orientation="vertical">
+            android:text="나의 하루"
+            android:textSize="8sp"
+            android:textColor="#6366F1"
+            android:alpha="0.7"
+            android:letterSpacing="0.15"
+            android:fontFamily="monospace" />
+
+        <!-- 중단: 날짜 범위 + 진행도 -->
+        <LinearLayout
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="center_vertical"
+            android:layout_marginTop="2dp">
 
             <TextView
                 android:id="@+id/widget_title"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="오늘"
-                android:textSize="17sp"
+                android:text="Today"
+                android:textSize="20sp"
                 android:fontFamily="sans-serif-medium"
-                android:textColor="#FFFFFF"
+                android:textColor="#1F2430"
                 android:textStyle="bold" />
 
             <TextView
                 android:id="@+id/widget_progress"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
-                android:text="0/0 완료"
-                android:textSize="12sp"
-                android:textColor="#B0FFFFFF" />
+                android:layout_marginStart="8dp"
+                android:text="0/0 done"
+                android:textSize="10sp"
+                android:textColor="#6366F1"
+                android:alpha="0.8"
+                android:fontFamily="monospace" />
 
         </LinearLayout>
 
-        <!-- Plus button hint -->
-        <TextView
-            android:layout_width="28dp"
-            android:layout_height="28dp"
-            android:text="＋"
-            android:textSize="18sp"
-            android:textColor="#FFFFFFFF"
-            android:gravity="center"
-            android:background="@drawable/bg_widget_btn" />
+        <!-- 하단: 버튼 행 (‹ TODAY › +) -->
+        <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:orientation="horizontal"
+            android:gravity="end|center_vertical"
+            android:layout_marginTop="8dp">
+
+            <!-- 주 이동: 이전 -->
+            <TextView
+                android:id="@+id/widget_week_prev"
+                android:layout_width="32dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="6dp"
+                android:text="‹"
+                android:textSize="18sp"
+                android:textColor="#6366F1"
+                android:gravity="center"
+                android:background="@drawable/bg_widget_btn" />
+
+            <!-- TODAY 버튼 -->
+            <TextView
+                android:id="@+id/widget_week_today"
+                android:layout_width="wrap_content"
+                android:layout_height="28dp"
+                android:layout_marginEnd="6dp"
+                android:paddingHorizontal="12dp"
+                android:text="TODAY"
+                android:textSize="9sp"
+                android:textColor="#6366F1"
+                android:gravity="center"
+                android:fontFamily="monospace"
+                android:letterSpacing="0.1"
+                android:background="@drawable/bg_widget_btn" />
+
+            <!-- 주 이동: 다음 -->
+            <TextView
+                android:id="@+id/widget_week_next"
+                android:layout_width="32dp"
+                android:layout_height="28dp"
+                android:layout_marginEnd="6dp"
+                android:text="›"
+                android:textSize="18sp"
+                android:textColor="#6366F1"
+                android:gravity="center"
+                android:background="@drawable/bg_widget_btn" />
+
+            <!-- + 버튼 (앱 열기) -->
+            <TextView
+                android:id="@+id/widget_open_app_button"
+                android:layout_width="32dp"
+                android:layout_height="28dp"
+                android:text="+"
+                android:textSize="18sp"
+                android:textColor="#6366F1"
+                android:gravity="center"
+                android:background="@drawable/bg_widget_btn" />
+
+        </LinearLayout>
 
     </LinearLayout>
 
-    <!-- Divider -->
-    <View
+    <!-- 구분선 -->
+    <TextView
         android:layout_width="match_parent"
-        android:layout_height="0.5dp"
+        android:layout_height="1dp"
         android:layout_marginHorizontal="14dp"
-        android:background="#33FFFFFF" />
+        android:background="#E4E7EF"
+        android:text="" />
 
-    <!-- Todo List -->
+    <!-- 달력 행 (일~토) -->
+    <LinearLayout
+        android:id="@+id/widget_calendar_row"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:paddingHorizontal="10dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="8dp">
+
+        <!-- 일 -->
+        <LinearLayout
+            android:id="@+id/widget_cal_cell0"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/widget_cal_dow0"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="일"
+                android:textSize="9sp"
+                android:textColor="#FF6B6B"
+                android:fontFamily="monospace" />
+            <TextView
+                android:id="@+id/widget_cal_day0"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="12sp"
+                android:textColor="#1F2430"
+                android:layout_marginTop="2dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/widget_cal_dot0_0"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot0_1"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot0_2"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 월 -->
+        <LinearLayout
+            android:id="@+id/widget_cal_cell1"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/widget_cal_dow1"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="월"
+                android:textSize="9sp"
+                android:textColor="#767B8D"
+                android:fontFamily="monospace" />
+            <TextView
+                android:id="@+id/widget_cal_day1"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="12sp"
+                android:textColor="#1F2430"
+                android:layout_marginTop="2dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/widget_cal_dot1_0"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot1_1"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot1_2"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 화 -->
+        <LinearLayout
+            android:id="@+id/widget_cal_cell2"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/widget_cal_dow2"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="화"
+                android:textSize="9sp"
+                android:textColor="#767B8D"
+                android:fontFamily="monospace" />
+            <TextView
+                android:id="@+id/widget_cal_day2"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="12sp"
+                android:textColor="#1F2430"
+                android:layout_marginTop="2dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/widget_cal_dot2_0"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot2_1"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot2_2"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 수 -->
+        <LinearLayout
+            android:id="@+id/widget_cal_cell3"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/widget_cal_dow3"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="수"
+                android:textSize="9sp"
+                android:textColor="#767B8D"
+                android:fontFamily="monospace" />
+            <TextView
+                android:id="@+id/widget_cal_day3"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="12sp"
+                android:textColor="#1F2430"
+                android:layout_marginTop="2dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/widget_cal_dot3_0"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot3_1"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot3_2"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 목 -->
+        <LinearLayout
+            android:id="@+id/widget_cal_cell4"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/widget_cal_dow4"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="목"
+                android:textSize="9sp"
+                android:textColor="#767B8D"
+                android:fontFamily="monospace" />
+            <TextView
+                android:id="@+id/widget_cal_day4"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="12sp"
+                android:textColor="#1F2430"
+                android:layout_marginTop="2dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/widget_cal_dot4_0"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot4_1"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot4_2"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 금 -->
+        <LinearLayout
+            android:id="@+id/widget_cal_cell5"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/widget_cal_dow5"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="금"
+                android:textSize="9sp"
+                android:textColor="#767B8D"
+                android:fontFamily="monospace" />
+            <TextView
+                android:id="@+id/widget_cal_day5"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="12sp"
+                android:textColor="#1F2430"
+                android:layout_marginTop="2dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/widget_cal_dot5_0"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot5_1"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot5_2"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <!-- 토 -->
+        <LinearLayout
+            android:id="@+id/widget_cal_cell6"
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical"
+            android:gravity="center">
+            <TextView
+                android:id="@+id/widget_cal_dow6"
+                android:layout_width="wrap_content"
+                android:layout_height="wrap_content"
+                android:text="토"
+                android:textSize="9sp"
+                android:textColor="#6366F1"
+                android:fontFamily="monospace" />
+            <TextView
+                android:id="@+id/widget_cal_day6"
+                android:layout_width="28dp"
+                android:layout_height="28dp"
+                android:gravity="center"
+                android:text=""
+                android:textSize="12sp"
+                android:textColor="#1F2430"
+                android:layout_marginTop="2dp" />
+            <LinearLayout
+                android:layout_width="wrap_content"
+                android:layout_height="6dp"
+                android:orientation="horizontal"
+                android:gravity="center"
+                android:layout_marginTop="2dp">
+                <TextView
+                    android:id="@+id/widget_cal_dot6_0"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot6_1"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+                <TextView
+                    android:id="@+id/widget_cal_dot6_2"
+                    android:layout_width="4dp"
+                    android:layout_height="4dp"
+                    android:layout_marginHorizontal="1dp"
+                    android:background="@drawable/bg_widget_dot"
+                    android:visibility="gone"
+                    android:text="" />
+            </LinearLayout>
+        </LinearLayout>
+
+    </LinearLayout>
+
+    <!-- 구분선 -->
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:layout_marginHorizontal="14dp"
+        android:background="#E4E7EF"
+        android:text="" />
+
+    <!-- 선택된 날짜 헤더 -->
+    <TextView
+        android:id="@+id/widget_selected_date_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="14dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#6366F1"
+        android:letterSpacing="0.1"
+        android:fontFamily="monospace" />
+
     <ListView
         android:id="@+id/widget_list"
         android:layout_width="match_parent"
@@ -72,18 +576,24 @@
         android:layout_weight="1"
         android:divider="@null"
         android:dividerHeight="0dp"
-        android:paddingTop="4dp"
+        android:paddingTop="2dp"
         android:paddingBottom="4dp" />
 
-    <!-- Empty view -->
     <TextView
         android:id="@+id/widget_empty"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:gravity="center"
         android:padding="20dp"
-        android:text="일정이 없어요"
-        android:textColor="#80FFFFFF"
-        android:textSize="13sp" />
+        android:text="등록된 일정이 없습니다"
+        android:textColor="#A8ADBC"
+        android:textSize="11sp"
+        android:fontFamily="monospace" />
+
+    <TextView
+        android:layout_width="match_parent"
+        android:layout_height="1dp"
+        android:background="#E4E7EF"
+        android:text="" />
 
 </LinearLayout>
