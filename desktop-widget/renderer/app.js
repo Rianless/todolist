@@ -29,8 +29,11 @@
   }
 
   // 일정(/api/todos)과 가계부·구독(/api/state)을 각각 가져온다. 한쪽이 실패해도 이전 값은 유지한다.
+  let retryTimer = null;
+
   async function load() {
     const seq = ++model.loadSeq;
+    clearTimeout(retryTimer);
     $('btnRefresh').classList.add('spin');
     const [todosRes, stateRes] = await Promise.allSettled([fetchJson('/api/todos'), fetchJson('/api/state')]);
     if (seq !== model.loadSeq) return;
@@ -47,6 +50,8 @@
 
     model.error = !ok;
     if (ok || model.lastSync === null) model.lastSync = new Date();
+    // PC를 켠 직후에는 네트워크가 아직 준비되지 않았을 수 있어, 실패하면 짧게 다시 시도한다.
+    if (!ok) retryTimer = setTimeout(load, 15 * 1000);
     $('btnRefresh').classList.remove('spin');
     render();
   }

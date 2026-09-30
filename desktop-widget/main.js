@@ -6,6 +6,7 @@ const fs = require('fs');
 const SERVER_URL = (process.env.TODOLIST_URL || 'https://todolist-liart-mu.vercel.app').replace(/\/+$/, '');
 
 const STATE_FILE = path.join(app.getPath('userData'), 'window-state.json');
+const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings.json');
 const DEFAULTS = { width: 380, height: 640, alwaysOnTop: false };
 
 let win = null;
@@ -44,6 +45,40 @@ function visiblePosition(state) {
            state.y < a.y + a.height - 40 && state.y + 60 > a.y;
   });
   return onScreen ? { x: state.x, y: state.y } : {};
+}
+
+// ── Windows 시작 시 자동 실행 ──────────────────────────────────────────
+// portable exe 는 실행할 때마다 임시 폴더에 풀려서 process.execPath 가 매번 달라진다.
+// 원래 exe 위치(PORTABLE_EXECUTABLE_FILE)를 시작프로그램에 등록해야 재부팅 후에도 실행된다.
+function autoStartPath() {
+  return process.env.PORTABLE_EXECUTABLE_FILE || process.execPath;
+}
+
+function isAutoStart() {
+  return app.getLoginItemSettings({ path: autoStartPath() }).openAtLogin;
+}
+
+function setAutoStart(enabled) {
+  app.setLoginItemSettings({ openAtLogin: enabled, path: autoStartPath() });
+}
+
+function readSettings() {
+  try {
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+  } catch (e) {
+    return {};
+  }
+}
+
+// 처음 실행할 때 한 번만 자동 실행을 켠다. 이후에는 트레이 메뉴의 선택을 따른다.
+function enableAutoStartOnFirstRun() {
+  if (!app.isPackaged) return; // npm start 개발 실행은 등록하지 않는다
+  const settings = readSettings();
+  if (settings.autoStartInitialized) return;
+  setAutoStart(true);
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify({ ...settings, autoStartInitialized: true }));
+  } catch (e) { /* 저장 실패 시 다음 실행에서 다시 시도 */ }
 }
 
 function createWindow() {
@@ -121,8 +156,8 @@ function buildTrayMenu() {
     {
       label: 'Windows 시작 시 자동 실행',
       type: 'checkbox',
-      checked: app.getLoginItemSettings().openAtLogin,
-      click: item => app.setLoginItemSettings({ openAtLogin: item.checked })
+      checked: isAutoStart(),
+      click: item => setAutoStart(item.checked)
     },
     { type: 'separator' },
     { label: '종료', click: () => { quitting = true; app.quit(); } }
@@ -156,6 +191,7 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', showWindow);
   app.whenReady().then(() => {
+    enableAutoStartOnFirstRun();
     createWindow();
     createTray();
   });
