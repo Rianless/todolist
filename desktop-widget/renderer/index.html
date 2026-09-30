@@ -1,0 +1,54 @@
+<!doctype html>
+<html lang="ko">
+<head>
+  <meta charset="utf-8">
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self'; connect-src https: http://localhost:* http://127.0.0.1:*; style-src 'self'; script-src 'self'; img-src 'self' data:">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>나의 하루</title>
+  <link rel="stylesheet" href="style.css">
+</head>
+<body>
+  <div class="widget">
+    <header class="bar" id="dragBar">
+      <div class="bar-title">
+        <strong id="monthLabel">나의 하루</strong>
+        <span id="syncState" class="sync">불러오는 중</span>
+      </div>
+      <div class="bar-actions">
+        <button id="btnRefresh" title="새로고침" aria-label="새로고침">⟳</button>
+        <button id="btnPin" title="항상 위에 표시" aria-label="항상 위에 표시">📌</button>
+        <button id="btnMin" title="최소화" aria-label="최소화">–</button>
+        <button id="btnClose" title="트레이로 숨기기" aria-label="닫기">✕</button>
+      </div>
+    </header>
+
+    <section class="week">
+      <div class="week-nav">
+        <button id="btnPrev" aria-label="이전 주">‹</button>
+        <button id="btnToday">오늘</button>
+        <button id="btnNext" aria-label="다음 주">›</button>
+      </div>
+      <div class="week-days" id="weekDays"></div>
+    </section>
+
+    <section class="agenda">
+      <div class="agenda-head">
+        <div>
+          <div class="eyebrow" id="agendaEyebrow"></div>
+          <h1 id="agendaTitle">오늘의 일정</h1>
+        </div>
+        <span class="count" id="agendaCount">0개</span>
+      </div>
+      <div class="list" id="agendaList"></div>
+    </section>
+
+    <footer class="foot">
+      <span class="foot-note">수정은 웹앱에서 해요</span>
+      <button id="btnWeb" class="link">웹앱 열기 ↗</button>
+    </footer>
+  </div>
+
+  <script src="logic.js"></script>
+  <script src="app.js"></script>
+</body>
+</html>

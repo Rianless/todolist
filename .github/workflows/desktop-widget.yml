@@ -1,0 +1,36 @@
+name: Build PC widget
+
+on:
+  push:
+    branches: [claude/eager-babbage-fg9hm4]
+    paths:
+      - 'desktop-widget/**'
+      - '.github/workflows/desktop-widget.yml'
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: windows-latest
+    defaults:
+      run:
+        working-directory: desktop-widget
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install --no-audit --no-fund
+
+      - name: Check calculation logic against the web app
+        run: npm test
+
+      - name: Build portable exe
+        run: npm run dist
+
+      - uses: actions/upload-artifact@v4
+        with:
+          name: MyDayWidget-windows
+          path: desktop-widget/dist/*.exe
