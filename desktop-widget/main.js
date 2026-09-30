@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain, screen, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -173,6 +173,23 @@ function createTray() {
 }
 
 ipcMain.handle('config', () => ({ serverUrl: SERVER_URL, alwaysOnTop: win ? win.isAlwaysOnTop() : false }));
+// 일정(/api/todos) 읽기/쓰기 전용 통로. 렌더러가 임의 주소로 요청하지 못하게 경로와 메서드를 제한한다.
+ipcMain.handle('api', async (_e, { method, path: apiPath, body }) => {
+  const okMethod = ['GET', 'POST', 'PATCH', 'DELETE'].includes(method);
+  const okPath = typeof apiPath === 'string' && /^\/api\/todos(\?id=\d+)?$/.test(apiPath);
+  if (!okMethod || !okPath) return { ok: false, status: 400, text: '' };
+  try {
+    const res = await net.fetch(SERVER_URL + apiPath, {
+      method,
+      headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    return { ok: res.ok, status: res.status, text: await res.text() };
+  } catch (e) {
+    return { ok: false, status: 0, text: '' };
+  }
+});
+
 ipcMain.on('open-web', (_e, p) => {
   const pathPart = typeof p === 'string' && p.startsWith('/') ? p : '/';
   openExternalSafe(SERVER_URL + pathPart);

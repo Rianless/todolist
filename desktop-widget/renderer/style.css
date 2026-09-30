@@ -70,7 +70,14 @@ h1 { margin: 1px 0 0; font-size: 18px; }
 .row strong { font-size: 13px; font-weight: 600; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row small { font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .row.done strong { text-decoration: line-through; color: var(--text3); }
-.row .mark { font-size: 12px; color: var(--green); }
+.row .check-btn {
+  width: 22px; height: 22px; border-radius: 50%; border: 2px solid #c9ccda; font-size: 12px; line-height: 1;
+  display: grid; place-items: center; color: transparent; padding: 0;
+}
+.row .check-btn:hover { border-color: var(--accent); }
+.row.done .check-btn { background: var(--green); border-color: var(--green); color: #fff; }
+.row.todo.editable { cursor: pointer; }
+.row.todo.editable:hover { box-shadow: 0 2px 6px rgba(31, 36, 48, .12); }
 .row.money .icon { font-size: 15px; text-align: center; }
 .row.money .amount { font-size: 12px; font-weight: 800; white-space: nowrap; }
 .row.income { --row-color: var(--green); } .row.income .amount { color: var(--green); }
@@ -88,3 +95,40 @@ h1 { margin: 1px 0 0; font-size: 18px; }
 .foot { align-items: center; }
 .foot-note { font-size: 10px; color: var(--text3); }
 .foot .link { margin-left: auto; background: none; border: 0; color: var(--accent); }
+
+.foot .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.foot .primary:hover { color: #fff; filter: brightness(1.08); }
+
+.modal { position: fixed; inset: 0; background: rgba(31, 36, 48, .45); display: flex; align-items: flex-end; z-index: 10; }
+.modal[hidden] { display: none; }
+.sheet {
+  width: 100%; max-height: 100%; overflow-y: auto; background: var(--panel); padding: 14px 16px 16px;
+  border-radius: 16px 16px 0 0; display: flex; flex-direction: column; gap: 9px;
+}
+.sheet h2 { margin: 0 0 2px; font-size: 15px; }
+.sheet label { display: flex; flex-direction: column; gap: 3px; font-size: 10px; font-weight: 700; color: var(--text3); }
+.sheet input[type=text], .sheet input[type=date], .sheet input[type=time], .sheet select, .sheet textarea {
+  font: inherit; font-size: 13px; font-weight: 400; color: var(--text); background: var(--bg);
+  border: 1px solid var(--border); border-radius: 8px; padding: 7px 9px; width: 100%;
+}
+.sheet textarea { resize: none; }
+.sheet input:focus, .sheet select:focus, .sheet textarea:focus { outline: 2px solid #c9caff; border-color: var(--accent); }
+.grid2 { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; align-items: end; }
+.sheet label.check { flex-direction: row; align-items: center; gap: 6px; font-size: 12px; font-weight: 600; color: var(--text2); padding-bottom: 8px; }
+.hint { margin: 0; font-size: 10px; color: var(--text3); }
+.hint:empty { display: none; }
+.error { margin: 0; font-size: 11px; color: var(--red); }
+.error[hidden] { display: none; }
+.actions { display: flex; align-items: center; gap: 6px; margin-top: 2px; }
+.spacer { flex: 1; }
+.actions button { padding: 8px 14px; border-radius: 8px; font-size: 12px; font-weight: 700; border: 1px solid var(--border); background: var(--panel); color: var(--text2); }
+.actions .primary { background: var(--accent); border-color: var(--accent); color: #fff; }
+.actions .danger { color: var(--red); border-color: #f2c4c7; }
+.actions .danger.confirm { background: var(--red); border-color: var(--red); color: #fff; }
+.actions button:disabled { opacity: .5; cursor: default; }
+.toast {
+  position: fixed; left: 50%; bottom: 62px; transform: translateX(-50%); background: #1f2430; color: #fff;
+  padding: 8px 14px; border-radius: 10px; font-size: 12px; z-index: 20; max-width: 90%;
+}
+.toast[hidden] { display: none; }
+.grid2[hidden] { display: none; }
