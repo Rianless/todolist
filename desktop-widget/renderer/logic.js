@@ -81,6 +81,7 @@
       color: row.category_color || '#636366',
       done: !!row.done,
       location: row.location || '',
+      memo: row.memo || row.note || '',
       hidden: !!row.hide_title || !!row.secret,
       repeat: row.repeat || 'none',
       repeatEnd: row.repeat_end || ''

@@ -43,10 +43,38 @@
     </section>
 
     <footer class="foot">
-      <span class="foot-note">수정은 웹앱에서 해요</span>
+      <button id="btnAdd" class="primary">+ 일정</button>
+      <span class="foot-note">가계부·구독은 웹앱에서</span>
       <button id="btnWeb" class="link">웹앱 열기 ↗</button>
     </footer>
   </div>
+
+  <div class="modal" id="modal" hidden>
+    <form class="sheet" id="editor" autocomplete="off">
+      <h2 id="editorTitle">새 일정</h2>
+      <label>제목<input id="f_title" type="text" maxlength="100"></label>
+      <div class="grid2">
+        <label>날짜<input id="f_date" type="date"></label>
+        <label class="check"><input id="f_allday" type="checkbox"> 종일</label>
+      </div>
+      <div class="grid2" id="timeRow">
+        <label>시작<input id="f_start" type="time"></label>
+        <label>종료<input id="f_end" type="time"></label>
+      </div>
+      <label>카테고리<select id="f_cat"></select></label>
+      <label>장소<input id="f_loc" type="text" maxlength="100"></label>
+      <label>메모<textarea id="f_memo" rows="2"></textarea></label>
+      <p class="hint" id="editorHint"></p>
+      <p class="error" id="editorError" hidden></p>
+      <div class="actions">
+        <button type="button" id="btnDelete" class="danger">삭제</button>
+        <span class="spacer"></span>
+        <button type="button" id="btnCancel">취소</button>
+        <button type="submit" id="btnSave" class="primary">저장</button>
+      </div>
+    </form>
+  </div>
+  <div class="toast" id="toast" hidden></div>
 
   <script src="logic.js"></script>
   <script src="app.js"></script>

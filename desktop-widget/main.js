@@ -1,4 +1,4 @@
-const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain, screen } = require('electron');
+const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain, screen, net } = require('electron');
 const path = require('path');
 const fs = require('fs');
 
@@ -6,6 +6,7 @@ const fs = require('fs');
 const SERVER_URL = (process.env.TODOLIST_URL || 'https://todolist-liart-mu.vercel.app').replace(/\/+$/, '');
 
 const STATE_FILE = path.join(app.getPath('userData'), 'window-state.json');
+const SETTINGS_FILE = path.join(app.getPath('userData'), 'settings.json');
 const DEFAULTS = { width: 380, height: 640, alwaysOnTop: false };
 
 let win = null;
@@ -44,6 +45,40 @@ function visiblePosition(state) {
            state.y < a.y + a.height - 40 && state.y + 60 > a.y;
   });
   return onScreen ? { x: state.x, y: state.y } : {};
+}
+
+// ── Windows 시작 시 자동 실행 ──────────────────────────────────────────
+// portable exe 는 실행할 때마다 임시 폴더에 풀려서 process.execPath 가 매번 달라진다.
+// 원래 exe 위치(PORTABLE_EXECUTABLE_FILE)를 시작프로그램에 등록해야 재부팅 후에도 실행된다.
+function autoStartPath() {
+  return process.env.PORTABLE_EXECUTABLE_FILE || process.execPath;
+}
+
+function isAutoStart() {
+  return app.getLoginItemSettings({ path: autoStartPath() }).openAtLogin;
+}
+
+function setAutoStart(enabled) {
+  app.setLoginItemSettings({ openAtLogin: enabled, path: autoStartPath() });
+}
+
+function readSettings() {
+  try {
+    return JSON.parse(fs.readFileSync(SETTINGS_FILE, 'utf8'));
+  } catch (e) {
+    return {};
+  }
+}
+
+// 처음 실행할 때 한 번만 자동 실행을 켠다. 이후에는 트레이 메뉴의 선택을 따른다.
+function enableAutoStartOnFirstRun() {
+  if (!app.isPackaged) return; // npm start 개발 실행은 등록하지 않는다
+  const settings = readSettings();
+  if (settings.autoStartInitialized) return;
+  setAutoStart(true);
+  try {
+    fs.writeFileSync(SETTINGS_FILE, JSON.stringify({ ...settings, autoStartInitialized: true }));
+  } catch (e) { /* 저장 실패 시 다음 실행에서 다시 시도 */ }
 }
 
 function createWindow() {
@@ -121,8 +156,8 @@ function buildTrayMenu() {
     {
       label: 'Windows 시작 시 자동 실행',
       type: 'checkbox',
-      checked: app.getLoginItemSettings().openAtLogin,
-      click: item => app.setLoginItemSettings({ openAtLogin: item.checked })
+      checked: isAutoStart(),
+      click: item => setAutoStart(item.checked)
     },
     { type: 'separator' },
     { label: '종료', click: () => { quitting = true; app.quit(); } }
@@ -138,6 +173,23 @@ function createTray() {
 }
 
 ipcMain.handle('config', () => ({ serverUrl: SERVER_URL, alwaysOnTop: win ? win.isAlwaysOnTop() : false }));
+// 일정(/api/todos) 읽기/쓰기 전용 통로. 렌더러가 임의 주소로 요청하지 못하게 경로와 메서드를 제한한다.
+ipcMain.handle('api', async (_e, { method, path: apiPath, body }) => {
+  const okMethod = ['GET', 'POST', 'PATCH', 'DELETE'].includes(method);
+  const okPath = typeof apiPath === 'string' && /^\/api\/todos(\?id=\d+)?$/.test(apiPath);
+  if (!okMethod || !okPath) return { ok: false, status: 400, text: '' };
+  try {
+    const res = await net.fetch(SERVER_URL + apiPath, {
+      method,
+      headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+      body: body === undefined ? undefined : JSON.stringify(body)
+    });
+    return { ok: res.ok, status: res.status, text: await res.text() };
+  } catch (e) {
+    return { ok: false, status: 0, text: '' };
+  }
+});
+
 ipcMain.on('open-web', (_e, p) => {
   const pathPart = typeof p === 'string' && p.startsWith('/') ? p : '/';
   openExternalSafe(SERVER_URL + pathPart);
@@ -156,6 +208,7 @@ if (!app.requestSingleInstanceLock()) {
 } else {
   app.on('second-instance', showWindow);
   app.whenReady().then(() => {
+    enableAutoStartOnFirstRun();
     createWindow();
     createTray();
   });
