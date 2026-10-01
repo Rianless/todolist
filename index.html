@@ -5497,7 +5497,17 @@ body::before, body::after, #bootScreen { display: none !important; }
 }
 .calendar-surface .cal-ledger-bar { position: absolute; right: 5px; top: 7px; margin: 0; }
 .calendar-surface .cal-ledger-pip { width: 4px; height: 4px; }
+
 .calendar-surface .cal-ledger-total { display: none; }
+/* 달력 칸: 그날 지출 합계 */
+.calendar-surface .cal-spend {
+  display: block; max-width: calc(100% - 4px); margin: 0 auto;
+  color: var(--red); font-size: 8px; font-weight: 800; line-height: 10px; text-align: center;
+  white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums;
+}
+@media (min-width: 900px) {
+  .calendar-surface .cal-spend { margin-top: 1px; font-size: 11px; line-height: 14px; }
+}
 
 .cal-agenda {
   min-height: 180px;
@@ -9361,8 +9371,17 @@ function renderCal() {
 
 
 
+    // 그날 지출 합계 (가계부 지출 + 구독 결제) — 달력 선택 패널의 합계와 같은 값
+    const dayExpense = (lmap[ds] ? lmap[ds].expense : 0)
+      + evts.filter(it => it.isSub).reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    if (dayExpense > 0) {
+      const spend = document.createElement('span');
+      spend.className = 'cal-spend';
+      spend.textContent = `-${compactLedgerAmount(dayExpense)}`;
+      spend.title = `이 날 지출 -${dayExpense.toLocaleString()}원`;
+      cell.appendChild(spend);
+    }
     evts.slice(0,2).forEach(item=>{
-
       const dot=document.createElement('span');
 
       dot.className='cal-dot'+(item.done?' done':'');
@@ -9462,8 +9481,33 @@ function renderCal() {
 
 
 
+  fitCalCells(grid);
+
   renderCalDayList(calSelectedDate, dmap[calSelectedDate] || []);
 
+}
+
+// 칸 높이에 다 들어가지 않으면 일정 줄을 줄이고 "+n"으로 바꾼다 (지출 줄이 일정을 가리지 않게)
+function fitCalCells(grid) {
+  grid.querySelectorAll('.cal-cell:not(.empty)').forEach(cell => {
+    if (!cell.clientHeight) return; // 화면에 안 보이는 상태에서는 측정할 수 없다
+    const chips = [...cell.querySelectorAll('.cal-dot')];
+    let hidden = 0;
+    while (chips.length > 1 && cell.scrollHeight > cell.clientHeight + 1) {
+      chips.pop().remove();
+      hidden++;
+      let more = cell.querySelector('.cal-more');
+      if (!more) {
+        more = document.createElement('span');
+        more.className = 'cal-more';
+        more.dataset.base = '0';
+        cell.appendChild(more);
+      }
+      const base = more.dataset.base !== undefined ? Number(more.dataset.base) : (parseInt(more.textContent.replace('+', ''), 10) || 0);
+      more.dataset.base = String(base);
+      more.textContent = `+${base + hidden}`;
+    }
+  });
 }
 
 function renderCalDayList(ds, dayEvents) {
