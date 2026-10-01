@@ -1,6 +1,7 @@
 package com.todoapp.widget.widget
 
 import android.app.PendingIntent
+import android.app.AlarmManager
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
 import android.content.ComponentName
@@ -10,6 +11,8 @@ import android.graphics.Color
 import android.graphics.Typeface
 import android.net.Uri
 import android.os.Build
+import android.os.Handler
+import android.os.Looper
 import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
@@ -25,6 +28,7 @@ import java.net.HttpURLConnection
 import java.net.URL
 import java.time.DayOfWeek
 import java.time.LocalDate
+import java.time.ZoneId
 import java.time.format.DateTimeFormatter
 import java.time.temporal.TemporalAdjusters
 
@@ -36,6 +40,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
         const val ACTION_WEEK_PREV = "com.todoapp.widget.ACTION_WEEK_PREV"
         const val ACTION_WEEK_NEXT = "com.todoapp.widget.ACTION_WEEK_NEXT"
         const val ACTION_WEEK_TODAY = "com.todoapp.widget.ACTION_WEEK_TODAY"
+        const val ACTION_MIDNIGHT = "com.todoapp.widget.ACTION_MIDNIGHT"
 
         const val EXTRA_TODO_ID = "extra_todo_id"
         const val EXTRA_DONE = "extra_done"
@@ -77,6 +82,36 @@ class TodoWidgetProvider : AppWidgetProvider() {
             intArrayOf(R.id.widget_cal_dot6_0, R.id.widget_cal_dot6_1, R.id.widget_cal_dot6_2)
         )
 
+        private fun midnightPendingIntent(context: Context): PendingIntent {
+            val intent = Intent(context, TodoWidgetProvider::class.java).apply { action = ACTION_MIDNIGHT }
+            return PendingIntent.getBroadcast(
+                context, 9001, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        // 자정 직후(00:00:05)에 위젯을 새로고침하도록 알람을 예약한다.
+        // Android 8 이후에는 앱이 DATE_CHANGED 방송을 거의 받지 못하므로, 알람으로 직접 깨운다.
+        fun scheduleMidnightRefresh(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            val triggerAt = LocalDate.now().plusDays(1)
+                .atStartOfDay(ZoneId.systemDefault())
+                .plusSeconds(5)
+                .toInstant()
+                .toEpochMilli()
+            val pending = midnightPendingIntent(context)
+            val exactAllowed = Build.VERSION.SDK_INT < Build.VERSION_CODES.S || alarmManager.canScheduleExactAlarms()
+            if (exactAllowed) {
+                alarmManager.setExactAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
+            } else {
+                alarmManager.setAndAllowWhileIdle(AlarmManager.RTC_WAKEUP, triggerAt, pending)
+            }
+        }
+
+        fun cancelMidnightRefresh(context: Context) {
+            (context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager)?.cancel(midnightPendingIntent(context))
+        }
+
         fun getWeekStart(today: LocalDate): LocalDate {
             return if (today.dayOfWeek == DayOfWeek.SUNDAY) today
             else today.with(TemporalAdjusters.previous(DayOfWeek.SUNDAY))
@@ -109,11 +144,22 @@ class TodoWidgetProvider : AppWidgetProvider() {
         }
     }
 
+    override fun onEnabled(context: Context) {
+        super.onEnabled(context)
+        scheduleMidnightRefresh(context)
+    }
+
+    override fun onDisabled(context: Context) {
+        super.onDisabled(context)
+        cancelMidnightRefresh(context)
+    }
+
     override fun onUpdate(
         context: Context,
         appWidgetManager: AppWidgetManager,
         appWidgetIds: IntArray
     ) {
+        scheduleMidnightRefresh(context)
         appWidgetIds.forEach { widgetId ->
             updateWidget(context, appWidgetManager, widgetId)
         }
@@ -136,9 +182,16 @@ class TodoWidgetProvider : AppWidgetProvider() {
         when (intent.action) {
             Intent.ACTION_DATE_CHANGED,
             Intent.ACTION_TIME_CHANGED,
-            Intent.ACTION_TIMEZONE_CHANGED -> {
+            Intent.ACTION_TIMEZONE_CHANGED,
+            Intent.ACTION_BOOT_COMPLETED,
+            ACTION_MIDNIGHT -> {
+                // 날짜가 바뀌었을 수 있다: 선택 날짜를 오늘로 넘기고, 위젯을 다시 그리고, 다음 자정 알람을 다시 예약한다.
+                // 데이터를 불러오는 동안 프로세스가 끝나지 않도록 잠시 수신 상태를 유지한다.
+                val pendingResult = goAsync()
                 applyDateRollover(context)
                 refreshAllWidgets(context)
+                scheduleMidnightRefresh(context)
+                Handler(Looper.getMainLooper()).postDelayed({ pendingResult.finish() }, 8000)
             }
 
             ACTION_TOGGLE_DONE -> {
