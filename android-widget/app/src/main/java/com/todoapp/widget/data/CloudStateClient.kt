@@ -34,6 +34,17 @@ data class DayExtra(
         get() = "${if (kind == "subscription") "\uD83D\uDD16 " else ""}$title · $amountText"
 }
 
+/** 웹 달력 칸과 같은 간단 금액 표기: 1만 원 미만 `4,500`, 1만 원 이상 `1.5만`, 1억 이상 `1.2억` */
+fun formatCompactWon(amount: Long): String {
+    fun trimmed(v: Double): String = if (v == Math.floor(v)) v.toLong().toString() else v.toString()
+    val abs = Math.abs(amount)
+    return when {
+        abs >= 100_000_000L -> "${trimmed(Math.round(amount / 10_000_000.0) / 10.0)}억"
+        abs >= 10_000L -> "${trimmed(Math.round(amount / 1_000.0) / 10.0)}만"
+        else -> "%,d".format(amount)
+    }
+}
+
 object CloudStateClient {
     private const val STATE_API_URL = "https://todolist-liart-mu.vercel.app/api/state"
 
@@ -50,6 +61,25 @@ object CloudStateClient {
      */
     fun fetchDayExtras(date: LocalDate): List<DayExtra> {
         val state = fetchState() ?: return emptyList()
+        return dayExtrasFrom(state, date)
+    }
+
+    /**
+     * weekStart 부터 7일간 날짜별 지출 합계(가계부 지출 + 구독 결제). 웹 달력 칸의 금액과 같은 값이다.
+     * 지출이 없는 날은 담지 않으며, 네트워크 오류 시 빈 맵을 돌려준다.
+     */
+    fun fetchWeekSpend(weekStart: LocalDate): Map<String, Long> {
+        val state = fetchState() ?: return emptyMap()
+        val result = mutableMapOf<String, Long>()
+        for (offset in 0..6) {
+            val day = weekStart.plusDays(offset.toLong())
+            val spend = dayExtrasFrom(state, day).filter { it.kind != "income" }.sumOf { it.amount }
+            if (spend > 0) result[day.toString()] = spend
+        }
+        return result
+    }
+
+    private fun dayExtrasFrom(state: JSONObject, date: LocalDate): List<DayExtra> {
         val dateValue = date.toString()
         val result = mutableListOf<DayExtra>()
 

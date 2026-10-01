@@ -18,6 +18,7 @@ import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
 import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.data.applyItemOrder
+import com.todoapp.widget.data.formatCompactWon
 import com.todoapp.widget.ui.AddEditActivity
 import com.todoapp.widget.ui.TodoDetailPopupActivity
 import kotlinx.coroutines.CoroutineScope
@@ -80,6 +81,13 @@ class TodoWidgetProvider : AppWidgetProvider() {
             intArrayOf(R.id.widget_cal_dot4_0, R.id.widget_cal_dot4_1, R.id.widget_cal_dot4_2),
             intArrayOf(R.id.widget_cal_dot5_0, R.id.widget_cal_dot5_1, R.id.widget_cal_dot5_2),
             intArrayOf(R.id.widget_cal_dot6_0, R.id.widget_cal_dot6_1, R.id.widget_cal_dot6_2)
+        )
+
+        // 요일 칸 아래 지출 금액 TextView ID
+        val CAL_SPEND_IDS = intArrayOf(
+            R.id.widget_cal_spend0, R.id.widget_cal_spend1, R.id.widget_cal_spend2,
+            R.id.widget_cal_spend3, R.id.widget_cal_spend4, R.id.widget_cal_spend5,
+            R.id.widget_cal_spend6
         )
 
         private fun midnightPendingIntent(context: Context): PendingIntent {
@@ -425,6 +433,10 @@ class TodoWidgetProvider : AppWidgetProvider() {
             val total = weekItems.size
             val done = weekItems.count { it.done }
 
+            // 날짜별 지출 합계(가계부 지출 + 구독 결제): 웹 달력 칸과 같은 값
+            val spendByDay = runCatching { CloudStateClient.fetchWeekSpend(weekStart) }.getOrDefault(emptyMap())
+            val selectedSpend = spendByDay[selectedDate.format(DateTimeFormatter.ISO_LOCAL_DATE)] ?: 0L
+
             // 날짜별 카테고리 색 목록
             val dotsByDay = mutableMapOf<String, MutableList<Int>>()
             weekItems.forEach { item ->
@@ -438,7 +450,8 @@ class TodoWidgetProvider : AppWidgetProvider() {
                 setTextViewText(R.id.widget_progress, "$done/$total 완료")
                 setTextViewText(
                     R.id.widget_selected_date_header,
-                    "${selectedDate.format(selFmt)} · $selDow"
+                    "${selectedDate.format(selFmt)} · $selDow" +
+                        if (selectedSpend > 0) " · 지출 -${formatCompactWon(selectedSpend)}" else ""
                 )
 
                 setOnClickPendingIntent(R.id.widget_root, openWebPending)
@@ -463,6 +476,9 @@ class TodoWidgetProvider : AppWidgetProvider() {
                     val isSelected = day == selectedDate
 
                     setTextViewText(CAL_DAY_IDS[i], day.dayOfMonth.toString())
+
+                    val spend = spendByDay[dayStr] ?: 0L
+                    setTextViewText(CAL_SPEND_IDS[i], if (spend > 0) "-${formatCompactWon(spend)}" else "")
 
                     if (isSelected) {
                         setInt(CAL_DAY_IDS[i], "setBackgroundResource", R.drawable.bg_widget_cal_today)
