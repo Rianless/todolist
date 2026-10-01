@@ -1814,7 +1814,7 @@ body::after {
 
 ═══════════════════════════════════════ */
 
-#detailModal, #addModal, #ledgerModal, #dayModal {
+#detailModal, #addModal, #ledgerModal, #accountModal, #transferModal, #dayModal {
 
   align-items: center;
 
@@ -3679,7 +3679,37 @@ body::after {
 }
 .ledger-filter-info.show { display: flex; }
 .ledger-filter-reset { border: none; background: none; color: var(--accent); font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+
 .ledger-cat-custom { margin-top: 6px; }
+.ledger-filter-selects { margin-top: 8px; }
+.ledger-chip.transfer.active { background: #6b7280; }
+.ledger-entry-amount.transfer { color: var(--accent); }
+
+/* 통장 */
+.account-total {
+  margin: 12px 0 8px; padding: 14px 16px; border-radius: 12px; color: #fff;
+  background: linear-gradient(135deg, var(--accent), #8b5cf6);
+}
+.account-total-label { font-size: 11px; opacity: .85; }
+.account-total-val { font-size: 22px; font-weight: 800; margin-top: 2px; }
+.account-total-sub { font-size: 10px; opacity: .8; margin-top: 4px; }
+.account-row { display: flex; align-items: center; gap: 10px; padding: 11px 4px; border-bottom: 1px solid var(--border2); cursor: pointer; }
+.account-row:last-child { border-bottom: none; }
+.account-row:hover { background: rgba(99, 102, 241, .05); }
+.account-icon { width: 34px; height: 34px; border-radius: 10px; display: grid; place-items: center; background: var(--panel2); font-size: 17px; flex: none; }
+.account-info { flex: 1; min-width: 0; }
+.account-name { font-size: 13px; font-weight: 700; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-meta { font-size: 10px; color: var(--text3); margin-top: 2px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.account-balance { font-size: 14px; font-weight: 800; white-space: nowrap; }
+.account-balance.neg { color: var(--red); }
+.account-edit { background: none; border: none; color: var(--accent); font-size: 12px; cursor: pointer; padding: 0 3px; font-family: inherit; }
+.account-empty { text-align: center; padding: 18px 0 8px; font-size: 12px; color: var(--text3); }
+.account-hint { font-size: 10px; color: var(--text3); margin-top: 4px; }
+.account-error { margin: 4px 0 8px; font-size: 12px; color: var(--red); }
+.account-delete-btn {
+  width: 100%; margin-top: 6px; padding: 10px; border: 1px solid var(--red); color: var(--red);
+  background: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 12px;
+}
 /* Calendar ledger marker */
 
 .cal-ledger-bar {
@@ -6143,6 +6173,25 @@ button:active:not(:disabled) {
 
 
 
+        <!-- ── 통장 카드 ── -->
+        <div class="mp-card open" id="mpCardAccounts">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardAccounts')">
+            <span class="mp-card-icon">🏦</span>
+            <span class="mp-card-label">통장</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div id="accountTotal"></div>
+              <div id="accountList"></div>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openAccountModal();event.stopPropagation()">+ 통장 추가</button>
+                <button class="ledger-export-btn" onclick="openTransferModal();event.stopPropagation()" aria-label="통장 간 이체">이체</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── 구독 카드 ── -->
 
         <div class="mp-card open" id="mpCardSubs">
@@ -6212,7 +6261,11 @@ button:active:not(:disabled) {
                     <button type="button" class="ledger-chip active" data-type="all" onclick="setLedgerTypeFilter('all');event.stopPropagation()">전체</button>
                     <button type="button" class="ledger-chip income" data-type="income" onclick="setLedgerTypeFilter('income');event.stopPropagation()">수입</button>
                     <button type="button" class="ledger-chip expense" data-type="expense" onclick="setLedgerTypeFilter('expense');event.stopPropagation()">지출</button>
+                    <button type="button" class="ledger-chip transfer" data-type="transfer" onclick="setLedgerTypeFilter('transfer');event.stopPropagation()">이체</button>
                   </div>
+                </div>
+                <div class="ledger-filter-row ledger-filter-selects">
+                  <select class="form-select ledger-cat-filter" id="ledgerAccountFilter" aria-label="통장 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
                   <select class="form-select ledger-cat-filter" id="ledgerCatFilter" aria-label="카테고리 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
                 </div>
                 <div class="ledger-filter-info" id="ledgerFilterInfo"></div>
@@ -6854,6 +6907,14 @@ button:active:not(:disabled) {
 
         </div>
 
+        <div class="form-group" id="l_account_group" style="display:none;">
+
+          <label class="form-label">통장</label>
+
+          <select class="form-select" id="l_account"></select>
+
+        </div>
+
         <div class="form-group">
 
           <label class="form-label">금액 (원) *</label>
@@ -6979,6 +7040,94 @@ button:active:not(:disabled) {
 </div>
 
 
+
+<!-- ACCOUNT MODAL -->
+<div class="modal-overlay" id="accountModal">
+  <div class="modal-sheet add-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
+      <div class="modal-header">
+        <div class="modal-title" id="accountModalTitle">통장 추가</div>
+        <button class="modal-close" onclick="closeAccountModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">통장 이름 *</label>
+          <input class="form-input" id="a_name" type="text" maxlength="20" placeholder="예: 국민 월급통장">
+        </div>
+        <div class="form-group form-row-2">
+          <div>
+            <label class="form-label">종류</label>
+            <select class="form-select" id="a_type"></select>
+          </div>
+          <div>
+            <label class="form-label">현재 잔액 (원)</label>
+            <input class="form-input" id="a_balance" type="text" inputmode="numeric" placeholder="0" autocomplete="off" oninput="formatSignedAmount(this)">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">내역 반영 시작일</label>
+          <input class="form-input" id="a_base" type="date">
+          <div class="account-hint">이 날짜부터의 수입·지출·이체가 잔액에 반영돼요. 오늘까지의 내역만 계산해요.</div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">메모</label>
+          <input class="form-input" id="a_memo" type="text" maxlength="60" placeholder="메모 (선택)">
+        </div>
+        <button type="button" class="account-delete-btn" id="a_delete" onclick="deleteAccount()">이 통장 삭제</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeAccountModal()">취소</button>
+        <button class="btn-save" onclick="saveAccount()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
+<!-- TRANSFER MODAL -->
+<div class="modal-overlay" id="transferModal">
+  <div class="modal-sheet add-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
+      <div class="modal-header">
+        <div class="modal-title" id="transferModalTitle">통장 간 이체</div>
+        <button class="modal-close" onclick="closeTransferModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">날짜 *</label>
+          <input class="form-input" id="t_date" type="date">
+        </div>
+        <div class="form-group form-row-2">
+          <div>
+            <label class="form-label">보내는 통장 *</label>
+            <select class="form-select" id="t_from"></select>
+          </div>
+          <div>
+            <label class="form-label">받는 통장 *</label>
+            <select class="form-select" id="t_to"></select>
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">금액 (원) *</label>
+          <input class="form-input" id="t_amount" type="text" inputmode="numeric" placeholder="0" autocomplete="off" oninput="formatLedgerAmount(this)">
+        </div>
+        <div class="form-group">
+          <label class="form-label">메모</label>
+          <input class="form-input" id="t_memo" type="text" maxlength="60" placeholder="메모 (선택)">
+        </div>
+        <div class="account-error" id="t_error" style="display:none;"></div>
+        <button type="button" class="account-delete-btn" id="t_delete" onclick="deleteTransfer(editingTransferId)">이 이체 삭제</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeTransferModal()">취소</button>
+        <button class="btn-save" onclick="saveTransfer()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- TOAST CONTAINER -->
 
@@ -7376,7 +7525,11 @@ let ledgerM = new Date().getMonth();
 let ledgerType = 'expense'; // 현재 입력 유형
 
 let editingLedgerId = null;
-let ledgerFilter = { q: '', type: 'all', cat: '' };
+let ledgerFilter = { q: '', type: 'all', cat: '', account: '' };
+let accounts = [];          // { id, name, type, initialBalance, baseDate, memo }
+let accountNextId = 1;
+let transfers = [];         // { id, date, fromId, toId, amount, memo }
+let transferNextId = 1;
 const LEDGER_NO_CATEGORY = '__none';
 const LEDGER_CUSTOM_CATEGORY = '__custom';
 const LEDGER_DEFAULT_CATEGORIES = {
@@ -7452,6 +7605,14 @@ function saveData() {
 
       ledger,
 
+      accounts,
+
+      accountNextId,
+
+      transfers,
+
+      transferNextId,
+
       nextId,
 
       ledgerNextId,
@@ -7483,6 +7644,10 @@ function getCloudStatePayload() {
     categories,
     hiddenCheongdoCats,
     ledger,
+    accounts,
+    accountNextId,
+    transfers,
+    transferNextId,
     nextId,
     ledgerNextId,
     memos,
@@ -7527,7 +7692,7 @@ async function syncCloudState() {
 }
 
 function hasLocalUserData() {
-  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || accounts.length > 0;
 }
 
 function applyCloudState(payload) {
@@ -7539,15 +7704,19 @@ function applyCloudState(payload) {
   if (Array.isArray(payload.categories)) categories = payload.categories;
   if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
   if (Array.isArray(payload.ledger)) ledger = payload.ledger;
+  if (Array.isArray(payload.accounts)) accounts = payload.accounts;
+  if (Array.isArray(payload.transfers)) transfers = payload.transfers;
   if (Array.isArray(payload.memos)) memos = payload.memos;
   if (Number.isFinite(payload.nextId)) nextId = payload.nextId;
   if (Number.isFinite(payload.ledgerNextId)) ledgerNextId = payload.ledgerNextId;
+  if (Number.isFinite(payload.accountNextId)) accountNextId = payload.accountNextId;
+  if (Number.isFinite(payload.transferNextId)) transferNextId = payload.transferNextId;
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (payload.nickname) localStorage.setItem('rianless_nickname', payload.nickname);
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledger, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledger, accounts, accountNextId, transfers, transferNextId, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -7718,9 +7887,11 @@ function loadData() {
       if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
 
       if (payload.ledger)        ledger        = payload.ledger;
-
+      if (Array.isArray(payload.accounts))  accounts  = payload.accounts;
+      if (Array.isArray(payload.transfers)) transfers = payload.transfers;
+      if (payload.accountNextId)  accountNextId  = payload.accountNextId;
+      if (payload.transferNextId) transferNextId = payload.transferNextId;
       if (payload.nextId)        nextId        = payload.nextId;
-
       if (payload.ledgerNextId)  ledgerNextId  = payload.ledgerNextId;
 
       if (payload.theme) {
@@ -7978,6 +8149,7 @@ function toggleMpCard(id) {
   if (!isOpen) {
 
     if (id === 'mpCardLedger') renderLedgerCard();
+    if (id === 'mpCardAccounts') renderAccounts();
 
     if (id === 'mpCardSubs') renderSubs();
 
@@ -8122,7 +8294,7 @@ function setTab(tab, btn) {
 ══════════════════════════════════════ */
 
 function renderCategoryView() {
-
+  renderAccounts();
   renderSubs();
 
   if (document.getElementById('mpCardLedger').classList.contains('open')) renderLedgerCard();
@@ -12100,6 +12272,7 @@ function openLedger(date, forSub=false) {
 
   setLedgerType('expense');
   fillLedgerCategorySelect('expense', '');
+  fillLedgerAccountSelect(lastLedgerAccountId);
   updateLedgerSubToggle(forSub);
 
   history.pushState({modal:'ledger'}, '');
@@ -12196,6 +12369,7 @@ function editLedgerEntry(id) {
   document.getElementById('l_memo').value = entry.memo || '';
   setLedgerType(entry.type === 'income' ? 'income' : 'expense');
   fillLedgerCategorySelect(entry.type === 'income' ? 'income' : 'expense', entry.category || '');
+  fillLedgerAccountSelect(entry.accountId);
   document.getElementById('ledgerModal').classList.add('open');
   history.pushState({modal:'ledger'}, '');
 }
@@ -12252,10 +12426,10 @@ function saveLedger() {
     title: document.getElementById('l_title').value.trim() || (ledgerType==='income'?'수입':'지출'),
 
     category: getLedgerCategoryValue(),
-
-    memo: document.getElementById('l_memo').value.trim()
-
+    memo: document.getElementById('l_memo').value.trim(),
+    accountId: document.getElementById('l_account').value ? Number(document.getElementById('l_account').value) : null
   };
+  if (entry.accountId !== null && editingLedgerId === null) rememberLedgerAccount(entry.accountId);
 
   if (editingLedgerId !== null) {
     const index = ledger.findIndex(e => e.id === editingLedgerId);
@@ -12304,8 +12478,8 @@ function ledgerMonthMove(d) {
   if (ledgerM < 0) { ledgerM = 11; ledgerY--; }
 
   if (ledgerM > 11) { ledgerM = 0; ledgerY++; }
-
   renderLedgerCard();
+  renderAccounts();
 
 }
 
@@ -12330,8 +12504,10 @@ function renderLedgerCard() {
   const income  = monthEntries.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
   const expense = monthEntries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
   const balance = income - expense;
+  const monthTransfers = transfers.filter(t => t.date && t.date.startsWith(monthStr));
   const entries = monthEntries.filter(ledgerMatchesFilter);
-  renderLedgerFilterBar(monthEntries, entries);
+  const shownTransfers = monthTransfers.filter(transferMatchesFilter);
+  renderLedgerFilterBar(monthEntries, entries, shownTransfers, monthTransfers);
 
 
 
@@ -12367,8 +12543,8 @@ function renderLedgerCard() {
 
 
 
-  if (!entries.length) {
-    const filtered = ledgerFilterActive() && monthEntries.length > 0;
+  if (!entries.length && !shownTransfers.length) {
+    const filtered = ledgerFilterActive() && (monthEntries.length > 0 || monthTransfers.length > 0);
     document.getElementById('ledgerList').innerHTML =
       `<div style="text-align:center;padding:20px 0;font-size:11px;color:var(--text3);">${filtered ? '조건에 맞는 내역이 없습니다' : (isDark?'// NO_RECORDS':'내역이 없습니다')}</div>`;
     return;
@@ -12376,7 +12552,9 @@ function renderLedgerCard() {
 
 
 
-  document.getElementById('ledgerList').innerHTML = entries.map(e => {
+  document.getElementById('ledgerList').innerHTML = ledgerRows(entries, shownTransfers).map(row => {
+    if (row.transfer) return transferRowHtml(row.transfer);
+    const e = row.entry;
 
     const d = e.date.slice(5); // MM-DD
 
@@ -12390,7 +12568,7 @@ function renderLedgerCard() {
 
         <div class="ledger-entry-title">${escapeLedgerText(e.title)}</div>
 
-        ${e.category?`<div class="ledger-entry-cat">${escapeLedgerText(e.category)}</div>`:''}
+        ${ledgerEntryMeta(e)}
 
       </div>
 
@@ -12408,28 +12586,62 @@ function renderLedgerCard() {
 
 /* ── 검색 · 필터 ── */
 function ledgerFilterActive() {
-  return !!(ledgerFilter.q || ledgerFilter.type !== 'all' || ledgerFilter.cat);
+  return !!(ledgerFilter.q || ledgerFilter.type !== 'all' || ledgerFilter.cat || ledgerFilter.account);
+}
+
+function accountName(id) {
+  if (id === null || id === undefined || id === '') return '';
+  const acc = accounts.find(a => a.id === Number(id));
+  return acc ? acc.name : '';
+}
+
+function ledgerSearchHit(text, amount) {
+  const q = ledgerFilter.q.toLowerCase();
+  if (!q) return true;
+  const digits = q.replace(/[^\d]/g, '');
+  return text.toLowerCase().includes(q) || !!(digits && String(amount).includes(digits));
 }
 
 function ledgerMatchesFilter(e) {
+  if (ledgerFilter.type === 'transfer') return false;
   if (ledgerFilter.type !== 'all' && e.type !== ledgerFilter.type) return false;
+  if (ledgerFilter.account === 'none') { if (e.accountId != null) return false; }
+  else if (ledgerFilter.account && String(e.accountId) !== ledgerFilter.account) return false;
   if (ledgerFilter.cat === LEDGER_NO_CATEGORY) { if (e.category) return false; }
   else if (ledgerFilter.cat && e.category !== ledgerFilter.cat) return false;
-  const q = ledgerFilter.q.toLowerCase();
-  if (q) {
-    const text = [e.title, e.category, e.memo].join('\n').toLowerCase();
-    const digits = q.replace(/[^\d]/g, '');
-    const amountHit = digits && String(e.amount).includes(digits);
-    if (!text.includes(q) && !amountHit) return false;
-  }
-  return true;
+  return ledgerSearchHit([e.title, e.category, e.memo, accountName(e.accountId)].join('\n'), e.amount);
 }
 
-function renderLedgerFilterBar(monthEntries, shown) {
-  // 유형 칩
+function transferMatchesFilter(t) {
+  if (ledgerFilter.type !== 'all' && ledgerFilter.type !== 'transfer') return false;
+  if (ledgerFilter.cat || ledgerFilter.account === 'none') return false;
+  if (ledgerFilter.account && String(t.fromId) !== ledgerFilter.account && String(t.toId) !== ledgerFilter.account) return false;
+  return ledgerSearchHit(['이체', t.memo, accountName(t.fromId), accountName(t.toId)].join('\n'), t.amount);
+}
+
+function renderLedgerFilterBar(monthEntries, shownEntries, shownTransfers, monthTransfers) {
+  // 유형 칩 (이체 칩은 통장이 2개 이상이거나 이체 내역이 있을 때만)
   document.querySelectorAll('#ledgerTypeChips .ledger-chip').forEach(btn => {
     btn.classList.toggle('active', btn.dataset.type === ledgerFilter.type);
+    if (btn.dataset.type === 'transfer') btn.hidden = !(accounts.length >= 2 || transfers.length > 0);
   });
+  const addOption = (sel, value, label) => {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = label;
+    sel.appendChild(o);
+  };
+  // 통장 선택 (통장이 있을 때만 보임)
+  const accSel = document.getElementById('ledgerAccountFilter');
+  const hasNoAccount = monthEntries.some(e => e.accountId == null);
+  if (ledgerFilter.account && ledgerFilter.account !== 'none' && !accounts.some(a => String(a.id) === ledgerFilter.account)) ledgerFilter.account = '';
+  accSel.textContent = '';
+  addOption(accSel, '', '모든 통장');
+  accounts.forEach(a => addOption(accSel, String(a.id), a.name));
+  if (accounts.length && hasNoAccount) addOption(accSel, 'none', '통장 없음');
+  if (ledgerFilter.account === 'none' && !(accounts.length && hasNoAccount)) ledgerFilter.account = '';
+  accSel.value = ledgerFilter.account;
+  accSel.style.display = accounts.length ? '' : 'none';
   // 카테고리 선택: 이번 달 내역에 있는 카테고리만 (많이 쓴 순)
   const counts = new Map();
   let hasNone = false;
@@ -12441,27 +12653,22 @@ function renderLedgerFilterBar(monthEntries, shown) {
   if (ledgerFilter.cat && ledgerFilter.cat !== LEDGER_NO_CATEGORY && !counts.has(ledgerFilter.cat)) ledgerFilter.cat = '';
   if (ledgerFilter.cat === LEDGER_NO_CATEGORY && !hasNone) ledgerFilter.cat = '';
   sel.textContent = '';
-  const addOption = (value, label) => {
-    const o = document.createElement('option');
-    o.value = value;
-    o.textContent = label;
-    sel.appendChild(o);
-  };
-  addOption('', '모든 카테고리');
+  addOption(sel, '', '모든 카테고리');
   [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
-    .forEach(([name, n]) => addOption(name, `${name} (${n})`));
-  if (hasNone) addOption(LEDGER_NO_CATEGORY, '카테고리 없음');
+    .forEach(([name, n]) => addOption(sel, name, `${name} (${n})`));
+  if (hasNone) addOption(sel, LEDGER_NO_CATEGORY, '카테고리 없음');
   sel.value = ledgerFilter.cat;
   // 결과 요약
   const info = document.getElementById('ledgerFilterInfo');
   info.textContent = '';
   if (ledgerFilterActive()) {
-    const inc = shown.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
-    const exp = shown.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    const inc = shownEntries.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    const exp = shownEntries.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
     const text = document.createElement('span');
-    const parts = [`${shown.length}건`];
+    const parts = [`${shownEntries.length + shownTransfers.length}건`];
     if (inc) parts.push(`수입 +${inc.toLocaleString()}`);
     if (exp) parts.push(`지출 -${exp.toLocaleString()}`);
+    if (shownTransfers.length) parts.push(`이체 ${shownTransfers.length}건`);
     text.textContent = parts.join(' · ');
     const reset = document.createElement('button');
     reset.type = 'button';
@@ -12478,6 +12685,7 @@ function renderLedgerFilterBar(monthEntries, shown) {
 function onLedgerFilterChange() {
   ledgerFilter.q = document.getElementById('ledgerSearch').value.trim();
   ledgerFilter.cat = document.getElementById('ledgerCatFilter').value;
+  ledgerFilter.account = document.getElementById('ledgerAccountFilter').value;
   renderLedgerCard();
 }
 
@@ -12487,9 +12695,46 @@ function setLedgerTypeFilter(type) {
 }
 
 function resetLedgerFilter() {
-  ledgerFilter = { q: '', type: 'all', cat: '' };
+  ledgerFilter = { q: '', type: 'all', cat: '', account: '' };
   document.getElementById('ledgerSearch').value = '';
   renderLedgerCard();
+}
+
+// 통장 카드에서 통장을 누르면 그 통장의 내역만 보여준다
+function filterLedgerByAccount(id) {
+  ledgerFilter = { q: '', type: 'all', cat: '', account: String(id) };
+  document.getElementById('ledgerSearch').value = '';
+  const card = document.getElementById('mpCardLedger');
+  card.classList.add('open');
+  renderLedgerCard();
+  card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function ledgerRows(entries, trs) {
+  return [
+    ...entries.map(entry => ({ entry, date: entry.date, id: entry.id })),
+    ...trs.map(transfer => ({ transfer, date: transfer.date, id: transfer.id }))
+  ].sort((a, b) => b.date.localeCompare(a.date) || (b.id - a.id));
+}
+
+function ledgerEntryMeta(e) {
+  const parts = [e.category, accountName(e.accountId)].filter(Boolean);
+  return parts.length ? `<div class="ledger-entry-cat">${escapeLedgerText(parts.join(' · '))}</div>` : '';
+}
+
+function transferRowHtml(t) {
+  const from = accountName(t.fromId) || '삭제된 통장';
+  const to = accountName(t.toId) || '삭제된 통장';
+  return `<div class="ledger-entry transfer">
+      <div class="ledger-entry-date">${t.date.slice(5)}</div>
+      <div class="ledger-entry-info">
+        <div class="ledger-entry-title">이체 · ${escapeLedgerText(from)} → ${escapeLedgerText(to)}</div>
+        ${t.memo ? `<div class="ledger-entry-cat">${escapeLedgerText(t.memo)}</div>` : ''}
+      </div>
+      <div class="ledger-entry-amount transfer">${t.amount.toLocaleString()}원</div>
+      <button class="ledger-entry-edit" onclick="openTransferModal(${t.id});event.stopPropagation()" aria-label="이체 수정">수정</button>
+      <button class="ledger-entry-del" onclick="deleteTransfer(${t.id});event.stopPropagation()" aria-label="이체 삭제">✕</button>
+    </div>`;
 }
 
 /* ── 추가/수정 팝업의 카테고리 선택 ── */
@@ -12538,6 +12783,303 @@ function getLedgerCategoryValue() {
     : selected;
 }
 
+/* ══════════════════════════════════════
+   통장 ACCOUNTS
+══════════════════════════════════════ */
+const ACCOUNT_TYPES = ['입출금', '저축', '현금', '투자', '기타'];
+const ACCOUNT_ICONS = { '입출금': '🏦', '저축': '🐖', '현금': '💵', '투자': '📈', '기타': '💳' };
+let editingAccountId = null;
+let editingTransferId = null;
+let lastLedgerAccountId = null;
+try {
+  const savedAccount = localStorage.getItem('rianless_ledger_account');
+  if (savedAccount) lastLedgerAccountId = Number(savedAccount);
+} catch (e) { /* 저장소를 못 쓰면 기본값 사용 */ }
+
+function rememberLedgerAccount(id) {
+  lastLedgerAccountId = id;
+  try { localStorage.setItem('rianless_ledger_account', String(id)); } catch (e) { /* 무시 */ }
+}
+
+function formatSignedAmount(input) {
+  const negative = input.value.trim().startsWith('-');
+  const digits = input.value.replace(/[^\d]/g, '').replace(/^0+(?=\d)/, '');
+  input.value = (negative ? '-' : '') + (digits ? Number(digits).toLocaleString('ko-KR') : '');
+}
+
+function parseSignedAmount(value) {
+  const negative = String(value || '').trim().startsWith('-');
+  const n = Number(String(value || '').replace(/[^\d]/g, ''));
+  return negative ? -n : n;
+}
+
+// baseDate 이상, upTo 이하 날짜의 수입·지출·이체 합계 (이 통장의 잔액 변화)
+function accountNet(id, baseDate, upTo) {
+  let net = 0;
+  ledger.forEach(e => {
+    if (e.accountId !== id || !e.date || e.date < baseDate || e.date > upTo) return;
+    net += e.type === 'income' ? e.amount : -e.amount;
+  });
+  transfers.forEach(t => {
+    if (!t.date || t.date < baseDate || t.date > upTo) return;
+    if (t.toId === id) net += t.amount;
+    if (t.fromId === id) net -= t.amount;
+  });
+  return net;
+}
+
+function accountBalance(acc) {
+  return (Number(acc.initialBalance) || 0) + accountNet(acc.id, acc.baseDate || '0000-01-01', fmtDate(new Date()));
+}
+
+function accountMonthStats(acc) {
+  const monthStr = `${ledgerY}-${String(ledgerM + 1).padStart(2, '0')}`;
+  let income = 0, expense = 0;
+  ledger.forEach(e => {
+    if (e.accountId !== acc.id || !e.date || !e.date.startsWith(monthStr)) return;
+    if (e.type === 'income') income += e.amount; else expense += e.amount;
+  });
+  return { income, expense };
+}
+
+function renderAccounts() {
+  const totalEl = document.getElementById('accountTotal');
+  const listEl = document.getElementById('accountList');
+  if (!totalEl || !listEl) return;
+  totalEl.textContent = '';
+  listEl.textContent = '';
+  if (!accounts.length) {
+    totalEl.className = '';
+    const empty = document.createElement('div');
+    empty.className = 'account-empty';
+    empty.textContent = '통장을 추가하면 잔액을 한눈에 관리할 수 있어요';
+    listEl.appendChild(empty);
+    return;
+  }
+  const balances = accounts.map(a => accountBalance(a));
+  const total = balances.reduce((s, v) => s + v, 0);
+  totalEl.className = 'account-total';
+  const label = document.createElement('div');
+  label.className = 'account-total-label';
+  label.textContent = '총 자산';
+  const val = document.createElement('div');
+  val.className = 'account-total-val';
+  val.textContent = `${total.toLocaleString()}원`;
+  const sub = document.createElement('div');
+  sub.className = 'account-total-sub';
+  sub.textContent = `통장 ${accounts.length}개 · 오늘까지의 내역 기준`;
+  totalEl.append(label, val, sub);
+
+  accounts.forEach((acc, i) => {
+    const row = document.createElement('div');
+    row.className = 'account-row';
+    row.onclick = () => filterLedgerByAccount(acc.id);
+    const icon = document.createElement('div');
+    icon.className = 'account-icon';
+    icon.textContent = ACCOUNT_ICONS[acc.type] || ACCOUNT_ICONS['기타'];
+    const info = document.createElement('div');
+    info.className = 'account-info';
+    const name = document.createElement('div');
+    name.className = 'account-name';
+    name.textContent = acc.name;
+    const stats = accountMonthStats(acc);
+    const meta = document.createElement('div');
+    meta.className = 'account-meta';
+    const parts = [acc.type || '기타', `${ledgerM + 1}월 +${stats.income.toLocaleString()} -${stats.expense.toLocaleString()}`];
+    if (acc.memo) parts.push(acc.memo);
+    meta.textContent = parts.join(' · ');
+    info.append(name, meta);
+    const bal = document.createElement('div');
+    bal.className = 'account-balance' + (balances[i] < 0 ? ' neg' : '');
+    bal.textContent = `${balances[i].toLocaleString()}원`;
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'account-edit';
+    edit.textContent = '수정';
+    edit.setAttribute('aria-label', `${acc.name} 수정`);
+    edit.onclick = ev => { ev.stopPropagation(); openAccountModal(acc.id); };
+    row.append(icon, info, bal, edit);
+    listEl.appendChild(row);
+  });
+}
+
+function openAccountModal(id) {
+  const acc = id !== undefined && id !== null ? accounts.find(a => a.id === id) : null;
+  editingAccountId = acc ? acc.id : null;
+  const typeSel = document.getElementById('a_type');
+  typeSel.textContent = '';
+  ACCOUNT_TYPES.forEach(t => {
+    const o = document.createElement('option');
+    o.value = t;
+    o.textContent = t;
+    typeSel.appendChild(o);
+  });
+  document.getElementById('accountModalTitle').textContent = acc ? '통장 수정' : '통장 추가';
+  document.getElementById('a_name').value = acc ? acc.name : '';
+  typeSel.value = acc ? (acc.type || '기타') : '입출금';
+  document.getElementById('a_balance').value = acc ? accountBalance(acc).toLocaleString('ko-KR') : '';
+  document.getElementById('a_base').value = acc ? (acc.baseDate || fmtDate(new Date())) : fmtDate(new Date());
+  document.getElementById('a_memo').value = acc ? (acc.memo || '') : '';
+  document.getElementById('a_delete').style.display = acc ? '' : 'none';
+  history.pushState({modal:'account'}, '');
+  document.getElementById('accountModal').classList.add('open');
+  setTimeout(() => document.getElementById('a_name').focus(), 200);
+}
+
+function closeAccountModal() { document.getElementById('accountModal').classList.remove('open'); }
+
+function saveAccount() {
+  const nameInput = document.getElementById('a_name');
+  const name = nameInput.value.trim();
+  if (!name) {
+    nameInput.classList.add('form-error');
+    setTimeout(() => nameInput.classList.remove('form-error'), 1500);
+    return;
+  }
+  const today = fmtDate(new Date());
+  const typed = parseSignedAmount(document.getElementById('a_balance').value);   // 사용자가 입력한 "현재 잔액"
+  const baseDate = document.getElementById('a_base').value || today;
+  const fields = {
+    name,
+    type: document.getElementById('a_type').value,
+    baseDate,
+    memo: document.getElementById('a_memo').value.trim()
+  };
+  const wasEditing = editingAccountId !== null;
+  if (wasEditing) {
+    const acc = accounts.find(a => a.id === editingAccountId);
+    if (acc) {
+      // 입력한 현재 잔액이 되도록 시작 잔액을 맞춘다 (시작일 이후 내역은 그대로 반영)
+      Object.assign(acc, fields, { initialBalance: typed - accountNet(acc.id, baseDate, today) });
+    }
+  } else {
+    accounts.push({ id: accountNextId++, ...fields, initialBalance: typed });
+  }
+  editingAccountId = null;
+  closeAccountModal();
+  saveData();
+  renderCategoryView();
+  showToast(wasEditing ? '통장을 수정했습니다' : '통장을 추가했습니다', { type: 'success', duration: 1800 });
+}
+
+async function deleteAccount() {
+  const acc = accounts.find(a => a.id === editingAccountId);
+  if (!acc) return;
+  const entryCount = ledger.filter(e => e.accountId === acc.id).length;
+  const transferCount = transfers.filter(t => t.fromId === acc.id || t.toId === acc.id).length;
+  const msg = [`'${acc.name}' 통장을 삭제할까요?`,
+    entryCount ? `이 통장으로 기록한 내역 ${entryCount}건은 '통장 없음'으로 바뀌어요.` : '',
+    transferCount ? `이 통장이 들어간 이체 ${transferCount}건은 삭제되고, 상대 통장의 잔액도 함께 바뀌어요.` : ''].filter(Boolean).join(' ');
+  const ok = await customConfirm(msg, { danger: true, okLabel: '삭제' });
+  if (!ok) return;
+  ledger.forEach(e => { if (e.accountId === acc.id) e.accountId = null; });
+  transfers = transfers.filter(t => t.fromId !== acc.id && t.toId !== acc.id);
+  accounts = accounts.filter(a => a.id !== acc.id);
+  if (ledgerFilter.account === String(acc.id)) ledgerFilter.account = '';
+  if (lastLedgerAccountId === acc.id) lastLedgerAccountId = null;
+  editingAccountId = null;
+  closeAccountModal();
+  saveData();
+  renderCategoryView();
+  showToast('통장을 삭제했습니다', { type: 'info', duration: 1800 });
+}
+
+function fillLedgerAccountSelect(current) {
+  const group = document.getElementById('l_account_group');
+  const sel = document.getElementById('l_account');
+  sel.textContent = '';
+  group.style.display = accounts.length ? '' : 'none';
+  const none = document.createElement('option');
+  none.value = '';
+  none.textContent = '통장 선택 안 함';
+  sel.appendChild(none);
+  accounts.forEach(a => {
+    const o = document.createElement('option');
+    o.value = String(a.id);
+    o.textContent = a.name;
+    sel.appendChild(o);
+  });
+  const exists = current !== null && current !== undefined && accounts.some(a => a.id === Number(current));
+  sel.value = exists ? String(current) : '';
+}
+
+function fillAccountSelect(sel, selectedId) {
+  sel.textContent = '';
+  accounts.forEach(a => {
+    const o = document.createElement('option');
+    o.value = String(a.id);
+    o.textContent = a.name;
+    sel.appendChild(o);
+  });
+  sel.value = String(selectedId);
+}
+
+function openTransferModal(id) {
+  if (accounts.length < 2) {
+    showToast('이체하려면 통장이 2개 이상 필요해요', { type: 'info', duration: 2200 });
+    return;
+  }
+  const tr = id !== undefined && id !== null ? transfers.find(t => t.id === id) : null;
+  editingTransferId = tr ? tr.id : null;
+  document.getElementById('transferModalTitle').textContent = tr ? '이체 수정' : '통장 간 이체';
+  document.getElementById('t_date').value = tr ? tr.date : fmtDate(new Date());
+  const fromId = tr && accounts.some(a => a.id === tr.fromId) ? tr.fromId : accounts[0].id;
+  const toId = tr && accounts.some(a => a.id === tr.toId) ? tr.toId : (accounts.find(a => a.id !== fromId) || accounts[1]).id;
+  fillAccountSelect(document.getElementById('t_from'), fromId);
+  fillAccountSelect(document.getElementById('t_to'), toId);
+  document.getElementById('t_amount').value = tr ? tr.amount.toLocaleString('ko-KR') : '';
+  document.getElementById('t_memo').value = tr ? (tr.memo || '') : '';
+  showTransferError('');
+  document.getElementById('t_delete').style.display = tr ? '' : 'none';
+  history.pushState({modal:'transfer'}, '');
+  document.getElementById('transferModal').classList.add('open');
+  setTimeout(() => document.getElementById('t_amount').focus(), 200);
+}
+
+function closeTransferModal() { document.getElementById('transferModal').classList.remove('open'); }
+
+function showTransferError(msg) {
+  const el = document.getElementById('t_error');
+  el.textContent = msg;
+  el.style.display = msg ? '' : 'none';
+}
+
+function saveTransfer() {
+  const amount = parseLedgerAmount(document.getElementById('t_amount').value);
+  const fromId = Number(document.getElementById('t_from').value);
+  const toId = Number(document.getElementById('t_to').value);
+  const date = document.getElementById('t_date').value;
+  if (!date) return showTransferError('날짜를 선택해 주세요.');
+  if (fromId === toId) return showTransferError('보내는 통장과 받는 통장이 같아요.');
+  if (!amount || amount <= 0) return showTransferError('금액을 입력해 주세요.');
+  const fields = { date, fromId, toId, amount, memo: document.getElementById('t_memo').value.trim() };
+  const wasEditing = editingTransferId !== null;
+  if (wasEditing) {
+    const index = transfers.findIndex(t => t.id === editingTransferId);
+    if (index > -1) transfers[index] = { ...transfers[index], ...fields };
+  } else {
+    transfers.push({ id: transferNextId++, ...fields });
+  }
+  editingTransferId = null;
+  closeTransferModal();
+  saveData();
+  renderCategoryView();
+  showToast(wasEditing ? '이체를 수정했습니다' : '이체를 저장했습니다', { type: 'success', duration: 1800 });
+}
+
+async function deleteTransfer(id) {
+  const tr = transfers.find(t => t.id === id);
+  if (!tr) return;
+  const ok = await customConfirm(`이 이체(${tr.amount.toLocaleString()}원)를 삭제할까요? 두 통장의 잔액이 함께 바뀌어요.`, { danger: true, okLabel: '삭제' });
+  if (!ok) return;
+  transfers = transfers.filter(t => t.id !== id);
+  editingTransferId = null;
+  closeTransferModal();
+  saveData();
+  renderCategoryView();
+  showToast('이체를 삭제했습니다', { type: 'info', duration: 1600 });
+}
+
 function exportLedgerCSV() {
   const mm = String(ledgerM + 1).padStart(2, '0');
   const monthStr = `${ledgerY}-${mm}`;
@@ -12552,8 +13094,8 @@ function exportLedgerCSV() {
 
   const csvCell = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
   const csv = [
-    ['날짜', '유형', '항목명', '카테고리', '금액', '메모'],
-    ...rows.map(e => [e.date, e.type === 'income' ? '수입' : '지출', e.title, e.category, e.amount, e.memo])
+    ['날짜', '유형', '항목명', '카테고리', '금액', '메모', '통장'],
+    ...rows.map(e => [e.date, e.type === 'income' ? '수입' : '지출', e.title, e.category, e.amount, e.memo, accountName(e.accountId)])
   ].map(row => row.map(csvCell).join(',')).join('\r\n');
 
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
