@@ -5941,6 +5941,20 @@ button:active:not(:disabled) {
   .cal-agenda { box-shadow: 3px 3px 0 color-mix(in srgb, var(--border2) 65%, transparent) !important; }
 }
 
+
+/* PC 레이아웃: 가계부 탭과 마이페이지 탭은 내용이 길면 이 영역 안에서 스크롤 */
+@media (min-width: 900px) {
+  #mainContent > #viewCategory.active,
+  #mainContent > #viewMypage.active {
+    overflow-y: auto;
+    padding-bottom: 32px;
+    scrollbar-width: thin;
+  }
+  #viewCategory::-webkit-scrollbar,
+  #viewMypage::-webkit-scrollbar { width: 6px; }
+  #viewCategory::-webkit-scrollbar-thumb,
+  #viewMypage::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
+}
 </style>
 
 </head>
