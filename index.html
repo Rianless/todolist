@@ -3660,8 +3660,26 @@ body::after {
 
 [data-theme="light"] .ledger-type-btn { font-family: 'Noto Sans KR',sans-serif; letter-spacing: 0; font-size: 13px; }
 
-
-
+/* 가계부 검색 · 필터 */
+.ledger-filter { margin: 12px 0 6px; }
+.ledger-search { width: 100%; margin-bottom: 8px; }
+.ledger-filter-row { display: flex; gap: 8px; align-items: center; }
+.ledger-chips { display: flex; flex: none; border: 1px solid var(--border2); overflow: hidden; border-radius: 8px; }
+.ledger-chip {
+  padding: 7px 12px; border: none; background: none; cursor: pointer; color: var(--text3);
+  font-family: inherit; font-size: 12px; font-weight: 600; white-space: nowrap;
+}
+.ledger-chip.active { background: var(--accent); color: #fff; }
+.ledger-chip.income.active { background: var(--green); }
+.ledger-chip.expense.active { background: var(--red); }
+.ledger-cat-filter { flex: 1; min-width: 0; height: 34px; padding: 0 8px; font-size: 12px; }
+.ledger-filter-info {
+  display: none; align-items: center; justify-content: space-between; gap: 8px;
+  margin-top: 8px; font-size: 11px; color: var(--text2);
+}
+.ledger-filter-info.show { display: flex; }
+.ledger-filter-reset { border: none; background: none; color: var(--accent); font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
+.ledger-cat-custom { margin-top: 6px; }
 /* Calendar ledger marker */
 
 .cal-ledger-bar {
@@ -6187,6 +6205,19 @@ button:active:not(:disabled) {
 
               <div class="ledger-summary" id="ledgerSummary"></div>
 
+              <div class="ledger-filter" id="ledgerFilter">
+                <input class="form-input ledger-search" id="ledgerSearch" type="search" placeholder="항목 · 카테고리 · 메모 · 금액 검색" aria-label="가계부 검색" oninput="onLedgerFilterChange()" onclick="event.stopPropagation()">
+                <div class="ledger-filter-row">
+                  <div class="ledger-chips" id="ledgerTypeChips">
+                    <button type="button" class="ledger-chip active" data-type="all" onclick="setLedgerTypeFilter('all');event.stopPropagation()">전체</button>
+                    <button type="button" class="ledger-chip income" data-type="income" onclick="setLedgerTypeFilter('income');event.stopPropagation()">수입</button>
+                    <button type="button" class="ledger-chip expense" data-type="expense" onclick="setLedgerTypeFilter('expense');event.stopPropagation()">지출</button>
+                  </div>
+                  <select class="form-select ledger-cat-filter" id="ledgerCatFilter" aria-label="카테고리 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
+                </div>
+                <div class="ledger-filter-info" id="ledgerFilterInfo"></div>
+              </div>
+
               <div id="ledgerList"></div>
 
               <div class="ledger-actions">
@@ -6843,7 +6874,9 @@ button:active:not(:disabled) {
 
           <label class="form-label">카테고리</label>
 
-          <input class="form-input" id="l_cat" type="text" placeholder="식비, 교통, 급여...">
+          <select class="form-select" id="l_cat_select" onchange="onLedgerCatChange()"></select>
+
+          <input class="form-input ledger-cat-custom" id="l_cat" type="text" placeholder="카테고리 직접 입력" maxlength="20" style="display:none;">
 
         </div>
 
@@ -7343,7 +7376,13 @@ let ledgerM = new Date().getMonth();
 let ledgerType = 'expense'; // 현재 입력 유형
 
 let editingLedgerId = null;
-
+let ledgerFilter = { q: '', type: 'all', cat: '' };
+const LEDGER_NO_CATEGORY = '__none';
+const LEDGER_CUSTOM_CATEGORY = '__custom';
+const LEDGER_DEFAULT_CATEGORIES = {
+  expense: ['식비', '교통', '쇼핑', '생활', '주거', '통신', '의료', '문화/여가', '교육', '기타'],
+  income: ['급여', '용돈', '부수입', '이자', '기타']
+};
 let calWeekOffset = 0;      // 주 뷰 오프셋 (week탭용)
 
 let selectedCatColor = '#ff6ef7';
@@ -12060,7 +12099,7 @@ function openLedger(date, forSub=false) {
   document.getElementById('ledgerSubToggleArea').style.display = '';
 
   setLedgerType('expense');
-
+  fillLedgerCategorySelect('expense', '');
   updateLedgerSubToggle(forSub);
 
   history.pushState({modal:'ledger'}, '');
@@ -12118,8 +12157,13 @@ function closeLedger() { document.getElementById('ledgerModal').classList.remove
 
 
 function setLedgerType(type) {
-
+  const changed = ledgerType !== type;
   ledgerType = type;
+  // 수입/지출을 바꾸면 그 유형의 카테고리 목록으로 바꾸되, 같은 이름이 있으면 선택을 유지한다
+  if (changed) {
+    const keep = getLedgerCategoryValue();
+    fillLedgerCategorySelect(type, ledgerCategoryList(type, '').includes(keep) ? keep : '');
+  }
 
   document.getElementById('lTypeIncome').classList.toggle('active', type==='income');
 
@@ -12148,9 +12192,10 @@ function editLedgerEntry(id) {
   document.getElementById('l_date').value = entry.date || fmtDate(new Date());
   document.getElementById('l_amount').value = Number(entry.amount || 0).toLocaleString('ko-KR');
   document.getElementById('l_title').value = entry.title || '';
-  document.getElementById('l_cat').value = entry.category || '';
+  document.getElementById('l_cat').value = '';
   document.getElementById('l_memo').value = entry.memo || '';
   setLedgerType(entry.type === 'income' ? 'income' : 'expense');
+  fillLedgerCategorySelect(entry.type === 'income' ? 'income' : 'expense', entry.category || '');
   document.getElementById('ledgerModal').classList.add('open');
   history.pushState({modal:'ledger'}, '');
 }
@@ -12206,7 +12251,7 @@ function saveLedger() {
 
     title: document.getElementById('l_title').value.trim() || (ledgerType==='income'?'수입':'지출'),
 
-    category: document.getElementById('l_cat').value.trim(),
+    category: getLedgerCategoryValue(),
 
     memo: document.getElementById('l_memo').value.trim()
 
@@ -12280,17 +12325,13 @@ function renderLedgerCard() {
 
   const monthStr = `${ledgerY}-${mm}`;
 
-  const entries  = ledger.filter(e => e.date && e.date.startsWith(monthStr))
-
-                         .sort((a,b) => b.date.localeCompare(a.date));
-
-
-
-  const income  = entries.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
-
-  const expense = entries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
-
+  const monthEntries = ledger.filter(e => e.date && e.date.startsWith(monthStr))
+                             .sort((a,b) => b.date.localeCompare(a.date) || (b.id - a.id));
+  const income  = monthEntries.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
+  const expense = monthEntries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
   const balance = income - expense;
+  const entries = monthEntries.filter(ledgerMatchesFilter);
+  renderLedgerFilterBar(monthEntries, entries);
 
 
 
@@ -12327,13 +12368,10 @@ function renderLedgerCard() {
 
 
   if (!entries.length) {
-
+    const filtered = ledgerFilterActive() && monthEntries.length > 0;
     document.getElementById('ledgerList').innerHTML =
-
-      `<div style="text-align:center;padding:20px 0;font-size:11px;color:var(--text3);">${isDark?'// NO_RECORDS':'내역이 없습니다'}</div>`;
-
+      `<div style="text-align:center;padding:20px 0;font-size:11px;color:var(--text3);">${filtered ? '조건에 맞는 내역이 없습니다' : (isDark?'// NO_RECORDS':'내역이 없습니다')}</div>`;
     return;
-
   }
 
 
@@ -12366,6 +12404,138 @@ function renderLedgerCard() {
 
   }).join('');
 
+}
+
+/* ── 검색 · 필터 ── */
+function ledgerFilterActive() {
+  return !!(ledgerFilter.q || ledgerFilter.type !== 'all' || ledgerFilter.cat);
+}
+
+function ledgerMatchesFilter(e) {
+  if (ledgerFilter.type !== 'all' && e.type !== ledgerFilter.type) return false;
+  if (ledgerFilter.cat === LEDGER_NO_CATEGORY) { if (e.category) return false; }
+  else if (ledgerFilter.cat && e.category !== ledgerFilter.cat) return false;
+  const q = ledgerFilter.q.toLowerCase();
+  if (q) {
+    const text = [e.title, e.category, e.memo].join('\n').toLowerCase();
+    const digits = q.replace(/[^\d]/g, '');
+    const amountHit = digits && String(e.amount).includes(digits);
+    if (!text.includes(q) && !amountHit) return false;
+  }
+  return true;
+}
+
+function renderLedgerFilterBar(monthEntries, shown) {
+  // 유형 칩
+  document.querySelectorAll('#ledgerTypeChips .ledger-chip').forEach(btn => {
+    btn.classList.toggle('active', btn.dataset.type === ledgerFilter.type);
+  });
+  // 카테고리 선택: 이번 달 내역에 있는 카테고리만 (많이 쓴 순)
+  const counts = new Map();
+  let hasNone = false;
+  monthEntries.forEach(e => {
+    if (e.category) counts.set(e.category, (counts.get(e.category) || 0) + 1);
+    else hasNone = true;
+  });
+  const sel = document.getElementById('ledgerCatFilter');
+  if (ledgerFilter.cat && ledgerFilter.cat !== LEDGER_NO_CATEGORY && !counts.has(ledgerFilter.cat)) ledgerFilter.cat = '';
+  if (ledgerFilter.cat === LEDGER_NO_CATEGORY && !hasNone) ledgerFilter.cat = '';
+  sel.textContent = '';
+  const addOption = (value, label) => {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = label;
+    sel.appendChild(o);
+  };
+  addOption('', '모든 카테고리');
+  [...counts.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0]))
+    .forEach(([name, n]) => addOption(name, `${name} (${n})`));
+  if (hasNone) addOption(LEDGER_NO_CATEGORY, '카테고리 없음');
+  sel.value = ledgerFilter.cat;
+  // 결과 요약
+  const info = document.getElementById('ledgerFilterInfo');
+  info.textContent = '';
+  if (ledgerFilterActive()) {
+    const inc = shown.filter(e => e.type === 'income').reduce((s, e) => s + e.amount, 0);
+    const exp = shown.filter(e => e.type === 'expense').reduce((s, e) => s + e.amount, 0);
+    const text = document.createElement('span');
+    const parts = [`${shown.length}건`];
+    if (inc) parts.push(`수입 +${inc.toLocaleString()}`);
+    if (exp) parts.push(`지출 -${exp.toLocaleString()}`);
+    text.textContent = parts.join(' · ');
+    const reset = document.createElement('button');
+    reset.type = 'button';
+    reset.className = 'ledger-filter-reset';
+    reset.textContent = '초기화';
+    reset.onclick = e => { e.stopPropagation(); resetLedgerFilter(); };
+    info.append(text, reset);
+    info.classList.add('show');
+  } else {
+    info.classList.remove('show');
+  }
+}
+
+function onLedgerFilterChange() {
+  ledgerFilter.q = document.getElementById('ledgerSearch').value.trim();
+  ledgerFilter.cat = document.getElementById('ledgerCatFilter').value;
+  renderLedgerCard();
+}
+
+function setLedgerTypeFilter(type) {
+  ledgerFilter.type = type;
+  renderLedgerCard();
+}
+
+function resetLedgerFilter() {
+  ledgerFilter = { q: '', type: 'all', cat: '' };
+  document.getElementById('ledgerSearch').value = '';
+  renderLedgerCard();
+}
+
+/* ── 추가/수정 팝업의 카테고리 선택 ── */
+function ledgerCategoryList(type, current) {
+  const defaults = LEDGER_DEFAULT_CATEGORIES[type] || [];
+  const used = new Map();
+  ledger.forEach(e => {
+    if (e.type === type && e.category && !defaults.includes(e.category)) used.set(e.category, (used.get(e.category) || 0) + 1);
+  });
+  const custom = [...used.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
+  const list = [...defaults, ...custom];
+  if (current && !list.includes(current)) list.push(current);
+  return list;
+}
+
+function fillLedgerCategorySelect(type, current) {
+  const sel = document.getElementById('l_cat_select');
+  sel.textContent = '';
+  const addOption = (value, label) => {
+    const o = document.createElement('option');
+    o.value = value;
+    o.textContent = label;
+    sel.appendChild(o);
+  };
+  addOption('', '선택 안 함');
+  const list = ledgerCategoryList(type, current);
+  list.forEach(name => addOption(name, name));
+  addOption(LEDGER_CUSTOM_CATEGORY, '직접 입력…');
+  sel.value = current && list.includes(current) ? current : '';
+  const custom = document.getElementById('l_cat');
+  custom.value = '';
+  custom.style.display = 'none';
+}
+
+function onLedgerCatChange() {
+  const custom = document.getElementById('l_cat');
+  const isCustom = document.getElementById('l_cat_select').value === LEDGER_CUSTOM_CATEGORY;
+  custom.style.display = isCustom ? '' : 'none';
+  if (isCustom) custom.focus();
+}
+
+function getLedgerCategoryValue() {
+  const selected = document.getElementById('l_cat_select').value;
+  return selected === LEDGER_CUSTOM_CATEGORY
+    ? document.getElementById('l_cat').value.trim()
+    : selected;
 }
 
 function exportLedgerCSV() {
