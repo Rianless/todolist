@@ -3683,7 +3683,29 @@ body::after {
 .ledger-cat-custom { margin-top: 6px; }
 .ledger-filter-selects { margin-top: 8px; }
 .ledger-chip.transfer.active { background: #6b7280; }
+
 .ledger-entry-amount.transfer { color: var(--accent); }
+
+/* 가계부 목록: 날짜별 묶음 머리글 + 그날 합계 */
+.ledger-day-head {
+  display: flex; justify-content: space-between; align-items: baseline; gap: 8px;
+  padding: 12px 4px 6px; border-bottom: 1px solid var(--border2);
+  font-size: 11px; font-weight: 700; color: var(--text2);
+}
+.ledger-day-head:first-child { padding-top: 4px; }
+.ledger-day-totals { display: flex; gap: 8px; font-weight: 800; white-space: nowrap; }
+.ledger-day-exp { color: var(--red); }
+.ledger-day-inc { color: var(--green); }
+
+/* 선택한 날 패널: 그날 지출 합계 */
+.agenda-money {
+  display: flex; flex-wrap: wrap; align-items: baseline; gap: 2px 12px;
+  margin: 10px 0 2px; padding: 10px 12px; border-radius: 10px;
+  background: rgba(228, 95, 104, .07); font-size: 12px;
+}
+.agenda-money-exp { font-weight: 800; color: var(--red); }
+.agenda-money-inc { font-weight: 700; color: var(--green); }
+.agenda-money-sub { flex-basis: 100%; font-size: 10px; color: var(--text3); }
 
 /* 통장 */
 .account-total {
@@ -9488,6 +9510,34 @@ function renderCalDayList(ds, dayEvents) {
   actions.append(addSchedule, addLedger);
   container.appendChild(actions);
 
+  // 그날 지출 합계 (구독 결제 포함) / 수입
+  const ledgerExpense = dayLedger.filter(e => e.type === 'expense').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  const subExpense = daySubs.reduce((sum, sub) => sum + Number(sub.amount || 0), 0);
+  const dayIncome = dayLedger.filter(e => e.type === 'income').reduce((sum, e) => sum + Number(e.amount || 0), 0);
+  if (ledgerExpense || subExpense || dayIncome) {
+    const money = document.createElement('div');
+    money.className = 'agenda-money';
+    if (ledgerExpense || subExpense) {
+      const exp = document.createElement('span');
+      exp.className = 'agenda-money-exp';
+      exp.textContent = `지출 -${(ledgerExpense + subExpense).toLocaleString()}원`;
+      money.appendChild(exp);
+    }
+    if (dayIncome) {
+      const inc = document.createElement('span');
+      inc.className = 'agenda-money-inc';
+      inc.textContent = `수입 +${dayIncome.toLocaleString()}원`;
+      money.appendChild(inc);
+    }
+    if (ledgerExpense && subExpense) {
+      const detail = document.createElement('span');
+      detail.className = 'agenda-money-sub';
+      detail.textContent = `가계부 -${ledgerExpense.toLocaleString()}원 · 구독 -${subExpense.toLocaleString()}원`;
+      money.appendChild(detail);
+    }
+    container.appendChild(money);
+  }
+
   if (!dayItems.length && !dayLedger.length && !daySubs.length) {
     const empty = document.createElement('div');
     empty.className = 'agenda-empty';
@@ -12566,16 +12616,18 @@ function renderLedgerCard() {
 
 
 
+  let lastRowDate = null;
   document.getElementById('ledgerList').innerHTML = ledgerRows(entries, shownTransfers).map(row => {
-    if (row.transfer) return transferRowHtml(row.transfer);
+    const head = row.date !== lastRowDate ? ledgerDayHead(row.date, entries) : '';
+    lastRowDate = row.date;
+    if (row.transfer) return head + transferRowHtml(row.transfer);
     const e = row.entry;
 
     const d = e.date.slice(5); // MM-DD
 
     const sign = e.type === 'income' ? '+' : '-';
 
-    return `<div class="ledger-entry">
-
+    return head + `<div class="ledger-entry">
       <div class="ledger-entry-date">${d}</div>
 
       <div class="ledger-entry-info">
@@ -12722,6 +12774,20 @@ function filterLedgerByAccount(id) {
   card.classList.add('open');
   renderLedgerCard();
   card.scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 날짜 머리글: 보이는 내역 기준으로 그날 지출·수입 합계 (이체는 합계에서 제외)
+function ledgerDayHead(date, shownEntries) {
+  const day = shownEntries.filter(e => e.date === date);
+  const expense = day.filter(e => e.type === 'expense').reduce((sum, e) => sum + e.amount, 0);
+  const income = day.filter(e => e.type === 'income').reduce((sum, e) => sum + e.amount, 0);
+  const d = new Date(date + 'T00:00:00');
+  const label = `${d.getMonth() + 1}월 ${d.getDate()}일 (${DOW_KO[d.getDay()]})`;
+  const totals = [
+    expense ? `<span class="ledger-day-exp">지출 -${expense.toLocaleString()}원</span>` : '',
+    income ? `<span class="ledger-day-inc">수입 +${income.toLocaleString()}원</span>` : ''
+  ].join('');
+  return `<div class="ledger-day-head"><span>${label}</span><span class="ledger-day-totals">${totals}</span></div>`;
 }
 
 function ledgerRows(entries, trs) {
