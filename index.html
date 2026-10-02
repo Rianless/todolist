@@ -5987,6 +5987,18 @@ button:active:not(:disabled) {
   #viewCategory::-webkit-scrollbar-thumb,
   #viewMypage::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 3px; }
 }
+
+/* 선택한 날 패널: 일정 순서 바꾸기 */
+.agenda-row.reorderable { grid-template-columns: 18px 43px minmax(0,1fr) auto; gap: 8px; }
+.agenda-handle {
+  display: block; padding: 8px 0; border-radius: 6px; text-align: center; user-select: none;
+  color: var(--text3); font-size: 14px; line-height: 1; letter-spacing: -3px; cursor: grab; touch-action: none;
+}
+.agenda-handle:hover, .agenda-handle:focus-visible { color: var(--accent); background: var(--panel); outline: none; }
+.agenda-list.reordering .agenda-row:not(.dragging) { transition: transform .15s ease; }
+.agenda-row.dragging { position: relative; z-index: 1; box-shadow: 0 8px 24px rgba(31, 36, 48, .22); }
+.agenda-row.dragging .agenda-handle { cursor: grabbing; color: var(--accent); }
+.agenda-row[role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 </style>
 
 </head>
@@ -7576,6 +7588,7 @@ let accounts = [];          // { id, name, type, initialBalance, baseDate, memo 
 let accountNextId = 1;
 let transfers = [];         // { id, date, fromId, toId, amount, memo }
 let transferNextId = 1;
+let itemOrder = {};        // { 'YYYY-MM-DD': [일정 id, ...] } 사용자가 정한 하루 일정 순서
 const LEDGER_NO_CATEGORY = '__none';
 const LEDGER_CUSTOM_CATEGORY = '__custom';
 const LEDGER_DEFAULT_CATEGORIES = {
@@ -7658,9 +7671,8 @@ function saveData() {
       transfers,
 
       transferNextId,
-
+      itemOrder,
       nextId,
-
       ledgerNextId,
 
       theme: document.documentElement.getAttribute('data-theme') || 'dark'
@@ -7694,6 +7706,7 @@ function getCloudStatePayload() {
     accountNextId,
     transfers,
     transferNextId,
+    itemOrder,
     nextId,
     ledgerNextId,
     memos,
@@ -7752,6 +7765,7 @@ function applyCloudState(payload) {
   if (Array.isArray(payload.ledger)) ledger = payload.ledger;
   if (Array.isArray(payload.accounts)) accounts = payload.accounts;
   if (Array.isArray(payload.transfers)) transfers = payload.transfers;
+  if (payload.itemOrder && typeof payload.itemOrder === 'object' && !Array.isArray(payload.itemOrder)) itemOrder = payload.itemOrder;
   if (Array.isArray(payload.memos)) memos = payload.memos;
   if (Number.isFinite(payload.nextId)) nextId = payload.nextId;
   if (Number.isFinite(payload.ledgerNextId)) ledgerNextId = payload.ledgerNextId;
@@ -7762,7 +7776,7 @@ function applyCloudState(payload) {
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledger, accounts, accountNextId, transfers, transferNextId, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledger, accounts, accountNextId, transfers, transferNextId, itemOrder, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -7937,6 +7951,7 @@ function loadData() {
       if (Array.isArray(payload.transfers)) transfers = payload.transfers;
       if (payload.accountNextId)  accountNextId  = payload.accountNextId;
       if (payload.transferNextId) transferNextId = payload.transferNextId;
+      if (payload.itemOrder && typeof payload.itemOrder === 'object' && !Array.isArray(payload.itemOrder)) itemOrder = payload.itemOrder;
       if (payload.nextId)        nextId        = payload.nextId;
       if (payload.ledgerNextId)  ledgerNextId  = payload.ledgerNextId;
 
@@ -8674,7 +8689,7 @@ function renderList() {
 
     el.appendChild(div);
 
-    byDate[dateKey].forEach(item => el.appendChild(makeCard(item)));
+    applyDayOrder(dateKey, byDate[dateKey]).forEach(item => el.appendChild(makeCard(item)));
 
   });
 
@@ -9278,6 +9293,9 @@ function renderCal() {
 
 
 
+  // 사용자가 정한 하루 일정 순서를 칸의 일정 표시에도 적용
+  Object.keys(dmap).forEach(d => { dmap[d] = applyDayOrder(d, dmap[d]); });
+
   // 가계부 ledger dmap (달 내 항목만)
 
   const lmap = {};
@@ -9487,6 +9505,113 @@ function renderCal() {
 
 }
 
+// 사용자가 정한 순서를 적용한다. 정한 순서에 없는 일정(새로 생긴 일정)은 원래 순서 그대로 뒤에 붙는다.
+function applyDayOrder(ds, list) {
+  const order = itemOrder[ds];
+  if (!Array.isArray(order) || !order.length) return list;
+  const position = new Map();
+  order.forEach((id, index) => { const key = String(id); if (!position.has(key)) position.set(key, index); });
+  const known = list.filter(it => position.has(String(it.id)))
+    .sort((a, b) => position.get(String(a.id)) - position.get(String(b.id)));
+  const unknown = list.filter(it => !position.has(String(it.id)));
+  return [...known, ...unknown];
+}
+
+function setDayOrder(ds, ids) {
+  itemOrder[ds] = ids;
+  saveData();
+}
+
+// 선택한 날 패널의 일정 줄에 손잡이를 달아 순서를 바꿀 수 있게 한다.
+// 마우스/터치로 끌거나, 손잡이에 포커스를 두고 방향키 ↑↓로 옮긴다.
+function wireAgendaReorder(list, ds, dayItems) {
+  const idByKey = new Map(dayItems.map(it => [String(it.id), it.id]));
+  const todoRows = () => [...list.children].filter(el => el.classList.contains('agenda-row') && el.dataset.itemId !== undefined);
+  const commit = (focusKey) => {
+    setDayOrder(ds, todoRows().map(row => idByKey.get(row.dataset.itemId)));
+    renderCal();   // 달력 칸의 일정 순서와 패널을 함께 다시 그린다
+    if (focusKey !== undefined) {
+      const handle = document.querySelector(`#calDayList .agenda-row[data-item-id="${focusKey}"] .agenda-handle`);
+      if (handle) handle.focus();
+    }
+  };
+
+  todoRows().forEach(row => {
+    row.classList.add('reorderable');
+    const handle = document.createElement('span');
+    handle.className = 'agenda-handle';
+    handle.textContent = '⋮⋮';
+    handle.tabIndex = 0;
+    handle.setAttribute('role', 'button');
+    handle.setAttribute('aria-label', '순서 바꾸기 (끌거나 위아래 방향키)');
+    handle.title = '끌어서 순서 바꾸기';
+    row.prepend(handle);
+    handle.addEventListener('click', e => e.stopPropagation());
+
+    handle.addEventListener('keydown', e => {
+      if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+      e.preventDefault();
+      e.stopPropagation();
+      const sibling = e.key === 'ArrowUp' ? row.previousElementSibling : row.nextElementSibling;
+      if (!sibling || sibling.dataset.itemId === undefined) return;
+      if (e.key === 'ArrowUp') list.insertBefore(row, sibling); else sibling.after(row);
+      commit(row.dataset.itemId);
+    });
+
+    handle.addEventListener('pointerdown', e => {
+      if (e.button !== undefined && e.button !== 0) return;
+      e.preventDefault();
+      e.stopPropagation();
+      try { handle.setPointerCapture(e.pointerId); } catch (err) { /* 일부 환경에서는 지원하지 않는다 */ }
+
+      // 끄는 동안에는 줄을 DOM 에서 옮기지 않고(옮기면 포인터 추적이 끊긴다) transform 으로만 보여 준다.
+      // 손을 떼는 순간 새 순서를 한 번에 저장한다.
+      const rows = todoRows();
+      const from = rows.indexOf(row);
+      const boxes = rows.map(r => r.getBoundingClientRect());
+      const centers = boxes.map(box => box.top + box.height / 2);
+      const gap = rows.length > 1 ? Math.max(0, boxes[1].top - boxes[0].bottom) : 0;
+      const shift = boxes[from].height + gap;
+      const startY = e.clientY;
+      let to = from;
+      list.classList.add('reordering');
+      row.classList.add('dragging');
+
+      const onMove = ev => {
+        const dy = ev.clientY - startY;
+        row.style.transform = `translateY(${dy}px)`;
+        const draggedCenter = centers[from] + dy;
+        to = centers.filter((c, i) => i !== from && c < draggedCenter).length;
+        rows.forEach((r, i) => {
+          if (r === row) return;
+          let offset = 0;
+          if (from < to && i > from && i <= to) offset = -shift;
+          else if (to < from && i >= to && i < from) offset = shift;
+          r.style.transform = offset ? `translateY(${offset}px)` : '';
+        });
+      };
+      const onEnd = () => {
+        handle.removeEventListener('pointermove', onMove);
+        handle.removeEventListener('pointerup', onEnd);
+        handle.removeEventListener('pointercancel', onEnd);
+        rows.forEach(r => { r.style.transform = ''; });
+        row.classList.remove('dragging');
+        list.classList.remove('reordering');
+        if (to !== from) {
+          const ids = rows.map(r => idByKey.get(r.dataset.itemId));
+          const [moved] = ids.splice(from, 1);
+          ids.splice(to, 0, moved);
+          setDayOrder(ds, ids);
+          renderCal();
+        }
+      };
+      handle.addEventListener('pointermove', onMove);
+      handle.addEventListener('pointerup', onEnd);
+      handle.addEventListener('pointercancel', onEnd);
+    });
+  });
+}
+
 // 칸 높이에 다 들어가지 않으면 일정 줄을 줄이고 "+n"으로 바꾼다 (지출 줄이 일정을 가리지 않게)
 function fitCalCells(grid) {
   grid.querySelectorAll('.cal-cell:not(.empty)').forEach(cell => {
@@ -9517,9 +9642,9 @@ function renderCalDayList(ds, dayEvents) {
 
   const date = new Date(ds + 'T00:00:00');
   const allDayEvents = dayEvents || items.filter(item => item.date === ds);
-  const dayItems = allDayEvents
+  const dayItems = applyDayOrder(ds, allDayEvents
     .filter(item => !item.isSub)
-    .sort((a, b) => String(a.time || '').localeCompare(String(b.time || '')));
+    .sort((a, b) => String(a.time || '').localeCompare(String(b.time || ''))));
   const daySubs = allDayEvents.filter(item => item.isSub);
   const dayLedger = ledger.filter(entry => entry.date === ds);
 
@@ -9594,8 +9719,11 @@ function renderCalDayList(ds, dayEvents) {
   list.className = 'agenda-list';
 
   dayItems.forEach(item => {
-    const row = document.createElement('button');
-    row.type = 'button';
+    // 안에 손잡이(순서 바꾸기)를 넣을 수 있게 button 대신 role=button 인 div 를 쓴다
+    const row = document.createElement('div');
+    row.setAttribute('role', 'button');
+    row.tabIndex = 0;
+    row.dataset.itemId = String(item.id);
     row.className = 'agenda-row';
     row.style.setProperty('--agenda-color', getCatColor(item.category));
     const time = document.createElement('span');
@@ -9613,8 +9741,12 @@ function renderCalDayList(ds, dayEvents) {
     arrow.textContent = '›';
     row.append(time, body, arrow);
     row.onclick = () => openDetail(item.id);
+    row.onkeydown = e => {
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); openDetail(item.id); }
+    };
     list.appendChild(row);
   });
+  if (dayItems.length > 1) wireAgendaReorder(list, ds, dayItems);
 
   dayLedger.forEach(entry => {
     const row = document.createElement('button');
@@ -12282,7 +12414,7 @@ function renderWeekDayList(dmap) {
 
   const selDs  = weekSelectedDate;
 
-  const tasks  = (dmap[selDs] || []).sort((a,b)=>(a.time||'').localeCompare(b.time||''));
+  const tasks  = applyDayOrder(selDs, (dmap[selDs] || []).sort((a,b)=>(a.time||'').localeCompare(b.time||'')));
 
   const selDate = new Date(selDs + 'T00:00:00');
 

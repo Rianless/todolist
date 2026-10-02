@@ -17,6 +17,10 @@ const web = new Function('fmtDate', `
   ${grab('generateRepeatInstances', 'function toggleAlldayMode')}
   return { getSubDatesForMonth, generateRepeatInstances };
 `)(fmtDate);
+const webApplyDayOrder = new Function('itemOrder', `
+  ${grab('applyDayOrder', 'function setDayOrder')}
+  return applyDayOrder;
+`);
 
 let checked = 0;
 
@@ -68,4 +72,26 @@ assert.strictEqual(day.ledger.length, 1);
 assert.strictEqual(day.subs[0].name, '유튜브');
 assert.strictEqual(day.subs[0].amount, 14900);
 
-console.log(`OK (${checked} date checks)`);
+// 5) 일정 순서: 웹앱의 applyDayOrder 와 같은 결과 (무작위 시나리오 비교)
+let orderChecks = 0;
+let seed = 12345;
+const rand = n => { seed = (seed * 1103515245 + 12345) & 0x7fffffff; return seed % n; };
+for (let round = 0; round < 500; round++) {
+  const ids = Array.from({ length: rand(7) + 1 }, (_, i) => i + 1).sort(() => rand(3) - 1);
+  const list = ids.map(id => ({ id }));
+  const saved = Array.from({ length: rand(8) }, () => rand(9) + 1);   // 중복·삭제된 id·없는 id 가 섞일 수 있다
+  const expected = webApplyDayOrder({ '2026-10-02': saved })('2026-10-02', list).map(t => t.id);
+  const actual = L.applyDayOrder(saved, list).map(t => t.id);
+  assert.deepStrictEqual(actual, expected, `order ${JSON.stringify(saved)} ${JSON.stringify(ids)}`);
+  orderChecks++;
+}
+assert.deepStrictEqual(L.applyDayOrder(undefined, [{ id: 1 }, { id: 2 }]).map(t => t.id), [1, 2]);
+assert.deepStrictEqual(L.applyDayOrder([], [{ id: 1 }, { id: 2 }]).map(t => t.id), [1, 2]);
+
+// 6) buildDay 가 저장된 순서를 따른다 (시간순 A, B 인데 정한 순서는 B, A)
+const orderedState = { ...state, itemOrder: { '2026-09-26': [1, 2] } };
+const ordered = L.buildDay(todos, orderedState, '2026-09-26');
+assert.deepStrictEqual(ordered.todos.map(t => t.title), ['B', 'A']);
+assert.deepStrictEqual(L.buildDay(todos, state, '2026-09-26').todos.map(t => t.title), ['A', 'B']);
+
+console.log(`OK (${checked} date checks, ${orderChecks} order checks)`);

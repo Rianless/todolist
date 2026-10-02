@@ -94,11 +94,26 @@
     return '';
   }
 
+  // 웹앱에서 사용자가 정한 하루 일정 순서를 적용한다. (index.html 의 applyDayOrder 와 같은 규칙)
+  // 정한 순서에 없는 일정(새로 생긴 일정)은 원래 순서 그대로 뒤에 붙는다.
+  function applyDayOrder(order, list) {
+    if (!Array.isArray(order) || !order.length) return list;
+    const position = new Map();
+    order.forEach((id, index) => { const key = String(id); if (!position.has(key)) position.set(key, index); });
+    const known = list.filter(t => position.has(String(t.id)))
+      .sort((a, b) => position.get(String(a.id)) - position.get(String(b.id)));
+    const unknown = list.filter(t => !position.has(String(t.id)));
+    return [...known, ...unknown];
+  }
+
   // 하루치 항목: 일정(반복 포함) + 가계부 + 구독 (웹앱의 "오늘의 일정"과 같은 구성)
   function buildDay(todos, state, ds) {
-    const dayTodos = todos
-      .filter(t => t.date === ds || repeatOccursOn(t, ds))
-      .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''));
+    const dayTodos = applyDayOrder(
+      state && state.itemOrder ? state.itemOrder[ds] : null,
+      todos
+        .filter(t => t.date === ds || repeatOccursOn(t, ds))
+        .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
+    );
 
     const ledger = ((state && state.ledger) || [])
       .filter(e => e.date === ds)
@@ -145,7 +160,7 @@
 
   const Logic = {
     DOW_KO, CYCLE_LABEL, fmtDate, parseDate, getSubDatesForMonth, subscriptionOccursOn,
-    repeatOccursOn, normalizeTodo, timeLabel, buildDay, weekDots, weekStartOf
+    repeatOccursOn, normalizeTodo, timeLabel, applyDayOrder, buildDay, weekDots, weekStartOf
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Logic;
