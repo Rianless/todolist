@@ -1814,7 +1814,7 @@ body::after {
 
 ═══════════════════════════════════════ */
 
-#detailModal, #addModal, #ledgerModal, #accountModal, #transferModal, #dayModal {
+#detailModal, #addModal, #ledgerModal, #accountModal, #transferModal, #inboxModal, #dayModal {
 
   align-items: center;
 
@@ -5999,6 +5999,24 @@ button:active:not(:disabled) {
 .agenda-row.dragging { position: relative; z-index: 1; box-shadow: 0 8px 24px rgba(31, 36, 48, .22); }
 .agenda-row.dragging .agenda-handle { cursor: grabbing; color: var(--accent); }
 .agenda-row[role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* 자동 감지된 결제 (확인 대기함) */
+.inbox-banner {
+  display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  margin: 0 0 12px; padding: 13px 16px; border-radius: 14px; cursor: pointer;
+  background: rgba(99, 102, 241, .1); color: var(--accent); font-size: 13px; font-weight: 700;
+}
+.inbox-banner:hover { background: rgba(99, 102, 241, .16); }
+.inbox-card { padding: 12px; margin-bottom: 10px; border: 1px solid var(--border2); border-radius: 12px; background: var(--panel2); }
+.inbox-card-top { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.inbox-amount { font-size: 15px; font-weight: 800; color: var(--red); white-space: nowrap; }
+.inbox-meta { margin: 2px 0 8px; font-size: 10px; color: var(--text3); }
+.inbox-fields { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin-bottom: 8px; }
+.inbox-fields .form-input, .inbox-fields .form-select { width: 100%; }
+.inbox-title-input { grid-column: 1 / -1; }
+.inbox-actions { display: flex; gap: 6px; justify-content: flex-end; }
+.inbox-actions button { padding: 7px 14px; border-radius: 8px; font-family: inherit; font-size: 12px; font-weight: 700; cursor: pointer; border: 1px solid var(--border2); background: var(--panel); color: var(--text2); }
+.inbox-actions .inbox-add { background: var(--accent); border-color: var(--accent); color: #fff; }
+.inbox-empty { text-align: center; padding: 24px 0; font-size: 12px; color: var(--text3); }
 </style>
 
 </head>
@@ -6230,6 +6248,12 @@ button:active:not(:disabled) {
       <div class="mypage-cards">
 
 
+
+        <!-- ── 자동 감지된 결제 (폰 위젯 앱이 보낸 것) ── -->
+        <div class="inbox-banner" id="inboxBanner" style="display:none;" onclick="openInboxModal()" role="button" tabindex="0">
+          <span id="inboxBannerText"></span>
+          <span>확인하기 ›</span>
+        </div>
 
         <!-- ── 통장 카드 ── -->
         <div class="mp-card" id="mpCardAccounts">
@@ -7187,6 +7211,28 @@ button:active:not(:disabled) {
   </div>
 </div>
 
+<!-- INBOX MODAL: 자동 감지된 결제 확인 -->
+<div class="modal-overlay" id="inboxModal">
+  <div class="modal-sheet add-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
+      <div class="modal-header">
+        <div class="modal-title">자동 감지된 결제</div>
+        <button class="modal-close" onclick="closeInboxModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="account-hint" style="margin:0 0 10px;">폰에서 결제 알림을 읽어 모아 둔 내역이에요. 확인하고 가계부에 추가하거나 무시할 수 있어요.</div>
+        <div id="inboxList"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeInboxModal()">닫기</button>
+        <button class="btn-save" id="inboxAddAll" onclick="approveAllPayments()">모두 추가</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- TOAST CONTAINER -->
 
 <div id="toastContainer" aria-live="polite" aria-atomic="true"></div>
@@ -7589,6 +7635,10 @@ let accountNextId = 1;
 let transfers = [];         // { id, date, fromId, toId, amount, memo }
 let transferNextId = 1;
 let itemOrder = {};        // { 'YYYY-MM-DD': [일정 id, ...] } 사용자가 정한 하루 일정 순서
+const INBOX_API_URL = '/api/inbox';
+let pendingPayments = [];   // 폰이 감지해 서버 받은편지함에 모아 둔, 아직 확인하지 않은 결제
+let inboxBusy = false;
+let inboxPollTimer = null;
 const LEDGER_NO_CATEGORY = '__none';
 const LEDGER_CUSTOM_CATEGORY = '__custom';
 const LEDGER_DEFAULT_CATEGORIES = {
@@ -13336,6 +13386,265 @@ async function deleteTransfer(id) {
   showToast('이체를 삭제했습니다', { type: 'info', duration: 1600 });
 }
 
+/* ══════════════════════════════════════
+   자동 감지된 결제 (폰 → 서버 받은편지함 → 확인 대기함)
+══════════════════════════════════════ */
+const INBOX_IGNORED_KEY = 'rianless_inbox_ignored';
+
+function loadIgnoredUids() {
+  try { return new Set(JSON.parse(localStorage.getItem(INBOX_IGNORED_KEY) || '[]')); } catch (e) { return new Set(); }
+}
+
+function rememberIgnoredUid(uid) {
+  try {
+    const set = loadIgnoredUids();
+    set.add(uid);
+    localStorage.setItem(INBOX_IGNORED_KEY, JSON.stringify([...set].slice(-300)));
+  } catch (e) { /* 저장소를 못 써도 서버에서 지워지면 문제없다 */ }
+}
+
+// 가맹점 이름으로 지출 카테고리를 추측한다. (확인 대기함에서 바꿀 수 있다)
+const INBOX_CATEGORY_HINTS = [
+  ['식비', ['스타벅스', '커피', '카페', '투썸', '이디야', '메가mgc', '메가커피', '컴포즈', '빽다방', '맥도날드', '버거', '롯데리아', '치킨', '피자', '식당', '분식', '국밥', '김밥', '배달의민족', '배민', '요기요', '쿠팡이츠', 'gs25', 'cu', '세븐일레븐', '이마트24', '편의점', '마트', '베이커리', '파리바게뜨', '뚜레쥬르']],
+  ['교통', ['택시', '카카오t', '지하철', '버스', '티머니', '코레일', 'ktx', 'srt', '주유', '칼텍스', 'sk에너지', 's-oil', '주차']],
+  ['쇼핑', ['쿠팡', '11번가', 'g마켓', '옥션', '무신사', '올리브영', '다이소', '네이버쇼핑']],
+  ['의료', ['병원', '의원', '약국', '치과', '한의원']],
+  ['문화/여가', ['cgv', '메가박스', '롯데시네마', '넷플릭스', '영화', '노래방', 'pc방', '공연']],
+  ['통신', ['skt', 'lg u+', 'lgu+', '통신']],
+  ['주거', ['관리비', '월세']]
+];
+
+function guessPaymentCategory(merchant) {
+  const text = String(merchant || '').toLowerCase();
+  for (const [category, words] of INBOX_CATEGORY_HINTS) {
+    if (words.some(w => text.includes(w))) return category;
+  }
+  return '';
+}
+
+async function removeInboxEntry(uid) {
+  try {
+    const res = await fetch(`${INBOX_API_URL}?uid=${encodeURIComponent(uid)}`, { method: 'DELETE' });
+    return res.ok;
+  } catch (e) {
+    return false;
+  }
+}
+
+function renderInboxBanner() {
+  const banner = document.getElementById('inboxBanner');
+  if (!banner) return;
+  banner.style.display = pendingPayments.length ? '' : 'none';
+  document.getElementById('inboxBannerText').textContent = `📥 자동 감지된 결제 ${pendingPayments.length}건`;
+}
+
+// 서버 받은편지함을 가져온다. 서버 상태를 먼저 불러온 뒤에만 동작한다.
+// (그 전에 가계부를 바꿔 저장하면 서버의 기존 가계부를 덮어쓸 수 있기 때문)
+async function loadInbox() {
+  if (!cloudStateLoaded || inboxBusy) return;
+  inboxBusy = true;
+  try {
+    const res = await fetch(INBOX_API_URL, { cache: 'no-store' });
+    if (!res.ok) return;
+    const list = await res.json();
+    if (!Array.isArray(list)) return;
+    const known = new Set(ledger.map(e => e.externalId).filter(Boolean));
+    const ignored = loadIgnoredUids();
+    const fresh = [];
+    for (const entry of list) {
+      if (!entry || typeof entry.uid !== 'string') continue;
+      if (known.has(entry.uid) || ignored.has(entry.uid)) {
+        removeInboxEntry(entry.uid);   // 이미 처리됐는데 서버에서 못 지운 것은 지우기만 한다
+      } else {
+        fresh.push(entry);
+      }
+    }
+    const before = pendingPayments.length;
+    pendingPayments = fresh;
+    renderInboxBanner();
+    if (document.getElementById('inboxModal').classList.contains('open')) syncInboxCards();
+    if (fresh.length > before) showToast(`📥 자동 감지된 결제 ${fresh.length}건을 확인해 주세요`, { type: 'info', duration: 2600 });
+  } catch (e) {
+    /* 오프라인이거나 서버에 받은편지함이 없으면 조용히 넘어간다 */
+  } finally {
+    inboxBusy = false;
+  }
+}
+
+function startInboxPolling() {
+  loadInbox();
+  window.addEventListener('focus', loadInbox);
+  document.addEventListener('visibilitychange', () => { if (!document.hidden) loadInbox(); });
+  clearInterval(inboxPollTimer);
+  inboxPollTimer = setInterval(() => { if (!document.hidden) loadInbox(); }, 60 * 1000);
+}
+
+function openInboxModal() {
+  renderInboxList();
+  history.pushState({modal:'inbox'}, '');
+  document.getElementById('inboxModal').classList.add('open');
+}
+
+function closeInboxModal() { document.getElementById('inboxModal').classList.remove('open'); }
+
+function inboxCardValues(uid) {
+  const card = document.querySelector(`.inbox-card[data-uid="${uid}"]`);
+  if (!card) return null;
+  const account = card.querySelector('.inbox-account');
+  return {
+    title: card.querySelector('.inbox-title-input').value.trim(),
+    category: card.querySelector('.inbox-category').value,
+    accountId: account && account.value ? Number(account.value) : null
+  };
+}
+
+function buildInboxCard(p, categories) {
+  const card = document.createElement('div');
+  card.className = 'inbox-card';
+  card.dataset.uid = p.uid;
+
+  const top = document.createElement('div');
+  top.className = 'inbox-card-top';
+  const when = document.createElement('div');
+  when.className = 'inbox-meta';
+  when.textContent = [p.date, p.time, p.source].filter(Boolean).join(' · ');
+  const amount = document.createElement('div');
+  amount.className = 'inbox-amount';
+  amount.textContent = `-${Number(p.amount || 0).toLocaleString()}원`;
+  top.append(when, amount);
+
+  const fields = document.createElement('div');
+  fields.className = 'inbox-fields';
+  const title = document.createElement('input');
+  title.className = 'form-input inbox-title-input';
+  title.type = 'text';
+  title.maxLength = 60;
+  title.value = p.merchant || '결제';
+  title.setAttribute('aria-label', '항목명');
+  const cat = document.createElement('select');
+  cat.className = 'form-select inbox-category';
+  cat.setAttribute('aria-label', '카테고리');
+  const none = document.createElement('option');
+  none.value = '';
+  none.textContent = '카테고리 없음';
+  cat.appendChild(none);
+  categories.forEach(name => {
+    const o = document.createElement('option');
+    o.value = name;
+    o.textContent = name;
+    cat.appendChild(o);
+  });
+  const guessed = guessPaymentCategory(p.merchant);
+  cat.value = categories.includes(guessed) ? guessed : '';
+  fields.append(title, cat);
+  if (accounts.length) {
+    const acc = document.createElement('select');
+    acc.className = 'form-select inbox-account';
+    acc.setAttribute('aria-label', '통장');
+    const noAcc = document.createElement('option');
+    noAcc.value = '';
+    noAcc.textContent = '통장 선택 안 함';
+    acc.appendChild(noAcc);
+    accounts.forEach(a => {
+      const o = document.createElement('option');
+      o.value = String(a.id);
+      o.textContent = a.name;
+      acc.appendChild(o);
+    });
+    acc.value = lastLedgerAccountId !== null && accounts.some(a => a.id === lastLedgerAccountId) ? String(lastLedgerAccountId) : '';
+    fields.appendChild(acc);
+  }
+
+  const actions = document.createElement('div');
+  actions.className = 'inbox-actions';
+  const ignore = document.createElement('button');
+  ignore.type = 'button';
+  ignore.textContent = '무시';
+  ignore.onclick = () => ignorePayment(p.uid);
+  const add = document.createElement('button');
+  add.type = 'button';
+  add.className = 'inbox-add';
+  add.textContent = '추가';
+  add.onclick = () => approvePayments([p.uid]);
+  actions.append(ignore, add);
+
+  card.append(top, fields, actions);
+  return card;
+}
+
+function renderInboxList() {
+  const list = document.getElementById('inboxList');
+  list.textContent = '';
+  const categories = ledgerCategoryList('expense', '');
+  pendingPayments.forEach(p => list.appendChild(buildInboxCard(p, categories)));
+  syncInboxCards();
+}
+
+// 열려 있는 확인 대기함을 다시 그리지 않고 바뀐 카드만 더하고 뺀다. (다른 카드에 고쳐 둔 입력이 사라지지 않게)
+function syncInboxCards() {
+  const list = document.getElementById('inboxList');
+  const want = new Set(pendingPayments.map(p => p.uid));
+  list.querySelectorAll('.inbox-card').forEach(card => { if (!want.has(card.dataset.uid)) card.remove(); });
+  const shown = new Set([...list.querySelectorAll('.inbox-card')].map(card => card.dataset.uid));
+  const categories = ledgerCategoryList('expense', '');
+  pendingPayments.forEach(p => { if (!shown.has(p.uid)) list.appendChild(buildInboxCard(p, categories)); });
+  list.querySelectorAll('.inbox-empty').forEach(el => el.remove());
+  if (!pendingPayments.length) {
+    const empty = document.createElement('div');
+    empty.className = 'inbox-empty';
+    empty.textContent = '확인할 결제가 없어요';
+    list.appendChild(empty);
+  }
+  document.getElementById('inboxAddAll').style.display = pendingPayments.length > 1 ? '' : 'none';
+}
+
+// 확인한 결제를 가계부 지출로 넣는다. 서버에 저장된 것을 확인한 뒤에야 받은편지함에서 지운다.
+async function approvePayments(uids) {
+  const added = [];
+  uids.forEach(uid => {
+    const p = pendingPayments.find(x => x.uid === uid);
+    const v = inboxCardValues(uid);
+    if (!p || !v) return;
+    if (ledger.some(e => e.externalId === uid)) { added.push(uid); return; }   // 이미 들어간 건 중복으로 넣지 않는다
+    ledger.push({
+      id: ledgerNextId++,
+      date: p.date,
+      type: 'expense',
+      amount: Number(p.amount),
+      title: v.title || p.merchant || '결제',
+      category: v.category,
+      memo: ['자동 감지', p.source, p.time].filter(Boolean).join(' · '),
+      accountId: v.accountId,
+      externalId: uid
+    });
+    if (v.accountId !== null) rememberLedgerAccount(v.accountId);
+    added.push(uid);
+  });
+  if (!added.length) return;
+  pendingPayments = pendingPayments.filter(x => !added.includes(x.uid));
+  renderInboxBanner();
+  syncInboxCards();
+  saveData();
+  renderCategoryView();
+  if (currentMainTab === 'calendar') { if (currentCalSubTab === 'cal') renderCal(); else if (currentCalSubTab === 'week') renderWeek(); }
+  showToast(`가계부에 ${added.length}건을 추가했어요`, { type: 'success', duration: 1800 });
+  const synced = await syncCloudState();
+  if (synced) await Promise.all(added.map(uid => removeInboxEntry(uid)));
+  // 서버 저장에 실패하면 받은편지함에 남겨 두고, 다음에 불러올 때 externalId로 중복을 막으며 지운다.
+}
+
+function approveAllPayments() {
+  approvePayments(pendingPayments.map(p => p.uid));
+}
+
+async function ignorePayment(uid) {
+  rememberIgnoredUid(uid);
+  pendingPayments = pendingPayments.filter(x => x.uid !== uid);
+  renderInboxBanner();
+  syncInboxCards();
+  await removeInboxEntry(uid);
+}
+
 function exportLedgerCSV() {
   const mm = String(ledgerM + 1).padStart(2, '0');
   const monthStr = `${ledgerY}-${mm}`;
@@ -13694,7 +14003,7 @@ loadData();
 
 loadMemos();
 
-loadCloudState();
+loadCloudState().then(startInboxPolling);
 
 buildFilters();
 
