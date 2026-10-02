@@ -7,7 +7,7 @@
   const model = {
     serverUrl: '',
     todos: [],
-    state: { ledger: [], subscriptions: [], categories: [] },
+    state: { ledger: [], subscriptions: [], categories: [], itemOrder: {} },
     selected: L.fmtDate(new Date()),
     weekOffset: 0,
     lastSync: null,
@@ -45,7 +45,7 @@
 
     if (stateRes.status === 'fulfilled') {
       const data = stateRes.value && stateRes.value.data;
-      if (data) model.state = { ledger: data.ledger || [], subscriptions: data.subscriptions || [], categories: data.categories || [] };
+      if (data) model.state = { ledger: data.ledger || [], subscriptions: data.subscriptions || [], categories: data.categories || [], itemOrder: data.itemOrder || {} };
     } else ok = false;
 
     model.error = !ok;

@@ -9,6 +9,7 @@ import android.widget.RemoteViewsService
 import com.todoapp.widget.R
 import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.data.DayExtra
+import com.todoapp.widget.data.applyItemOrder
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import java.net.HttpURLConnection
@@ -81,6 +82,14 @@ class TodoWidgetFactory(
                 todos = list
             }.onFailure {
                 todos = emptyList()
+            }
+
+            // 웹앱에서 정한 일정 순서를 적용 (정한 적이 없으면 시간순 그대로)
+            if (todos.size > 1) {
+                val order = runCatching {
+                    CloudStateClient.fetchItemOrder(LocalDate.parse(selectedDate))
+                }.getOrDefault(emptyList())
+                todos = applyItemOrder(todos, order) { it.id.toString() }
             }
 
             // 웹앱과 같이 가계부 · 구독도 함께 표시

@@ -37,6 +37,13 @@ data class DayExtra(
 object CloudStateClient {
     private const val STATE_API_URL = "https://todolist-liart-mu.vercel.app/api/state"
 
+    /** 웹앱에서 사용자가 정한 그날 일정 순서(일정 id 목록). 정한 적이 없으면 빈 목록. */
+    fun fetchItemOrder(date: LocalDate): List<String> {
+        val state = fetchState() ?: return emptyList()
+        val array = state.optJSONObject("itemOrder")?.optJSONArray(date.toString()) ?: return emptyList()
+        return (0 until array.length()).map { array.opt(it).toString() }
+    }
+
     /**
      * 웹앱 상태(/api/state)에서 해당 날짜의 가계부 내역과 구독 결제를 가져온다.
      * 네트워크 오류 시 빈 목록을 돌려준다.

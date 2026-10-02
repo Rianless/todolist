@@ -14,6 +14,7 @@ import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
 import com.todoapp.widget.data.CloudStateClient
+import com.todoapp.widget.data.applyItemOrder
 import com.todoapp.widget.ui.AddEditActivity
 import com.todoapp.widget.ui.TodoDetailPopupActivity
 import kotlinx.coroutines.CoroutineScope
@@ -707,7 +708,13 @@ class TodoWidgetProvider : AppWidgetProvider() {
                     )
                 )
             }
-            list
+            // 웹앱에서 정한 일정 순서를 적용 (정한 적이 없으면 시간순 그대로)
+            val order = if (list.size > 1) {
+                runCatching { CloudStateClient.fetchItemOrder(date) }.getOrDefault(emptyList())
+            } else {
+                emptyList()
+            }
+            applyItemOrder(list, order) { it.id.toString() }
         }.getOrDefault(emptyList())
     }
 
