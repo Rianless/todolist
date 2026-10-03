@@ -1,0 +1,265 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 위젯을 크게 키웠을 때(달력 모드): 한 달 칸 + 선택한 날의 일정 목록 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/widget_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:orientation="vertical"
+    android:background="@drawable/widget_background"
+    android:padding="0dp">
+
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:orientation="horizontal"
+        android:gravity="center_vertical"
+        android:paddingHorizontal="14dp"
+        android:paddingTop="10dp"
+        android:paddingBottom="6dp">
+
+        <LinearLayout
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:orientation="vertical">
+            <TextView android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="나의 하루" android:textSize="8sp" android:textColor="#6366F1" android:alpha="0.7" android:letterSpacing="0.15" android:fontFamily="monospace" />
+            <LinearLayout android:layout_width="wrap_content" android:layout_height="wrap_content" android:orientation="horizontal" android:gravity="center_vertical">
+                <TextView android:id="@+id/widget_title" android:layout_width="wrap_content" android:layout_height="wrap_content" android:text="" android:textSize="18sp" android:fontFamily="sans-serif-medium" android:textColor="#1F2430" android:textStyle="bold" />
+                <TextView android:id="@+id/widget_progress" android:layout_width="wrap_content" android:layout_height="wrap_content" android:layout_marginStart="8dp" android:text="" android:textSize="10sp" android:textColor="#6366F1" android:alpha="0.8" android:fontFamily="monospace" />
+            </LinearLayout>
+        </LinearLayout>
+
+        <TextView android:id="@+id/widget_week_prev" android:layout_width="32dp" android:layout_height="28dp" android:layout_marginEnd="6dp" android:text="‹" android:textSize="18sp" android:textColor="#6366F1" android:gravity="center" android:background="@drawable/bg_widget_btn" />
+        <TextView android:id="@+id/widget_week_today" android:layout_width="wrap_content" android:layout_height="28dp" android:layout_marginEnd="6dp" android:paddingHorizontal="10dp" android:text="TODAY" android:textSize="9sp" android:textColor="#6366F1" android:gravity="center" android:fontFamily="monospace" android:letterSpacing="0.1" android:background="@drawable/bg_widget_btn" />
+        <TextView android:id="@+id/widget_week_next" android:layout_width="32dp" android:layout_height="28dp" android:layout_marginEnd="6dp" android:text="›" android:textSize="18sp" android:textColor="#6366F1" android:gravity="center" android:background="@drawable/bg_widget_btn" />
+        <TextView android:id="@+id/widget_open_app_button" android:layout_width="32dp" android:layout_height="28dp" android:text="+" android:textSize="18sp" android:textColor="#6366F1" android:gravity="center" android:background="@drawable/bg_widget_btn" />
+    </LinearLayout>
+
+    <LinearLayout android:layout_width="match_parent" android:layout_height="wrap_content" android:orientation="horizontal" android:paddingHorizontal="10dp" android:paddingBottom="2dp">
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="일" android:textSize="9sp" android:textColor="#FF6B6B" android:fontFamily="monospace" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="월" android:textSize="9sp" android:textColor="#767B8D" android:fontFamily="monospace" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="화" android:textSize="9sp" android:textColor="#767B8D" android:fontFamily="monospace" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="수" android:textSize="9sp" android:textColor="#767B8D" android:fontFamily="monospace" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="목" android:textSize="9sp" android:textColor="#767B8D" android:fontFamily="monospace" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="금" android:textSize="9sp" android:textColor="#767B8D" android:fontFamily="monospace" />
+        <TextView android:layout_width="0dp" android:layout_height="wrap_content" android:layout_weight="1" android:gravity="center" android:text="토" android:textSize="9sp" android:textColor="#6366F1" android:fontFamily="monospace" />
+    </LinearLayout>
+
+    <LinearLayout android:id="@+id/month_row_0" android:layout_width="match_parent" android:layout_height="34dp" android:orientation="horizontal" android:paddingHorizontal="10dp">
+        <LinearLayout android:id="@+id/month_cell_0" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_0" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_0" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_1" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_1" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_1" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_2" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_2" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_2" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_3" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_3" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_3" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_4" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_4" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_4" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_5" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_5" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_5" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_6" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_6" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_6" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/month_row_1" android:layout_width="match_parent" android:layout_height="34dp" android:orientation="horizontal" android:paddingHorizontal="10dp">
+        <LinearLayout android:id="@+id/month_cell_7" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_7" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_7" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_8" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_8" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_8" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_9" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_9" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_9" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_10" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_10" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_10" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_11" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_11" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_11" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_12" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_12" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_12" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_13" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_13" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_13" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/month_row_2" android:layout_width="match_parent" android:layout_height="34dp" android:orientation="horizontal" android:paddingHorizontal="10dp">
+        <LinearLayout android:id="@+id/month_cell_14" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_14" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_14" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_15" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_15" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_15" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_16" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_16" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_16" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_17" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_17" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_17" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_18" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_18" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_18" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_19" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_19" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_19" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_20" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_20" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_20" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/month_row_3" android:layout_width="match_parent" android:layout_height="34dp" android:orientation="horizontal" android:paddingHorizontal="10dp">
+        <LinearLayout android:id="@+id/month_cell_21" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_21" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_21" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_22" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_22" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_22" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_23" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_23" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_23" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_24" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_24" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_24" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_25" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_25" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_25" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_26" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_26" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_26" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_27" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_27" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_27" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/month_row_4" android:layout_width="match_parent" android:layout_height="34dp" android:orientation="horizontal" android:paddingHorizontal="10dp">
+        <LinearLayout android:id="@+id/month_cell_28" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_28" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_28" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_29" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_29" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_29" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_30" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_30" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_30" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_31" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_31" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_31" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_32" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_32" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_32" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_33" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_33" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_33" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_34" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_34" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_34" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+    <LinearLayout android:id="@+id/month_row_5" android:layout_width="match_parent" android:layout_height="34dp" android:orientation="horizontal" android:paddingHorizontal="10dp">
+        <LinearLayout android:id="@+id/month_cell_35" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_35" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_35" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_36" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_36" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_36" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_37" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_37" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_37" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_38" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_38" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_38" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_39" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_39" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_39" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_40" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_40" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_40" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+        <LinearLayout android:id="@+id/month_cell_41" android:layout_width="0dp" android:layout_height="match_parent" android:layout_weight="1" android:orientation="vertical" android:gravity="center">
+            <TextView android:id="@+id/month_day_41" android:layout_width="24dp" android:layout_height="20dp" android:gravity="center" android:text="" android:textSize="11sp" android:textColor="#1F2430" />
+            <TextView android:id="@+id/month_dots_41" android:layout_width="wrap_content" android:layout_height="9dp" android:gravity="center" android:includeFontPadding="false" android:text="" android:textSize="6sp" android:maxLines="1" />
+        </LinearLayout>
+    </LinearLayout>
+
+    <TextView android:layout_width="match_parent" android:layout_height="1dp" android:layout_marginHorizontal="14dp" android:layout_marginTop="4dp" android:background="#E4E7EF" android:text="" />
+
+    <TextView
+        android:id="@+id/widget_selected_date_header"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:paddingHorizontal="14dp"
+        android:paddingTop="8dp"
+        android:paddingBottom="4dp"
+        android:text=""
+        android:textSize="12sp"
+        android:textColor="#6366F1"
+        android:letterSpacing="0.1"
+        android:fontFamily="monospace" />
+
+    <ListView
+        android:id="@+id/widget_list"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="1"
+        android:divider="@null"
+        android:dividerHeight="0dp"
+        android:paddingTop="2dp"
+        android:paddingBottom="4dp" />
+
+    <TextView
+        android:id="@+id/widget_empty"
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:gravity="center"
+        android:padding="20dp"
+        android:text="등록된 일정이 없습니다"
+        android:textColor="#A8ADBC"
+        android:textSize="11sp"
+        android:fontFamily="monospace" />
+
+</LinearLayout>

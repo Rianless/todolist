@@ -13,12 +13,17 @@ import android.net.Uri
 import android.os.Build
 import android.os.Handler
 import android.os.Looper
+import android.os.SystemClock
+import android.text.Spannable
+import android.text.SpannableStringBuilder
+import android.text.style.ForegroundColorSpan
 import android.widget.RemoteViews
 import com.todoapp.widget.MainActivity
 import com.todoapp.widget.R
 import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.data.applyItemOrder
 import com.todoapp.widget.data.formatCompactWon
+import com.todoapp.widget.data.monthWeekCount
 import com.todoapp.widget.ui.AddEditActivity
 import com.todoapp.widget.ui.TodoDetailPopupActivity
 import kotlinx.coroutines.CoroutineScope
@@ -31,6 +36,7 @@ import java.time.DayOfWeek
 import java.time.LocalDate
 import java.time.ZoneId
 import java.time.format.DateTimeFormatter
+import java.time.temporal.ChronoUnit
 import java.time.temporal.TemporalAdjusters
 
 class TodoWidgetProvider : AppWidgetProvider() {
@@ -42,6 +48,16 @@ class TodoWidgetProvider : AppWidgetProvider() {
         const val ACTION_WEEK_NEXT = "com.todoapp.widget.ACTION_WEEK_NEXT"
         const val ACTION_WEEK_TODAY = "com.todoapp.widget.ACTION_WEEK_TODAY"
         const val ACTION_MIDNIGHT = "com.todoapp.widget.ACTION_MIDNIGHT"
+        const val ACTION_MONTH_PREV = "com.todoapp.widget.ACTION_MONTH_PREV"
+        const val ACTION_MONTH_NEXT = "com.todoapp.widget.ACTION_MONTH_NEXT"
+        const val ACTION_REFRESH_TICK = "com.todoapp.widget.ACTION_REFRESH_TICK"
+
+        // 위젯을 이 크기(dp) 이상으로 키우면 주 줄 대신 달력(한 달 칸)으로 바뀐다.
+        private const val MONTH_MODE_MIN_WIDTH_DP = 250
+        private const val MONTH_MODE_MIN_HEIGHT_DP = 400
+
+        // 웹·PC 위젯에서 바꾼 내용(완료 체크 등)을 가져오는 주기
+        private const val REFRESH_TICK_MS = 5 * 60 * 1000L
 
         const val EXTRA_TODO_ID = "extra_todo_id"
         const val EXTRA_DONE = "extra_done"
@@ -116,6 +132,36 @@ class TodoWidgetProvider : AppWidgetProvider() {
             }
         }
 
+        private fun refreshTickPendingIntent(context: Context): PendingIntent {
+            val intent = Intent(context, TodoWidgetProvider::class.java).apply { action = ACTION_REFRESH_TICK }
+            return PendingIntent.getBroadcast(
+                context, 9002, intent,
+                PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+            )
+        }
+
+        // 몇 분마다 서버에서 다시 불러온다. 위젯은 스스로 서버 변경을 알 수 없어서, 웹/PC 에서 완료 체크를 해도
+        // 위젯을 다시 그리기 전까지는 옛 상태로 보였다. (화면이 꺼져 있으면 깨우지 않는 알람이라 배터리를 거의 쓰지 않고,
+        // 화면을 켜면 밀려 있던 알람이 바로 실행되어 최신 상태가 된다.)
+        fun scheduleRefreshTick(context: Context) {
+            val alarmManager = context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager ?: return
+            alarmManager.setInexactRepeating(
+                AlarmManager.ELAPSED_REALTIME,
+                SystemClock.elapsedRealtime() + REFRESH_TICK_MS,
+                REFRESH_TICK_MS,
+                refreshTickPendingIntent(context)
+            )
+        }
+
+        fun cancelRefreshTick(context: Context) {
+            (context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager)?.cancel(refreshTickPendingIntent(context))
+        }
+
+        // 선택한 날이 속한 주가 되도록 주 이동 값을 맞춘다. (달력 ↔ 주 줄을 오가도 같은 날이 보이게)
+        private fun weekOffsetFor(date: LocalDate): Int {
+            return ChronoUnit.WEEKS.between(getWeekStart(LocalDate.now()), getWeekStart(date)).toInt()
+        }
+
         fun cancelMidnightRefresh(context: Context) {
             (context.getSystemService(Context.ALARM_SERVICE) as? AlarmManager)?.cancel(midnightPendingIntent(context))
         }
@@ -154,11 +200,13 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
     override fun onEnabled(context: Context) {
         super.onEnabled(context)
+        scheduleRefreshTick(context)
         scheduleMidnightRefresh(context)
     }
 
     override fun onDisabled(context: Context) {
         super.onDisabled(context)
+        cancelRefreshTick(context)
         cancelMidnightRefresh(context)
     }
 
@@ -168,6 +216,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
         appWidgetIds: IntArray
     ) {
         scheduleMidnightRefresh(context)
+        scheduleRefreshTick(context)
         appWidgetIds.forEach { widgetId ->
             updateWidget(context, appWidgetManager, widgetId)
         }
@@ -199,7 +248,26 @@ class TodoWidgetProvider : AppWidgetProvider() {
                 applyDateRollover(context)
                 refreshAllWidgets(context)
                 scheduleMidnightRefresh(context)
+                scheduleRefreshTick(context)
                 Handler(Looper.getMainLooper()).postDelayed({ pendingResult.finish() }, 8000)
+            }
+
+            ACTION_REFRESH_TICK -> {
+                // 주기적으로 서버 내용을 다시 불러온다 (목록 어댑터가 새로 받아 온다).
+                val pendingResult = goAsync()
+                refreshAllWidgets(context)
+                Handler(Looper.getMainLooper()).postDelayed({ pendingResult.finish() }, 8000)
+            }
+
+            ACTION_MONTH_PREV, ACTION_MONTH_NEXT -> {
+                val current = runCatching { LocalDate.parse(prefs.getString(KEY_SELECTED_DATE, null)) }
+                    .getOrDefault(LocalDate.now())
+                val moved = current.plusMonths(if (intent.action == ACTION_MONTH_PREV) -1 else 1)
+                prefs.edit()
+                    .putString(KEY_SELECTED_DATE, moved.format(DateTimeFormatter.ISO_LOCAL_DATE))
+                    .putInt(KEY_WEEK_OFFSET, weekOffsetFor(moved))
+                    .apply()
+                refreshAllWidgets(context)
             }
 
             ACTION_TOGGLE_DONE -> {
@@ -224,7 +292,9 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
             ACTION_SELECT_DATE -> {
                 val date = intent.getStringExtra(EXTRA_DATE) ?: return
-                prefs.edit().putString(KEY_SELECTED_DATE, date).apply()
+                val editor = prefs.edit().putString(KEY_SELECTED_DATE, date)
+                runCatching { LocalDate.parse(date) }.getOrNull()?.let { editor.putInt(KEY_WEEK_OFFSET, weekOffsetFor(it)) }
+                editor.apply()
                 refreshAllWidgets(context)
             }
 
@@ -273,6 +343,11 @@ class TodoWidgetProvider : AppWidgetProvider() {
         }
         if (minHeight in 105 until 170) {
             updateMediumWidget(context, manager, widgetId)
+            return
+        }
+
+        if (minWidth >= MONTH_MODE_MIN_WIDTH_DP && minHeight >= MONTH_MODE_MIN_HEIGHT_DP) {
+            updateMonthWidget(context, manager, widgetId)
             return
         }
 
@@ -531,6 +606,140 @@ class TodoWidgetProvider : AppWidgetProvider() {
             manager.updateAppWidget(widgetId, updated)
             manager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_list)
         }
+    }
+
+    // 달력 모드: 한 달 칸(6주 x 7일) + 선택한 날의 일정 목록
+    private fun updateMonthWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
+        val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
+        val today = LocalDate.now()
+        val selected = runCatching { LocalDate.parse(prefs.getString(KEY_SELECTED_DATE, null)) }.getOrDefault(today)
+        prefs.edit()
+            .putString(KEY_SELECTED_DATE, selected.format(DateTimeFormatter.ISO_LOCAL_DATE))
+            .putInt(KEY_WEEK_OFFSET, weekOffsetFor(selected))
+            .apply()
+
+        val first = selected.withDayOfMonth(1)
+        val gridStart = getWeekStart(first)
+        val weeks = monthWeekCount(first)
+        val gridEnd = gridStart.plusDays(weeks * 7L - 1)
+
+        // 1차 렌더 (점 · 지출 없이)
+        manager.updateAppWidget(widgetId, buildMonthViews(context, widgetId, selected, gridStart, weeks, emptyMap(), emptyMap(), null))
+        manager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_list)
+
+        // 2차: 서버에서 이 달 일정 · 지출을 가져와 점과 진행도를 채운다
+        CoroutineScope(Dispatchers.IO).launch {
+            val gridItems = fetchWeekTodos(gridStart, gridEnd)
+            val monthItems = gridItems.filter { it.date.startsWith(selected.format(DateTimeFormatter.ofPattern("yyyy-MM"))) }
+            val spendByDay = runCatching { CloudStateClient.fetchSpend(gridStart, weeks * 7) }.getOrDefault(emptyMap())
+
+            val dotsByDay = mutableMapOf<String, MutableList<Int>>()
+            gridItems.forEach { item ->
+                val list = dotsByDay.getOrPut(item.date) { mutableListOf() }
+                if (list.size < 3) list.add(parseColorSafe(item.categoryColor))
+            }
+            val progress = "${monthItems.count { it.done }}/${monthItems.size} 완료"
+            manager.updateAppWidget(widgetId, buildMonthViews(context, widgetId, selected, gridStart, weeks, dotsByDay, spendByDay, progress))
+            manager.notifyAppWidgetViewDataChanged(widgetId, R.id.widget_list)
+        }
+    }
+
+    private fun buildMonthViews(
+        context: Context,
+        widgetId: Int,
+        selected: LocalDate,
+        gridStart: LocalDate,
+        weeks: Int,
+        dotsByDay: Map<String, List<Int>>,
+        spendByDay: Map<String, Long>,
+        progress: String?
+    ): RemoteViews {
+        val views = RemoteViews(context.packageName, R.layout.widget_layout_month)
+        val today = LocalDate.now()
+        val iso = DateTimeFormatter.ISO_LOCAL_DATE
+        val selectedStr = selected.format(iso)
+
+        views.setTextViewText(R.id.widget_title, "${selected.year}년 ${selected.monthValue}월")
+        views.setTextViewText(R.id.widget_progress, progress ?: "불러오는 중")
+        val dowEn = arrayOf("SUN", "MON", "TUE", "WED", "THU", "FRI", "SAT")
+        val spend = spendByDay[selectedStr] ?: 0L
+        views.setTextViewText(
+            R.id.widget_selected_date_header,
+            "${selected.format(DateTimeFormatter.ofPattern("M.dd"))} · ${dowEn[selected.dayOfWeek.value % 7]}" +
+                if (spend > 0) " · 지출 -${formatCompactWon(spend)}" else ""
+        )
+
+        views.setOnClickPendingIntent(R.id.widget_root, makeOpenWebPending(context, widgetId, 200))
+        views.setOnClickPendingIntent(R.id.widget_open_app_button, makeAddTodoPending(context, selected, widgetId, 210))
+        views.setOnClickPendingIntent(R.id.widget_week_prev, makeBroadcastPending(context, ACTION_MONTH_PREV, widgetId, 1010))
+        views.setOnClickPendingIntent(R.id.widget_week_next, makeBroadcastPending(context, ACTION_MONTH_NEXT, widgetId, 1011))
+        views.setOnClickPendingIntent(R.id.widget_week_today, makeBroadcastPending(context, ACTION_WEEK_TODAY, widgetId, 1002))
+
+        for (w in 0 until 6) {
+            views.setViewVisibility(MonthIds.ROWS[w], if (w < weeks) android.view.View.VISIBLE else android.view.View.GONE)
+        }
+        for (i in 0 until weeks * 7) {
+            val day = gridStart.plusDays(i.toLong())
+            val dayStr = day.format(iso)
+            val inMonth = day.month == selected.month
+            val dayId = MonthIds.DAYS[i]
+
+            views.setTextViewText(dayId, day.dayOfMonth.toString())
+            if (day == selected) {
+                views.setInt(dayId, "setBackgroundResource", R.drawable.bg_widget_cal_today)
+                views.setTextColor(dayId, Color.parseColor("#6366F1"))
+            } else {
+                views.setInt(dayId, "setBackgroundColor", Color.TRANSPARENT)
+                val color = when {
+                    day == today -> Color.parseColor("#6366F1")
+                    !inMonth -> Color.parseColor("#B8BDCC")
+                    i % 7 == 0 -> Color.parseColor("#FF6B6B")
+                    else -> Color.parseColor("#1F2430")
+                }
+                views.setTextColor(dayId, color)
+            }
+
+            val colors = dotsByDay[dayStr].orEmpty()
+            val dots = SpannableStringBuilder()
+            colors.forEach { c ->
+                val start = dots.length
+                dots.append("●")
+                dots.setSpan(ForegroundColorSpan(c), start, dots.length, Spannable.SPAN_EXCLUSIVE_EXCLUSIVE)
+            }
+            views.setTextViewText(MonthIds.DOTS[i], dots)
+
+            val selectIntent = Intent(context, TodoWidgetProvider::class.java).apply {
+                action = ACTION_SELECT_DATE
+                putExtra(EXTRA_DATE, dayStr)
+                data = Uri.parse("todoapp://select/$dayStr")
+            }
+            views.setOnClickPendingIntent(
+                MonthIds.CELLS[i],
+                PendingIntent.getBroadcast(
+                    context, 3000 + i, selectIntent,
+                    PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+                )
+            )
+        }
+
+        // 선택한 날의 일정 목록 (주 줄 모드와 같은 어댑터)
+        val serviceIntent = Intent(context, TodoWidgetService::class.java).apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+            putExtra(EXTRA_DATE, selectedStr)
+            data = Uri.parse("todoapp://list/$selectedStr/month")
+        }
+        views.setRemoteAdapter(R.id.widget_list, serviceIntent)
+        views.setEmptyView(R.id.widget_list, R.id.widget_empty)
+        val itemFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
+            PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
+        } else {
+            PendingIntent.FLAG_UPDATE_CURRENT
+        }
+        val itemIntent = Intent(context, TodoDetailPopupActivity::class.java).apply {
+            putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)
+        }
+        views.setPendingIntentTemplate(R.id.widget_list, PendingIntent.getActivity(context, widgetId, itemIntent, itemFlags))
+        return views
     }
 
     private fun updateCompactWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {

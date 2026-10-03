@@ -136,11 +136,11 @@
     return { todos: dayTodos, ledger, subs };
   }
 
-  // 한 주(일~토)의 날짜별 점 색상 (일정 색 + 구독은 보라색, 최대 3개)
-  function weekDots(todos, state, weekStart) {
+  // 시작일부터 count 일 동안의 날짜별 점 색상 (일정 색 + 구독은 보라색, 최대 3개)
+  function rangeDots(todos, state, start, count) {
     const out = {};
-    for (let i = 0; i < 7; i++) {
-      const d = new Date(weekStart);
+    for (let i = 0; i < count; i++) {
+      const d = new Date(start);
       d.setDate(d.getDate() + i);
       const ds = fmtDate(d);
       const day = buildDay(todos, state, ds);
@@ -152,6 +152,18 @@
     return out;
   }
 
+  function weekDots(todos, state, weekStart) {
+    return rangeDots(todos, state, weekStart, 7);
+  }
+
+  // 달력 모드: 그 달을 덮는 주(일~토) 단위 날짜 칸. 시작은 1일이 든 주의 일요일.
+  function monthGrid(year, month) {
+    const start = weekStartOf(new Date(year, month, 1));
+    const days = new Date(year, month + 1, 0).getDate();
+    const weeks = Math.ceil((new Date(year, month, 1).getDay() + days) / 7);
+    return { start, weeks, count: weeks * 7 };
+  }
+
   function weekStartOf(d) {
     const s = new Date(d.getFullYear(), d.getMonth(), d.getDate());
     s.setDate(s.getDate() - s.getDay());
@@ -160,7 +172,7 @@
 
   const Logic = {
     DOW_KO, CYCLE_LABEL, fmtDate, parseDate, getSubDatesForMonth, subscriptionOccursOn,
-    repeatOccursOn, normalizeTodo, timeLabel, applyDayOrder, buildDay, weekDots, weekStartOf
+    repeatOccursOn, normalizeTodo, timeLabel, applyDayOrder, buildDay, rangeDots, weekDots, monthGrid, weekStartOf
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Logic;

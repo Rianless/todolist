@@ -94,4 +94,18 @@ const ordered = L.buildDay(todos, orderedState, '2026-09-26');
 assert.deepStrictEqual(ordered.todos.map(t => t.title), ['B', 'A']);
 assert.deepStrictEqual(L.buildDay(todos, state, '2026-09-26').todos.map(t => t.title), ['A', 'B']);
 
+// 7) 달력 모드 칸 계산: 1일이 든 주의 일요일부터, 그 달을 덮는 주 수만큼
+const g1 = L.monthGrid(2026, 9);   // 2026-10: 1일 목요일, 31일 → 5주
+assert.strictEqual(L.fmtDate(g1.start), '2026-09-27'); assert.strictEqual(g1.weeks, 5); assert.strictEqual(g1.count, 35);
+const g2 = L.monthGrid(2026, 1);   // 2026-02: 1일 일요일, 28일 → 4주
+assert.strictEqual(L.fmtDate(g2.start), '2026-02-01'); assert.strictEqual(g2.weeks, 4);
+const g3 = L.monthGrid(2026, 7);   // 2026-08: 1일 토요일, 31일 → 6주
+assert.strictEqual(L.fmtDate(g3.start), '2026-07-26'); assert.strictEqual(g3.weeks, 6);
+for (let m = 0; m < 12; m++) {
+  const g = L.monthGrid(2026, m);
+  const last = new Date(g.start); last.setDate(last.getDate() + g.count - 1);
+  assert(g.start <= new Date(2026, m, 1) && last >= new Date(2026, m + 1, 0), 'grid covers month ' + m);
+}
+assert.deepStrictEqual(Object.keys(L.rangeDots(todos, state, g1.start, g1.count)).length, 35);
+
 console.log(`OK (${checked} date checks, ${orderChecks} order checks)`);

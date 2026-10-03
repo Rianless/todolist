@@ -10,6 +10,8 @@
     state: { ledger: [], subscriptions: [], categories: [], itemOrder: {} },
     selected: L.fmtDate(new Date()),
     weekOffset: 0,
+    monthOffset: 0,
+    mode: 'week',
     lastSync: null,
     error: false,
     loadSeq: 0,
@@ -75,7 +77,69 @@
     return ws;
   }
 
+  // 창을 충분히 키우면 주 줄 대신 달력(한 달 칸)으로 바뀐다.
+  const MONTH_MODE_MIN_WIDTH = 480;
+  const MONTH_MODE_MIN_HEIGHT = 700;
+
+  function wantedMode() {
+    return window.innerWidth >= MONTH_MODE_MIN_WIDTH && window.innerHeight >= MONTH_MODE_MIN_HEIGHT ? 'month' : 'week';
+  }
+
+  function currentMonth() {
+    const base = new Date();
+    return new Date(base.getFullYear(), base.getMonth() + model.monthOffset, 1);
+  }
+
+  function makeDayCell(d, ds, today, dow, dotColors, other) {
+    const cell = document.createElement('button');
+    cell.type = 'button';
+    cell.className = 'day' + (ds === today ? ' today' : '') + (ds === model.selected ? ' selected' : '') + (other ? ' other' : '');
+    const num = document.createElement('span');
+    num.className = 'num' + (dow === 0 ? ' sun' : '');
+    num.textContent = d.getDate();
+    const dotWrap = document.createElement('span');
+    dotWrap.className = 'dots';
+    (dotColors || []).forEach(color => {
+      const dot = document.createElement('i');
+      dot.style.background = color;
+      dotWrap.appendChild(dot);
+    });
+    return { cell, num, dotWrap };
+  }
+
+  function renderMonth() {
+    const first = currentMonth();
+    $('monthLabel').textContent = `${first.getFullYear()}년 ${first.getMonth() + 1}월`;
+    const grid = L.monthGrid(first.getFullYear(), first.getMonth());
+    const dots = L.rangeDots(model.todos, model.state, grid.start, grid.count);
+    const today = L.fmtDate(new Date());
+    const wrap = $('weekDays');
+    wrap.textContent = '';
+    wrap.classList.add('month');
+    for (let i = 0; i < 7; i++) {
+      const h = document.createElement('span');
+      h.className = 'month-dow' + (i === 0 ? ' sun' : '');
+      h.textContent = L.DOW_KO[i];
+      wrap.appendChild(h);
+    }
+    for (let i = 0; i < grid.count; i++) {
+      const d = new Date(grid.start); d.setDate(d.getDate() + i);
+      const ds = L.fmtDate(d);
+      const { cell, num, dotWrap } = makeDayCell(d, ds, today, i % 7, dots[ds], d.getMonth() !== first.getMonth());
+      cell.append(num, dotWrap);
+      cell.onclick = () => {
+        model.selected = ds;
+        // 다른 달 칸을 누르면 그 달로 이동
+        model.monthOffset = (d.getFullYear() - new Date().getFullYear()) * 12 + d.getMonth() - new Date().getMonth();
+        render();
+      };
+      wrap.appendChild(cell);
+    }
+  }
+
   function renderWeek() {
+    if (model.mode === 'month') { renderMonth(); return; }
+    $('weekDays').classList.remove('month');
     const ws = currentWeekStart();
     const we = new Date(ws); we.setDate(we.getDate() + 6);
     $('monthLabel').textContent = ws.getMonth() === we.getMonth()
@@ -491,6 +555,9 @@
   }
 
   function render() {
+    const unit = model.mode === 'month' ? '달' : '주';
+    $('btnPrev').setAttribute('aria-label', '이전 ' + unit);
+    $('btnNext').setAttribute('aria-label', '다음 ' + unit);
     renderSync();
     renderWeek();
     renderAgenda();
@@ -498,11 +565,22 @@
 
   function goToday() {
     model.weekOffset = 0;
+    model.monthOffset = 0;
     model.selected = L.fmtDate(new Date());
     render();
   }
 
   function moveWeek(delta) {
+    if (model.mode === 'month') {
+      model.monthOffset += delta;
+      const first = currentMonth();
+      // 같은 날짜(없으면 그 달 마지막 날)를 유지한 채 달을 이동
+      const day = L.parseDate(model.selected).getDate();
+      const last = new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate();
+      model.selected = L.fmtDate(new Date(first.getFullYear(), first.getMonth(), Math.min(day, last)));
+      render();
+      return;
+    }
     model.weekOffset += delta;
     const ws = currentWeekStart();
     // 선택한 요일을 유지한 채 주를 이동
@@ -525,6 +603,7 @@
     const cfg = await window.widget.getConfig();
     model.serverUrl = cfg.serverUrl;
     $('btnPin').classList.toggle('on', !!cfg.alwaysOnTop);
+    model.mode = wantedMode();
 
     $('btnRefresh').onclick = load;
     $('btnPrev').onclick = () => moveWeek(-1);
@@ -543,6 +622,17 @@
     $('modal').addEventListener('mousedown', e => { if (e.target === $('modal')) closeEditor(); });
     document.addEventListener('keydown', e => { if (e.key === 'Escape' && !$('modal').hidden) closeEditor(); });
 
+    window.addEventListener('resize', () => {
+      const mode = wantedMode();
+      if (mode === model.mode) return;
+      model.mode = mode;
+      // 모드가 바뀌면 지금 선택한 날이 보이는 주/달로 맞춘다.
+      const sel = L.parseDate(model.selected), now = new Date();
+      model.monthOffset = (sel.getFullYear() - now.getFullYear()) * 12 + sel.getMonth() - now.getMonth();
+      model.weekOffset = Math.round((L.weekStartOf(sel) - L.weekStartOf(now)) / (7 * 24 * 3600 * 1000));
+      render();
+    });
+    model.mode = wantedMode();
     window.addEventListener('focus', load);
     setInterval(() => { checkDateRollover(); load(); }, REFRESH_MS);
     render();
