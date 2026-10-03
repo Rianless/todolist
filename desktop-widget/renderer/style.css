@@ -132,3 +132,14 @@ h1 { margin: 1px 0 0; font-size: 18px; }
 }
 .toast[hidden] { display: none; }
 .grid2[hidden] { display: none; }
+
+/* 일정 순서 바꾸기 */
+.row.reorderable { grid-template-columns: 14px 56px minmax(0, 1fr) auto; gap: 6px; }
+.handle {
+  display: block; padding: 6px 0; border-radius: 6px; text-align: center; user-select: none;
+  color: var(--text3); font-size: 12px; line-height: 1; letter-spacing: -3px; cursor: grab; touch-action: none;
+}
+.handle:hover, .handle:focus-visible { color: var(--accent); background: var(--bg, #f3f4f8); outline: none; }
+.list.reordering .row:not(.dragging) { transition: transform .15s ease; }
+.row.dragging { position: relative; z-index: 1; box-shadow: 0 8px 24px rgba(31, 36, 48, .22); }
+.row.dragging .handle { cursor: grabbing; color: var(--accent); }

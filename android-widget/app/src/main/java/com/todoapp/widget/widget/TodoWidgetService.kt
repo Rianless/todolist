@@ -166,6 +166,7 @@ class TodoWidgetFactory(
         // 클릭 인텐트 (상세 팝업)
         val fillIntent = Intent().apply {
             putExtra(TodoWidgetProvider.EXTRA_TODO_ID, todo.id)
+            putExtra(TodoWidgetProvider.EXTRA_DATE, selectedDate)
         }
         views.setOnClickFillInIntent(R.id.widget_item_root, fillIntent)
 

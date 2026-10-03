@@ -224,9 +224,34 @@ class TodoDetailPopupActivity : AppCompatActivity() {
             }
         }
 
+        // 순서 바꾸기: 그날 일정 목록에서 한 칸 위/아래로 (웹앱·PC 위젯과 같은 순서를 쓴다)
+        view.findViewById<TextView>(R.id.dialog_btn_up).setOnClickListener { moveInDay(todo, -1) }
+        view.findViewById<TextView>(R.id.dialog_btn_down).setOnClickListener { moveInDay(todo, 1) }
+
         // 닫기 버튼
         view.findViewById<TextView>(R.id.dialog_btn_close).setOnClickListener {
             finish()
+        }
+    }
+
+    private fun moveInDay(todo: TodoDetail, delta: Int) {
+        // 위젯에서 연 경우 보고 있던 날짜(반복 일정은 원래 날짜와 다를 수 있다), 아니면 일정 날짜
+        val date = runCatching {
+            LocalDate.parse(intent.getStringExtra(TodoWidgetProvider.EXTRA_DATE) ?: todo.date)
+        }.getOrNull() ?: return
+        lifecycleScope.launch {
+            val result = withContext(Dispatchers.IO) { CloudStateClient.moveTodoInDay(date, todo.id, delta) }
+            when (result) {
+                CloudStateClient.MoveResult.MOVED -> {
+                    refreshWidget()
+                    Toast.makeText(this@TodoDetailPopupActivity,
+                        if (delta < 0) "한 칸 위로 옮겼어요" else "한 칸 아래로 옮겼어요", Toast.LENGTH_SHORT).show()
+                }
+                CloudStateClient.MoveResult.EDGE -> Toast.makeText(this@TodoDetailPopupActivity,
+                    if (delta < 0) "이미 맨 위예요" else "이미 맨 아래예요", Toast.LENGTH_SHORT).show()
+                CloudStateClient.MoveResult.FAILED -> Toast.makeText(this@TodoDetailPopupActivity,
+                    "순서를 저장하지 못했어요. 연결을 확인해 주세요.", Toast.LENGTH_SHORT).show()
+            }
         }
     }
 

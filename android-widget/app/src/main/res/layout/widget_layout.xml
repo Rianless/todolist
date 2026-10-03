@@ -195,6 +195,17 @@
                     android:visibility="gone"
                     android:text="" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/widget_cal_spend0"
+                android:layout_width="wrap_content"
+                android:layout_height="11dp"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="#E45F68"
+                android:textSize="8sp" />
         </LinearLayout>
 
         <!-- 월 -->
@@ -253,6 +264,17 @@
                     android:visibility="gone"
                     android:text="" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/widget_cal_spend1"
+                android:layout_width="wrap_content"
+                android:layout_height="11dp"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="#E45F68"
+                android:textSize="8sp" />
         </LinearLayout>
 
         <!-- 화 -->
@@ -311,6 +333,17 @@
                     android:visibility="gone"
                     android:text="" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/widget_cal_spend2"
+                android:layout_width="wrap_content"
+                android:layout_height="11dp"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="#E45F68"
+                android:textSize="8sp" />
         </LinearLayout>
 
         <!-- 수 -->
@@ -369,6 +402,17 @@
                     android:visibility="gone"
                     android:text="" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/widget_cal_spend3"
+                android:layout_width="wrap_content"
+                android:layout_height="11dp"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="#E45F68"
+                android:textSize="8sp" />
         </LinearLayout>
 
         <!-- 목 -->
@@ -427,6 +471,17 @@
                     android:visibility="gone"
                     android:text="" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/widget_cal_spend4"
+                android:layout_width="wrap_content"
+                android:layout_height="11dp"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="#E45F68"
+                android:textSize="8sp" />
         </LinearLayout>
 
         <!-- 금 -->
@@ -485,6 +540,17 @@
                     android:visibility="gone"
                     android:text="" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/widget_cal_spend5"
+                android:layout_width="wrap_content"
+                android:layout_height="11dp"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="#E45F68"
+                android:textSize="8sp" />
         </LinearLayout>
 
         <!-- 토 -->
@@ -543,6 +609,17 @@
                     android:visibility="gone"
                     android:text="" />
             </LinearLayout>
+            <TextView
+                android:id="@+id/widget_cal_spend6"
+                android:layout_width="wrap_content"
+                android:layout_height="11dp"
+                android:layout_marginTop="1dp"
+                android:ellipsize="end"
+                android:gravity="center"
+                android:maxLines="1"
+                android:text=""
+                android:textColor="#E45F68"
+                android:textSize="8sp" />
         </LinearLayout>
 
     </LinearLayout>

@@ -183,8 +183,10 @@
       row.replaceChild(check, row.lastChild);
       // 비공개 일정은 제목이 가려져 있으므로 위젯에서 편집하지 않는다(완료 체크만 가능)
       if (!t.hidden) row.onclick = () => openEditor(t);
+      row.dataset.itemId = String(t.id);
       list.appendChild(row);
     });
+    wireReorder(list, ds, day.todos);
 
     day.ledger.forEach(e => {
       const sign = e.type === 'income' ? '+' : '-';
@@ -203,6 +205,118 @@
         s.name, ['구독', s.category && s.category !== '구독' ? s.category : '', s.cycleLabel].filter(Boolean).join(' · '),
         { cls: 'amount', text: '-' + won(s.amount) }
       ));
+    });
+  }
+
+  // ── 일정 순서 바꾸기 ───────────────────────────────────────────────────
+  // 순서는 웹앱·폰 위젯과 같이 /api/state 의 itemOrder[날짜] 에 저장한다.
+  // 다른 내용(가계부 등)을 지우지 않도록 최신 상태를 읽어 itemOrder 만 바꿔 다시 쓴다.
+  let orderSaveChain = Promise.resolve();
+
+  function saveDayOrder(ds, ids) {
+    model.state.itemOrder = { ...(model.state.itemOrder || {}), [ds]: ids };
+    orderSaveChain = orderSaveChain.then(async () => {
+      const res = await window.widget.api('GET', '/api/state');
+      if (!res || !res.ok) throw new Error('GET /api/state');
+      const body = JSON.parse(res.text);
+      const data = body && body.data;
+      if (!data || typeof data !== 'object') throw new Error('empty state');
+      data.itemOrder = { ...(data.itemOrder || {}), [ds]: ids };
+      await api('POST', '/api/state', data);
+    }).catch(() => {
+      showToast('순서를 저장하지 못했어요. 연결을 확인해 주세요.');
+      return load();
+    });
+    return orderSaveChain;
+  }
+
+  // 일정 줄 왼쪽 손잡이(⋮⋮)를 끌거나, 손잡이에 포커스를 두고 ↑↓ 로 순서를 바꾼다.
+  function wireReorder(list, ds, dayTodos) {
+    const idByKey = new Map(dayTodos.map(t => [String(t.id), t.id]));
+    const todoRows = () => [...list.children].filter(el => el.dataset.itemId !== undefined);
+    const commit = ids => {
+      saveDayOrder(ds, ids);
+      renderAgenda();
+    };
+    if (dayTodos.length < 2) return;
+
+    todoRows().forEach(row => {
+      row.classList.add('reorderable');
+      const handle = document.createElement('span');
+      handle.className = 'handle';
+      handle.textContent = '⋮⋮';
+      handle.tabIndex = 0;
+      handle.setAttribute('role', 'button');
+      handle.setAttribute('aria-label', '순서 바꾸기 (끌거나 위아래 방향키)');
+      handle.title = '끌어서 순서 바꾸기';
+      row.prepend(handle);
+      handle.addEventListener('click', e => e.stopPropagation());
+
+      handle.addEventListener('keydown', e => {
+        if (e.key !== 'ArrowUp' && e.key !== 'ArrowDown') return;
+        e.preventDefault();
+        e.stopPropagation();
+        const rows = todoRows();
+        const from = rows.indexOf(row);
+        const to = e.key === 'ArrowUp' ? from - 1 : from + 1;
+        if (to < 0 || to >= rows.length) return;
+        const keys = rows.map(r => r.dataset.itemId);
+        const [moved] = keys.splice(from, 1);
+        keys.splice(to, 0, moved);
+        const key = row.dataset.itemId;
+        commit(keys.map(k => idByKey.get(k)));
+        const next = document.querySelector(`#agendaList .row[data-item-id="${key}"] .handle`);
+        if (next) next.focus();
+      });
+
+      handle.addEventListener('pointerdown', e => {
+        if (e.button !== undefined && e.button !== 0) return;
+        e.preventDefault();
+        e.stopPropagation();
+        try { handle.setPointerCapture(e.pointerId); } catch (err) { /* 지원하지 않는 환경 */ }
+        // 끄는 동안에는 DOM 을 옮기지 않고 transform 으로만 보여 주고, 손을 떼면 한 번에 저장한다.
+        const rows = todoRows();
+        const from = rows.indexOf(row);
+        const boxes = rows.map(r => r.getBoundingClientRect());
+        const centers = boxes.map(b => b.top + b.height / 2);
+        const gap = rows.length > 1 ? Math.max(0, boxes[1].top - boxes[0].bottom) : 0;
+        const shift = boxes[from].height + gap;
+        const startY = e.clientY;
+        let to = from;
+        list.classList.add('reordering');
+        row.classList.add('dragging');
+
+        const onMove = ev => {
+          const dy = ev.clientY - startY;
+          row.style.transform = `translateY(${dy}px)`;
+          const draggedCenter = centers[from] + dy;
+          to = centers.filter((c, i) => i !== from && c < draggedCenter).length;
+          rows.forEach((r, i) => {
+            if (r === row) return;
+            let offset = 0;
+            if (from < to && i > from && i <= to) offset = -shift;
+            else if (to < from && i >= to && i < from) offset = shift;
+            r.style.transform = offset ? `translateY(${offset}px)` : '';
+          });
+        };
+        const onEnd = () => {
+          handle.removeEventListener('pointermove', onMove);
+          handle.removeEventListener('pointerup', onEnd);
+          handle.removeEventListener('pointercancel', onEnd);
+          rows.forEach(r => { r.style.transform = ''; });
+          row.classList.remove('dragging');
+          list.classList.remove('reordering');
+          if (to !== from) {
+            const ids = rows.map(r => idByKey.get(r.dataset.itemId));
+            const [moved] = ids.splice(from, 1);
+            ids.splice(to, 0, moved);
+            commit(ids);
+          }
+        };
+        handle.addEventListener('pointermove', onMove);
+        handle.addEventListener('pointerup', onEnd);
+        handle.addEventListener('pointercancel', onEnd);
+      });
     });
   }
 

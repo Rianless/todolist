@@ -34,8 +34,20 @@ data class DayExtra(
         get() = "${if (kind == "subscription") "\uD83D\uDD16 " else ""}$title · $amountText"
 }
 
+/** 웹 달력 칸과 같은 간단 금액 표기: 1만 원 미만 `4,500`, 1만 원 이상 `1.5만`, 1억 이상 `1.2억` */
+fun formatCompactWon(amount: Long): String {
+    fun trimmed(v: Double): String = if (v == Math.floor(v)) v.toLong().toString() else v.toString()
+    val abs = Math.abs(amount)
+    return when {
+        abs >= 100_000_000L -> "${trimmed(Math.round(amount / 10_000_000.0) / 10.0)}억"
+        abs >= 10_000L -> "${trimmed(Math.round(amount / 1_000.0) / 10.0)}만"
+        else -> "%,d".format(amount)
+    }
+}
+
 object CloudStateClient {
     private const val STATE_API_URL = "https://todolist-liart-mu.vercel.app/api/state"
+    private const val TODOS_API_URL = "https://todolist-liart-mu.vercel.app/api/todos"
 
     /** 웹앱에서 사용자가 정한 그날 일정 순서(일정 id 목록). 정한 적이 없으면 빈 목록. */
     fun fetchItemOrder(date: LocalDate): List<String> {
@@ -45,11 +57,63 @@ object CloudStateClient {
     }
 
     /**
+     * 그날 일정 하나를 [delta] 칸(위 -1, 아래 +1) 옮겨 순서를 /api/state 의 itemOrder 에 저장한다. (웹앱·PC 위젯과 같은 저장 방식)
+     * 화면에 보이는 순서(시간순 + 정한 순서)를 기준으로 옮기고, 가계부 등 다른 내용은 그대로 둔다.
+     * 더 못 옮기면 [MoveResult.EDGE], 네트워크 오류면 [MoveResult.FAILED].
+     */
+    fun moveTodoInDay(date: LocalDate, todoId: Int, delta: Int): MoveResult {
+        val state = fetchState() ?: return MoveResult.FAILED
+        val visible = fetchDayTodoIds(date) ?: return MoveResult.FAILED
+        val saved = state.optJSONObject("itemOrder")?.optJSONArray(date.toString())
+            ?.let { array -> (0 until array.length()).map { array.opt(it).toString() } }
+            ?: emptyList()
+        val current = applyItemOrder(visible, saved) { it }
+        val moved = moveInOrder(current, todoId.toString(), delta) ?: return MoveResult.EDGE
+        val itemOrder = state.optJSONObject("itemOrder") ?: JSONObject().also { state.put("itemOrder", it) }
+        itemOrder.put(date.toString(), JSONArray(moved.map { it.toIntOrNull() ?: it }))
+        return if (postState(state)) MoveResult.MOVED else MoveResult.FAILED
+    }
+
+    enum class MoveResult { MOVED, EDGE, FAILED }
+
+    /** 그날 일정 id 들 (서버가 돌려주는 시간순). 실패하면 null. */
+    private fun fetchDayTodoIds(date: LocalDate): List<String>? {
+        return runCatching {
+            val connection = URL("$TODOS_API_URL?date=$date").openConnection() as HttpURLConnection
+            connection.connectTimeout = 8000
+            connection.readTimeout = 8000
+            val response = connection.inputStream.bufferedReader().readText()
+            connection.disconnect()
+            val array = JSONArray(response)
+            (0 until array.length()).map { array.getJSONObject(it).optInt("id").toString() }
+        }.getOrNull()
+    }
+
+    /**
      * 웹앱 상태(/api/state)에서 해당 날짜의 가계부 내역과 구독 결제를 가져온다.
      * 네트워크 오류 시 빈 목록을 돌려준다.
      */
     fun fetchDayExtras(date: LocalDate): List<DayExtra> {
         val state = fetchState() ?: return emptyList()
+        return dayExtrasFrom(state, date)
+    }
+
+    /**
+     * weekStart 부터 7일간 날짜별 지출 합계(가계부 지출 + 구독 결제). 웹 달력 칸의 금액과 같은 값이다.
+     * 지출이 없는 날은 담지 않으며, 네트워크 오류 시 빈 맵을 돌려준다.
+     */
+    fun fetchWeekSpend(weekStart: LocalDate): Map<String, Long> {
+        val state = fetchState() ?: return emptyMap()
+        val result = mutableMapOf<String, Long>()
+        for (offset in 0..6) {
+            val day = weekStart.plusDays(offset.toLong())
+            val spend = dayExtrasFrom(state, day).filter { it.kind != "income" }.sumOf { it.amount }
+            if (spend > 0) result[day.toString()] = spend
+        }
+        return result
+    }
+
+    private fun dayExtrasFrom(state: JSONObject, date: LocalDate): List<DayExtra> {
         val dateValue = date.toString()
         val result = mutableListOf<DayExtra>()
 
