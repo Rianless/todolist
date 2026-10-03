@@ -12,9 +12,4 @@
         android:title="@string/action_export"
         app:showAsAction="never" />
 
-    <item
-        android:id="@+id/action_auto_expense"
-        android:title="@string/action_auto_expense"
-        app:showAsAction="never" />
-
 </menu>

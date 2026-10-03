@@ -15,7 +15,6 @@ import androidx.recyclerview.widget.LinearLayoutManager
 import com.google.android.material.floatingactionbutton.FloatingActionButton
 import com.todoapp.widget.databinding.ActivityMainBinding
 import com.todoapp.widget.ui.AddEditActivity
-import com.todoapp.widget.ui.AutoExpenseSettingsActivity
 import com.todoapp.widget.ui.TodoAdapter
 import com.todoapp.widget.ui.TodoViewModel
 import com.todoapp.widget.widget.TodoWidgetProvider
@@ -101,10 +100,6 @@ class MainActivity : AppCompatActivity() {
         return when (item.itemId) {
             R.id.action_import -> {
                 importLauncher.launch("application/json")
-                true
-            }
-            R.id.action_auto_expense -> {
-                startActivity(Intent(this, AutoExpenseSettingsActivity::class.java))
                 true
             }
             R.id.action_export -> {

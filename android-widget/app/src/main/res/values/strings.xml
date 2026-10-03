@@ -5,5 +5,4 @@
     <string name="widget_description">Check today\'s tasks from your home screen</string>
     <string name="action_import">Import JSON</string>
     <string name="action_export">Export JSON</string>
-    <string name="action_auto_expense">자동 가계부 설정</string>
 </resources>
