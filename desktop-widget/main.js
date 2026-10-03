@@ -173,10 +173,10 @@ function createTray() {
 }
 
 ipcMain.handle('config', () => ({ serverUrl: SERVER_URL, alwaysOnTop: win ? win.isAlwaysOnTop() : false }));
-// 일정(/api/todos) 읽기/쓰기 전용 통로. 렌더러가 임의 주소로 요청하지 못하게 경로와 메서드를 제한한다.
+// 일정(/api/todos)과 일정 순서가 든 /api/state 읽기/쓰기 전용 통로. 렌더러가 임의 주소로 요청하지 못하게 경로와 메서드를 제한한다.
 ipcMain.handle('api', async (_e, { method, path: apiPath, body }) => {
   const okMethod = ['GET', 'POST', 'PATCH', 'DELETE'].includes(method);
-  const okPath = typeof apiPath === 'string' && /^\/api\/todos(\?id=\d+)?$/.test(apiPath);
+  const okPath = typeof apiPath === 'string' && /^\/api\/(todos(\?id=\d+)?|state)$/.test(apiPath);
   if (!okMethod || !okPath) return { ok: false, status: 400, text: '' };
   try {
     const res = await net.fetch(SERVER_URL + apiPath, {
