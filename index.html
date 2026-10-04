@@ -6626,19 +6626,13 @@ button:active:not(:disabled) {
           </div>
 
           <div>
-
-            <label class="form-label">카테고리</label>
-
-            <select class="form-select" id="f_cat"></select>
-
+            <label class="form-label">종료 날짜 <span style="font-weight:400;color:var(--text3);">(여러 날)</span></label>
+            <input class="form-input" id="f_endDate" type="date">
           </div>
 
         </div>
 
-        <div class="form-group" id="endDateWrap">
-          <label class="form-label">종료 날짜 <span style="font-weight:400;color:var(--text3);">(1박 2일처럼 여러 날일 때)</span></label>
-          <input class="form-input" id="f_endDate" type="date">
-        </div>
+
         <div class="form-group" style="margin-bottom:6px;">
           <label class="allday-label" for="f_allday">
 
@@ -6690,14 +6684,14 @@ button:active:not(:disabled) {
 
           </div>
 
-          <div id="repeatEndWrap" style="visibility:hidden;">
-
-            <label class="form-label">종료일</label>
-
-            <input class="form-input" id="f_repeatEnd" type="date">
-
+          <div>
+            <label class="form-label">카테고리</label>
+            <select class="form-select" id="f_cat"></select>
           </div>
-
+        </div>
+        <div class="form-group" id="repeatEndWrap" style="display:none;">
+          <label class="form-label">반복 종료일</label>
+          <input class="form-input" id="f_repeatEnd" type="date">
         </div>
 
         <div class="form-group">
@@ -11212,7 +11206,7 @@ function openAdd(presetDate=null) {
   document.getElementById('f_repeat').value='none';
 
   document.getElementById('f_repeatEnd').value='';
-  document.getElementById('repeatEndWrap').style.visibility='hidden';
+  document.getElementById('repeatEndWrap').style.display='none';
   document.getElementById('f_endDate').value='';
   document.getElementById('f_endDate').disabled=false;
 
@@ -11288,7 +11282,7 @@ function openEdit(id) {
 
   document.getElementById('f_repeatEnd').value = item.repeatEnd||'';
 
-  document.getElementById('repeatEndWrap').style.visibility = repeatV!=='none'?'visible':'hidden';
+  document.getElementById('repeatEndWrap').style.display = repeatV!=='none'?'':'none';
   document.getElementById('f_endDate').value = repeatV==='none' ? (item.endDate||'') : '';
   document.getElementById('f_endDate').disabled = repeatV!=='none';
 
@@ -13563,7 +13557,7 @@ function onRepeatChange() {
 
   const v = document.getElementById('f_repeat').value;
 
-  document.getElementById('repeatEndWrap').style.visibility = v==='none' ? 'hidden' : 'visible';
+  document.getElementById('repeatEndWrap').style.display = v==='none' ? 'none' : '';
   // 반복 일정과 여러 날 일정은 함께 쓰지 않는다
   const endDateInput = document.getElementById('f_endDate');
   if (endDateInput) { if (v!=='none') endDateInput.value=''; endDateInput.disabled = v!=='none'; }
