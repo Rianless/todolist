@@ -24,6 +24,7 @@ import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.data.applyItemOrder
 import com.todoapp.widget.data.formatCompactWon
 import com.todoapp.widget.data.monthWeekCount
+import com.todoapp.widget.data.spanDayKeys
 import com.todoapp.widget.ui.AddEditActivity
 import com.todoapp.widget.ui.TodoDetailPopupActivity
 import kotlinx.coroutines.CoroutineScope
@@ -516,8 +517,10 @@ class TodoWidgetProvider : AppWidgetProvider() {
             val dotsByDay = mutableMapOf<String, MutableList<Int>>()
             weekItems.forEach { item ->
                 val color = parseColorSafe(item.categoryColor)
-                val list = dotsByDay.getOrPut(item.date) { mutableListOf() }
-                if (list.size < 3) list.add(color)
+                spanDayKeys(item.date, item.endDate).forEach { day ->
+                    val list = dotsByDay.getOrPut(day) { mutableListOf() }
+                    if (list.size < 3) list.add(color)
+                }
             }
 
             val updated = RemoteViews(context.packageName, R.layout.widget_layout).apply {
@@ -635,8 +638,10 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
             val dotsByDay = mutableMapOf<String, MutableList<Int>>()
             gridItems.forEach { item ->
-                val list = dotsByDay.getOrPut(item.date) { mutableListOf() }
-                if (list.size < 3) list.add(parseColorSafe(item.categoryColor))
+                spanDayKeys(item.date, item.endDate).forEach { day ->
+                    val list = dotsByDay.getOrPut(day) { mutableListOf() }
+                    if (list.size < 3) list.add(parseColorSafe(item.categoryColor))
+                }
             }
             val progress = "${monthItems.count { it.done }}/${monthItems.size} 완료"
             manager.updateAppWidget(widgetId, buildMonthViews(context, widgetId, selected, gridStart, weeks, dotsByDay, spendByDay, progress))
@@ -955,7 +960,8 @@ class TodoWidgetProvider : AppWidgetProvider() {
     }
 
     // 이번 주 일정 전체 가져오기 (도트 + 진행도용)
-    private data class MiniTodo(val date: String, val categoryColor: String, val done: Boolean)
+    // endDate: 여러 날 일정(1박 2일 등)의 종료 날짜. 반복이 없는 일정의 repeat_end 열을 쓴다.
+    private data class MiniTodo(val date: String, val categoryColor: String, val done: Boolean, val endDate: String = "")
 
     private data class DateTodo(
         val id: Int,
@@ -1012,7 +1018,8 @@ class TodoWidgetProvider : AppWidgetProvider() {
                     MiniTodo(
                         date = o.optString("date"),
                         categoryColor = o.optString("category_color", "#636366"),
-                        done = o.optBoolean("done")
+                        done = o.optBoolean("done"),
+                        endDate = if (o.optString("repeat", "none").let { it.isEmpty() || it == "none" }) o.optString("repeat_end") else ""
                     )
                 )
             }
