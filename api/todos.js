@@ -1,3 +1,5 @@
+const { buildTodoFilters } = require('./_todoFilters');
+
 module.exports = async (req, res) => {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
@@ -18,13 +20,11 @@ module.exports = async (req, res) => {
   };
 
   if (req.method === 'GET') {
-    const filters = [];
-    if (req.query.id) filters.push(`id=eq.${encodeURIComponent(req.query.id)}`);
-    if (req.query.date) filters.push(`date=eq.${encodeURIComponent(req.query.date)}`);
-    if (req.query.from) filters.push(`date=gte.${encodeURIComponent(req.query.from)}`);
-    if (req.query.to) filters.push(`date=lte.${encodeURIComponent(req.query.to)}`);
-    filters.push('order=date.asc,start_time.asc,created_at.asc');
-    const r = await fetch(`${base}?${filters.join('&')}`, { headers });
+    let r = await fetch(`${base}?${buildTodoFilters(req.query).join('&')}`, { headers });
+    if (!r.ok) {
+      // 여러 날 일정 조건이 거부되더라도 일정 조회 자체는 되도록 예전 조건으로 한 번 더 시도한다.
+      r = await fetch(`${base}?${buildTodoFilters(req.query, { legacy: true }).join('&')}`, { headers });
+    }
     const data = await r.json();
     return res.status(r.status).json(data);
   }

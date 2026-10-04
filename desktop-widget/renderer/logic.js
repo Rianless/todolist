@@ -66,6 +66,13 @@
     return false;
   }
 
+  // 여러 날 일정(1박 2일 등): 시작일 다음 날부터 종료일까지 모든 날에 나타난다. (index.html 의 addSpanInstances 와 같은 규칙)
+  function spansDate(item, ds) {
+    if (!item.date || !item.endDate || item.endDate <= item.date) return false;
+    if (item.repeat && item.repeat !== 'none') return false;
+    return ds > item.date && ds <= item.endDate;
+  }
+
   // /api/todos 의 행(snake_case) → 위젯에서 쓰는 모양
   function normalizeTodo(row) {
     const st = row.start_time || '';
@@ -84,7 +91,9 @@
       memo: row.memo || row.note || '',
       hidden: !!row.hide_title || !!row.secret,
       repeat: row.repeat || 'none',
-      repeatEnd: row.repeat_end || ''
+      repeatEnd: row.repeat_end || '',
+      // 반복이 없는 일정의 repeat_end 열은 "종료 날짜"(여러 날 일정)로 쓰인다
+      endDate: (!row.repeat || row.repeat === 'none') ? (row.repeat_end || '') : ''
     };
   }
 
@@ -111,7 +120,7 @@
     const dayTodos = applyDayOrder(
       state && state.itemOrder ? state.itemOrder[ds] : null,
       todos
-        .filter(t => t.date === ds || repeatOccursOn(t, ds))
+        .filter(t => t.date === ds || repeatOccursOn(t, ds) || spansDate(t, ds))
         .sort((a, b) => (a.startTime || '').localeCompare(b.startTime || ''))
     );
 
@@ -172,7 +181,7 @@
 
   const Logic = {
     DOW_KO, CYCLE_LABEL, fmtDate, parseDate, getSubDatesForMonth, subscriptionOccursOn,
-    repeatOccursOn, normalizeTodo, timeLabel, applyDayOrder, buildDay, rangeDots, weekDots, monthGrid, weekStartOf
+    repeatOccursOn, spansDate, normalizeTodo, timeLabel, applyDayOrder, buildDay, rangeDots, weekDots, monthGrid, weekStartOf
   };
 
   if (typeof module !== 'undefined' && module.exports) module.exports = Logic;

@@ -1,6 +1,9 @@
 {
   "name": "todolist",
   "version": "1.0.0",
+  "scripts": {
+    "test": "node test/todo_filters.test.js"
+  },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
   }

@@ -108,4 +108,31 @@ for (let m = 0; m < 12; m++) {
 }
 assert.deepStrictEqual(Object.keys(L.rangeDots(todos, state, g1.start, g1.count)).length, 35);
 
-console.log(`OK (${checked} date checks, ${orderChecks} order checks)`);
+// 8) 여러 날 일정: 웹앱(addSpanInstances)이 칸에 넣는 날짜와 위젯의 spansDate 가 같다
+const webSpan = new Function('fmtDate', `
+  ${grab('spanStartOf', 'function spanLabel')}
+  return { addSpanInstances, isMultiDay };
+`)(fmtDate);
+let spanChecks = 0;
+for (let i = 0; i < 300; i++) {
+  const start = new Date(2026, 0, 1 + Math.floor(Math.random() * 360));
+  const len = Math.floor(Math.random() * 6) - 1;            // -1(잘못된 값) ~ 4일 뒤
+  const end = new Date(start); end.setDate(end.getDate() + len);
+  const item = { id: 1, date: fmtDate(start), endDate: fmtDate(end), repeat: Math.random() < 0.2 ? 'weekly' : 'none' };
+  const rangeStart = new Date(start); rangeStart.setDate(rangeStart.getDate() - 3);
+  const rangeEnd = new Date(start); rangeEnd.setDate(rangeEnd.getDate() + 8);
+  const dmap = {};
+  webSpan.addSpanInstances(dmap, item, rangeStart, rangeEnd);
+  for (let k = -3; k <= 8; k++) {
+    const d = new Date(start); d.setDate(d.getDate() + k);
+    const ds = fmtDate(d);
+    assert.strictEqual(L.spansDate(item, ds), !!(dmap[ds] && dmap[ds].length), `span ${JSON.stringify(item)} ${ds}`);
+    spanChecks++;
+  }
+}
+const spanDay = L.buildDay([{ id: 1, date: '2026-10-06', endDate: '2026-10-08', repeat: 'none', title: '여행', startTime: '' }], { ledger: [], subscriptions: [] }, '2026-10-07');
+assert.deepStrictEqual(spanDay.todos.map(t => t.title), ['여행']);
+assert.strictEqual(L.normalizeTodo({ id: 1, date: '2026-10-06', repeat: 'none', repeat_end: '2026-10-08' }).endDate, '2026-10-08');
+assert.strictEqual(L.normalizeTodo({ id: 1, date: '2026-10-06', repeat: 'weekly', repeat_end: '2026-12-08' }).endDate, '');
+
+console.log(`OK (${checked} date checks, ${orderChecks} order checks, ${spanChecks} span checks)`);

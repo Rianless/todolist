@@ -5999,6 +5999,16 @@ button:active:not(:disabled) {
 .agenda-row.dragging { position: relative; z-index: 1; box-shadow: 0 8px 24px rgba(31, 36, 48, .22); }
 .agenda-row.dragging .agenda-handle { cursor: grabbing; color: var(--accent); }
 .agenda-row[role="button"]:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+/* 여러 날 일정(1박 2일 등): 칸을 가로질러 이어진 막대 */
+.cal-cell.has-span { overflow: visible; z-index: 1; }
+.calendar-surface .cal-dot.cal-span,
+.cal-dot.cal-span {
+  background: color-mix(in srgb, var(--event-color, var(--accent)) 30%, transparent) !important;
+  border-radius: 4px !important;
+}
+.cal-dot.cal-span.span-prev { border-top-left-radius: 0 !important; border-bottom-left-radius: 0 !important; }
+.cal-dot.cal-span.span-next { border-top-right-radius: 0 !important; border-bottom-right-radius: 0 !important; }
+.cal-dot.cal-gap { visibility: hidden; }
 </style>
 
 </head>
@@ -6625,8 +6635,11 @@ button:active:not(:disabled) {
 
         </div>
 
+        <div class="form-group" id="endDateWrap">
+          <label class="form-label">종료 날짜 <span style="font-weight:400;color:var(--text3);">(1박 2일처럼 여러 날일 때)</span></label>
+          <input class="form-input" id="f_endDate" type="date">
+        </div>
         <div class="form-group" style="margin-bottom:6px;">
-
           <label class="allday-label" for="f_allday">
 
             <input type="checkbox" id="f_allday" onchange="toggleAlldayMode(this.checked)" style="accent-color:var(--accent);width:14px;height:14px;cursor:pointer;">
@@ -7881,7 +7894,7 @@ async function syncItemsToAPI() {
 
         repeat: item.repeat || 'none',
 
-        repeat_end: item.repeatEnd || '',
+        repeat_end: (item.repeat && item.repeat !== 'none') ? (item.repeatEnd || '') : (item.endDate || ''),
 
         memo: item.memo || ''
 
@@ -8058,7 +8071,8 @@ async function loadItemsFromAPI() {
 
           repeat: row.repeat || 'none',
 
-          repeatEnd: row.repeat_end || null,
+          repeatEnd: (row.repeat && row.repeat !== 'none') ? (row.repeat_end || null) : null,
+          endDate: (!row.repeat || row.repeat === 'none') ? (row.repeat_end || null) : null,
 
           checklist: normalizeChecklist(row.checklist || existingItem?.checklist)
 
@@ -9233,6 +9247,8 @@ function renderCal() {
 
     // generate repeat instances for this month
 
+    addSpanInstances(dmap, item, monthStart, monthEnd);
+
     generateRepeatInstances(item, monthStart, monthEnd).forEach(inst=>{
 
       if(!dmap[inst.date]) dmap[inst.date]=[];
@@ -9318,10 +9334,32 @@ function renderCal() {
 
 
 
+    // 여러 날 일정은 주(일~토) 단위로 같은 줄(레인)에 이어 붙여 그린다
+  const spanLane = {};   // `${주 번호}:${일정 id}` → 레인(위에서 몇 번째 줄)
+  const weekCount = Math.ceil((firstDow + daysInMonth) / 7);
+  for (let w = 0; w < weekCount; w++) {
+    const segs = new Map();
+    for (let c = 0; c < 7; c++) {
+      const dayNo = w * 7 + c - firstDow + 1;
+      if (dayNo < 1 || dayNo > daysInMonth) continue;
+      const dsw = `${calY}-${mm}-${String(dayNo).padStart(2,'0')}`;
+      (dmap[dsw] || []).filter(isMultiDay).forEach(it => {
+        const key = String(it.id);
+        const seg = segs.get(key) || { id: key, a: c, b: c, len: dayDiff(spanStartOf(it), it.endDate) };
+        seg.b = c;
+        segs.set(key, seg);
+      });
+    }
+    const laneEnd = [];
+    [...segs.values()].sort((x, y) => x.a - y.a || y.len - x.len || (x.id < y.id ? -1 : 1)).forEach(seg => {
+      let k = 0;
+      while (laneEnd[k] !== undefined && laneEnd[k] >= seg.a) k++;
+      laneEnd[k] = seg.b;
+      spanLane[`${w}:${seg.id}`] = k;
+    });
+  }
   for(let i=0;i<firstDow;i++){
-
     const e=document.createElement('div'); e.className='cal-cell empty'; grid.appendChild(e);
-
   }
 
 
@@ -9399,7 +9437,21 @@ function renderCal() {
       spend.title = `이 날 지출 -${dayExpense.toLocaleString()}원`;
       cell.appendChild(spend);
     }
-    evts.slice(0,2).forEach(item=>{
+    const weekNo = Math.floor((firstDow + d - 1) / 7);
+    const laneItems = [];
+    evts.filter(isMultiDay).forEach(it => { laneItems[spanLane[`${weekNo}:${it.id}`]] = it; });
+    const chipList = [];
+    for (let k = 0; k < laneItems.length; k++) chipList.push(laneItems[k] ? { item: laneItems[k] } : { gap: true });
+    evts.filter(it => !isMultiDay(it)).forEach(it => chipList.push({ item: it }));
+    chipList.slice(0,2).forEach(entry=>{
+      if (entry.gap) {
+        const gap=document.createElement('span');
+        gap.className='cal-dot cal-gap';
+        gap.textContent='\u00a0';
+        cell.appendChild(gap);
+        return;
+      }
+      const item = entry.item;
       const dot=document.createElement('span');
 
       dot.className='cal-dot'+(item.done?' done':'');
@@ -9411,6 +9463,21 @@ function renderCal() {
 
       dot.textContent=(item.secret&&!item._unlocked?'🔒 비공개':displayTitle);
       dot.title = item.time ? `${item.time.split('~')[0]} ${displayTitle}` : displayTitle;
+      if (isMultiDay(item)) {
+        // 시작일과 이어지는 칸을 한 줄 막대로 보이게 한다 (좌우 연결은 connectCalSpans 가 맞춘다)
+        const isStart = ds === spanStartOf(item);
+        const isEnd = ds === item.endDate;
+        const contPrev = !isStart && dow !== 0 && d > 1;
+        const contNext = !isEnd && dow !== 6 && d < daysInMonth;
+        dot.classList.add('cal-span');
+        if (contPrev) dot.classList.add('span-prev');
+        if (contNext) dot.classList.add('span-next');
+        dot.dataset.prev = contPrev ? '1' : '0';
+        dot.dataset.next = contNext ? '1' : '0';
+        dot.title = `${spanLabel(item)} · ${displayTitle}`;
+        if (contPrev) dot.textContent = '\u00a0';
+        cell.classList.add('has-span');
+      }
 
 
 
@@ -9442,13 +9509,11 @@ function renderCal() {
 
     });
 
-    if(evts.length>2){
-
+    const hiddenCount = evts.length - chipList.slice(0,2).filter(e => !e.gap).length;
+    if(hiddenCount>0){
       const more=document.createElement('span');
-
       more.className='cal-more';
-
-      more.textContent=`+${evts.length-2}`;
+      more.textContent=`+${hiddenCount}`;
 
       cell.appendChild(more);
 
@@ -9472,7 +9537,7 @@ function renderCal() {
 
       const it = items.find(i=>i.id===_calDragId);
 
-      if (it && it.date !== ds) { it.date = ds; renderCal(); }
+      if (it && it.date !== ds) { moveItemDate(it, ds); renderCal(); }
 
       _calDragId = null;
 
@@ -9499,8 +9564,8 @@ function renderCal() {
 
 
 
+  connectCalSpans(grid);
   fitCalCells(grid);
-
   renderCalDayList(calSelectedDate, dmap[calSelectedDate] || []);
 
 }
@@ -9613,6 +9678,19 @@ function wireAgendaReorder(list, ds, dayItems) {
 }
 
 // 칸 높이에 다 들어가지 않으면 일정 줄을 줄이고 "+n"으로 바꾼다 (지출 줄이 일정을 가리지 않게)
+// 여러 날 일정 막대가 칸 사이 틈(칸 안쪽 여백 + 칸 간격)을 가로질러 이웃 칸의 막대와 맞닿게 한다.
+function connectCalSpans(grid) {
+  const gap = parseFloat(getComputedStyle(grid).columnGap) || 0;
+  grid.querySelectorAll('.cal-dot.cal-span').forEach(chip => {
+    const cs = getComputedStyle(chip.closest('.cal-cell'));
+    const reachLeft = (parseFloat(cs.paddingLeft) || 0) + gap / 2;
+    const reachRight = (parseFloat(cs.paddingRight) || 0) + gap / 2;
+    chip.style.setProperty('width', 'auto', 'important');
+    chip.style.setProperty('margin-left', chip.dataset.prev === '1' ? `-${reachLeft}px` : '2px', 'important');
+    chip.style.setProperty('margin-right', chip.dataset.next === '1' ? `-${reachRight}px` : '2px', 'important');
+  });
+}
+
 function fitCalCells(grid) {
   grid.querySelectorAll('.cal-cell:not(.empty)').forEach(cell => {
     if (!cell.clientHeight) return; // 화면에 안 보이는 상태에서는 측정할 수 없다
@@ -9734,7 +9812,8 @@ function renderCalDayList(ds, dayEvents) {
     const title = document.createElement('strong');
     title.textContent = item.hideTitle ? '비공개 일정' : item.title;
     const meta = document.createElement('small');
-    meta.textContent = [item.category, item.location].filter(Boolean).join(' · ');
+    const spanText = isMultiDay(item) ? `${spanLabel(item)} · ${dayDiff(spanStartOf(item), ds) + 1}일째` : '';
+    meta.textContent = [spanText, item.category, item.location].filter(Boolean).join(' · ');
     body.append(title, meta);
     const arrow = document.createElement('span');
     arrow.className = 'agenda-arrow';
@@ -9929,7 +10008,7 @@ function _setupCalTouchDrag(dot, item) {
 
       const it = items.find(i=>i.id===_calDragId);
 
-      if (it && it.date !== cell.dataset.date) { it.date = cell.dataset.date; saveData(); renderCal(); }
+      if (it && it.date !== cell.dataset.date) { moveItemDate(it, cell.dataset.date); saveData(); renderCal(); }
 
     }
 
@@ -11133,8 +11212,9 @@ function openAdd(presetDate=null) {
   document.getElementById('f_repeat').value='none';
 
   document.getElementById('f_repeatEnd').value='';
-
   document.getElementById('repeatEndWrap').style.visibility='hidden';
+  document.getElementById('f_endDate').value='';
+  document.getElementById('f_endDate').disabled=false;
 
   removePhoto();
 
@@ -11209,6 +11289,8 @@ function openEdit(id) {
   document.getElementById('f_repeatEnd').value = item.repeatEnd||'';
 
   document.getElementById('repeatEndWrap').style.visibility = repeatV!=='none'?'visible':'hidden';
+  document.getElementById('f_endDate').value = repeatV==='none' ? (item.endDate||'') : '';
+  document.getElementById('f_endDate').disabled = repeatV!=='none';
 
   currentPhoto = item.photo || null;
 
@@ -11473,14 +11555,14 @@ async function saveItem() {
 
 
 
+  const endDateInput = document.getElementById('f_endDate');
+  let endDate = (document.getElementById('f_repeat').value==='none' && endDateInput.value) ? endDateInput.value : null;
+  if (endDate && date && endDate < date) { endDateInput.classList.add('form-error'); setTimeout(()=>endDateInput.classList.remove('form-error'),1500); return; }
+  if (endDate && endDate === date) endDate = null;
   const st = document.getElementById('f_st').value;
-
   const et = document.getElementById('f_et').value;
-
   const isAllday = document.getElementById('f_allday').checked;
-
   const time = isAllday ? 'allday' : (st && et ? `${st}~${et}` : st||'');
-
   const existing = editingId !== null ? items.find(i=>i.id===editingId) : null;
   const wasEditing = editingId !== null;
 
@@ -11507,6 +11589,7 @@ async function saveItem() {
     photo: currentPhoto || null,
 
     repeat: repeatVal, repeatEnd: repeatVal!=='none' ? (document.getElementById('f_repeatEnd').value||null) : null,
+    endDate,
 
     personal: true, done: false
 
@@ -11611,6 +11694,7 @@ function openDetail(id, skipHistory = false) {
 
     ${item.instructor?`<div class="detail-row"><span class="dr-key">강사</span><span class="dr-val">${item.instructor}</span></div>`:''}
 
+    ${isMultiDay(item)?`<div class="detail-row"><span class="dr-key">기간</span><span class="dr-val">${item.date} ~ ${item.endDate} · ${spanLabel(item)}</span></div>`:''}
     ${item.repeat&&item.repeat!=='none'?`<div class="detail-row"><span class="dr-key">반복</span><span class="dr-val">${{daily:'매일',weekly:'매주',monthly:'매월'}[item.repeat]||''}${item.repeatEnd?' · ~'+item.repeatEnd:''}</span></div>`:''}
 
     <div class="detail-row"><span class="dr-key">중요도</span><span class="dr-val">${prioLabels[item.priority||'none']}</span></div>
@@ -12271,7 +12355,7 @@ function renderWeek() {
     if (!dmap[it.date]) dmap[it.date] = [];
 
     dmap[it.date].push(it);
-
+    addSpanInstances(dmap, it, base, endOfWeek);
     if (it.repeat && it.repeat !== 'none') {
 
       generateRepeatInstances(it, base, endOfWeek).forEach(inst => {
@@ -13374,6 +13458,45 @@ function exportLedgerCSV() {
 
 ══════════════════════════════════════ */
 
+/* ── 여러 날에 걸친 일정 (1박 2일, 2박 3일 …) ──────────────────────────
+   item.endDate 가 item.date 보다 뒤면 그 사이 모든 날에 나타난다. (반복 일정과는 함께 쓰지 않는다)
+   시작일 이후의 날에는 {...item, date: 그날, _spanOf: 시작일} 복사본을 달력 칸에 넣는다. */
+function spanStartOf(item) { return (item && (item._spanOf || item.date)) || ''; }
+function isMultiDay(item) {
+  const start = spanStartOf(item);
+  return !!(item && start && item.endDate && item.endDate > start && (!item.repeat || item.repeat === 'none'));
+}
+function dayDiff(a, b) {
+  return Math.round((new Date(b + 'T00:00:00') - new Date(a + 'T00:00:00')) / 86400000);
+}
+function addSpanInstances(dmap, item, rangeStart, rangeEnd) {
+  if (!isMultiDay(item) || item._spanOf) return;
+  const last = new Date(item.endDate + 'T00:00:00');
+  const cur = new Date(item.date + 'T00:00:00');
+  cur.setDate(cur.getDate() + 1);
+  while (cur < rangeStart) cur.setDate(cur.getDate() + 1);
+  for (; cur <= last && cur <= rangeEnd; cur.setDate(cur.getDate() + 1)) {
+    const ds = fmtDate(cur);
+    if (!dmap[ds]) dmap[ds] = [];
+    dmap[ds].push({ ...item, date: ds, _spanOf: item.date });
+  }
+}
+function spanLabel(item) {
+  const start = spanStartOf(item);
+  if (!isMultiDay(item)) return '';
+  const total = dayDiff(start, item.endDate) + 1;
+  return `${total - 1}박 ${total}일`;
+}
+// 일정을 다른 날짜로 옮길 때 종료 날짜도 같은 만큼 옮겨 기간을 유지한다.
+function moveItemDate(item, newDate) {
+  if (item.endDate && item.date) {
+    const shifted = new Date(item.endDate + 'T00:00:00');
+    shifted.setDate(shifted.getDate() + dayDiff(item.date, newDate));
+    item.endDate = fmtDate(shifted);
+  }
+  item.date = newDate;
+}
+
 function generateRepeatInstances(item, rangeStart, rangeEnd) {
 
   const instances = [];
@@ -13441,6 +13564,9 @@ function onRepeatChange() {
   const v = document.getElementById('f_repeat').value;
 
   document.getElementById('repeatEndWrap').style.visibility = v==='none' ? 'hidden' : 'visible';
+  // 반복 일정과 여러 날 일정은 함께 쓰지 않는다
+  const endDateInput = document.getElementById('f_endDate');
+  if (endDateInput) { if (v!=='none') endDateInput.value=''; endDateInput.disabled = v!=='none'; }
 
 }
 
