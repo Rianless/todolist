@@ -102,11 +102,14 @@ object CloudStateClient {
      * weekStart 부터 7일간 날짜별 지출 합계(가계부 지출 + 구독 결제). 웹 달력 칸의 금액과 같은 값이다.
      * 지출이 없는 날은 담지 않으며, 네트워크 오류 시 빈 맵을 돌려준다.
      */
-    fun fetchWeekSpend(weekStart: LocalDate): Map<String, Long> {
+    fun fetchWeekSpend(weekStart: LocalDate): Map<String, Long> = fetchSpend(weekStart, 7)
+
+    /** [start] 부터 [days] 일간 날짜별 지출 합계. */
+    fun fetchSpend(start: LocalDate, days: Int): Map<String, Long> {
         val state = fetchState() ?: return emptyMap()
         val result = mutableMapOf<String, Long>()
-        for (offset in 0..6) {
-            val day = weekStart.plusDays(offset.toLong())
+        for (offset in 0 until days) {
+            val day = start.plusDays(offset.toLong())
             val spend = dayExtrasFrom(state, day).filter { it.kind != "income" }.sumOf { it.amount }
             if (spend > 0) result[day.toString()] = spend
         }
