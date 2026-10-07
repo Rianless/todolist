@@ -3635,6 +3635,9 @@ body::after {
 
 .ledger-actions { display: grid; grid-template-columns: 1fr auto; gap: 8px; margin-top: 10px; }
 
+.ledger-actions-stack { grid-template-columns: 1fr; }
+.ledger-actions-stack .ledger-export-btn { min-height: 38px; }
+
 .ledger-export-btn {
   border: 1px solid var(--border2); background: transparent; color: var(--text2);
   border-radius: 6px; padding: 0 12px; cursor: pointer; font-size: 11px;
@@ -6355,7 +6358,7 @@ button:active:not(:disabled) {
 
               <div id="ledgerList"></div>
 
-              <div class="ledger-actions">
+              <div class="ledger-actions ledger-actions-stack">
                 <button class="ledger-add-btn" onclick="openLedger();event.stopPropagation()">+ 수입 / 지출 추가</button>
                 <button class="ledger-export-btn" onclick="exportLedgerCSV();event.stopPropagation()" aria-label="현재 월 가계부 CSV 내보내기">CSV</button>
               </div>
