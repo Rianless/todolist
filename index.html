@@ -6343,6 +6343,7 @@ button:active:not(:disabled) {
 
               <div class="ledger-actions">
                 <button class="ledger-add-btn" onclick="openLedger();event.stopPropagation()">+ 수입 / 지출 추가</button>
+                <button class="ledger-export-btn" onclick="openLedgerCatManager();event.stopPropagation()" aria-label="가계부 카테고리 편집">🏷️ 카테고리</button>
                 <button class="ledger-export-btn" onclick="exportLedgerCSV();event.stopPropagation()" aria-label="현재 월 가계부 CSV 내보내기">CSV</button>
               </div>
 
@@ -6556,6 +6557,31 @@ button:active:not(:disabled) {
   </nav>
 
 </div><!-- end app -->
+
+<!-- 가계부 카테고리 편집 -->
+<div class="modal-overlay" id="ledgerCatModal" role="dialog" aria-modal="true" aria-labelledby="ledgerCatTitle">
+  <div class="modal-sheet cheongdo-manager-sheet">
+    <div class="modal-header">
+      <div>
+        <div class="modal-title" id="ledgerCatTitle">가계부 카테고리 편집</div>
+        <div class="cheongdo-manager-help">카테고리를 추가, 이름 변경, 삭제할 수 있어요. 삭제해도 기존 내역은 그대로 남습니다.</div>
+      </div>
+      <button class="modal-close" type="button" onclick="closeLedgerCatManager()" aria-label="닫기">✕</button>
+    </div>
+    <div class="modal-body">
+      <div class="ledger-chips" style="margin-bottom:12px;">
+        <button type="button" class="ledger-chip expense active" id="lcTabExpense" onclick="setLedgerCatTab('expense')" style="flex:1;">지출</button>
+        <button type="button" class="ledger-chip income" id="lcTabIncome" onclick="setLedgerCatTab('income')" style="flex:1;">수입</button>
+      </div>
+      <div id="ledgerCatList" class="cheongdo-manager-list"></div>
+      <div class="ledger-filter-row" style="margin-top:12px;">
+        <input class="form-input" id="ledgerCatNew" type="text" maxlength="20" placeholder="새 카테고리 이름" onkeydown="if(event.key==='Enter'){addLedgerCategory();}">
+        <button type="button" class="ledger-add-btn" style="flex:none;white-space:nowrap;" onclick="addLedgerCategory()">추가</button>
+      </div>
+      <button type="button" class="ledger-export-btn" style="margin-top:10px;width:100%;" onclick="resetLedgerCategories()">기본값으로 되돌리기</button>
+    </div>
+  </div>
+</div>
 
 <!-- 청도활동 고정 카테고리 표시 설정 -->
 <div class="modal-overlay" id="cheongdoManagerModal" role="dialog" aria-modal="true" aria-labelledby="cheongdoManagerTitle">
@@ -7602,6 +7628,15 @@ const LEDGER_DEFAULT_CATEGORIES = {
   expense: ['식비', '교통', '쇼핑', '생활', '주거', '통신', '의료', '문화/여가', '교육', '기타'],
   income: ['급여', '용돈', '부수입', '이자', '기타']
 };
+let ledgerCategories = {
+  expense: [...LEDGER_DEFAULT_CATEGORIES.expense],
+  income: [...LEDGER_DEFAULT_CATEGORIES.income]
+};   // 사용자가 편집하는 가계부 카테고리 목록
+function sanitizeLedgerCategories(value) {
+  const clean = list => [...new Set((Array.isArray(list) ? list : []).map(n => String(n).trim()).filter(Boolean))];
+  if (!value || typeof value !== 'object') return null;
+  return { expense: clean(value.expense), income: clean(value.income) };
+}
 let calWeekOffset = 0;      // 주 뷰 오프셋 (week탭용)
 
 let selectedCatColor = '#ff6ef7';
@@ -7668,6 +7703,7 @@ function saveData() {
 
       categories,
       hiddenCheongdoCats,
+      ledgerCategories,
 
       ledger,
 
@@ -7708,6 +7744,7 @@ function getCloudStatePayload() {
     subscriptions,
     categories,
     hiddenCheongdoCats,
+    ledgerCategories,
     ledger,
     accounts,
     accountNextId,
@@ -7769,6 +7806,7 @@ function applyCloudState(payload) {
   if (Array.isArray(payload.subscriptions)) subscriptions = payload.subscriptions;
   if (Array.isArray(payload.categories)) categories = payload.categories;
   if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
+  { const lc = sanitizeLedgerCategories(payload.ledgerCategories); if (lc) ledgerCategories = lc; }
   if (Array.isArray(payload.ledger)) ledger = payload.ledger;
   if (Array.isArray(payload.accounts)) accounts = payload.accounts;
   if (Array.isArray(payload.transfers)) transfers = payload.transfers;
@@ -7783,7 +7821,7 @@ function applyCloudState(payload) {
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledger, accounts, accountNextId, transfers, transferNextId, itemOrder, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, itemOrder, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -7952,8 +7990,16 @@ function loadData() {
 
       if (payload.categories)    categories    = payload.categories;
       if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
+      { const lc = sanitizeLedgerCategories(payload.ledgerCategories); if (lc) ledgerCategories = lc; }
 
       if (payload.ledger)        ledger        = payload.ledger;
+      if (!payload.ledgerCategories) {
+        // 예전 데이터: 내역에 쓰인 직접 입력 카테고리를 목록에 옮겨 담는다
+        ledger.forEach(e => {
+          const list = ledgerCategories[e.type];
+          if (list && e.category && !list.includes(e.category)) list.push(e.category);
+        });
+      }
       if (Array.isArray(payload.accounts))  accounts  = payload.accounts;
       if (Array.isArray(payload.transfers)) transfers = payload.transfers;
       if (payload.accountNextId)  accountNextId  = payload.accountNextId;
@@ -12748,6 +12794,9 @@ function saveLedger() {
     accountId: document.getElementById('l_account').value ? Number(document.getElementById('l_account').value) : null
   };
   if (entry.accountId !== null && editingLedgerId === null) rememberLedgerAccount(entry.accountId);
+  if (entry.category && !(ledgerCategories[entry.type] || []).includes(entry.category)) {
+    (ledgerCategories[entry.type] = ledgerCategories[entry.type] || []).push(entry.category);
+  }
 
   if (editingLedgerId !== null) {
     const index = ledger.findIndex(e => e.id === editingLedgerId);
@@ -13073,15 +13122,116 @@ function transferRowHtml(t) {
 
 /* ── 추가/수정 팝업의 카테고리 선택 ── */
 function ledgerCategoryList(type, current) {
-  const defaults = LEDGER_DEFAULT_CATEGORIES[type] || [];
-  const used = new Map();
-  ledger.forEach(e => {
-    if (e.type === type && e.category && !defaults.includes(e.category)) used.set(e.category, (used.get(e.category) || 0) + 1);
-  });
-  const custom = [...used.entries()].sort((a, b) => b[1] - a[1] || a[0].localeCompare(b[0])).map(([name]) => name);
-  const list = [...defaults, ...custom];
+  const list = [...(ledgerCategories[type] || [])];
   if (current && !list.includes(current)) list.push(current);
   return list;
+}
+
+/* ── 가계부 카테고리 편집 ── */
+let ledgerCatTab = 'expense';
+
+function openLedgerCatManager() {
+  renderLedgerCatManager();
+  document.getElementById('ledgerCatModal').classList.add('open');
+}
+
+function closeLedgerCatManager() {
+  document.getElementById('ledgerCatModal').classList.remove('open');
+}
+
+function setLedgerCatTab(type) {
+  ledgerCatTab = type;
+  renderLedgerCatManager();
+}
+
+function renderLedgerCatManager() {
+  document.getElementById('lcTabExpense').classList.toggle('active', ledgerCatTab === 'expense');
+  document.getElementById('lcTabIncome').classList.toggle('active', ledgerCatTab === 'income');
+  const list = document.getElementById('ledgerCatList');
+  list.textContent = '';
+  const names = ledgerCategories[ledgerCatTab] || [];
+  if (!names.length) {
+    const empty = document.createElement('div');
+    empty.className = 'cheongdo-manager-help';
+    empty.textContent = '카테고리가 없습니다. 아래에서 추가하세요.';
+    list.appendChild(empty);
+    return;
+  }
+  names.forEach(name => {
+    const row = document.createElement('div');
+    row.className = 'cheongdo-manager-row';
+    row.style.gridTemplateColumns = 'minmax(0,1fr) auto auto';
+    const label = document.createElement('span');
+    label.className = 'cheongdo-manager-name';
+    label.textContent = name;
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'cheongdo-visibility-btn';
+    edit.textContent = '이름 변경';
+    edit.setAttribute('aria-label', `${name} 이름 변경`);
+    edit.onclick = () => renameLedgerCategory(name);
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'cheongdo-visibility-btn';
+    del.textContent = '삭제';
+    del.setAttribute('aria-label', `${name} 삭제`);
+    del.onclick = () => deleteLedgerCategory(name);
+    row.append(label, edit, del);
+    list.appendChild(row);
+  });
+}
+
+function afterLedgerCategoryChange() {
+  saveData();
+  renderLedgerCatManager();
+  if (typeof renderCategoryView === 'function') renderCategoryView();
+}
+
+function addLedgerCategory() {
+  const input = document.getElementById('ledgerCatNew');
+  const name = input.value.trim();
+  if (!name) return;
+  const list = ledgerCategories[ledgerCatTab] = ledgerCategories[ledgerCatTab] || [];
+  if (list.includes(name)) {
+    showToast('이미 있는 카테고리입니다', { type: 'info', duration: 1600 });
+    return;
+  }
+  list.push(name);
+  input.value = '';
+  afterLedgerCategoryChange();
+}
+
+function renameLedgerCategory(oldName) {
+  const next = (prompt('새 이름을 입력하세요', oldName) || '').trim().slice(0, 20);
+  if (!next || next === oldName) return;
+  const list = ledgerCategories[ledgerCatTab];
+  if (list.includes(next)) {
+    showToast('이미 있는 카테고리입니다', { type: 'info', duration: 1600 });
+    return;
+  }
+  list[list.indexOf(oldName)] = next;
+  // 기존 내역의 카테고리 이름도 함께 바꾼다
+  ledger.forEach(e => { if (e.type === ledgerCatTab && e.category === oldName) e.category = next; });
+  afterLedgerCategoryChange();
+}
+
+function deleteLedgerCategory(name) {
+  const used = ledger.filter(e => e.type === ledgerCatTab && e.category === name).length;
+  const msg = used
+    ? `'${name}' 카테고리를 삭제할까요?\n이 카테고리의 내역 ${used}건은 그대로 남습니다.`
+    : `'${name}' 카테고리를 삭제할까요?`;
+  if (!confirm(msg)) return;
+  ledgerCategories[ledgerCatTab] = ledgerCategories[ledgerCatTab].filter(n => n !== name);
+  afterLedgerCategoryChange();
+}
+
+function resetLedgerCategories() {
+  if (!confirm('지출/수입 카테고리를 모두 기본값으로 되돌릴까요?')) return;
+  ledgerCategories = {
+    expense: [...LEDGER_DEFAULT_CATEGORIES.expense],
+    income: [...LEDGER_DEFAULT_CATEGORIES.income]
+  };
+  afterLedgerCategoryChange();
 }
 
 function fillLedgerCategorySelect(type, current) {
