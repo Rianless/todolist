@@ -3683,6 +3683,15 @@ body::after {
 .ledger-filter-reset { border: none; background: none; color: var(--accent); font-family: inherit; font-size: 11px; font-weight: 700; cursor: pointer; padding: 2px 4px; }
 
 .ledger-cat-custom { margin-top: 6px; }
+.ledger-cat-select-row { display: flex; gap: 8px; align-items: center; }
+.ledger-cat-select-row .form-select { flex: 1; min-width: 0; }
+.ledger-cat-manage-btn {
+  flex: none; height: 34px; padding: 0 10px; border: 1px solid var(--border2); border-radius: 8px;
+  background: var(--panel2); color: var(--accent); font-family: inherit; font-size: 11px; font-weight: 700;
+  white-space: nowrap; cursor: pointer;
+}
+/* 내역 추가 창 위에서도 카테고리 관리 창이 보이도록 */
+#ledgerCatModal { z-index: 9500; }
 .ledger-filter-selects { margin-top: 8px; }
 .ledger-chip.transfer.active { background: #6b7280; }
 
@@ -6337,6 +6346,7 @@ button:active:not(:disabled) {
                 <div class="ledger-filter-row ledger-filter-selects">
                   <select class="form-select ledger-cat-filter" id="ledgerAccountFilter" aria-label="통장 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
                   <select class="form-select ledger-cat-filter" id="ledgerCatFilter" aria-label="카테고리 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
+                  <button type="button" class="ledger-cat-manage-btn" onclick="openLedgerCatManager();event.stopPropagation()" aria-label="카테고리 관리">🏷️ 관리</button>
                 </div>
                 <div class="ledger-filter-info" id="ledgerFilterInfo"></div>
               </div>
@@ -7028,7 +7038,10 @@ button:active:not(:disabled) {
 
           <label class="form-label">카테고리</label>
 
-          <select class="form-select" id="l_cat_select" onchange="onLedgerCatChange()"></select>
+          <div class="ledger-cat-select-row">
+            <select class="form-select" id="l_cat_select" onchange="onLedgerCatChange()"></select>
+            <button type="button" class="ledger-cat-manage-btn" onclick="openLedgerCatManager()" aria-label="카테고리 관리">🏷️ 관리</button>
+          </div>
 
           <input class="form-input ledger-cat-custom" id="l_cat" type="text" placeholder="카테고리 직접 입력" maxlength="20" style="display:none;">
 
@@ -13133,12 +13146,29 @@ function ledgerCategoryList(type, current) {
 let ledgerCatTab = 'expense';
 
 function openLedgerCatManager() {
+  // 내역 추가 창에서 열면 지금 고른 수입/지출 탭으로 시작
+  if (document.getElementById('ledgerModal').classList.contains('open') && !ledgerSub) ledgerCatTab = ledgerType;
   renderLedgerCatManager();
   document.getElementById('ledgerCatModal').classList.add('open');
 }
 
 function closeLedgerCatManager() {
   document.getElementById('ledgerCatModal').classList.remove('open');
+  refreshLedgerCatSelect();
+}
+
+// 내역 추가/수정 창이 열려 있으면 바뀐 카테고리 목록을 반영 (선택한 값은 가능하면 유지)
+function refreshLedgerCatSelect() {
+  if (!document.getElementById('ledgerModal').classList.contains('open') || ledgerSub) return;
+  const keep = getLedgerCategoryValue();
+  const typed = document.getElementById('l_cat').value;
+  const wasCustom = document.getElementById('l_cat_select').value === LEDGER_CUSTOM_CATEGORY;
+  fillLedgerCategorySelect(ledgerType, keep);
+  if (wasCustom) {
+    document.getElementById('l_cat_select').value = LEDGER_CUSTOM_CATEGORY;
+    document.getElementById('l_cat').value = typed;
+    document.getElementById('l_cat').style.display = '';
+  }
 }
 
 function setLedgerCatTab(type) {
