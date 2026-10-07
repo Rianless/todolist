@@ -2384,7 +2384,9 @@ body::after {
 
 .mp-card.open .mp-card-body {
 
-  max-height: 2000px;
+  /* 내역이 많은 가계부도 잘리지 않도록 높이 제한을 두지 않는다 */
+  max-height: none;
+  overflow: visible;
 
 }
 
