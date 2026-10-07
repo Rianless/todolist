@@ -3690,6 +3690,8 @@ body::after {
   background: var(--panel2); color: var(--accent); font-family: inherit; font-size: 11px; font-weight: 700;
   white-space: nowrap; cursor: pointer;
 }
+/* 필터 줄의 관리 버튼: 가로 2배, 세로는 옆 선택 상자와 동일 */
+.ledger-cat-manage-btn.wide { min-width: 120px; align-self: stretch; height: auto; }
 /* 내역 추가 창 위에서도 카테고리 관리 창이 보이도록 */
 #ledgerCatModal { z-index: 9500; }
 .ledger-filter-selects { margin-top: 8px; }
@@ -6346,7 +6348,7 @@ button:active:not(:disabled) {
                 <div class="ledger-filter-row ledger-filter-selects">
                   <select class="form-select ledger-cat-filter" id="ledgerAccountFilter" aria-label="통장 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
                   <select class="form-select ledger-cat-filter" id="ledgerCatFilter" aria-label="카테고리 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
-                  <button type="button" class="ledger-cat-manage-btn" onclick="openLedgerCatManager();event.stopPropagation()" aria-label="카테고리 관리">🏷️ 관리</button>
+                  <button type="button" class="ledger-cat-manage-btn wide" onclick="openLedgerCatManager();event.stopPropagation()" aria-label="카테고리 관리">🏷️ 관리</button>
                 </div>
                 <div class="ledger-filter-info" id="ledgerFilterInfo"></div>
               </div>
@@ -6355,7 +6357,6 @@ button:active:not(:disabled) {
 
               <div class="ledger-actions">
                 <button class="ledger-add-btn" onclick="openLedger();event.stopPropagation()">+ 수입 / 지출 추가</button>
-                <button class="ledger-export-btn" onclick="openLedgerCatManager();event.stopPropagation()" aria-label="가계부 카테고리 편집">🏷️ 카테고리</button>
                 <button class="ledger-export-btn" onclick="exportLedgerCSV();event.stopPropagation()" aria-label="현재 월 가계부 CSV 내보내기">CSV</button>
               </div>
 
