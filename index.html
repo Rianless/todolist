@@ -5521,6 +5521,7 @@ body::before, body::after, #bootScreen { display: none !important; }
   color: var(--red); font-size: 8px; font-weight: 800; line-height: 10px; text-align: center;
   white-space: nowrap; overflow: hidden; text-overflow: ellipsis; font-variant-numeric: tabular-nums;
 }
+.calendar-surface .cal-spend.cal-income { color: var(--green); }
 @media (min-width: 900px) {
   .calendar-surface .cal-spend { margin-top: 1px; font-size: 11px; line-height: 14px; }
 }
@@ -9487,6 +9488,14 @@ function renderCal() {
 
 
     // 그날 지출 합계 (가계부 지출 + 구독 결제) — 달력 선택 패널의 합계와 같은 값
+    const dayIncomeSum = lmap[ds] ? lmap[ds].income : 0;
+    if (dayIncomeSum > 0) {
+      const inc = document.createElement('span');
+      inc.className = 'cal-spend cal-income';
+      inc.textContent = `+${compactLedgerAmount(dayIncomeSum)}`;
+      inc.title = `이 날 수입 +${dayIncomeSum.toLocaleString()}원`;
+      cell.appendChild(inc);
+    }
     const dayExpense = (lmap[ds] ? lmap[ds].expense : 0)
       + evts.filter(it => it.isSub).reduce((sum, it) => sum + Number(it.amount || 0), 0);
     if (dayExpense > 0) {
