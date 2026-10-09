@@ -3766,6 +3766,20 @@ body::after {
 .invest-bar { height: 5px; border-radius: 3px; background: var(--panel2); margin: 8px 0 0 44px; overflow: hidden; }
 .invest-bar > span { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #0ea5e9, #6366f1); }
 #investModal [hidden] { display: none !important; }
+/* 루틴 */
+#routineModal { align-items: center; justify-content: center; padding: 16px; }
+#routineModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
+.routine-days { display: flex; gap: 6px; }
+.routine-days button { flex: 1; font: inherit; font-size: 12px; font-weight: 700; padding: 9px 0; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--text3); cursor: pointer; }
+.routine-days button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+.routine-presets { display: flex; gap: 6px; margin-top: 8px; }
+.routine-presets button { font: inherit; font-size: 10px; padding: 4px 10px; border-radius: 999px; border: 1px solid var(--border); background: none; color: var(--text2, var(--text)); cursor: pointer; }
+.routine-check { width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--accent); display: grid; place-items: center; font-size: 12px; color: #fff; justify-self: center; }
+.agenda-row.routine.done .routine-check { background: var(--accent); }
+.agenda-row.routine.done strong { text-decoration: line-through; opacity: .55; }
+.routine-edit { background: none; border: none; color: var(--accent); font: inherit; font-size: 11px; cursor: pointer; padding: 4px; }
+.calendar-surface .cal-spend.cal-routine { color: var(--accent); }
+.calendar-surface .cal-spend.cal-routine.complete { color: var(--green); }
 /* 적금·예금·투자 팝업은 화면 한가운데에 띄운다 */
 #investModal { align-items: center; justify-content: center; padding: 16px; }
 #investModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
@@ -6320,6 +6334,23 @@ button:active:not(:disabled) {
           </div>
         </div>
 
+        <!-- ── 루틴 카드 ── -->
+        <div class="mp-card" id="mpCardRoutine">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardRoutine')">
+            <span class="mp-card-icon">🔁</span>
+            <span class="mp-card-label">루틴</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div id="routineList"></div>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openRoutineModal();event.stopPropagation()">+ 루틴 추가</button>
+              </div>
+            </div>
+          </div>
+        </div>
+
         <!-- ── 투자·저축 카드 ── -->
         <div class="mp-card" id="mpCardInvest">
           <div class="mp-card-header" onclick="toggleMpCard('mpCardInvest')">
@@ -7260,6 +7291,66 @@ button:active:not(:disabled) {
 
 
 
+<!-- ROUTINE MODAL -->
+<div class="modal-overlay" id="routineModal">
+  <div class="modal-sheet add-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
+      <div class="modal-header">
+        <div class="modal-title" id="routineModalTitle">루틴 추가</div>
+        <button class="modal-close" onclick="closeRoutineModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">루틴 이름 *</label>
+          <input class="form-input" id="r_name" type="text" maxlength="30" placeholder="예: 운동 30분, 영양제 먹기">
+        </div>
+        <div class="form-group">
+          <label class="form-label">반복 요일</label>
+          <div class="routine-days" id="r_days">
+            <button type="button" data-d="0" onclick="toggleRoutineDay(this)">일</button>
+            <button type="button" data-d="1" onclick="toggleRoutineDay(this)">월</button>
+            <button type="button" data-d="2" onclick="toggleRoutineDay(this)">화</button>
+            <button type="button" data-d="3" onclick="toggleRoutineDay(this)">수</button>
+            <button type="button" data-d="4" onclick="toggleRoutineDay(this)">목</button>
+            <button type="button" data-d="5" onclick="toggleRoutineDay(this)">금</button>
+            <button type="button" data-d="6" onclick="toggleRoutineDay(this)">토</button>
+          </div>
+          <div class="routine-presets">
+            <button type="button" onclick="setRoutineDays('all')">매일</button>
+            <button type="button" onclick="setRoutineDays('weekday')">평일</button>
+            <button type="button" onclick="setRoutineDays('weekend')">주말</button>
+          </div>
+        </div>
+        <div class="form-group form-row-2">
+          <div>
+            <label class="form-label">시간 (선택)</label>
+            <input class="form-input" id="r_time" type="time">
+          </div>
+          <div>
+            <label class="form-label">시작일</label>
+            <input class="form-input" id="r_start" type="date">
+          </div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">종료일 (선택)</label>
+          <input class="form-input" id="r_end" type="date">
+        </div>
+        <div class="form-group">
+          <label class="form-label">메모</label>
+          <input class="form-input" id="r_memo" type="text" maxlength="60" placeholder="메모 (선택)">
+        </div>
+        <button type="button" class="account-delete-btn" id="r_delete" onclick="deleteRoutine()">이 루틴 삭제</button>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeRoutineModal()">취소</button>
+        <button class="btn-save" onclick="saveRoutine()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- INVESTMENT MODAL -->
 <div class="modal-overlay" id="investModal">
   <div class="modal-sheet add-sheet">
@@ -7821,6 +7912,9 @@ let transfers = [];         // { id, date, fromId, toId, amount, memo }
 let transferNextId = 1;
 let investments = [];       // { id, name, kind, rate, startDate, endDate, monthly, principal, currentValue, accountId, memo }
 let investmentNextId = 1;
+let routines = [];          // { id, name, days:[0-6], time, startDate, endDate, memo }
+let routineNextId = 1;
+let routineLog = {};        // { 'YYYY-MM-DD': [완료한 루틴 id, ...] }
 let investTaxRate = 15.4;   // 이자소득세율(%) 기본값. 항목마다 따로 정할 수도 있다
 let itemOrder = {};        // { 'YYYY-MM-DD': [일정 id, ...] } 사용자가 정한 하루 일정 순서
 const LEDGER_NO_CATEGORY = '__none';
@@ -7918,6 +8012,9 @@ function saveData() {
       investments,
       investmentNextId,
       investTaxRate,
+      routines,
+      routineNextId,
+      routineLog,
       itemOrder,
       nextId,
       ledgerNextId,
@@ -7957,6 +8054,9 @@ function getCloudStatePayload() {
     investments,
     investmentNextId,
     investTaxRate,
+    routines,
+    routineNextId,
+    routineLog,
     itemOrder,
     nextId,
     ledgerNextId,
@@ -8002,7 +8102,7 @@ async function syncCloudState() {
 }
 
 function hasLocalUserData() {
-  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || accounts.length > 0 || investments.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
 }
 
 function applyCloudState(payload) {
@@ -8026,12 +8126,15 @@ function applyCloudState(payload) {
   if (Number.isFinite(payload.transferNextId)) transferNextId = payload.transferNextId;
   if (Number.isFinite(payload.investmentNextId)) investmentNextId = payload.investmentNextId;
   if (Number.isFinite(payload.investTaxRate)) investTaxRate = payload.investTaxRate;
+  if (Array.isArray(payload.routines)) routines = payload.routines;
+  if (payload.routineLog && typeof payload.routineLog === 'object' && !Array.isArray(payload.routineLog)) routineLog = payload.routineLog;
+  if (Number.isFinite(payload.routineNextId)) routineNextId = payload.routineNextId;
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (payload.nickname) localStorage.setItem('rianless_nickname', payload.nickname);
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, itemOrder, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, routines, routineNextId, routineLog, itemOrder, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -8215,6 +8318,9 @@ function loadData() {
       if (Array.isArray(payload.investments)) investments = payload.investments;
       if (payload.investmentNextId) investmentNextId = payload.investmentNextId;
       if (Number.isFinite(payload.investTaxRate)) investTaxRate = payload.investTaxRate;
+      if (Array.isArray(payload.routines)) routines = payload.routines;
+      if (payload.routineLog && typeof payload.routineLog === 'object' && !Array.isArray(payload.routineLog)) routineLog = payload.routineLog;
+      if (payload.routineNextId) routineNextId = payload.routineNextId;
       if (payload.accountNextId)  accountNextId  = payload.accountNextId;
       if (payload.transferNextId) transferNextId = payload.transferNextId;
       if (payload.itemOrder && typeof payload.itemOrder === 'object' && !Array.isArray(payload.itemOrder)) itemOrder = payload.itemOrder;
@@ -8479,6 +8585,7 @@ function toggleMpCard(id) {
     if (id === 'mpCardLedger') renderLedgerCard();
     if (id === 'mpCardAccounts') renderAccounts();
     if (id === 'mpCardInvest') renderInvestments();
+    if (id === 'mpCardRoutine') renderRoutines();
 
     if (id === 'mpCardSubs') renderSubs();
 
@@ -8623,6 +8730,7 @@ function setTab(tab, btn) {
 ══════════════════════════════════════ */
 
 function renderCategoryView() {
+  renderRoutines();
   renderAccounts();
   renderInvestments();
   renderSubs();
@@ -9725,6 +9833,15 @@ function renderCal() {
       spend.title = `이 날 지출 -${dayExpense.toLocaleString()}원`;
       cell.appendChild(spend);
     }
+    const dayRoutines = routinesForDate(ds);
+    if (dayRoutines.length) {
+      const doneN = dayRoutines.filter(r => isRoutineDone(r.id, ds)).length;
+      const rt = document.createElement('span');
+      rt.className = 'cal-spend cal-routine' + (doneN === dayRoutines.length ? ' complete' : '');
+      rt.textContent = `🔁${doneN}/${dayRoutines.length}`;
+      rt.title = `루틴 ${doneN}/${dayRoutines.length} 완료`;
+      cell.appendChild(rt);
+    }
     const weekNo = Math.floor((firstDow + d - 1) / 7);
     const laneItems = [];
     evts.filter(isMultiDay).forEach(it => { laneItems[spanLane[`${weekNo}:${it.id}`]] = it; });
@@ -10013,6 +10130,7 @@ function renderCalDayList(ds, dayEvents) {
     .sort((a, b) => String(a.time || '').localeCompare(String(b.time || ''))));
   const daySubs = allDayEvents.filter(item => item.isSub);
   const dayInvest = allDayEvents.filter(item => item.isInvest);
+  const dayRoutines = routinesForDate(ds);
   const dayLedger = ledger.filter(entry => entry.date === ds);
 
   const header = document.createElement('div');
@@ -10029,7 +10147,7 @@ function renderCalDayList(ds, dayEvents) {
 
   const count = document.createElement('span');
   count.className = 'agenda-count';
-  count.textContent = `${dayItems.length + dayLedger.length + daySubs.length + dayInvest.length}개`;
+  count.textContent = `${dayItems.length + dayLedger.length + daySubs.length + dayInvest.length + dayRoutines.length}개`;
   header.append(headingWrap, count);
   container.appendChild(header);
 
@@ -10043,7 +10161,11 @@ function renderCalDayList(ds, dayEvents) {
   addLedger.type = 'button';
   addLedger.textContent = '+ 가계부';
   addLedger.onclick = () => openLedger(ds);
-  actions.append(addSchedule, addLedger);
+  const addRoutine = document.createElement('button');
+  addRoutine.type = 'button';
+  addRoutine.textContent = '+ 루틴';
+  addRoutine.onclick = () => openRoutineModal(null, ds);
+  actions.append(addSchedule, addLedger, addRoutine);
   container.appendChild(actions);
 
   // 그날 지출 합계 (구독 결제 포함) / 수입
@@ -10074,7 +10196,7 @@ function renderCalDayList(ds, dayEvents) {
     container.appendChild(money);
   }
 
-  if (!dayItems.length && !dayLedger.length && !daySubs.length && !dayInvest.length) {
+  if (!dayItems.length && !dayLedger.length && !daySubs.length && !dayInvest.length && !dayRoutines.length) {
     const empty = document.createElement('div');
     empty.className = 'agenda-empty';
     empty.innerHTML = '<span>✓</span><strong>여유로운 하루예요</strong><small>일정, 가계부, 구독을 추가해 보세요.</small>';
@@ -10084,6 +10206,35 @@ function renderCalDayList(ds, dayEvents) {
 
   const list = document.createElement('div');
   list.className = 'agenda-list';
+
+  dayRoutines.forEach(r => {
+    const done = isRoutineDone(r.id, ds);
+    const row = document.createElement('div');
+    row.setAttribute('role', 'button');
+    row.tabIndex = 0;
+    row.className = 'agenda-row routine' + (done ? ' done' : '');
+    const check = document.createElement('span');
+    check.className = 'routine-check';
+    check.textContent = done ? '✓' : '';
+    const body = document.createElement('span');
+    body.className = 'agenda-row-body';
+    const title = document.createElement('strong');
+    title.textContent = r.name;
+    const meta = document.createElement('small');
+    const streak = routineStreak(r, fmtDate(new Date()));
+    meta.textContent = ['루틴', r.time, streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
+    body.append(title, meta);
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'routine-edit';
+    edit.textContent = '수정';
+    edit.setAttribute('aria-label', `${r.name} 수정`);
+    edit.onclick = ev => { ev.stopPropagation(); openRoutineModal(r.id); };
+    row.append(check, body, edit);
+    row.onclick = () => toggleRoutine(r.id, ds);
+    row.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); toggleRoutine(r.id, ds); } };
+    list.appendChild(row);
+  });
 
   dayItems.forEach(item => {
     // 안에 손잡이(순서 바꾸기)를 넣을 수 있게 button 대신 role=button 인 div 를 쓴다
@@ -13916,6 +14067,205 @@ async function deleteTransfer(id) {
   saveData();
   renderCategoryView();
   showToast('이체를 삭제했습니다', { type: 'info', duration: 1600 });
+}
+
+/* ── 루틴 (요일 반복 + 날짜별 체크) ── */
+const ROUTINE_DOW = ['일', '월', '화', '수', '목', '금', '토'];
+const ROUTINE_PRESETS = { all: [0, 1, 2, 3, 4, 5, 6], weekday: [1, 2, 3, 4, 5], weekend: [0, 6] };
+let editingRoutineId = null;
+
+function routineOccursOn(r, ds) {
+  if (!r || !ds || (r.startDate && ds < r.startDate) || (r.endDate && ds > r.endDate)) return false;
+  return (r.days || []).includes(new Date(ds + 'T00:00:00').getDay());
+}
+
+function routinesForDate(ds) {
+  return routines.filter(r => routineOccursOn(r, ds))
+    .sort((a, b) => String(a.time || '99:99').localeCompare(String(b.time || '99:99')) || a.id - b.id);
+}
+
+function isRoutineDone(id, ds) { return (routineLog[ds] || []).includes(id); }
+
+function toggleRoutine(id, ds) {
+  const list = routineLog[ds] || [];
+  const next = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
+  if (next.length) routineLog[ds] = next; else delete routineLog[ds];
+  saveData();
+  renderRoutines();
+  if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
+}
+
+function shiftDate(ds, delta) {
+  const d = new Date(ds + 'T00:00:00');
+  d.setDate(d.getDate() + delta);
+  return fmtDate(d);
+}
+
+// 오늘까지 이어진 연속 달성일. 오늘 아직 안 했으면 어제까지 센다 (예정이 없는 요일은 건너뜀)
+function routineStreak(r, today) {
+  let streak = 0, ds = today;
+  for (let i = 0; i < 800; i++, ds = shiftDate(ds, -1)) {
+    if (r.startDate && ds < r.startDate) break;
+    if (!routineOccursOn(r, ds)) continue;
+    if (isRoutineDone(r.id, ds)) streak++;
+    else if (ds !== today) break;
+  }
+  return streak;
+}
+
+// 최근 7일 중 예정된 날 대비 완료한 날
+function routineWeek(r, today) {
+  let due = 0, done = 0;
+  for (let i = 0; i < 7; i++) {
+    const ds = shiftDate(today, -i);
+    if (!routineOccursOn(r, ds)) continue;
+    due++;
+    if (isRoutineDone(r.id, ds)) done++;
+  }
+  return { due, done };
+}
+
+function routineDaysLabel(days) {
+  const set = [...days].sort((a, b) => a - b).join();
+  if (set === ROUTINE_PRESETS.all.join()) return '매일';
+  if (set === ROUTINE_PRESETS.weekday.join()) return '평일';
+  if (set === ROUTINE_PRESETS.weekend.join()) return '주말';
+  return [...days].sort((a, b) => a - b).map(d => ROUTINE_DOW[d]).join('·');
+}
+
+function renderRoutines() {
+  const el = document.getElementById('routineList');
+  if (!el) return;
+  el.textContent = '';
+  if (!routines.length) {
+    const empty = document.createElement('div');
+    empty.className = 'account-empty';
+    empty.textContent = '매일 하는 운동·공부·약 먹기 같은 루틴을 추가해 보세요';
+    el.appendChild(empty);
+    return;
+  }
+  const today = fmtDate(new Date());
+  routines.forEach(r => {
+    const row = document.createElement('div');
+    row.className = 'invest-row';
+    row.onclick = () => openRoutineModal(r.id);
+    const top = document.createElement('div');
+    top.className = 'invest-row-top';
+    const icon = document.createElement('div');
+    icon.className = 'account-icon';
+    icon.textContent = '🔁';
+    const info = document.createElement('div');
+    info.className = 'account-info';
+    const name = document.createElement('div');
+    name.className = 'account-name';
+    name.textContent = r.name;
+    const meta = document.createElement('div');
+    meta.className = 'account-meta';
+    const week = routineWeek(r, today);
+    const ended = r.endDate && r.endDate < today;
+    meta.textContent = [routineDaysLabel(r.days), r.time, ended ? '종료' : '', week.due ? `최근 7일 ${week.done}/${week.due}` : ''].filter(Boolean).join(' · ');
+    info.append(name, meta);
+    const streak = document.createElement('div');
+    streak.className = 'invest-val';
+    const n = routineStreak(r, today);
+    const main = document.createElement('div');
+    main.className = 'invest-val-main';
+    main.textContent = n ? `🔥 ${n}일` : '—';
+    const sub = document.createElement('div');
+    sub.className = 'invest-val-sub';
+    sub.textContent = '연속 달성';
+    streak.append(main, sub);
+    const edit = document.createElement('button');
+    edit.type = 'button';
+    edit.className = 'account-edit';
+    edit.textContent = '수정';
+    edit.setAttribute('aria-label', `${r.name} 수정`);
+    edit.onclick = ev => { ev.stopPropagation(); openRoutineModal(r.id); };
+    top.append(icon, info, streak, edit);
+    row.appendChild(top);
+    el.appendChild(row);
+  });
+}
+
+function syncRoutineDayButtons(days) {
+  document.querySelectorAll('#r_days button').forEach(b => b.classList.toggle('on', days.includes(Number(b.dataset.d))));
+}
+function currentRoutineDays() {
+  return [...document.querySelectorAll('#r_days button.on')].map(b => Number(b.dataset.d));
+}
+function toggleRoutineDay(btn) { btn.classList.toggle('on'); }
+function setRoutineDays(kind) { syncRoutineDayButtons(ROUTINE_PRESETS[kind]); }
+
+function openRoutineModal(id, date) {
+  const r = id !== undefined && id !== null ? routines.find(x => x.id === id) : null;
+  editingRoutineId = r ? r.id : null;
+  document.getElementById('routineModalTitle').textContent = r ? '루틴 수정' : '루틴 추가';
+  document.getElementById('r_name').value = r ? r.name : '';
+  document.getElementById('r_time').value = r ? (r.time || '') : '';
+  document.getElementById('r_start').value = r ? (r.startDate || '') : (date || fmtDate(new Date()));
+  document.getElementById('r_end').value = r ? (r.endDate || '') : '';
+  document.getElementById('r_memo').value = r ? (r.memo || '') : '';
+  syncRoutineDayButtons(r ? r.days : ROUTINE_PRESETS.all);
+  document.getElementById('r_delete').style.display = r ? '' : 'none';
+  history.pushState({modal:'routine'}, '');
+  document.getElementById('routineModal').classList.add('open');
+  setTimeout(() => document.getElementById('r_name').focus(), 200);
+}
+
+function closeRoutineModal() { document.getElementById('routineModal').classList.remove('open'); }
+
+function refreshRoutineViews() {
+  renderRoutines();
+  if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
+}
+
+function saveRoutine() {
+  const nameInput = document.getElementById('r_name');
+  const name = nameInput.value.trim();
+  const days = currentRoutineDays();
+  if (!name) {
+    nameInput.classList.add('form-error');
+    setTimeout(() => nameInput.classList.remove('form-error'), 1500);
+    return;
+  }
+  if (!days.length) { showToast('반복할 요일을 하나 이상 골라 주세요', { type: 'error', duration: 2200 }); return; }
+  const fields = {
+    name, days,
+    time: document.getElementById('r_time').value || '',
+    startDate: document.getElementById('r_start').value || fmtDate(new Date()),
+    endDate: document.getElementById('r_end').value || '',
+    memo: document.getElementById('r_memo').value.trim()
+  };
+  if (fields.endDate && fields.endDate < fields.startDate) { showToast('종료일은 시작일보다 뒤여야 해요', { type: 'error', duration: 2200 }); return; }
+  const wasEditing = editingRoutineId !== null;
+  if (wasEditing) {
+    const r = routines.find(x => x.id === editingRoutineId);
+    if (r) Object.assign(r, fields);
+  } else {
+    routines.push({ id: routineNextId++, ...fields });
+  }
+  editingRoutineId = null;
+  closeRoutineModal();
+  saveData();
+  refreshRoutineViews();
+  showToast(wasEditing ? '루틴을 수정했습니다' : '루틴을 추가했습니다', { type: 'success', duration: 1800 });
+}
+
+async function deleteRoutine() {
+  const r = routines.find(x => x.id === editingRoutineId);
+  if (!r) return;
+  const ok = await customConfirm(`'${r.name}' 루틴을 삭제할까요? 지금까지의 체크 기록도 함께 지워져요.`, { danger: true, okLabel: '삭제' });
+  if (!ok) return;
+  routines = routines.filter(x => x.id !== r.id);
+  Object.keys(routineLog).forEach(ds => {
+    routineLog[ds] = routineLog[ds].filter(id => id !== r.id);
+    if (!routineLog[ds].length) delete routineLog[ds];
+  });
+  editingRoutineId = null;
+  closeRoutineModal();
+  saveData();
+  refreshRoutineViews();
+  showToast('루틴을 삭제했습니다', { type: 'info', duration: 1600 });
 }
 
 /* ── 투자·저축 (적금 · 예금 · 주식 등) ── */
