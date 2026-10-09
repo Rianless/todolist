@@ -6109,20 +6109,19 @@ button:active:not(:disabled) {
 /* 달력 월 보기 — 모바일 폭(900px 미만)만. 일정·구독·적금·루틴은 점, 수입·지출은 금액 글자. PC 폭은 건드리지 않는다. */
 .cal-legend { display: none; }
 @media (max-width: 899px) {
-  .cal-cell, [data-theme="dark"] .cal-cell { height: auto; min-height: 80px; }
+  .cal-cell, [data-theme="dark"] .cal-cell { height: auto; min-height: 84px; }
   .calendar-surface .cal-ledger-bar { display: none; }
   .calendar-surface .cal-dots { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px; max-width: 100%; margin: 3px auto 2px; min-height: 6px; }
   .calendar-surface .cal-pt { width: 6px; height: 6px; border-radius: 50%; flex: none; }
   .calendar-surface .cal-pt.done { opacity: .3; }
-  .calendar-surface .cal-pt.important { box-shadow: 0 0 0 1.5px #f5a623; margin: 0 1px; }
   .calendar-surface .cal-pt.pie { background: conic-gradient(var(--green) calc(var(--p, 0) * 1%), var(--border2) 0); box-shadow: 0 0 0 1px var(--accent); }
   .calendar-surface .cal-dots .cal-more { margin: 0; font-size: 8px; line-height: 7px; }
-  .calendar-surface .cal-star { position: absolute; top: 3px; right: 4px; font-size: 10px; line-height: 1; color: #f5a623; }
   .cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; padding: 8px 4px 0; font-size: 10px; color: var(--text3); }
   .cal-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .cal-legend i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
   .cal-legend i.pie { background: conic-gradient(var(--green) 60%, var(--border2) 0); box-shadow: 0 0 0 1px var(--accent); }
-  .cal-legend b.star { color: #f5a623; font-size: 10px; }
+  .cal-legend b.imp { padding: 1px 4px; border-radius: 3px; background: var(--panel2); color: var(--text2); font-size: 8px; font-weight: 700; }
+  .calendar-surface .cal-cell > .cal-dot { display: block; margin-top: 2px; }
 }
 </style>
 
@@ -6271,8 +6270,8 @@ button:active:not(:disabled) {
             <div class="cal-grid" id="calGrid"></div>
 
             <div class="cal-legend" aria-label="달력 표시 설명">
-              <span><i style="background:var(--text2)"></i>일정(색=카테고리)</span>
-              <span><b class="star">★</b>중요</span>
+              <span><i style="background:var(--text2)"></i>일정</span>
+              <span><b class="imp">가나다</b>중요 일정</span>
               <span><i style="background:#9d00ff"></i>구독</span>
               <span><i style="background:#0ea5e9"></i>적금·만기</span>
               <span><i class="pie"></i>루틴</span>
@@ -10169,8 +10168,11 @@ function renderCal() {
 
 
     } else {
-      // 모바일: 일정·구독·적금·루틴은 점으로만 보여주고, 자세한 내용은 날짜를 눌러 아래 패널에서 본다.
-      // 중요(⭐ 높음) 일정이 있으면 ★ 표시를 하고, 그 일정의 점을 맨 앞에 둔다.
+      // 모바일: 중요(⭐ 높음) 일정은 지금처럼 제목 칩으로, 나머지 일정·구독·적금·루틴은 점으로 보여준다.
+      // 자세한 내용은 날짜를 눌러 아래 패널에서 본다.
+      const personal = evts.filter(it => !it.isSub && !it.isInvest);
+      const chipItems = personal.filter(it => it.priority === 'high').slice(0, 2);
+      const dotItems = personal.filter(it => !chipItems.includes(it));
       const dots = document.createElement('div');
       dots.className = 'cal-dots';
       const addDot = (cls, color, label) => {
@@ -10181,17 +10183,14 @@ function renderCal() {
         dots.appendChild(pt);
         return pt;
       };
-      const personal = evts.filter(it => !it.isSub && !it.isInvest)
-        .sort((a, b) => (b.priority === 'high') - (a.priority === 'high'));
-      personal.slice(0, 4).forEach(it => {
+      dotItems.slice(0, 4).forEach(it => {
         const hidden = (it.secret && !it._unlocked) || it.hideTitle;
-        const important = it.priority === 'high';
-        addDot((it.done ? 'done ' : '') + (important ? 'important' : ''), hidden ? 'var(--text3)' : getCatColor(it.category), (important ? '⭐ ' : '') + (hidden ? '비공개 일정' : it.title));
+        addDot(it.done ? 'done' : '', hidden ? 'var(--text3)' : getCatColor(it.category), hidden ? '비공개 일정' : it.title);
       });
-      if (personal.length > 4) {
+      if (dotItems.length > 4) {
         const more = document.createElement('span');
         more.className = 'cal-more';
-        more.textContent = `+${personal.length - 4}`;
+        more.textContent = `+${dotItems.length - 4}`;
         dots.appendChild(more);
       }
       const subs = evts.filter(it => it.isSub);
@@ -10203,13 +10202,16 @@ function renderCal() {
         addDot('pie', '', `루틴 ${doneN}/${dayRoutines.length} 완료`).style.setProperty('--p', Math.round(doneN / dayRoutines.length * 100));
       }
       if (dots.childNodes.length) num.after(dots);
-      if (personal.some(it => it.priority === 'high')) {
-        const star = document.createElement('span');
-        star.className = 'cal-star';
-        star.textContent = '★';
-        star.title = '중요 일정';
-        cell.appendChild(star);
-      }
+      chipItems.forEach(item => {
+        const chip = document.createElement('span');
+        chip.className = 'cal-dot' + (item.done ? ' done' : '');
+        chip.style.setProperty('--event-color', getCatColor(item.category));
+        const hidden = item.secret && !item._unlocked;
+        const displayTitle = item.hideTitle ? '// 비공개' : item.title;
+        chip.textContent = hidden ? '🔒 비공개' : displayTitle;
+        chip.title = '⭐ ' + (item.time ? `${item.time.split('~')[0]} ` : '') + displayTitle;
+        cell.appendChild(chip);
+      });
     }
 
     // 셀 드롭 대상
@@ -10567,7 +10569,7 @@ function renderCalDayList(ds, dayEvents) {
     const body = document.createElement('span');
     body.className = 'agenda-row-body';
     const title = document.createElement('strong');
-    title.textContent = (isCompactCal() && item.priority === 'high' ? '⭐ ' : '') + (item.hideTitle ? '비공개 일정' : item.title);
+    title.textContent = item.hideTitle ? '비공개 일정' : item.title;
     const meta = document.createElement('small');
     const spanText = isMultiDay(item) ? `${spanLabel(item)} · ${dayDiff(spanStartOf(item), ds) + 1}일째` : '';
     meta.textContent = [spanText, item.category].filter(Boolean).join(' · ');
