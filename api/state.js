@@ -31,6 +31,43 @@ module.exports = async (req, res) => {
       if (!req.body || typeof req.body !== 'object' || Array.isArray(req.body)) {
         return res.status(400).json({ error: '올바른 동기화 데이터가 필요합니다.' });
       }
+
+      // 새 방식: { _v: 2, baseRev, data } — 내가 마지막으로 본 버전(baseRev)과 서버의 현재 버전이
+      // 같을 때만 저장하고, 그 사이 다른 기기가 저장했다면 409 와 서버의 현재 상태를 돌려준다.
+      if (req.body._v === 2) {
+        const { baseRev, data } = req.body;
+        if (!data || typeof data !== 'object' || Array.isArray(data)) {
+          return res.status(400).json({ error: '올바른 동기화 데이터가 필요합니다.' });
+        }
+        const now = new Date().toISOString();
+        const conflict = async () => {
+          const cur = await fetch(`${endpoint}?id=eq.main&select=data,updated_at`, { headers });
+          const rows = await cur.json();
+          return res.status(409).json({ conflict: true, current: Array.isArray(rows) ? rows[0] || null : null });
+        };
+        if (baseRev === null || baseRev === undefined) {
+          const response = await fetch(endpoint, {
+            method: 'POST',
+            headers: { ...headers, Prefer: 'return=representation' },
+            body: JSON.stringify({ id: 'main', data, updated_at: now })
+          });
+          if (response.status === 409) return conflict();
+          const rows = await response.json();
+          if (!response.ok) return res.status(response.status).json(rows);
+          return res.status(200).json({ updated_at: (rows[0] && rows[0].updated_at) || now });
+        }
+        const response = await fetch(`${endpoint}?id=eq.main&updated_at=eq.${encodeURIComponent(String(baseRev))}`, {
+          method: 'PATCH',
+          headers: { ...headers, Prefer: 'return=representation' },
+          body: JSON.stringify({ data, updated_at: now })
+        });
+        const rows = await response.json();
+        if (!response.ok) return res.status(response.status).json(rows);
+        if (!Array.isArray(rows) || rows.length === 0) return conflict();
+        return res.status(200).json({ updated_at: rows[0].updated_at || now });
+      }
+
+      // 예전 방식(데스크톱 위젯 등): 본문 전체를 그대로 덮어쓴다
       const response = await fetch(endpoint, {
         method: 'POST',
         headers: { ...headers, Prefer: 'resolution=merge-duplicates,return=representation' },
