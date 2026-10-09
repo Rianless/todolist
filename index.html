@@ -3769,6 +3769,10 @@ body::after {
 /* 루틴 */
 #routineModal { align-items: center; justify-content: center; padding: 16px; }
 #routineModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
+.memo-field { min-height: 64px; line-height: 1.5; resize: vertical; font-family: inherit; }
+#memoModal { align-items: center; justify-content: center; padding: 16px; }
+#memoModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
+.memo-item { cursor: pointer; }
 .routine-days { display: flex; gap: 6px; }
 .routine-days button { flex: 1; font: inherit; font-size: 12px; font-weight: 700; padding: 9px 0; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--text3); cursor: pointer; }
 .routine-days button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -7158,7 +7162,7 @@ button:active:not(:disabled) {
 
           <label class="form-label">메모</label>
 
-          <input class="form-input" id="l_memo" type="text" placeholder="메모 (선택)">
+          <textarea class="form-textarea memo-field" id="l_memo" rows="2" placeholder="메모 (선택)"></textarea>
 
         </div>
 
@@ -7251,7 +7255,7 @@ button:active:not(:disabled) {
 
           <label class="form-label">메모</label>
 
-          <input class="form-input" id="f_submemo" type="text" placeholder="메모">
+          <textarea class="form-textarea memo-field" id="f_submemo" rows="2" placeholder="메모"></textarea>
 
         </div>
 
@@ -7290,6 +7294,30 @@ button:active:not(:disabled) {
 </div>
 
 
+
+<!-- MEMO MODAL -->
+<div class="modal-overlay" id="memoModal">
+  <div class="modal-sheet add-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
+      <div class="modal-header">
+        <div class="modal-title" id="memoModalTitle">메모 추가</div>
+        <button class="modal-close" onclick="closeMemoModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">메모 내용</label>
+          <textarea class="form-textarea" id="memoText" rows="7" placeholder="메모를 입력하세요. Enter로 줄을 바꿀 수 있어요."></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeMemoModal()">취소</button>
+        <button class="btn-save" onclick="saveMemoModal()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
 
 <!-- ROUTINE MODAL -->
 <div class="modal-overlay" id="routineModal">
@@ -7339,7 +7367,7 @@ button:active:not(:disabled) {
         </div>
         <div class="form-group">
           <label class="form-label">메모</label>
-          <input class="form-input" id="r_memo" type="text" maxlength="60" placeholder="메모 (선택)">
+          <textarea class="form-textarea memo-field" id="r_memo" rows="2" maxlength="200" placeholder="메모 (선택)"></textarea>
         </div>
         <button type="button" class="account-delete-btn" id="r_delete" onclick="deleteRoutine()">이 루틴 삭제</button>
       </div>
@@ -7408,7 +7436,7 @@ button:active:not(:disabled) {
         </div>
         <div class="form-group">
           <label class="form-label">메모</label>
-          <input class="form-input" id="iv_memo" type="text" maxlength="60" placeholder="메모 (선택)">
+          <textarea class="form-textarea memo-field" id="iv_memo" rows="2" maxlength="200" placeholder="메모 (선택)"></textarea>
         </div>
         <div class="account-hint" id="iv_preview"></div>
         <button type="button" class="account-delete-btn" id="iv_delete" onclick="deleteInvestment()">이 항목 삭제</button>
@@ -7453,7 +7481,7 @@ button:active:not(:disabled) {
         </div>
         <div class="form-group">
           <label class="form-label">메모</label>
-          <input class="form-input" id="a_memo" type="text" maxlength="60" placeholder="메모 (선택)">
+          <textarea class="form-textarea memo-field" id="a_memo" rows="2" maxlength="200" placeholder="메모 (선택)"></textarea>
         </div>
         <button type="button" class="account-delete-btn" id="a_delete" onclick="deleteAccount()">이 통장 삭제</button>
       </div>
@@ -7496,7 +7524,7 @@ button:active:not(:disabled) {
         </div>
         <div class="form-group">
           <label class="form-label">메모</label>
-          <input class="form-input" id="t_memo" type="text" maxlength="60" placeholder="메모 (선택)">
+          <textarea class="form-textarea memo-field" id="t_memo" rows="2" maxlength="200" placeholder="메모 (선택)"></textarea>
         </div>
         <div class="account-error" id="t_error" style="display:none;"></div>
         <button type="button" class="account-delete-btn" id="t_delete" onclick="deleteTransfer(editingTransferId)">이 이체 삭제</button>
@@ -8803,21 +8831,34 @@ let memoNextId = 9000;
 
 
 
-function openMemoAdd() {
+let editingMemoId = null;
 
-  const text = prompt('메모 내용을 입력하세요:');
-
-  if (!text || !text.trim()) return;
-
-  memos.push({ id: memoNextId++, content: text.trim(), date: fmtDate(new Date()) });
-
-  saveMemos();
-
-  renderMemoList();
-
+function openMemoAdd(id) {
+  const m = id !== undefined && id !== null ? memos.find(x => x.id === id) : null;
+  editingMemoId = m ? m.id : null;
+  document.getElementById('memoModalTitle').textContent = m ? '메모 수정' : '메모 추가';
+  document.getElementById('memoText').value = m ? m.content : '';
+  history.pushState({modal:'memo'}, '');
+  document.getElementById('memoModal').classList.add('open');
+  setTimeout(() => document.getElementById('memoText').focus(), 200);
 }
 
+function closeMemoModal() { document.getElementById('memoModal').classList.remove('open'); }
 
+function saveMemoModal() {
+  const text = document.getElementById('memoText').value.replace(/\s+$/, '');
+  if (!text.trim()) { closeMemoModal(); return; }
+  if (editingMemoId !== null) {
+    const m = memos.find(x => x.id === editingMemoId);
+    if (m) m.content = text;
+  } else {
+    memos.push({ id: memoNextId++, content: text, date: fmtDate(new Date()) });
+  }
+  editingMemoId = null;
+  closeMemoModal();
+  saveMemos();
+  renderMemoList();
+}
 
 function deleteMemo(id) {
 
@@ -8870,7 +8911,7 @@ function renderMemoList() {
 
   el.innerHTML = [...memos].reverse().map(m => `
 
-    <div class="memo-item">
+    <div class="memo-item" onclick="openMemoAdd(${m.id})">
 
       <div class="memo-item-date">${m.date}</div>
 
@@ -11078,7 +11119,7 @@ function renderSubs() {
           <div class="sub-name">${escapeLedgerText(s.name)}${subStatusBadge(s, next, today)}</div>
           <div class="sub-meta">${meta}</div>
           ${s.endDate ? `<div class="sub-meta">${escapeLedgerText(s.endDate)} 까지</div>` : ''}
-          ${s.memo ? `<div class="sub-meta">${escapeLedgerText(s.memo)}</div>` : ''}
+          ${s.memo ? `<div class="sub-meta" style="white-space:pre-wrap">${escapeLedgerText(s.memo)}</div>` : ''}
         </div>
         <div style="text-align:right;white-space:nowrap">
           <div class="sub-amount">₩${Number(s.amount || 0).toLocaleString()}</div>
