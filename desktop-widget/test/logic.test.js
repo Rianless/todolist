@@ -135,4 +135,8 @@ assert.deepStrictEqual(spanDay.todos.map(t => t.title), ['여행']);
 assert.strictEqual(L.normalizeTodo({ id: 1, date: '2026-10-06', repeat: 'none', repeat_end: '2026-10-08' }).endDate, '2026-10-08');
 assert.strictEqual(L.normalizeTodo({ id: 1, date: '2026-10-06', repeat: 'weekly', repeat_end: '2026-12-08' }).endDate, '');
 
+assert.strictEqual(L.subscriptionOccursOn({ date: '2026-10-05', cycle: 'monthly', paused: true }, '2026-11-05'), false);
+assert.strictEqual(L.subscriptionOccursOn({ date: '2026-10-05', cycle: 'monthly', endDate: '2026-11-30' }, '2026-12-05'), false);
+assert.strictEqual(L.subscriptionOccursOn({ date: '2026-10-05', cycle: 'monthly', endDate: '2026-11-30' }, '2026-11-05'), true);
+
 console.log(`OK (${checked} date checks, ${orderChecks} order checks, ${spanChecks} span checks)`);

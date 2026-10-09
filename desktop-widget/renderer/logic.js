@@ -44,7 +44,8 @@
   }
 
   function subscriptionOccursOn(sub, ds) {
-    if (!sub || !sub.date) return false;
+    if (!sub || !sub.date || sub.paused) return false;
+    if (sub.endDate && ds > sub.endDate) return false;
     const dt = parseDate(ds);
     return getSubDatesForMonth(sub, dt.getFullYear(), dt.getMonth()).includes(ds);
   }
