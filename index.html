@@ -7610,6 +7610,7 @@ button:active:not(:disabled) {
 
 
 
+<script src="/state-merge.js"></script>
 <script>
 
 /* ══════════════════════════════════════
@@ -8111,28 +8112,114 @@ function getCloudStatePayload() {
   };
 }
 
+/* ── 기기 간 동기화 ──
+   서버 상태에는 버전(updated_at)이 있다. 저장할 때 "내가 마지막으로 본 버전"을 같이 보내고,
+   그 사이 다른 기기가 저장했으면 서버가 거절(409)한다. 그러면 마지막으로 맞춘 상태(cloudBase)를 기준으로
+   내 변경과 서버 변경을 합친 뒤(state-merge.js) 다시 저장한다. */
+const CLOUD_META_KEY = 'rianless_cloud_meta';
+const CLOUD_DIRTY_KEY = 'rianless_cloud_dirty';
+let cloudRev = null;          // 마지막으로 서버와 맞춘 버전
+let cloudBase = null;         // 그때의 서버 상태 (병합 기준)
+let cloudDirty = false;       // 서버에 아직 못 올린 변경이 있는가
+let cloudChangeSeq = 0;
+let cloudSyncPromise = null;
+let cloudResync = false;
+let cloudPulling = false;
+try { cloudDirty = localStorage.getItem(CLOUD_DIRTY_KEY) === '1'; } catch (e) { /* 무시 */ }
+
+const cloneState = v => JSON.parse(JSON.stringify(v));
+const sameCloudRev = (a, b) => !!a && !!b && (a === b || Date.parse(a) === Date.parse(b));
+
+function setCloudDirty(v) {
+  cloudDirty = v;
+  try { localStorage.setItem(CLOUD_DIRTY_KEY, v ? '1' : '0'); } catch (e) { /* 무시 */ }
+}
+
+function saveCloudMeta() {
+  try { localStorage.setItem(CLOUD_META_KEY, JSON.stringify({ rev: cloudRev, base: cloudBase })); }
+  catch (e) { /* 용량이 부족하면 기준 없이 동작한다 */ }
+}
+
+function loadCloudMeta() {
+  try {
+    const meta = JSON.parse(localStorage.getItem(CLOUD_META_KEY) || 'null');
+    if (meta && typeof meta === 'object') { cloudRev = meta.rev || null; cloudBase = meta.base || null; }
+  } catch (e) { /* 무시 */ }
+}
+
+function markCloudSynced(rev, base) {
+  cloudRev = rev || cloudRev;
+  cloudBase = cloneState(base || {});
+  saveCloudMeta();
+}
+
 function queueCloudStateSync() {
+  cloudChangeSeq++;
+  setCloudDirty(true);
   if (!cloudStateLoaded || cloudSyncAvailable === false) return;
   clearTimeout(cloudSyncTimer);
   cloudSyncTimer = setTimeout(syncCloudState, 450);
 }
 
-async function syncCloudState() {
-  if (cloudSyncAvailable === false) return false;
-  try {
-    const response = await fetch(STATE_API_URL, {
-      method: 'POST',
-      headers: { 'Content-Type': 'application/json' },
-      body: JSON.stringify(getCloudStatePayload())
-    });
-    if (!response.ok) {
-      const error = new Error(`클라우드 저장 오류: ${response.status}`);
-      error.status = response.status;
-      throw error;
+// 한 번에 하나만 보낸다. 보내는 중에 또 바뀌면 끝난 뒤 다시 보낸다.
+function syncCloudState() {
+  if (cloudSyncAvailable === false) return Promise.resolve(false);
+  if (cloudSyncPromise) { cloudResync = true; return cloudSyncPromise; }
+  cloudSyncPromise = (async () => {
+    try {
+      let ok;
+      do {
+        cloudResync = false;
+        ok = await syncCloudOnce();
+      } while (cloudResync && ok);
+      return ok;
+    } finally {
+      cloudSyncPromise = null;
     }
-    cloudSyncAvailable = true;
-    cloudFailureNotified = false;
-    return true;
+  })();
+  return cloudSyncPromise;
+}
+
+async function syncCloudOnce() {
+  const seqAtStart = cloudChangeSeq;
+  try {
+    for (let attempt = 0; attempt < 4; attempt++) {
+      const local = getCloudStatePayload();
+      // 마지막으로 서버와 맞춘 상태에서 바뀐 게 없으면 보낼 필요가 없다 (서버 버전만 괜히 올라간다)
+      if (cloudRev && cloudBase && window.StateMerge && StateMerge.eq(local, cloudBase)) {
+        if (seqAtStart === cloudChangeSeq) setCloudDirty(false);
+        return true;
+      }
+      const response = await fetch(STATE_API_URL, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ _v: 2, baseRev: cloudRev, data: local })
+      });
+      if (response.status === 409) {
+        const info = await response.json().catch(() => null);
+        const current = info && info.current;
+        if (!current) { cloudRev = null; continue; }           // 서버에 아직 아무것도 없다 → 처음 저장
+        if (window.StateMerge) {
+          // 다른 기기가 먼저 저장했다 → 서로의 변경을 합쳐서 다시 저장.
+          // 요청을 보내는 동안 고친 내용이 있을 수 있어서, 보냈던 스냅샷이 아니라 지금 상태를 기준으로 합친다.
+          applyCloudState(StateMerge.mergeStates(cloudBase || {}, getCloudStatePayload(), current.data || {}));
+        }
+        markCloudSynced(current.updated_at, current.data);
+        continue;
+      }
+      if (!response.ok) {
+        const error = new Error(`클라우드 저장 오류: ${response.status}`);
+        error.status = response.status;
+        throw error;
+      }
+      const result = await response.json().catch(() => ({}));
+      markCloudSynced(result.updated_at, local);
+      if (seqAtStart === cloudChangeSeq) setCloudDirty(false);
+      cloudSyncAvailable = true;
+      cloudFailureNotified = false;
+      return true;
+    }
+    throw new Error('클라우드 저장 충돌이 계속됩니다');
   } catch (error) {
     console.error('[syncCloudState]', error);
     if ([404, 405, 501].includes(error.status)) cloudSyncAvailable = false;
@@ -8142,6 +8229,36 @@ async function syncCloudState() {
       showToast('클라우드 저장 서버에 연결할 수 없습니다', { type: 'error', duration: 2600 });
     }
     return false;
+  }
+}
+
+// 다른 기기에서 바뀐 내용을 가져온다 (앱으로 돌아올 때, 30초마다)
+async function pullCloudState() {
+  if (!cloudStateLoaded || cloudSyncAvailable === false || cloudPulling || cloudSyncPromise || document.hidden) return;
+  if (document.querySelector('.modal-overlay.open')) return;      // 입력 중에는 화면을 바꾸지 않는다
+  cloudPulling = true;
+  try {
+    const response = await fetch(STATE_API_URL, { cache: 'no-store' });
+    if (!response.ok) return;
+    const result = await response.json();
+    if (!result || !result.updated_at || sameCloudRev(result.updated_at, cloudRev)) return;
+    if (cloudSyncPromise || document.querySelector('.modal-overlay.open')) return;
+    const remote = result.data || {};
+    if (cloudDirty && window.StateMerge) {
+      applyCloudState(StateMerge.mergeStates(cloudBase || {}, getCloudStatePayload(), remote));
+      markCloudSynced(result.updated_at, remote);
+      showToast('다른 기기의 변경을 합쳤습니다', { type: 'info', duration: 1800 });
+      syncCloudState();
+    } else {
+      applyCloudState(remote);
+      markCloudSynced(result.updated_at, remote);
+      setCloudDirty(false);
+      showToast('다른 기기의 변경을 불러왔습니다', { type: 'info', duration: 1800 });
+    }
+  } catch (error) {
+    console.error('[pullCloudState]', error);
+  } finally {
+    cloudPulling = false;
   }
 }
 
@@ -8193,6 +8310,7 @@ function applyCloudState(payload) {
 
 async function loadCloudState() {
   try {
+    loadCloudMeta();
     const response = await fetch(STATE_API_URL, { cache: 'no-store' });
     if (response.status === 404) {
       const missingState = await response.json().catch(() => null);
@@ -8203,6 +8321,7 @@ async function loadCloudState() {
       }
       cloudSyncAvailable = true;
       cloudStateLoaded = true;
+      cloudRev = null;
       if (hasLocalUserData()) {
         await syncCloudState();
         showToast('이 기기의 데이터를 클라우드에 연결했습니다', { type: 'success', duration: 2400 });
@@ -8211,10 +8330,22 @@ async function loadCloudState() {
     }
     if (!response.ok) throw new Error(`클라우드 불러오기 오류: ${response.status}`);
     const result = await response.json();
-    applyCloudState(result.data || {});
+    const remote = result.data || {};
     cloudSyncAvailable = true;
-    cloudStateLoaded = true;
-    showToast('클라우드 동기화 완료', { type: 'success', duration: 1500 });
+    if (cloudDirty && cloudBase && window.StateMerge) {
+      // 지난번에 서버에 못 올린 변경이 남아 있다 → 서버 내용과 합친 뒤 올린다
+      applyCloudState(StateMerge.mergeStates(cloudBase, getCloudStatePayload(), remote));
+      markCloudSynced(result.updated_at, remote);
+      cloudStateLoaded = true;
+      await syncCloudState();
+      showToast('이 기기의 변경을 서버 내용과 합쳤습니다', { type: 'success', duration: 2000 });
+    } else {
+      applyCloudState(remote);
+      markCloudSynced(result.updated_at, remote);
+      setCloudDirty(false);
+      cloudStateLoaded = true;
+      showToast('클라우드 동기화 완료', { type: 'success', duration: 1500 });
+    }
   } catch (error) {
     console.error('[loadCloudState]', error);
     cloudStateLoaded = false;
@@ -8222,7 +8353,8 @@ async function loadCloudState() {
   }
 }
 
-
+window.addEventListener('online', () => { if (cloudDirty) queueCloudStateSync(); else pullCloudState(); });
+setInterval(() => { if (cloudDirty && !cloudSyncPromise && cloudStateLoaded) queueCloudStateSync(); else pullCloudState(); }, 30000);
 
 async function syncItemsToAPI() {
 
@@ -9549,9 +9681,9 @@ function handleDateChange() {
   scheduleMidnightRefresh();
 }
 
-window.addEventListener('focus', handleDateChange);
+window.addEventListener('focus', () => { handleDateChange(); pullCloudState(); });
 document.addEventListener('visibilitychange', () => {
-  if (!document.hidden) handleDateChange();
+  if (!document.hidden) { handleDateChange(); pullCloudState(); }
 });
 
 function changeListMonth(delta) {

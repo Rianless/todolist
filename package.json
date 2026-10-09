@@ -2,7 +2,7 @@
   "name": "todolist",
   "version": "1.0.0",
   "scripts": {
-    "test": "node test/todo_filters.test.js"
+    "test": "node test/todo_filters.test.js && node test/state_merge.test.js && node test/state_api.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
