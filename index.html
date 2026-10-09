@@ -3766,6 +3766,9 @@ body::after {
 .invest-bar { height: 5px; border-radius: 3px; background: var(--panel2); margin: 8px 0 0 44px; overflow: hidden; }
 .invest-bar > span { display: block; height: 100%; border-radius: 3px; background: linear-gradient(90deg, #0ea5e9, #6366f1); }
 #investModal [hidden] { display: none !important; }
+/* 적금·예금·투자 팝업은 화면 한가운데에 띄운다 */
+#investModal { align-items: center; justify-content: center; padding: 16px; }
+#investModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
 
 /* 구독 */
 .sub-summary { display: flex; gap: 8px; margin: 12px 0 8px; }
