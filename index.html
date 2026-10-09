@@ -3780,6 +3780,17 @@ body::after {
 #memoModal { align-items: center; justify-content: center; padding: 16px; }
 #memoModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
 .memo-item { cursor: pointer; }
+.routine-page { padding: 4px 2px 24px; }
+.routine-stats { margin: 8px 0 12px; padding: 14px 16px; border-radius: 14px; background: var(--panel2); }
+.routine-stats-head { display: flex; align-items: baseline; gap: 10px; }
+.routine-stats-big { font-size: 28px; font-weight: 800; color: var(--accent); }
+.routine-stats-label { font-size: 12px; color: var(--text3); }
+.routine-week { display: flex; gap: 6px; margin-top: 12px; }
+.routine-week-day { flex: 1; text-align: center; }
+.routine-week-day small { display: block; margin-top: 4px; font-size: 10px; color: var(--text3); }
+.routine-week-day.today small { color: var(--accent); font-weight: 800; }
+.routine-week-bar { height: 44px; border-radius: 8px; background: var(--border2); display: flex; align-items: flex-end; overflow: hidden; }
+.routine-week-bar span { display: block; width: 100%; background: var(--accent); }
 .routine-days { display: flex; gap: 6px; }
 .routine-days button { flex: 1; font: inherit; font-size: 12px; font-weight: 700; padding: 9px 0; border-radius: 10px; border: 1px solid var(--border); background: var(--panel2); color: var(--text3); cursor: pointer; }
 .routine-days button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
@@ -6210,6 +6221,8 @@ button:active:not(:disabled) {
 
         <button class="cal-subtab" id="cst-list" onclick="setCalSubTab('list',this)">리스트</button>
 
+        <button class="cal-subtab" id="cst-routine" onclick="setCalSubTab('routine',this)">루틴</button>
+
       </div>
 
 
@@ -6285,6 +6298,17 @@ button:active:not(:disabled) {
 
 
 
+      <!-- ROUTINE VIEW (루틴) -->
+      <div class="cal-subview" id="viewRoutine">
+        <div class="routine-page">
+          <div id="routineStats"></div>
+          <div id="routineList"></div>
+          <div class="ledger-actions">
+            <button class="ledger-add-btn" onclick="openRoutineModal()">+ 루틴 추가</button>
+          </div>
+        </div>
+      </div>
+
       <!-- LIST VIEW (리스트) -->
 
       <div class="cal-subview" id="viewList">
@@ -6357,23 +6381,6 @@ button:active:not(:disabled) {
               <div id="investList"></div>
               <div class="ledger-actions">
                 <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── 루틴 카드 ── -->
-        <div class="mp-card" id="mpCardRoutine">
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardRoutine')">
-            <span class="mp-card-icon">🔁</span>
-            <span class="mp-card-label">루틴</span>
-            <span class="mp-card-chevron">▼</span>
-          </div>
-          <div class="mp-card-body">
-            <div class="mp-card-inner">
-              <div id="routineList"></div>
-              <div class="ledger-actions">
-                <button class="ledger-add-btn" onclick="openRoutineModal();event.stopPropagation()">+ 루틴 추가</button>
               </div>
             </div>
           </div>
@@ -7446,6 +7453,7 @@ button:active:not(:disabled) {
         <div class="form-group">
           <label class="form-label">연결 통장</label>
           <select class="form-select" id="iv_account"></select>
+          <div class="account-hint">적금·예금에 연결하면 납입일마다 이 통장 잔액에서 빠지고, 만기에 원금+이자가 들어와요. (통장의 반영 시작일 이후 기준)</div>
         </div>
         <div class="form-group">
           <label class="form-label">메모</label>
@@ -8762,7 +8770,6 @@ function toggleMpCard(id) {
 
     if (id === 'mpCardLedger') renderLedgerCard();
     if (id === 'mpCardAccounts') { renderAccounts(); renderInvestments(); }
-    if (id === 'mpCardRoutine') renderRoutines();
 
     if (id === 'mpCardSubs') renderSubs();
 
@@ -8860,7 +8867,7 @@ function setCalSubTab(sub, btn) {
 
   document.querySelectorAll('.cal-subview').forEach(v => v.classList.remove('active'));
 
-  const map = { cal: 'viewCal', week: 'viewWeek', list: 'viewList' };
+  const map = { cal: 'viewCal', week: 'viewWeek', list: 'viewList', routine: 'viewRoutine' };
 
   const el = document.getElementById(map[sub]);
 
@@ -8871,6 +8878,8 @@ function setCalSubTab(sub, btn) {
   else if (sub === 'week') renderWeek();
 
   else if (sub === 'list') renderList();
+
+  else if (sub === 'routine') renderRoutines();
 
 }
 
@@ -9738,6 +9747,85 @@ function updateProgress() {
 
 ══════════════════════════════════════ */
 
+/* 구독 결제일 · 적금 납입일/만기일을 달력용 가상 일정으로 dmap 에 넣는다 (y년 m월(0-11) 기준) */
+function addMoneyEvents(dmap, y, m) {
+  subscriptions.forEach((sub, subIndex)=>{
+
+    if(!sub.date || sub.paused) return;
+
+    const cycleLabel = {weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[sub.cycle]||'';
+
+    const subDates = getSubDatesForMonth(sub, y, m);
+
+    subDates.forEach(dateStr => {
+
+      const subItem = {
+
+        id: 'sub_'+sub.name+'_'+dateStr,
+
+        date: dateStr,
+
+        category: sub.category||'구독',
+
+        time: '',
+
+        title: `🔖 ${sub.name}`,
+
+        sub: `₩${Number(sub.amount||0).toLocaleString()} · ${cycleLabel}`,
+
+        amount: Number(sub.amount||0),
+
+        cycleLabel,
+
+        subIndex,
+
+        priority: 'none',
+
+        secret: false,
+
+        done: false,
+
+        isSub: true
+
+      };
+
+      if(!dmap[dateStr]) dmap[dateStr]=[];
+
+      dmap[dateStr].push(subItem);
+
+    });
+
+  });
+
+
+
+  investments.forEach(iv => {
+    investEventsForMonth(iv, y, m).forEach(ev => {
+      const isDeposit = ev.type === 'deposit';
+      const item = {
+        id: `inv_${iv.id}_${ev.type}_${ev.date}`,
+        date: ev.date,
+        category: '투자',
+        time: '',
+        title: isDeposit ? `${INVEST_ICONS[iv.kind]} ${iv.name} 납입` : `🏁 ${iv.name} 만기`,
+        sub: isDeposit ? `₩${ev.amount.toLocaleString()} 납입` : `만기 예상 ₩${ev.amount.toLocaleString()}`,
+        amount: ev.amount,
+        investId: iv.id,
+        investEvent: ev.type,
+        investNo: ev.no || 0,
+        investTotal: ev.total || 0,
+        priority: 'none',
+        secret: false,
+        done: false,
+        isInvest: true
+      };
+      if (!dmap[ev.date]) dmap[ev.date] = [];
+      dmap[ev.date].push(item);
+    });
+  });
+
+}
+
 function renderCal() {
 
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
@@ -9812,82 +9900,9 @@ function renderCal() {
 
   });
 
-  subscriptions.forEach((sub, subIndex)=>{
-
-    if(!sub.date || sub.paused) return;
-
-    const cycleLabel = {weekly:'매주',biweekly:'격주',monthly:'매월',bimonthly:'격월',yearly:'매년'}[sub.cycle]||'';
-
-    const subDates = getSubDatesForMonth(sub, calY, calM);
-
-    subDates.forEach(dateStr => {
-
-      const subItem = {
-
-        id: 'sub_'+sub.name+'_'+dateStr,
-
-        date: dateStr,
-
-        category: sub.category||'구독',
-
-        time: '',
-
-        title: `🔖 ${sub.name}`,
-
-        sub: `₩${Number(sub.amount||0).toLocaleString()} · ${cycleLabel}`,
-
-        amount: Number(sub.amount||0),
-
-        cycleLabel,
-
-        subIndex,
-
-        priority: 'none',
-
-        secret: false,
-
-        done: false,
-
-        isSub: true
-
-      };
-
-      if(!dmap[dateStr]) dmap[dateStr]=[];
-
-      dmap[dateStr].push(subItem);
-
-    });
-
-  });
-
-
+  addMoneyEvents(dmap, calY, calM);
 
   // 사용자가 정한 하루 일정 순서를 칸의 일정 표시에도 적용
-  investments.forEach(iv => {
-    investEventsForMonth(iv, calY, calM).forEach(ev => {
-      const isDeposit = ev.type === 'deposit';
-      const item = {
-        id: `inv_${iv.id}_${ev.type}_${ev.date}`,
-        date: ev.date,
-        category: '투자',
-        time: '',
-        title: isDeposit ? `${INVEST_ICONS[iv.kind]} ${iv.name} 납입` : `🏁 ${iv.name} 만기`,
-        sub: isDeposit ? `₩${ev.amount.toLocaleString()} 납입` : `만기 예상 ₩${ev.amount.toLocaleString()}`,
-        amount: ev.amount,
-        investId: iv.id,
-        investEvent: ev.type,
-        investNo: ev.no || 0,
-        investTotal: ev.total || 0,
-        priority: 'none',
-        secret: false,
-        done: false,
-        isInvest: true
-      };
-      if (!dmap[ev.date]) dmap[ev.date] = [];
-      dmap[ev.date].push(item);
-    });
-  });
-
   Object.keys(dmap).forEach(d => { dmap[d] = applyDayOrder(d, dmap[d]); });
 
   // 가계부 ledger dmap (달 내 항목만)
@@ -10308,6 +10323,64 @@ function fitCalCells(grid) {
   });
 }
 
+// 하루 패널·주 보기에서 쓰는 루틴 한 줄 (눌러서 체크, 체크리스트·메모 포함)
+function buildRoutineRow(r, ds) {
+  const done = isRoutineDone(r.id, ds);
+  const row = document.createElement('div');
+  row.setAttribute('role', 'button');
+  row.tabIndex = 0;
+  row.className = 'agenda-row routine' + (done ? ' done' : '');
+  const check = document.createElement('span');
+  check.className = 'routine-check';
+  check.textContent = done ? '✓' : '';
+  const body = document.createElement('span');
+  body.className = 'agenda-row-body';
+  const title = document.createElement('strong');
+  title.textContent = r.name;
+  const meta = document.createElement('small');
+  const streak = routineStreak(r, fmtDate(new Date()));
+  const items = routineItems(r);
+  const checked = items.filter(it => routineCheckedIds(r.id, ds).includes(it.id)).length;
+  meta.textContent = ['루틴', r.time, items.length ? `${checked}/${items.length}` : '', streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
+  body.append(title, meta);
+  const edit = document.createElement('button');
+  edit.type = 'button';
+  edit.className = 'routine-edit';
+  edit.textContent = '수정';
+  edit.setAttribute('aria-label', `${r.name} 수정`);
+  edit.onclick = ev => { ev.stopPropagation(); openRoutineModal(r.id); };
+  row.append(check, body, edit);
+  if (r.memo || items.length) {
+    const detail = document.createElement('div');
+    detail.className = 'routine-detail';
+    if (r.memo) {
+      const memo = document.createElement('div');
+      memo.className = 'routine-memo';
+      memo.textContent = r.memo;
+      detail.appendChild(memo);
+    }
+    items.forEach(it => {
+      const isOn = routineCheckedIds(r.id, ds).includes(it.id);
+      const sub = document.createElement('button');
+      sub.type = 'button';
+      sub.className = 'routine-sub' + (isOn ? ' done' : '');
+      const box = document.createElement('span');
+      box.className = 'routine-sub-check';
+      box.textContent = isOn ? '✓' : '';
+      const text = document.createElement('span');
+      text.className = 'routine-sub-text';
+      text.textContent = it.text;
+      sub.append(box, text);
+      sub.onclick = ev => { ev.stopPropagation(); toggleRoutineItem(r.id, it.id, ds); };
+      detail.appendChild(sub);
+    });
+    row.appendChild(detail);
+  }
+  row.onclick = () => toggleRoutine(r.id, ds);
+  row.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); toggleRoutine(r.id, ds); } };
+  return row;
+}
+
 function renderCalDayList(ds, dayEvents) {
   const container = document.getElementById('calDayList');
   if (!container || !ds) return;
@@ -10397,62 +10470,7 @@ function renderCalDayList(ds, dayEvents) {
   const list = document.createElement('div');
   list.className = 'agenda-list';
 
-  dayRoutines.forEach(r => {
-    const done = isRoutineDone(r.id, ds);
-    const row = document.createElement('div');
-    row.setAttribute('role', 'button');
-    row.tabIndex = 0;
-    row.className = 'agenda-row routine' + (done ? ' done' : '');
-    const check = document.createElement('span');
-    check.className = 'routine-check';
-    check.textContent = done ? '✓' : '';
-    const body = document.createElement('span');
-    body.className = 'agenda-row-body';
-    const title = document.createElement('strong');
-    title.textContent = r.name;
-    const meta = document.createElement('small');
-    const streak = routineStreak(r, fmtDate(new Date()));
-    const items = routineItems(r);
-    const checked = items.filter(it => routineCheckedIds(r.id, ds).includes(it.id)).length;
-    meta.textContent = ['루틴', r.time, items.length ? `${checked}/${items.length}` : '', streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
-    body.append(title, meta);
-    const edit = document.createElement('button');
-    edit.type = 'button';
-    edit.className = 'routine-edit';
-    edit.textContent = '수정';
-    edit.setAttribute('aria-label', `${r.name} 수정`);
-    edit.onclick = ev => { ev.stopPropagation(); openRoutineModal(r.id); };
-    row.append(check, body, edit);
-    if (r.memo || items.length) {
-      const detail = document.createElement('div');
-      detail.className = 'routine-detail';
-      if (r.memo) {
-        const memo = document.createElement('div');
-        memo.className = 'routine-memo';
-        memo.textContent = r.memo;
-        detail.appendChild(memo);
-      }
-      items.forEach(it => {
-        const isOn = routineCheckedIds(r.id, ds).includes(it.id);
-        const sub = document.createElement('button');
-        sub.type = 'button';
-        sub.className = 'routine-sub' + (isOn ? ' done' : '');
-        const box = document.createElement('span');
-        box.className = 'routine-sub-check';
-        box.textContent = isOn ? '✓' : '';
-        const text = document.createElement('span');
-        text.className = 'routine-sub-text';
-        text.textContent = it.text;
-        sub.append(box, text);
-        sub.onclick = ev => { ev.stopPropagation(); toggleRoutineItem(r.id, it.id, ds); };
-        detail.appendChild(sub);
-      });
-      row.appendChild(detail);
-    }
-    row.onclick = () => toggleRoutine(r.id, ds);
-    row.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); toggleRoutine(r.id, ds); } };
-    list.appendChild(row);
-  });
+  dayRoutines.forEach(r => list.appendChild(buildRoutineRow(r, ds)));
 
   dayItems.forEach(item => {
     // 안에 손잡이(순서 바꾸기)를 넣을 수 있게 button 대신 role=button 인 div 를 쓴다
@@ -13089,6 +13107,11 @@ function renderWeek() {
 
   });
 
+  // 구독 결제일 · 적금 납입일/만기일 (주가 두 달에 걸칠 수 있다)
+  [[base.getFullYear(), base.getMonth()], [endOfWeek.getFullYear(), endOfWeek.getMonth()]]
+    .filter((ym, i, arr) => i === 0 || ym[0] !== arr[0][0] || ym[1] !== arr[0][1])
+    .forEach(([y, m]) => addMoneyEvents(dmap, y, m));
+
 
 
   // 스트립 렌더
@@ -13181,7 +13204,7 @@ function renderWeek() {
 
         pip.className = 'week-event-dot';
 
-        pip.style.background = getCatColor(it.category);
+        pip.style.background = it.isSub ? '#9d00ff' : it.isInvest ? '#0ea5e9' : getCatColor(it.category);
 
         dotsRow.appendChild(pip);
 
@@ -13247,7 +13270,9 @@ function renderWeekDayList(dmap) {
 
 
 
-  if (!tasks.length) {
+  const weekRoutines = routinesForDate(selDs);
+
+  if (!tasks.length && !weekRoutines.length) {
 
     const empty = document.createElement('div');
 
@@ -13269,6 +13294,12 @@ function renderWeekDayList(dmap) {
 
     container.appendChild(card);
 
+  });
+
+  weekRoutines.forEach(r => {
+    const row = buildRoutineRow(r, selDs);
+    row.style.marginBottom = '6px';
+    container.appendChild(row);
   });
 
 }
@@ -14032,6 +14063,11 @@ function accountNet(id, baseDate, upTo) {
     if (t.toId === id) net += t.amount;
     if (t.fromId === id) net -= t.amount;
   });
+  // 연결 통장이 있는 적금·예금: 납입일마다 빠지고, 만기에 원금+이자가 들어온다
+  investments.forEach(iv => {
+    if (iv.accountId !== id) return;
+    investCashflows(iv, baseDate, upTo).forEach(cf => { net += cf.amount; });
+  });
   // 결제 통장이 지정된 구독은 결제일마다 지출로 반영
   subscriptions.forEach(sub => {
     if (sub.accountId !== id || sub.paused || !sub.date) return;
@@ -14072,7 +14108,7 @@ function renderAssetTotal() {
   if (!accounts.length && !investments.length) return;
   const today = fmtDate(new Date());
   const bank = accounts.reduce((sum, a) => sum + accountBalance(a), 0);
-  const invest = investments.reduce((sum, iv) => sum + calcInvestment(iv, today).value, 0);
+  const invest = investments.reduce((sum, iv) => sum + (investCountsInAssets(iv, today) ? calcInvestment(iv, today).value : 0), 0);
   el.className = 'account-total';
   const label = document.createElement('div');
   label.className = 'account-total-label';
@@ -14351,7 +14387,10 @@ function setRoutineDone(id, ds, done) {
 function afterRoutineChange() {
   saveData();
   renderRoutines();
-  if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
+  if (currentMainTab === 'calendar') {
+    if (currentCalSubTab === 'cal') renderCal();
+    else if (currentCalSubTab === 'week') renderWeek();
+  }
 }
 
 // 체크리스트가 있는 루틴은 전체 체크/해제, 없으면 완료 토글
@@ -14397,16 +14436,33 @@ function routineStreak(r, today) {
   return streak;
 }
 
-// 최근 7일 중 예정된 날 대비 완료한 날
-function routineWeek(r, today) {
+// 기간(from~to, 포함) 동안 예정된 날 대비 완료한 날
+function routineRange(r, from, to) {
   let due = 0, done = 0;
-  for (let i = 0; i < 7; i++) {
-    const ds = shiftDate(today, -i);
+  for (let ds = from, i = 0; ds <= to && i < 800; ds = shiftDate(ds, 1), i++) {
     if (!routineOccursOn(r, ds)) continue;
     due++;
     if (isRoutineDone(r.id, ds)) done++;
   }
   return { due, done };
+}
+
+// 최근 7일 중 예정된 날 대비 완료한 날
+function routineWeek(r, today) { return routineRange(r, shiftDate(today, -6), today); }
+
+// 이번 달 1일부터 오늘까지
+function routineMonth(r, today) { return routineRange(r, `${today.slice(0, 8)}01`, today); }
+
+// 지금까지의 최장 연속 달성일 (예정이 없는 요일은 건너뛴다)
+function routineBestStreak(r, today) {
+  if (!r.startDate) return 0;
+  let best = 0, cur = 0;
+  for (let ds = r.startDate, i = 0; ds <= today && i < 3000; ds = shiftDate(ds, 1), i++) {
+    if (!routineOccursOn(r, ds)) continue;
+    if (isRoutineDone(r.id, ds)) { cur++; best = Math.max(best, cur); }
+    else if (ds !== today) cur = 0;
+  }
+  return best;
 }
 
 function routineDaysLabel(days) {
@@ -14417,10 +14473,55 @@ function routineDaysLabel(days) {
   return [...days].sort((a, b) => a - b).map(d => ROUTINE_DOW[d]).join('·');
 }
 
+const pctText = (done, due) => (due ? `${Math.round(done / due * 100)}%` : '—');
+
+function renderRoutineStats(today) {
+  const el = document.getElementById('routineStats');
+  if (!el) return;
+  el.textContent = '';
+  el.className = '';
+  if (!routines.length) return;
+  let mDue = 0, mDone = 0;
+  routines.forEach(r => { const m = routineMonth(r, today); mDue += m.due; mDone += m.done; });
+  el.className = 'routine-stats';
+  const head = document.createElement('div');
+  head.className = 'routine-stats-head';
+  const big = document.createElement('div');
+  big.className = 'routine-stats-big';
+  big.textContent = pctText(mDone, mDue);
+  const label = document.createElement('div');
+  label.className = 'routine-stats-label';
+  label.textContent = `${Number(today.slice(5, 7))}월 달성률 · ${mDone}/${mDue}`;
+  head.append(big, label);
+  // 최근 7일: 날마다 예정된 루틴 중 완료한 비율
+  const strip = document.createElement('div');
+  strip.className = 'routine-week';
+  for (let i = 6; i >= 0; i--) {
+    const ds = shiftDate(today, -i);
+    let due = 0, done = 0;
+    routines.forEach(r => { if (routineOccursOn(r, ds)) { due++; if (isRoutineDone(r.id, ds)) done++; } });
+    const cell = document.createElement('div');
+    cell.className = 'routine-week-day' + (ds === today ? ' today' : '');
+    const bar = document.createElement('div');
+    bar.className = 'routine-week-bar';
+    const fill = document.createElement('span');
+    fill.style.height = `${due ? Math.round(done / due * 100) : 0}%`;
+    bar.appendChild(fill);
+    const dow = document.createElement('small');
+    dow.textContent = ROUTINE_DOW[new Date(ds + 'T00:00:00').getDay()];
+    cell.title = due ? `${ds} ${done}/${due}` : `${ds} 예정 없음`;
+    cell.append(bar, dow);
+    strip.appendChild(cell);
+  }
+  el.append(head, strip);
+}
+
 function renderRoutines() {
   const el = document.getElementById('routineList');
   if (!el) return;
   el.textContent = '';
+  const today = fmtDate(new Date());
+  renderRoutineStats(today);
   if (!routines.length) {
     const empty = document.createElement('div');
     empty.className = 'account-empty';
@@ -14428,7 +14529,6 @@ function renderRoutines() {
     el.appendChild(empty);
     return;
   }
-  const today = fmtDate(new Date());
   routines.forEach(r => {
     const row = document.createElement('div');
     row.className = 'invest-row';
@@ -14445,9 +14545,11 @@ function renderRoutines() {
     name.textContent = r.name;
     const meta = document.createElement('div');
     meta.className = 'account-meta';
-    const week = routineWeek(r, today);
+    const month = routineMonth(r, today);
+    const best = routineBestStreak(r, today);
     const ended = r.endDate && r.endDate < today;
-    meta.textContent = [routineDaysLabel(r.days), r.time, ended ? '종료' : '', week.due ? `최근 7일 ${week.done}/${week.due}` : ''].filter(Boolean).join(' · ');
+    meta.textContent = [routineDaysLabel(r.days), r.time, ended ? '종료' : '',
+      month.due ? `이번 달 ${month.done}/${month.due}` : '', best ? `최장 ${best}일` : ''].filter(Boolean).join(' · ');
     info.append(name, meta);
     const streak = document.createElement('div');
     streak.className = 'invest-val';
@@ -14557,7 +14659,10 @@ function closeRoutineModal() { document.getElementById('routineModal').classList
 
 function refreshRoutineViews() {
   renderRoutines();
-  if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
+  if (currentMainTab === 'calendar') {
+    if (currentCalSubTab === 'cal') renderCal();
+    else if (currentCalSubTab === 'week') renderWeek();
+  }
 }
 
 function saveRoutine() {
@@ -14625,7 +14730,9 @@ function investIsFixed(kind) { return kind === '적금' || kind === '예금'; }
 function wholeMonthsBetween(a, b) {
   const da = new Date(a + 'T00:00:00'), db = new Date(b + 'T00:00:00');
   let m = (db.getFullYear() - da.getFullYear()) * 12 + (db.getMonth() - da.getMonth());
-  if (db.getDate() < da.getDate()) m--;
+  // 31일에 가입해 말일(30일, 28일)에 만기되는 경우는 한 달로 센다
+  const lastDay = new Date(db.getFullYear(), db.getMonth() + 1, 0).getDate();
+  if (db.getDate() < da.getDate() && db.getDate() !== lastDay) m--;
   return Math.max(0, m);
 }
 
@@ -14684,6 +14791,34 @@ function calcInvestment(iv, today) {
   return out;
 }
 
+// 연결 통장이 있는 적금·예금의 돈 흐름 (납입·예치는 -, 만기 수령은 +). from~upTo 사이 날짜만.
+function investCashflows(iv, from, upTo) {
+  const out = [];
+  if (!iv.accountId || !investIsFixed(iv.kind) || !iv.startDate) return out;
+  const add = (date, amount) => { if (amount && date >= from && date <= upTo) out.push({ date, amount }); };
+  if (iv.kind === '적금') {
+    const monthly = Number(iv.monthly) || 0;
+    const n = iv.endDate ? Math.max(1, wholeMonthsBetween(iv.startDate, iv.endDate)) : wholeMonthsBetween(iv.startDate, upTo) + 1;
+    const start = new Date(iv.startDate + 'T00:00:00');
+    for (let k = 0; k < n; k++) {
+      const first = new Date(start.getFullYear(), start.getMonth() + k, 1);
+      const day = Math.min(start.getDate(), new Date(first.getFullYear(), first.getMonth() + 1, 0).getDate());
+      const ds = fmtDate(new Date(first.getFullYear(), first.getMonth(), day));
+      if (ds > upTo) break;
+      add(ds, -monthly);
+    }
+  } else {
+    add(iv.startDate, -(Number(iv.principal) || 0));
+  }
+  if (iv.endDate) add(iv.endDate, calcInvestment(iv, iv.endDate).maturityValue || 0);
+  return out;
+}
+
+// 만기가 지나 원금+이자가 연결 통장에 들어간 항목은 자산에 이중으로 잡지 않는다
+function investCountsInAssets(iv, today) {
+  return !(iv.accountId && accounts.some(a => a.id === iv.accountId) && investIsFixed(iv.kind) && iv.endDate && iv.endDate <= today);
+}
+
 // y년 m월(0-11)에 걸리는 적금 납입일 · 적금/예금 만기일
 function investEventsForMonth(iv, y, m) {
   const pad = n => String(n).padStart(2, '0');
@@ -14738,8 +14873,9 @@ function renderInvestments() {
   }
   const today = fmtDate(new Date());
   const calcs = investments.map(iv => calcInvestment(iv, today));
-  const paid = calcs.reduce((s, c) => s + c.paid, 0);
-  const value = calcs.reduce((s, c) => s + c.value, 0);
+  const counted = investments.map(iv => investCountsInAssets(iv, today));
+  const paid = calcs.reduce((s, c, i) => s + (counted[i] ? c.paid : 0), 0);
+  const value = calcs.reduce((s, c, i) => s + (counted[i] ? c.value : 0), 0);
   const profit = value - paid;
   subEl.textContent = `${Math.round(value).toLocaleString()}원 · ${investments.length}개`;
   hintEl.textContent = `원금 ${Math.round(paid).toLocaleString()}원 · 손익 ${signedWon(profit)} (${signedPct(paid > 0 ? profit / paid : 0)}) · 이자는 세후 추정`;
@@ -14768,7 +14904,7 @@ function renderInvestments() {
     const parts = [iv.kind];
     if (investIsFixed(iv.kind) && iv.rate) parts.push(`연 ${iv.rate}%`);
     if (iv.kind === '적금' && iv.monthly) parts.push(`월 ${Number(iv.monthly).toLocaleString()}원`);
-    if (c.dday !== null) parts.push(c.dday > 0 ? `만기 ${ddayLabel(c.dday)}` : c.dday === 0 ? '오늘 만기' : '만기 지남');
+    if (c.dday !== null) parts.push(c.dday > 0 ? `만기 ${ddayLabel(c.dday)}` : c.dday === 0 ? '오늘 만기' : (counted[i] ? '만기 지남' : '만기 · 통장에 입금됨'));
     const acc = accountName(iv.accountId);
     if (acc) parts.push(acc);
     if (iv.memo) parts.push(iv.memo);
@@ -14923,6 +15059,7 @@ function saveInvestment() {
   editingInvestId = null;
   closeInvestModal();
   saveData();
+  renderAccounts();
   renderInvestments();
   showToast(wasEditing ? '수정했습니다' : '추가했습니다', { type: 'success', duration: 1800 });
 }
@@ -14936,6 +15073,7 @@ async function deleteInvestment() {
   editingInvestId = null;
   closeInvestModal();
   saveData();
+  renderAccounts();
   renderInvestments();
   showToast('삭제했습니다', { type: 'info', duration: 1600 });
 }
