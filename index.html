@@ -3769,6 +3769,16 @@ body::after {
 /* 루틴 */
 #routineModal { align-items: center; justify-content: center; padding: 16px; }
 #routineModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
+.extra-toggle-row { display: flex; gap: 8px; }
+.extra-toggle-row button { flex: 1; font: inherit; font-size: 13px; font-weight: 700; padding: 10px 0; border-radius: 12px; border: 1px solid var(--border); background: var(--panel2); color: var(--text3); cursor: pointer; }
+.extra-toggle-row button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
+#addModal [hidden], #routineModal [hidden] { display: none !important; }
+.routine-detail { grid-column: 2 / -1; display: flex; flex-direction: column; gap: 4px; }
+.routine-memo { font-size: 11px; color: var(--text3); white-space: pre-wrap; }
+.routine-sub { display: flex; align-items: center; gap: 8px; width: 100%; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 12px; color: var(--text); text-align: left; cursor: pointer; }
+.routine-sub-check { width: 16px; height: 16px; flex: none; border-radius: 4px; border: 2px solid var(--accent); display: grid; place-items: center; font-size: 10px; color: #fff; }
+.routine-sub.done .routine-sub-check { background: var(--accent); }
+.routine-sub.done .routine-sub-text { text-decoration: line-through; opacity: .55; }
 .memo-field { min-height: 64px; line-height: 1.5; resize: vertical; font-family: inherit; }
 #memoModal { align-items: center; justify-content: center; padding: 16px; }
 #memoModal .modal-sheet { margin: 0 auto; border-radius: 24px !important; max-height: calc(100dvh - 32px); }
@@ -6845,14 +6855,6 @@ button:active:not(:disabled) {
 
         <div class="form-group">
 
-          <label class="form-label">장소</label>
-
-          <input class="form-input" id="f_loc" type="text" placeholder="장소 (선택)">
-
-        </div>
-
-        <div class="form-group">
-
           <label class="form-label">사진</label>
 
           <input type="file" id="photoFileInput" accept="image/*" capture="environment" style="display:none" onchange="handlePhotoUpload(this)">
@@ -6883,19 +6885,30 @@ button:active:not(:disabled) {
 
         <div class="form-group">
 
+          <label class="form-label">추가 항목</label>
+
+          <div class="extra-toggle-row">
+            <button type="button" id="f_memoBtn" onclick="toggleScheduleExtra('memo')">📝 메모</button>
+            <button type="button" id="f_checkBtn" onclick="toggleScheduleExtra('check')">☑️ 체크리스트</button>
+          </div>
+
+        </div>
+
+        <div class="form-group" id="f_memoGroup" hidden>
+
+          <label class="form-label">메모</label>
+
+          <textarea class="form-textarea memo-field" id="f_memo" placeholder="메모 내용..."></textarea>
+
+        </div>
+
+        <div class="form-group" id="f_checkGroup" hidden>
+
           <label class="form-label">체크리스트</label>
 
           <div class="checklist-editor-list" id="f_checklist"></div>
 
           <button class="checklist-add-btn" type="button" onclick="addChecklistItem()">+ 체크 항목 추가</button>
-
-        </div>
-
-        <div class="form-group">
-
-          <label class="form-label">메모</label>
-
-          <textarea class="form-textarea" id="f_memo" placeholder="메모 내용..." style="min-height:40px;max-height:60px;resize:none;"></textarea>
 
         </div>
 
@@ -7366,8 +7379,20 @@ button:active:not(:disabled) {
           <input class="form-input" id="r_end" type="date">
         </div>
         <div class="form-group">
+          <label class="form-label">추가 항목</label>
+          <div class="extra-toggle-row">
+            <button type="button" id="r_memoBtn" onclick="toggleRoutineExtra('memo')">📝 메모</button>
+            <button type="button" id="r_checkBtn" onclick="toggleRoutineExtra('check')">☑️ 체크리스트</button>
+          </div>
+        </div>
+        <div class="form-group" id="r_memoGroup" hidden>
           <label class="form-label">메모</label>
-          <textarea class="form-textarea memo-field" id="r_memo" rows="2" maxlength="200" placeholder="메모 (선택)"></textarea>
+          <textarea class="form-textarea memo-field" id="r_memo" rows="2" maxlength="300" placeholder="메모 내용..."></textarea>
+        </div>
+        <div class="form-group" id="r_checkGroup" hidden>
+          <label class="form-label">체크리스트</label>
+          <div class="checklist-editor-list" id="r_checklist"></div>
+          <button class="checklist-add-btn" type="button" onclick="addRoutineCheck()">+ 체크 항목 추가</button>
         </div>
         <button type="button" class="account-delete-btn" id="r_delete" onclick="deleteRoutine()">이 루틴 삭제</button>
       </div>
@@ -7943,6 +7968,7 @@ let investmentNextId = 1;
 let routines = [];          // { id, name, days:[0-6], time, startDate, endDate, memo }
 let routineNextId = 1;
 let routineLog = {};        // { 'YYYY-MM-DD': [완료한 루틴 id, ...] }
+let routineChecks = {};     // { 'YYYY-MM-DD': { 루틴 id: [체크한 항목 id, ...] } }
 let investTaxRate = 15.4;   // 이자소득세율(%) 기본값. 항목마다 따로 정할 수도 있다
 let itemOrder = {};        // { 'YYYY-MM-DD': [일정 id, ...] } 사용자가 정한 하루 일정 순서
 const LEDGER_NO_CATEGORY = '__none';
@@ -8043,6 +8069,7 @@ function saveData() {
       routines,
       routineNextId,
       routineLog,
+      routineChecks,
       itemOrder,
       nextId,
       ledgerNextId,
@@ -8085,6 +8112,7 @@ function getCloudStatePayload() {
     routines,
     routineNextId,
     routineLog,
+    routineChecks,
     itemOrder,
     nextId,
     ledgerNextId,
@@ -8156,13 +8184,14 @@ function applyCloudState(payload) {
   if (Number.isFinite(payload.investTaxRate)) investTaxRate = payload.investTaxRate;
   if (Array.isArray(payload.routines)) routines = payload.routines;
   if (payload.routineLog && typeof payload.routineLog === 'object' && !Array.isArray(payload.routineLog)) routineLog = payload.routineLog;
+  if (payload.routineChecks && typeof payload.routineChecks === 'object' && !Array.isArray(payload.routineChecks)) routineChecks = payload.routineChecks;
   if (Number.isFinite(payload.routineNextId)) routineNextId = payload.routineNextId;
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (payload.nickname) localStorage.setItem('rianless_nickname', payload.nickname);
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, routines, routineNextId, routineLog, itemOrder, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, routines, routineNextId, routineLog, routineChecks, itemOrder, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -8348,6 +8377,7 @@ function loadData() {
       if (Number.isFinite(payload.investTaxRate)) investTaxRate = payload.investTaxRate;
       if (Array.isArray(payload.routines)) routines = payload.routines;
       if (payload.routineLog && typeof payload.routineLog === 'object' && !Array.isArray(payload.routineLog)) routineLog = payload.routineLog;
+      if (payload.routineChecks && typeof payload.routineChecks === 'object' && !Array.isArray(payload.routineChecks)) routineChecks = payload.routineChecks;
       if (payload.routineNextId) routineNextId = payload.routineNextId;
       if (payload.accountNextId)  accountNextId  = payload.accountNextId;
       if (payload.transferNextId) transferNextId = payload.transferNextId;
@@ -10263,7 +10293,9 @@ function renderCalDayList(ds, dayEvents) {
     title.textContent = r.name;
     const meta = document.createElement('small');
     const streak = routineStreak(r, fmtDate(new Date()));
-    meta.textContent = ['루틴', r.time, streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
+    const items = routineItems(r);
+    const checked = items.filter(it => routineCheckedIds(r.id, ds).includes(it.id)).length;
+    meta.textContent = ['루틴', r.time, items.length ? `${checked}/${items.length}` : '', streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
     body.append(title, meta);
     const edit = document.createElement('button');
     edit.type = 'button';
@@ -10272,6 +10304,32 @@ function renderCalDayList(ds, dayEvents) {
     edit.setAttribute('aria-label', `${r.name} 수정`);
     edit.onclick = ev => { ev.stopPropagation(); openRoutineModal(r.id); };
     row.append(check, body, edit);
+    if (r.memo || items.length) {
+      const detail = document.createElement('div');
+      detail.className = 'routine-detail';
+      if (r.memo) {
+        const memo = document.createElement('div');
+        memo.className = 'routine-memo';
+        memo.textContent = r.memo;
+        detail.appendChild(memo);
+      }
+      items.forEach(it => {
+        const isOn = routineCheckedIds(r.id, ds).includes(it.id);
+        const sub = document.createElement('button');
+        sub.type = 'button';
+        sub.className = 'routine-sub' + (isOn ? ' done' : '');
+        const box = document.createElement('span');
+        box.className = 'routine-sub-check';
+        box.textContent = isOn ? '✓' : '';
+        const text = document.createElement('span');
+        text.className = 'routine-sub-text';
+        text.textContent = it.text;
+        sub.append(box, text);
+        sub.onclick = ev => { ev.stopPropagation(); toggleRoutineItem(r.id, it.id, ds); };
+        detail.appendChild(sub);
+      });
+      row.appendChild(detail);
+    }
     row.onclick = () => toggleRoutine(r.id, ds);
     row.onkeydown = e => { if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); toggleRoutine(r.id, ds); } };
     list.appendChild(row);
@@ -10294,7 +10352,7 @@ function renderCalDayList(ds, dayEvents) {
     title.textContent = item.hideTitle ? '비공개 일정' : item.title;
     const meta = document.createElement('small');
     const spanText = isMultiDay(item) ? `${spanLabel(item)} · ${dayDiff(spanStartOf(item), ds) + 1}일째` : '';
-    meta.textContent = [spanText, item.category, item.location].filter(Boolean).join(' · ');
+    meta.textContent = [spanText, item.category].filter(Boolean).join(' · ');
     body.append(title, meta);
     const arrow = document.createElement('span');
     arrow.className = 'agenda-arrow';
@@ -11727,13 +11785,12 @@ function openAdd(presetDate=null) {
 
   document.getElementById('timeInputWrap').style.display = '';
 
-  document.getElementById('f_loc').value='';
-
   document.getElementById('f_memo').value='';
 
   document.getElementById('f_content').value='';
 
   renderChecklistEditor();
+  setScheduleExtras(false, false);
 
   document.getElementById('f_repeat').value='none';
 
@@ -11798,13 +11855,12 @@ function openEdit(id) {
 
   document.getElementById('f_et').value = isAlldayVal ? '' : (times[1]||'');
 
-  document.getElementById('f_loc').value = item.location||'';
-
   document.getElementById('f_memo').value = item.memo||'';
 
   document.getElementById('f_content').value = item.content||'';
 
   renderChecklistEditor();
+  setScheduleExtras(!!item.memo, editingChecklist.length > 0);
 
   document.getElementById('f_cat').value = item.category;
 
@@ -11860,6 +11916,30 @@ function normalizeChecklist(list) {
 
 function createChecklistId() {
   return `check-${Date.now().toString(36)}-${Math.random().toString(36).slice(2, 7)}`;
+}
+
+function applyExtraToggle(btnId, groupId, on) {
+  document.getElementById(btnId).classList.toggle('on', on);
+  document.getElementById(groupId).hidden = !on;
+}
+
+function scheduleExtraOn(kind) {
+  return document.getElementById(kind === 'memo' ? 'f_memoBtn' : 'f_checkBtn').classList.contains('on');
+}
+
+function setScheduleExtras(memoOn, checkOn) {
+  applyExtraToggle('f_memoBtn', 'f_memoGroup', memoOn);
+  applyExtraToggle('f_checkBtn', 'f_checkGroup', checkOn);
+}
+
+function toggleScheduleExtra(kind) {
+  const on = !scheduleExtraOn(kind);
+  if (kind === 'memo') applyExtraToggle('f_memoBtn', 'f_memoGroup', on);
+  else {
+    applyExtraToggle('f_checkBtn', 'f_checkGroup', on);
+    if (on && !editingChecklist.length) addChecklistItem();
+  }
+  if (on) setTimeout(() => (kind === 'memo' ? document.getElementById('f_memo') : document.querySelector('#f_checklist .checklist-editor-input'))?.focus(), 0);
 }
 
 function addChecklistItem(text = '') {
@@ -12100,13 +12180,11 @@ async function saveItem() {
 
     time, floor: existing?.floor||'', sub: existing?.sub||'', instructor: existing?.instructor||'',
 
-    location: document.getElementById('f_loc').value,
-
-    memo: document.getElementById('f_memo').value,
+    memo: scheduleExtraOn('memo') ? document.getElementById('f_memo').value : '',
 
     content: document.getElementById('f_content').value,
 
-    checklist: editingChecklist
+    checklist: !scheduleExtraOn('check') ? [] : editingChecklist
       .map(entry => ({ id: entry.id, text: entry.text.trim(), done: Boolean(entry.done) }))
       .filter(entry => entry.text),
 
@@ -12215,8 +12293,6 @@ function openDetail(id, skipHistory = false) {
     <div class="detail-row"><span class="dr-key">날짜</span><span class="dr-val">${item.date||'개별'}</span></div>
 
     ${item.time?`<div class="detail-row"><span class="dr-key">시간</span><span class="dr-val">${item.time === 'allday' ? '하루종일' : item.time}</span></div>`:''}
-
-    ${item.location?`<div class="detail-row"><span class="dr-key">장소</span><span class="dr-val">${item.location}</span></div>`:''}
 
     ${item.instructor?`<div class="detail-row"><span class="dr-key">강사</span><span class="dr-val">${item.instructor}</span></div>`:''}
 
@@ -12731,8 +12807,6 @@ function doSearch(q) {
 
     normalizeChecklist(it.checklist).some(entry => entry.text.toLowerCase().includes(q)) ||
 
-    (it.location||'').toLowerCase().includes(q) ||
-
     (it.category||'').toLowerCase().includes(q)
 
   );
@@ -12749,7 +12823,7 @@ function doSearch(q) {
 
     const color = getCatColor(it.category);
 
-    const meta = [it.date, it.time === 'allday' ? '하루종일' : it.time, it.location].filter(Boolean).join(' · ');
+    const meta = [it.date, it.time === 'allday' ? '하루종일' : it.time].filter(Boolean).join(' · ');
 
     return `<div class="search-item" onclick="closeSearch();openDetail(${it.id})">
 
@@ -14114,6 +14188,7 @@ async function deleteTransfer(id) {
 const ROUTINE_DOW = ['일', '월', '화', '수', '목', '금', '토'];
 const ROUTINE_PRESETS = { all: [0, 1, 2, 3, 4, 5, 6], weekday: [1, 2, 3, 4, 5], weekend: [0, 6] };
 let editingRoutineId = null;
+let routineEditList = [];
 
 function routineOccursOn(r, ds) {
   if (!r || !ds || (r.startDate && ds < r.startDate) || (r.endDate && ds > r.endDate)) return false;
@@ -14127,13 +14202,49 @@ function routinesForDate(ds) {
 
 function isRoutineDone(id, ds) { return (routineLog[ds] || []).includes(id); }
 
-function toggleRoutine(id, ds) {
-  const list = routineLog[ds] || [];
-  const next = list.includes(id) ? list.filter(x => x !== id) : [...list, id];
-  if (next.length) routineLog[ds] = next; else delete routineLog[ds];
+function routineItems(r) { return Array.isArray(r && r.checklist) ? r.checklist : []; }
+function routineCheckedIds(id, ds) { return (routineChecks[ds] && routineChecks[ds][id]) || []; }
+
+function setRoutineChecked(id, ds, ids) {
+  if (ids.length) { (routineChecks[ds] = routineChecks[ds] || {})[id] = ids; }
+  else if (routineChecks[ds]) { delete routineChecks[ds][id]; if (!Object.keys(routineChecks[ds]).length) delete routineChecks[ds]; }
+}
+
+function setRoutineDone(id, ds, done) {
+  const list = (routineLog[ds] || []).filter(x => x !== id);
+  if (done) list.push(id);
+  if (list.length) routineLog[ds] = list; else delete routineLog[ds];
+}
+
+function afterRoutineChange() {
   saveData();
   renderRoutines();
   if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
+}
+
+// 체크리스트가 있는 루틴은 전체 체크/해제, 없으면 완료 토글
+function toggleRoutine(id, ds) {
+  const r = routines.find(x => x.id === id);
+  const items = routineItems(r);
+  if (items.length) {
+    const all = items.every(it => routineCheckedIds(id, ds).includes(it.id));
+    setRoutineChecked(id, ds, all ? [] : items.map(it => it.id));
+    setRoutineDone(id, ds, !all);
+  } else {
+    setRoutineDone(id, ds, !isRoutineDone(id, ds));
+  }
+  afterRoutineChange();
+}
+
+// 항목을 모두 체크하면 루틴이 자동으로 완료된다
+function toggleRoutineItem(id, itemId, ds) {
+  const r = routines.find(x => x.id === id);
+  const items = routineItems(r);
+  const cur = routineCheckedIds(id, ds);
+  const next = cur.includes(itemId) ? cur.filter(x => x !== itemId) : [...cur, itemId];
+  setRoutineChecked(id, ds, next);
+  setRoutineDone(id, ds, items.length > 0 && items.every(it => next.includes(it.id)));
+  afterRoutineChange();
 }
 
 function shiftDate(ds, delta) {
@@ -14237,6 +14348,60 @@ function currentRoutineDays() {
 function toggleRoutineDay(btn) { btn.classList.toggle('on'); }
 function setRoutineDays(kind) { syncRoutineDayButtons(ROUTINE_PRESETS[kind]); }
 
+function routineExtraOn(kind) {
+  return document.getElementById(kind === 'memo' ? 'r_memoBtn' : 'r_checkBtn').classList.contains('on');
+}
+
+function setRoutineExtras(memoOn, checkOn) {
+  applyExtraToggle('r_memoBtn', 'r_memoGroup', memoOn);
+  applyExtraToggle('r_checkBtn', 'r_checkGroup', checkOn);
+}
+
+function toggleRoutineExtra(kind) {
+  const on = !routineExtraOn(kind);
+  if (kind === 'memo') applyExtraToggle('r_memoBtn', 'r_memoGroup', on);
+  else {
+    applyExtraToggle('r_checkBtn', 'r_checkGroup', on);
+    if (on && !routineEditList.length) addRoutineCheck();
+  }
+  if (on) setTimeout(() => (kind === 'memo' ? document.getElementById('r_memo') : document.querySelector('#r_checklist input'))?.focus(), 0);
+}
+
+function renderRoutineCheckEditor(focusId) {
+  const box = document.getElementById('r_checklist');
+  box.replaceChildren();
+  routineEditList.forEach(entry => {
+    const row = document.createElement('div');
+    row.className = 'checklist-editor-item';
+    const input = document.createElement('input');
+    input.type = 'text';
+    input.className = 'form-input checklist-editor-input';
+    input.placeholder = '할 일을 입력하세요';
+    input.value = entry.text;
+    input.addEventListener('input', () => { entry.text = input.value; });
+    input.addEventListener('keydown', ev => {
+      if (ev.key !== 'Enter' || ev.isComposing) return;
+      ev.preventDefault();
+      if (entry.text.trim()) addRoutineCheck();
+    });
+    const remove = document.createElement('button');
+    remove.type = 'button';
+    remove.className = 'checklist-remove-btn';
+    remove.textContent = '×';
+    remove.setAttribute('aria-label', '체크 항목 삭제');
+    remove.onclick = () => { routineEditList = routineEditList.filter(x => x.id !== entry.id); renderRoutineCheckEditor(); };
+    row.append(input, remove);
+    box.appendChild(row);
+    if (focusId === entry.id) setTimeout(() => input.focus(), 0);
+  });
+}
+
+function addRoutineCheck() {
+  const id = createChecklistId();
+  routineEditList.push({ id, text: '' });
+  renderRoutineCheckEditor(id);
+}
+
 function openRoutineModal(id, date) {
   const r = id !== undefined && id !== null ? routines.find(x => x.id === id) : null;
   editingRoutineId = r ? r.id : null;
@@ -14246,6 +14411,9 @@ function openRoutineModal(id, date) {
   document.getElementById('r_start').value = r ? (r.startDate || '') : (date || fmtDate(new Date()));
   document.getElementById('r_end').value = r ? (r.endDate || '') : '';
   document.getElementById('r_memo').value = r ? (r.memo || '') : '';
+  routineEditList = r ? routineItems(r).map(x => ({ ...x })) : [];
+  renderRoutineCheckEditor();
+  setRoutineExtras(!!(r && r.memo), routineEditList.length > 0);
   syncRoutineDayButtons(r ? r.days : ROUTINE_PRESETS.all);
   document.getElementById('r_delete').style.display = r ? '' : 'none';
   history.pushState({modal:'routine'}, '');
@@ -14275,7 +14443,8 @@ function saveRoutine() {
     time: document.getElementById('r_time').value || '',
     startDate: document.getElementById('r_start').value || fmtDate(new Date()),
     endDate: document.getElementById('r_end').value || '',
-    memo: document.getElementById('r_memo').value.trim()
+    memo: routineExtraOn('memo') ? document.getElementById('r_memo').value.trim() : '',
+    checklist: routineExtraOn('check') ? routineEditList.map(x => ({ id: x.id, text: x.text.trim() })).filter(x => x.text) : []
   };
   if (fields.endDate && fields.endDate < fields.startDate) { showToast('종료일은 시작일보다 뒤여야 해요', { type: 'error', duration: 2200 }); return; }
   const wasEditing = editingRoutineId !== null;
@@ -14301,6 +14470,10 @@ async function deleteRoutine() {
   Object.keys(routineLog).forEach(ds => {
     routineLog[ds] = routineLog[ds].filter(id => id !== r.id);
     if (!routineLog[ds].length) delete routineLog[ds];
+  });
+  Object.keys(routineChecks).forEach(ds => {
+    delete routineChecks[ds][r.id];
+    if (!Object.keys(routineChecks[ds]).length) delete routineChecks[ds];
   });
   editingRoutineId = null;
   closeRoutineModal();
