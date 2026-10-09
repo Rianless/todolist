@@ -3744,13 +3744,10 @@ body::after {
 .account-empty { text-align: center; padding: 18px 0 8px; font-size: 12px; color: var(--text3); }
 
 /* 투자·저축 */
-.invest-total {
-  margin: 12px 0 8px; padding: 14px 16px; border-radius: 12px; color: #fff;
-  background: linear-gradient(135deg, #0ea5e9, #6366f1);
-}
-.invest-total-label { font-size: 11px; opacity: .85; }
-.invest-total-val { font-size: 22px; font-weight: 800; margin-top: 2px; }
-.invest-total-sub { font-size: 11px; opacity: .9; margin-top: 4px; }
+.asset-section { display: flex; justify-content: space-between; align-items: baseline; margin: 20px 2px 4px; padding-top: 14px; border-top: 1px solid var(--border2); font-size: 13px; font-weight: 800; }
+.asset-section small { font-size: 12px; font-weight: 700; color: var(--text3); }
+.asset-hint { font-size: 10px; color: var(--text3); margin: 0 2px 6px; }
+.asset-hint:empty { display: none; }
 .invest-tax-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 11px; color: var(--text3); margin: 4px 0 6px; }
 .invest-tax-row input { width: 62px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel2); color: var(--text); font: inherit; text-align: right; }
 .invest-tax-row button { font: inherit; font-size: 10px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); background: none; color: var(--text2, var(--text)); cursor: pointer; }
@@ -6333,16 +6330,33 @@ button:active:not(:disabled) {
         <div class="mp-card" id="mpCardAccounts">
           <div class="mp-card-header" onclick="toggleMpCard('mpCardAccounts')">
             <span class="mp-card-icon">🏦</span>
-            <span class="mp-card-label">통장</span>
+            <span class="mp-card-label">자산 · 통장 / 투자 / 저축</span>
             <span class="mp-card-chevron">▼</span>
           </div>
           <div class="mp-card-body">
             <div class="mp-card-inner">
-              <div id="accountTotal"></div>
+              <div id="assetTotal"></div>
+
+              <div class="asset-section"><span>🏦 통장</span><small id="accountSub"></small></div>
               <div id="accountList"></div>
               <div class="ledger-actions">
                 <button class="ledger-add-btn" onclick="openAccountModal();event.stopPropagation()">+ 통장 추가</button>
                 <button class="ledger-export-btn" onclick="openTransferModal();event.stopPropagation()" aria-label="통장 간 이체">이체</button>
+              </div>
+
+              <div class="asset-section"><span>📈 투자 · 저축</span><small id="investSub"></small></div>
+              <div class="asset-hint" id="investHint"></div>
+              <div class="invest-tax-row">
+                <span>이자소득세</span>
+                <input type="number" id="investTaxInput" min="0" max="100" step="0.1" inputmode="decimal" aria-label="이자소득세율(%)" onchange="setInvestTaxRate(this.value)">
+                <span>%</span>
+                <button type="button" onclick="setInvestTaxRate(15.4)">일반 15.4</button>
+                <button type="button" onclick="setInvestTaxRate(9.5)">세금우대 9.5</button>
+                <button type="button" onclick="setInvestTaxRate(0)">비과세</button>
+              </div>
+              <div id="investList"></div>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
               </div>
             </div>
           </div>
@@ -6360,32 +6374,6 @@ button:active:not(:disabled) {
               <div id="routineList"></div>
               <div class="ledger-actions">
                 <button class="ledger-add-btn" onclick="openRoutineModal();event.stopPropagation()">+ 루틴 추가</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── 투자·저축 카드 ── -->
-        <div class="mp-card" id="mpCardInvest">
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardInvest')">
-            <span class="mp-card-icon">📈</span>
-            <span class="mp-card-label">투자·저축</span>
-            <span class="mp-card-chevron">▼</span>
-          </div>
-          <div class="mp-card-body">
-            <div class="mp-card-inner">
-              <div id="investTotal"></div>
-              <div class="invest-tax-row">
-                <span>이자소득세</span>
-                <input type="number" id="investTaxInput" min="0" max="100" step="0.1" inputmode="decimal" aria-label="이자소득세율(%)" onchange="setInvestTaxRate(this.value)">
-                <span>%</span>
-                <button type="button" onclick="setInvestTaxRate(15.4)">일반 15.4</button>
-                <button type="button" onclick="setInvestTaxRate(9.5)">세금우대 9.5</button>
-                <button type="button" onclick="setInvestTaxRate(0)">비과세</button>
-              </div>
-              <div id="investList"></div>
-              <div class="ledger-actions">
-                <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
               </div>
             </div>
           </div>
@@ -8641,8 +8629,7 @@ function toggleMpCard(id) {
   if (!isOpen) {
 
     if (id === 'mpCardLedger') renderLedgerCard();
-    if (id === 'mpCardAccounts') renderAccounts();
-    if (id === 'mpCardInvest') renderInvestments();
+    if (id === 'mpCardAccounts') { renderAccounts(); renderInvestments(); }
     if (id === 'mpCardRoutine') renderRoutines();
 
     if (id === 'mpCardSubs') renderSubs();
@@ -13944,14 +13931,37 @@ function accountMonthStats(acc) {
   return { income, expense };
 }
 
+// 통장 잔액 + 투자·저축 평가금액 = 총 자산
+function renderAssetTotal() {
+  const el = document.getElementById('assetTotal');
+  if (!el) return;
+  el.textContent = '';
+  el.className = '';
+  if (!accounts.length && !investments.length) return;
+  const today = fmtDate(new Date());
+  const bank = accounts.reduce((sum, a) => sum + accountBalance(a), 0);
+  const invest = investments.reduce((sum, iv) => sum + calcInvestment(iv, today).value, 0);
+  el.className = 'account-total';
+  const label = document.createElement('div');
+  label.className = 'account-total-label';
+  label.textContent = '총 자산';
+  const val = document.createElement('div');
+  val.className = 'account-total-val';
+  val.textContent = `${Math.round(bank + invest).toLocaleString()}원`;
+  const sub = document.createElement('div');
+  sub.className = 'account-total-sub';
+  sub.textContent = `통장 ${Math.round(bank).toLocaleString()}원 · 투자·저축 ${Math.round(invest).toLocaleString()}원`;
+  el.append(label, val, sub);
+}
+
 function renderAccounts() {
-  const totalEl = document.getElementById('accountTotal');
+  const subEl = document.getElementById('accountSub');
   const listEl = document.getElementById('accountList');
-  if (!totalEl || !listEl) return;
-  totalEl.textContent = '';
+  if (!subEl || !listEl) return;
   listEl.textContent = '';
+  renderAssetTotal();
   if (!accounts.length) {
-    totalEl.className = '';
+    subEl.textContent = '';
     const empty = document.createElement('div');
     empty.className = 'account-empty';
     empty.textContent = '통장을 추가하면 잔액을 한눈에 관리할 수 있어요';
@@ -13960,17 +13970,7 @@ function renderAccounts() {
   }
   const balances = accounts.map(a => accountBalance(a));
   const total = balances.reduce((s, v) => s + v, 0);
-  totalEl.className = 'account-total';
-  const label = document.createElement('div');
-  label.className = 'account-total-label';
-  label.textContent = '총 자산';
-  const val = document.createElement('div');
-  val.className = 'account-total-val';
-  val.textContent = `${total.toLocaleString()}원`;
-  const sub = document.createElement('div');
-  sub.className = 'account-total-sub';
-  sub.textContent = `통장 ${accounts.length}개 · 오늘까지의 내역 기준`;
-  totalEl.append(label, val, sub);
+  subEl.textContent = `${total.toLocaleString()}원 · ${accounts.length}개`;
 
   accounts.forEach((acc, i) => {
     const row = document.createElement('div');
@@ -14589,13 +14589,15 @@ function setInvestTaxRate(v) {
 function renderInvestments() {
   const taxInput = document.getElementById('investTaxInput');
   if (taxInput) taxInput.value = investTaxRate;
-  const totalEl = document.getElementById('investTotal');
+  const subEl = document.getElementById('investSub');
+  const hintEl = document.getElementById('investHint');
   const listEl = document.getElementById('investList');
-  if (!totalEl || !listEl) return;
-  totalEl.textContent = '';
-  totalEl.className = '';
+  if (!subEl || !listEl) return;
   listEl.textContent = '';
+  renderAssetTotal();
   if (!investments.length) {
+    subEl.textContent = '';
+    hintEl.textContent = '';
     const empty = document.createElement('div');
     empty.className = 'account-empty';
     empty.textContent = '적금·예금·주식을 추가하면 자산 현황을 볼 수 있어요';
@@ -14607,18 +14609,8 @@ function renderInvestments() {
   const paid = calcs.reduce((s, c) => s + c.paid, 0);
   const value = calcs.reduce((s, c) => s + c.value, 0);
   const profit = value - paid;
-
-  totalEl.className = 'invest-total';
-  const label = document.createElement('div');
-  label.className = 'invest-total-label';
-  label.textContent = '투자·저축 평가금액';
-  const val = document.createElement('div');
-  val.className = 'invest-total-val';
-  val.textContent = `${Math.round(value).toLocaleString()}원`;
-  const sub = document.createElement('div');
-  sub.className = 'invest-total-sub';
-  sub.textContent = `원금 ${Math.round(paid).toLocaleString()}원 · ${signedWon(profit)} (${signedPct(paid > 0 ? profit / paid : 0)}) · 이자는 세후 추정`;
-  totalEl.append(label, val, sub);
+  subEl.textContent = `${Math.round(value).toLocaleString()}원 · ${investments.length}개`;
+  hintEl.textContent = `원금 ${Math.round(paid).toLocaleString()}원 · 손익 ${signedWon(profit)} (${signedPct(paid > 0 ? profit / paid : 0)}) · 이자는 세후 추정`;
 
   const order = investments.map((iv, i) => i).sort((a, b) => {
     const da = calcs[a].dday === null ? 1e9 : calcs[a].dday, db = calcs[b].dday === null ? 1e9 : calcs[b].dday;
