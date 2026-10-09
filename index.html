@@ -3751,6 +3751,9 @@ body::after {
 .invest-total-label { font-size: 11px; opacity: .85; }
 .invest-total-val { font-size: 22px; font-weight: 800; margin-top: 2px; }
 .invest-total-sub { font-size: 11px; opacity: .9; margin-top: 4px; }
+.invest-tax-row { display: flex; align-items: center; flex-wrap: wrap; gap: 6px; font-size: 11px; color: var(--text3); margin: 4px 0 6px; }
+.invest-tax-row input { width: 62px; padding: 4px 6px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel2); color: var(--text); font: inherit; text-align: right; }
+.invest-tax-row button { font: inherit; font-size: 10px; padding: 4px 8px; border-radius: 999px; border: 1px solid var(--border); background: none; color: var(--text2, var(--text)); cursor: pointer; }
 .invest-row { padding: 11px 4px; border-bottom: 1px solid var(--border2); cursor: pointer; }
 .invest-row:last-child { border-bottom: none; }
 .invest-row:hover { background: rgba(99, 102, 241, .05); }
@@ -6324,6 +6327,14 @@ button:active:not(:disabled) {
           <div class="mp-card-body">
             <div class="mp-card-inner">
               <div id="investTotal"></div>
+              <div class="invest-tax-row">
+                <span>이자소득세</span>
+                <input type="number" id="investTaxInput" min="0" max="100" step="0.1" inputmode="decimal" aria-label="이자소득세율(%)" onchange="setInvestTaxRate(this.value)">
+                <span>%</span>
+                <button type="button" onclick="setInvestTaxRate(15.4)">일반 15.4</button>
+                <button type="button" onclick="setInvestTaxRate(9.5)">세금우대 9.5</button>
+                <button type="button" onclick="setInvestTaxRate(0)">비과세</button>
+              </div>
               <div id="investList"></div>
               <div class="ledger-actions">
                 <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
@@ -7293,6 +7304,10 @@ button:active:not(:disabled) {
           <label class="form-label">현재 평가금액 (원)</label>
           <input class="form-input" id="iv_value" type="text" inputmode="numeric" placeholder="비우면 원금으로 계산" autocomplete="off" oninput="formatLedgerAmount(this)">
         </div>
+        <div class="form-group invest-kind-fields" id="iv_tax_group">
+          <label class="form-label">이자소득세율 (%)</label>
+          <input class="form-input" id="iv_tax" type="number" step="0.1" min="0" max="100" inputmode="decimal" placeholder="비우면 기본 설정 따름">
+        </div>
         <div class="form-group">
           <label class="form-label">연결 통장</label>
           <select class="form-select" id="iv_account"></select>
@@ -7803,6 +7818,7 @@ let transfers = [];         // { id, date, fromId, toId, amount, memo }
 let transferNextId = 1;
 let investments = [];       // { id, name, kind, rate, startDate, endDate, monthly, principal, currentValue, accountId, memo }
 let investmentNextId = 1;
+let investTaxRate = 15.4;   // 이자소득세율(%) 기본값. 항목마다 따로 정할 수도 있다
 let itemOrder = {};        // { 'YYYY-MM-DD': [일정 id, ...] } 사용자가 정한 하루 일정 순서
 const LEDGER_NO_CATEGORY = '__none';
 const LEDGER_CUSTOM_CATEGORY = '__custom';
@@ -7898,6 +7914,7 @@ function saveData() {
       transferNextId,
       investments,
       investmentNextId,
+      investTaxRate,
       itemOrder,
       nextId,
       ledgerNextId,
@@ -7936,6 +7953,7 @@ function getCloudStatePayload() {
     transferNextId,
     investments,
     investmentNextId,
+    investTaxRate,
     itemOrder,
     nextId,
     ledgerNextId,
@@ -8004,12 +8022,13 @@ function applyCloudState(payload) {
   if (Number.isFinite(payload.accountNextId)) accountNextId = payload.accountNextId;
   if (Number.isFinite(payload.transferNextId)) transferNextId = payload.transferNextId;
   if (Number.isFinite(payload.investmentNextId)) investmentNextId = payload.investmentNextId;
+  if (Number.isFinite(payload.investTaxRate)) investTaxRate = payload.investTaxRate;
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (payload.nickname) localStorage.setItem('rianless_nickname', payload.nickname);
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, itemOrder, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, itemOrder, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -8192,6 +8211,7 @@ function loadData() {
       if (Array.isArray(payload.transfers)) transfers = payload.transfers;
       if (Array.isArray(payload.investments)) investments = payload.investments;
       if (payload.investmentNextId) investmentNextId = payload.investmentNextId;
+      if (Number.isFinite(payload.investTaxRate)) investTaxRate = payload.investTaxRate;
       if (payload.accountNextId)  accountNextId  = payload.accountNextId;
       if (payload.transferNextId) transferNextId = payload.transferNextId;
       if (payload.itemOrder && typeof payload.itemOrder === 'object' && !Array.isArray(payload.itemOrder)) itemOrder = payload.itemOrder;
@@ -9542,6 +9562,31 @@ function renderCal() {
 
 
   // 사용자가 정한 하루 일정 순서를 칸의 일정 표시에도 적용
+  investments.forEach(iv => {
+    investEventsForMonth(iv, calY, calM).forEach(ev => {
+      const isDeposit = ev.type === 'deposit';
+      const item = {
+        id: `inv_${iv.id}_${ev.type}_${ev.date}`,
+        date: ev.date,
+        category: '투자',
+        time: '',
+        title: isDeposit ? `${INVEST_ICONS[iv.kind]} ${iv.name} 납입` : `🏁 ${iv.name} 만기`,
+        sub: isDeposit ? `₩${ev.amount.toLocaleString()} 납입` : `만기 예상 ₩${ev.amount.toLocaleString()}`,
+        amount: ev.amount,
+        investId: iv.id,
+        investEvent: ev.type,
+        investNo: ev.no || 0,
+        investTotal: ev.total || 0,
+        priority: 'none',
+        secret: false,
+        done: false,
+        isInvest: true
+      };
+      if (!dmap[ev.date]) dmap[ev.date] = [];
+      dmap[ev.date].push(item);
+    });
+  });
+
   Object.keys(dmap).forEach(d => { dmap[d] = applyDayOrder(d, dmap[d]); });
 
   // 가계부 ledger dmap (달 내 항목만)
@@ -9696,7 +9741,7 @@ function renderCal() {
 
       dot.className='cal-dot'+(item.done?' done':'');
 
-      const dotColor = item.isSub ? '#9d00ff' : getCatColor(item.category);
+      const dotColor = item.isSub ? '#9d00ff' : item.isInvest ? '#0ea5e9' : getCatColor(item.category);
       dot.style.setProperty('--event-color', dotColor);
 
       const displayTitle = item.hideTitle ? '// 비공개' : item.title;
@@ -9723,7 +9768,7 @@ function renderCal() {
 
       // 드래그 (개인 일정만)
 
-      if (!item.isSub) {
+      if (!item.isSub && !item.isInvest) {
 
         dot.setAttribute('aria-label', `${displayTitle} 일정`);
 
@@ -9961,9 +10006,10 @@ function renderCalDayList(ds, dayEvents) {
   const date = new Date(ds + 'T00:00:00');
   const allDayEvents = dayEvents || items.filter(item => item.date === ds);
   const dayItems = applyDayOrder(ds, allDayEvents
-    .filter(item => !item.isSub)
+    .filter(item => !item.isSub && !item.isInvest)
     .sort((a, b) => String(a.time || '').localeCompare(String(b.time || ''))));
   const daySubs = allDayEvents.filter(item => item.isSub);
+  const dayInvest = allDayEvents.filter(item => item.isInvest);
   const dayLedger = ledger.filter(entry => entry.date === ds);
 
   const header = document.createElement('div');
@@ -9980,7 +10026,7 @@ function renderCalDayList(ds, dayEvents) {
 
   const count = document.createElement('span');
   count.className = 'agenda-count';
-  count.textContent = `${dayItems.length + dayLedger.length + daySubs.length}개`;
+  count.textContent = `${dayItems.length + dayLedger.length + daySubs.length + dayInvest.length}개`;
   header.append(headingWrap, count);
   container.appendChild(header);
 
@@ -10025,7 +10071,7 @@ function renderCalDayList(ds, dayEvents) {
     container.appendChild(money);
   }
 
-  if (!dayItems.length && !dayLedger.length && !daySubs.length) {
+  if (!dayItems.length && !dayLedger.length && !daySubs.length && !dayInvest.length) {
     const empty = document.createElement('div');
     empty.className = 'agenda-empty';
     empty.innerHTML = '<span>✓</span><strong>여유로운 하루예요</strong><small>일정, 가계부, 구독을 추가해 보세요.</small>';
@@ -10108,6 +10154,30 @@ function renderCalDayList(ds, dayEvents) {
     amount.textContent = `-${Number(sub.amount || 0).toLocaleString()}원`;
     row.append(icon, body, amount);
     row.onclick = () => editSubscription(sub.subIndex);
+    list.appendChild(row);
+  });
+
+  dayInvest.forEach(ev => {
+    const row = document.createElement('button');
+    row.type = 'button';
+    row.className = 'agenda-row ledger invest';
+    const icon = document.createElement('span');
+    icon.className = 'agenda-money-icon';
+    icon.textContent = ev.investEvent === 'deposit' ? '🐷' : '🏁';
+    const body = document.createElement('span');
+    body.className = 'agenda-row-body';
+    const title = document.createElement('strong');
+    title.textContent = String(ev.title || '').replace(/^\S+\s/, '');
+    const meta = document.createElement('small');
+    meta.textContent = ev.investEvent === 'deposit'
+      ? ['적금 납입', ev.investTotal ? `${ev.investNo}/${ev.investTotal}회차` : `${ev.investNo}회차`].join(' · ')
+      : '만기일 · 세후 예상';
+    body.append(title, meta);
+    const amount = document.createElement('span');
+    amount.className = 'agenda-amount';
+    amount.textContent = `${Number(ev.amount || 0).toLocaleString()}원`;
+    row.append(icon, body, amount);
+    row.onclick = () => openInvestModal(ev.investId);
     list.appendChild(row);
   });
 
@@ -10524,6 +10594,8 @@ function makeCardForDayModal(item, ds, evts) {
     }
 
     if (item.isSub) return;
+
+    if (item.isInvest) { document.getElementById('dayModal').classList.remove('open'); openInvestModal(item.investId); return; }
 
     document.getElementById('dayModal').classList.remove('open');
 
@@ -13858,10 +13930,17 @@ function wholeMonthsBetween(a, b) {
   return Math.max(0, m);
 }
 
-// 세전 단리 기준 추정치. 적금은 매월 납입, 예금은 일할 계산
+function investTaxFor(iv) {
+  const own = iv.taxRate;
+  const t = own !== null && own !== undefined && own !== '' && Number.isFinite(Number(own)) ? Number(own) : investTaxRate;
+  return Math.min(100, Math.max(0, t));
+}
+
+// 단리 추정치. 적금은 매월 납입, 예금은 일할 계산. 이자에서 이자소득세를 뺀 세후 금액으로 돌려준다
 function calcInvestment(iv, today) {
   const rate = (Number(iv.rate) || 0) / 100;
-  const out = { paid: 0, value: 0, profit: 0, rate: 0, maturityValue: null, progress: null, dday: null };
+  const keep = 1 - investTaxFor(iv) / 100;
+  const out = { paid: 0, value: 0, profit: 0, rate: 0, maturityValue: null, maturityInterest: null, maturityTax: null, progress: null, dday: null };
   if (iv.kind === '적금') {
     const monthly = Number(iv.monthly) || 0;
     const n = iv.startDate && iv.endDate ? Math.max(1, wholeMonthsBetween(iv.startDate, iv.endDate)) : null;
@@ -13870,18 +13949,28 @@ function calcInvestment(iv, today) {
     if (n !== null) e = Math.min(e, n);
     out.paid = monthly * e;
     const finished = iv.endDate && today >= iv.endDate;
-    if (n !== null) out.maturityValue = Math.round(monthly * n + monthly * rate * n * (n + 1) / 24);
-    out.value = finished && out.maturityValue !== null
-      ? out.maturityValue
-      : Math.round(out.paid + monthly * rate / 12 * (e - 1) * e / 2);
-    if (e === 0) out.value = 0;
+    let gross = monthly * rate / 12 * (e - 1) * e / 2;
+    if (n !== null) {
+      const gm = monthly * rate * n * (n + 1) / 24;
+      out.maturityInterest = Math.round(gm * keep);
+      out.maturityTax = Math.round(gm) - out.maturityInterest;
+      out.maturityValue = monthly * n + out.maturityInterest;
+      if (finished) gross = gm;
+    }
+    out.value = e === 0 ? 0 : Math.round(out.paid + gross * keep);
   } else if (iv.kind === '예금') {
     const principal = Number(iv.principal) || 0;
     const totalDays = iv.startDate && iv.endDate ? Math.max(0, daysBetweenDates(iv.startDate, iv.endDate)) : null;
     const elapsed = iv.startDate && iv.startDate <= today ? daysBetweenDates(iv.startDate, today) : 0;
     out.paid = principal;
-    if (totalDays !== null) out.maturityValue = Math.round(principal * (1 + rate * totalDays / 365));
-    out.value = Math.round(principal * (1 + rate * Math.min(elapsed, totalDays === null ? elapsed : totalDays) / 365));
+    if (totalDays !== null) {
+      const gm = principal * rate * totalDays / 365;
+      out.maturityInterest = Math.round(gm * keep);
+      out.maturityTax = Math.round(gm) - out.maturityInterest;
+      out.maturityValue = principal + out.maturityInterest;
+    }
+    const gross = principal * rate * Math.min(elapsed, totalDays === null ? elapsed : totalDays) / 365;
+    out.value = Math.round(principal + gross * keep);
   } else {
     out.paid = Number(iv.principal) || 0;
     out.value = iv.currentValue !== undefined && iv.currentValue !== null && iv.currentValue !== '' ? Number(iv.currentValue) : out.paid;
@@ -13896,11 +13985,43 @@ function calcInvestment(iv, today) {
   return out;
 }
 
+// y년 m월(0-11)에 걸리는 적금 납입일 · 적금/예금 만기일
+function investEventsForMonth(iv, y, m) {
+  const pad = n => String(n).padStart(2, '0');
+  const inMonth = d => d && d.startsWith(`${y}-${pad(m + 1)}-`);
+  const out = [];
+  if (!investIsFixed(iv.kind) || !iv.startDate) return out;
+  if (iv.kind === '적금' && Number(iv.monthly) > 0) {
+    const start = new Date(iv.startDate + 'T00:00:00');
+    const n = iv.endDate ? Math.max(1, wholeMonthsBetween(iv.startDate, iv.endDate)) : 600;
+    const k = (y - start.getFullYear()) * 12 + (m - start.getMonth());
+    if (k >= 0 && k < n) {
+      const day = Math.min(start.getDate(), new Date(y, m + 1, 0).getDate());
+      out.push({ date: `${y}-${pad(m + 1)}-${pad(day)}`, type: 'deposit', amount: Number(iv.monthly), no: k + 1, total: iv.endDate ? n : null });
+    }
+  }
+  if (iv.endDate && inMonth(iv.endDate)) {
+    out.push({ date: iv.endDate, type: 'maturity', amount: calcInvestment(iv, iv.endDate).maturityValue || 0 });
+  }
+  return out;
+}
+
 function signedWon(n) { return `${n > 0 ? '+' : ''}${Math.round(n).toLocaleString()}원`; }
 function signedPct(r) { return `${r > 0 ? '+' : ''}${(r * 100).toFixed(1)}%`; }
 function trendClass(n) { return n > 0 ? 'up' : n < 0 ? 'down' : ''; }
 
+function setInvestTaxRate(v) {
+  const n = Number(v);
+  if (!Number.isFinite(n) || n < 0 || n > 100) { renderInvestments(); return; }
+  investTaxRate = Math.round(n * 100) / 100;
+  saveData();
+  renderInvestments();
+  if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
+}
+
 function renderInvestments() {
+  const taxInput = document.getElementById('investTaxInput');
+  if (taxInput) taxInput.value = investTaxRate;
   const totalEl = document.getElementById('investTotal');
   const listEl = document.getElementById('investList');
   if (!totalEl || !listEl) return;
@@ -13929,7 +14050,7 @@ function renderInvestments() {
   val.textContent = `${Math.round(value).toLocaleString()}원`;
   const sub = document.createElement('div');
   sub.className = 'invest-total-sub';
-  sub.textContent = `원금 ${Math.round(paid).toLocaleString()}원 · ${signedWon(profit)} (${signedPct(paid > 0 ? profit / paid : 0)}) · 이자는 세전 추정`;
+  sub.textContent = `원금 ${Math.round(paid).toLocaleString()}원 · ${signedWon(profit)} (${signedPct(paid > 0 ? profit / paid : 0)}) · 이자는 세후 추정`;
   totalEl.append(label, val, sub);
 
   const order = investments.map((iv, i) => i).sort((a, b) => {
@@ -14006,6 +14127,7 @@ function investFormValues() {
     monthly: kind === '적금' ? parseLedgerAmount(document.getElementById('iv_monthly').value) : 0,
     principal: kind === '적금' ? 0 : parseLedgerAmount(document.getElementById('iv_principal').value),
     currentValue: !fixed && valueText.trim() !== '' ? parseLedgerAmount(valueText) : null,
+    taxRate: fixed && document.getElementById('iv_tax').value !== '' ? Number(document.getElementById('iv_tax').value) : null,
     accountId: document.getElementById('iv_account').value ? Number(document.getElementById('iv_account').value) : null,
     memo: document.getElementById('iv_memo').value.trim()
   };
@@ -14017,6 +14139,8 @@ function updateInvestFormKind() {
   document.getElementById('iv_monthly_group').hidden = kind !== '적금';
   document.getElementById('iv_principal_group').hidden = kind === '적금';
   document.getElementById('iv_value_group').hidden = fixed;
+  document.getElementById('iv_tax_group').hidden = !fixed;
+  document.getElementById('iv_tax').placeholder = `비우면 기본 ${investTaxRate}%`;
   document.getElementById('iv_rate').parentElement.hidden = !fixed;
   document.getElementById('iv_end').parentElement.hidden = !fixed;
   document.getElementById('iv_start_label').textContent = fixed ? '가입일' : '매수일';
@@ -14030,7 +14154,7 @@ function updateInvestPreview() {
   const c = calcInvestment(v, fmtDate(new Date()));
   if (v.kind === '적금' || v.kind === '예금') {
     el.textContent = c.maturityValue !== null
-      ? `만기 예상 ${c.maturityValue.toLocaleString()}원 (세전 단리 추정, 이자 ${(c.maturityValue - (v.kind === '적금' ? v.monthly * Math.max(1, wholeMonthsBetween(v.startDate, v.endDate)) : v.principal)).toLocaleString()}원)`
+      ? `만기 예상 ${c.maturityValue.toLocaleString()}원 · 세후 이자 ${c.maturityInterest.toLocaleString()}원 (이자소득세 ${investTaxFor(v)}% = ${c.maturityTax.toLocaleString()}원, 단리 추정)`
       : '가입일과 만기일을 입력하면 만기 예상 금액을 계산해 줘요.';
   } else {
     el.textContent = v.principal > 0 ? `평가손익 ${signedWon(c.profit)} (${signedPct(c.rate)})` : '';
@@ -14060,6 +14184,7 @@ function openInvestModal(id) {
   document.getElementById('iv_value').value = iv && iv.currentValue !== null && iv.currentValue !== undefined ? fmtWon(iv.currentValue) : '';
   fillInvestAccountSelect(iv ? iv.accountId : null);
   document.getElementById('iv_memo').value = iv ? (iv.memo || '') : '';
+  document.getElementById('iv_tax').value = iv && iv.taxRate !== null && iv.taxRate !== undefined ? iv.taxRate : '';
   document.getElementById('iv_delete').style.display = iv ? '' : 'none';
   updateInvestFormKind();
   history.pushState({modal:'invest'}, '');
