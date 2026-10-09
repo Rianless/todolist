@@ -161,6 +161,9 @@ object CloudStateClient {
     /** 웹앱 index.html의 getSubDatesForMonth 와 같은 결제일 계산 */
     private fun subscriptionOccursOn(sub: JSONObject, date: LocalDate): Boolean {
         val start = runCatching { LocalDate.parse(sub.optString("date")) }.getOrNull() ?: return false
+        if (sub.optBoolean("paused", false)) return false
+        val end = runCatching { LocalDate.parse(sub.optString("endDate")) }.getOrNull()
+        if (end != null && date.isAfter(end)) return false
         val monthDiff = (date.year - start.year) * 12 + (date.monthValue - start.monthValue)
         val sameDayOfMonth = date.dayOfMonth == minOf(start.dayOfMonth, date.lengthOfMonth())
         return when (sub.optString("cycle")) {
