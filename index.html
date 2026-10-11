@@ -3279,6 +3279,11 @@ body::after {
 }
 
 .week-strip-day.today .week-event-dot { background: rgba(255,255,255,0.6) !important; }
+/* 주 보기 루틴 달(모바일): 오늘까지는 차오르는 노란 달, 앞날은 빈 달 */
+.week-event-dot.routine { background: conic-gradient(#f6c945 calc(var(--p, 0) * 1%), var(--border2) 0) !important; margin: 0 1px; }
+.week-event-dot.routine.future { background: transparent !important; box-shadow: inset 0 0 0 1px rgba(227, 181, 42, .7); }
+.week-strip-day.today .week-event-dot.routine { background: conic-gradient(#f6c945 calc(var(--p, 0) * 1%), var(--border2) 0) !important; }
+.week-strip-day.today .week-event-dot.routine.future { background: transparent !important; }
 
 
 
@@ -6115,6 +6120,7 @@ button:active:not(:disabled) {
   .calendar-surface .cal-pt { width: 6px; height: 6px; border-radius: 50%; flex: none; }
   .calendar-surface .cal-pt.done { opacity: .3; }
   .calendar-surface .cal-pt.pie { box-sizing: border-box; border: 1px solid #e3b52a; background: conic-gradient(#f6c945 calc(var(--p, 0) * 1%), var(--border2) 0); }   /* 달처럼 노랗게 차오른다. 테두리는 안쪽이라 다른 점과 같은 6px */
+  .calendar-surface .cal-pt.pie.future { background: transparent; border-color: rgba(227, 181, 42, .6); }
   .calendar-surface .cal-dots .cal-more { margin: 0; font-size: 8px; line-height: 7px; }
   .cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; padding: 8px 4px 0; font-size: 10px; color: var(--text3); }
   .cal-legend span { display: inline-flex; align-items: center; gap: 4px; }
@@ -10197,9 +10203,12 @@ function renderCal() {
       if (subs.length) addDot('', '#9d00ff', `구독 결제 ${subs.length}건`);
       const invests = evts.filter(it => it.isInvest);
       if (invests.length) addDot('', '#0ea5e9', invests.map(it => it.title).join(', '));
-      if (dayRoutines.length && ds <= todayDs) {      // 앞날의 루틴은 날짜를 눌러 확인 (매일 반복이면 칸마다 생겨 소음이 된다)
+      if (dayRoutines.length) {
+        // 오늘까지는 달성 비율만큼 차오르는 달, 앞날은 비어 있는 달(예정). 루틴을 만들거나 고치면 앞날까지 한 번에 달라진다.
         const doneN = dayRoutines.filter(r => isRoutineDone(r.id, ds)).length;
-        addDot('pie', '', `루틴 ${doneN}/${dayRoutines.length} 완료`).style.setProperty('--p', Math.round(doneN / dayRoutines.length * 100));
+        const future = ds > todayDs;
+        addDot(future ? 'pie future' : 'pie', '', future ? `루틴 ${dayRoutines.length}개 예정` : `루틴 ${doneN}/${dayRoutines.length} 완료`)
+          .style.setProperty('--p', Math.round(doneN / dayRoutines.length * 100));
       }
       if (dots.childNodes.length) num.after(dots);
       chipItems.forEach(item => {
@@ -13274,8 +13283,9 @@ function renderWeek() {
     // 이벤트 도트들
 
     const evts = dmap[ds] || [];
+    const weekRoutines = isCompactCal() ? routinesForDate(ds) : [];
 
-    if (evts.length) {
+    if (evts.length || weekRoutines.length) {
 
       const dotsRow = document.createElement('div');
 
@@ -13292,6 +13302,14 @@ function renderWeek() {
         dotsRow.appendChild(pip);
 
       });
+
+      if (weekRoutines.length) {
+        const moon = document.createElement('div');
+        const doneN = weekRoutines.filter(r => isRoutineDone(r.id, ds)).length;
+        moon.className = 'week-event-dot routine' + (ds > todayStr ? ' future' : '');
+        moon.style.setProperty('--p', Math.round(doneN / weekRoutines.length * 100));
+        dotsRow.appendChild(moon);
+      }
 
       cell.appendChild(dotsRow);
 
