@@ -1,11 +1,12 @@
-const CACHE_NAME = 'todolist-v59-fresh-html';
+const CACHE_NAME = 'todolist-v60-bookmarks';
 const ASSETS = [
   './',
   './index.html',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
-  './state-merge.js'
+  './state-merge.js',
+  './bookmarks.js'
 ];
 
 // 설치: 핵심 자산 프리캐시

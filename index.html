@@ -4069,6 +4069,23 @@ body::after {
 
 .memo-empty { text-align:center; color:var(--text3); padding:30px 0; font-size:12px; }
 
+/* ══ 북마크 카드 ══ */
+.bm-add { display: flex; gap: 6px; }
+.bm-add .form-input { flex: 1; min-width: 0; }
+.bm-go { flex: 0 0 auto; padding: 0 12px; white-space: nowrap; }
+.bm-hint { font-size: 11px; color: var(--red, #e5484d); min-height: 14px; margin: 4px 0 6px; }
+.bm-item {
+  display: flex; align-items: center; gap: 10px; position: relative; cursor: pointer;
+  background: var(--panel); border: 1px solid var(--border); border-left: 3px solid var(--accent, var(--yellow));
+  padding: 9px 10px; margin-bottom: 6px; border-radius: 0 6px 6px 0;
+}
+.bm-item:active { opacity: 0.75; }
+.bm-icon { width: 20px; height: 20px; flex: 0 0 20px; border-radius: 4px; }
+.bm-text { flex: 1; min-width: 0; }
+.bm-title { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-url { font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-del { background: none; border: none; color: var(--text3); font-size: 14px; cursor: pointer; padding: 4px; }
+
 
 
 /* ═══════════════════════════════════════
@@ -6872,6 +6889,39 @@ button:active:not(:disabled) {
 
         </div>
 
+        <!-- ── 북마크 카드 ── -->
+
+        <div class="mp-card" id="mpCardBookmark">
+
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardBookmark')">
+
+            <span class="mp-card-icon">🔖</span>
+
+            <span class="mp-card-label" id="bookmarkSysLabel">북마크</span>
+
+            <span class="mp-card-chevron">▼</span>
+
+          </div>
+
+          <div class="mp-card-body">
+
+            <div class="mp-card-inner">
+
+              <div class="bm-add">
+                <input type="text" class="form-input" id="bookmarkInput" inputmode="url" autocomplete="off" autocapitalize="off" spellcheck="false" placeholder="링크를 붙여넣고 Enter" onkeydown="if(event.key==='Enter'){event.preventDefault();addBookmark(true)}">
+                <button class="btn-save bm-go" onclick="addBookmark(true)">이동</button>
+                <button class="btn-cancel bm-go" onclick="addBookmark(false)">저장</button>
+              </div>
+              <div class="bm-hint" id="bookmarkHint"></div>
+
+              <div id="bookmarkList"></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
 
 
       </div>
@@ -7862,6 +7912,7 @@ button:active:not(:disabled) {
 
 
 <script src="/state-merge.js"></script>
+<script src="/bookmarks.js"></script>
 <script>
 
 /* ══════════════════════════════════════
@@ -8358,6 +8409,8 @@ function getCloudStatePayload() {
     ledgerNextId,
     memos,
     memoNextId,
+    bookmarks,
+    bookmarkNextId,
     nickname: localStorage.getItem('rianless_nickname') || 'Rianless',
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   };
@@ -8514,7 +8567,7 @@ async function pullCloudState() {
 }
 
 function hasLocalUserData() {
-  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || bookmarks.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
 }
 
 function applyCloudState(payload) {
@@ -8543,6 +8596,8 @@ function applyCloudState(payload) {
   if (payload.routineChecks && typeof payload.routineChecks === 'object' && !Array.isArray(payload.routineChecks)) routineChecks = payload.routineChecks;
   if (Number.isFinite(payload.routineNextId)) routineNextId = payload.routineNextId;
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
+  if (Array.isArray(payload.bookmarks)) bookmarks = payload.bookmarks;
+  if (Number.isFinite(payload.bookmarkNextId)) bookmarkNextId = payload.bookmarkNextId;
   if (payload.nickname) localStorage.setItem('rianless_nickname', payload.nickname);
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
@@ -8551,6 +8606,7 @@ function applyCloudState(payload) {
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
+  localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId }));
 
   buildFilters();
   buildCatSelect();
@@ -8971,6 +9027,8 @@ function updateHeaderBadges() {
 
     document.getElementById('memoSysLabel').textContent = '// MEMO';
 
+    document.getElementById('bookmarkSysLabel').textContent = '// BOOKMARK';
+
     document.getElementById('progLabel').textContent = 'SYS_LOAD';
 
   } else {
@@ -8990,6 +9048,8 @@ function updateHeaderBadges() {
     document.getElementById('catSysLabel').textContent = '카테고리 관리';
 
     document.getElementById('memoSysLabel').textContent = '메모';
+
+    document.getElementById('bookmarkSysLabel').textContent = '북마크';
 
     document.getElementById('progLabel').textContent = '달성률';
 
@@ -9025,6 +9085,8 @@ function toggleMpCard(id) {
     if (id === 'mpCardCat') renderCatLists();
 
     if (id === 'mpCardMemo') renderMemoList();
+
+    if (id === 'mpCardBookmark') renderBookmarkList();
 
     if (id === 'mpCardNickname') renderMypageView();
 
@@ -9196,6 +9258,7 @@ function renderMypageView() {
 
   if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
   if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
+  if (document.getElementById('mpCardBookmark').classList.contains('open')) renderBookmarkList();
 
 }
 
@@ -9331,6 +9394,74 @@ function renderMemoList() {
 }
 
 
+
+/* ══════════════════════════════════════
+
+   BOOKMARK
+
+══════════════════════════════════════ */
+
+let bookmarks = [];       // { id, url, title, createdAt }
+let bookmarkNextId = 1;
+
+function addBookmark(openAfter) {
+  const input = document.getElementById('bookmarkInput');
+  const hint = document.getElementById('bookmarkHint');
+  const url = Bookmarks.normalizeUrl(input.value);
+  if (!url) { hint.textContent = '열 수 있는 링크가 아니에요 (http/https 주소만 가능)'; return; }
+  hint.textContent = '';
+  if (!Bookmarks.findDuplicate(bookmarks, url)) {
+    bookmarks.push({ id: bookmarkNextId++, url, title: '', createdAt: fmtDate(new Date()) });
+    saveBookmarks();
+    renderBookmarkList();
+  } else if (!openAfter) {
+    hint.textContent = '이미 저장된 링크예요';
+  }
+  input.value = '';
+  if (openAfter) window.open(url, '_blank', 'noopener');
+}
+
+function openBookmark(id) {
+  const b = bookmarks.find(x => x.id === id);
+  if (b) window.open(b.url, '_blank', 'noopener');
+}
+
+function deleteBookmark(id) {
+  bookmarks = bookmarks.filter(b => b.id !== id);
+  saveBookmarks();
+  renderBookmarkList();
+}
+
+function saveBookmarks() {
+  try { localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId })); } catch(e) {}
+  queueCloudStateSync();
+}
+
+function loadBookmarks() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('rianless_bookmarks') || 'null');
+    if (raw && Array.isArray(raw.bookmarks)) {
+      bookmarks = raw.bookmarks;
+      bookmarkNextId = Math.max(Number(raw.bookmarkNextId) || 1, ...bookmarks.map(b => b.id + 1));
+    }
+  } catch(e) {}
+}
+
+function renderBookmarkList() {
+  const el = document.getElementById('bookmarkList');
+  if (!el) return;
+  if (!bookmarks.length) { el.innerHTML = '<div class="memo-empty">저장한 링크가 없습니다</div>'; return; }
+  const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
+  el.innerHTML = [...bookmarks].reverse().map(b => `
+    <div class="bm-item" onclick="openBookmark(${b.id})">
+      <img class="bm-icon" loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'">
+      <div class="bm-text">
+        <div class="bm-title">${esc(Bookmarks.labelOf(b))}</div>
+        <div class="bm-url">${esc(b.url)}</div>
+      </div>
+      <button class="bm-del" onclick="deleteBookmark(${b.id});event.stopPropagation()">✕</button>
+    </div>`).join('');
+}
 
 /* legacy renderMypage — now routes to category view render */
 
@@ -15817,6 +15948,8 @@ buildCatSelect();
 loadData();
 
 loadMemos();
+
+loadBookmarks();
 
 loadCloudState();
 
