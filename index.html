@@ -4774,7 +4774,7 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
     border-right: none;
     background: transparent;
     padding: 0;
-    margin-top: auto;
+    margin-top: 18px;
     padding-top: 24px;
     gap: 2px;
   }
@@ -5464,7 +5464,7 @@ body::before, body::after, #bootScreen { display: none !important; }
   .header-controls { padding-top: 22px; }
   .tab-bar {
     position: static;
-    margin-top: auto;
+    margin-top: 18px;
     padding: 6px;
     border: 0;
     border-radius: 16px;
@@ -6128,14 +6128,6 @@ button:active:not(:disabled) {
   .cal-legend i.pie { box-sizing: border-box; border: 1px solid #e3b52a; background: conic-gradient(#f6c945 60%, var(--border2) 0); }
   .cal-legend b.imp { padding: 1px 4px; border-radius: 3px; background: var(--panel2); color: var(--text2); font-size: 8px; font-weight: 700; }
   .calendar-surface .cal-cell > .cal-dot { display: block; margin-top: 2px; }
-}
-
-/* 모바일 폭(900px 미만): 달력·가계부·마이페이지 탭 줄을 맨 아래가 아니라 제목(나의 하루 · 달성률) 바로 아래에 붙인다. PC 폭은 그대로. */
-@media (max-width: 899px) {
-  .app-header { order: 0; }
-  .tab-bar { order: 1; margin: 10px 12px 2px; padding: 5px; border-radius: 16px; }
-  #mainContent { order: 2; }
-  .tab-item { min-height: 46px; }
 }
 </style>
 
