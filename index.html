@@ -4084,6 +4084,7 @@ body::after {
 .bm-text { flex: 1; min-width: 0; }
 .bm-title { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bm-url { font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-title-input { width: 100%; padding: 4px 8px; font-size: 13px; }
 .bm-del { background: none; border: none; color: var(--text3); font-size: 14px; cursor: pointer; padding: 4px; }
 
 
@@ -9426,6 +9427,29 @@ function openBookmark(id) {
   if (b) window.open(b.url, '_blank', 'noopener');
 }
 
+let editingBookmarkId = null;
+
+function editBookmarkTitle(id) {
+  editingBookmarkId = id;
+  renderBookmarkList();
+  const input = document.getElementById('bookmarkTitleInput');
+  if (input) { input.focus(); input.select(); }
+}
+
+// save=false 면 취소. 빈 제목은 "제목 없음"으로 저장되어 도메인 이름이 대신 표시된다.
+function finishBookmarkTitle(save) {
+  const id = editingBookmarkId;
+  if (id === null) return;
+  editingBookmarkId = null;
+  const input = document.getElementById('bookmarkTitleInput');
+  const b = bookmarks.find(x => x.id === id);
+  if (save && b && input && b.title !== input.value.trim()) {
+    b.title = input.value.trim();
+    saveBookmarks();
+  }
+  renderBookmarkList();
+}
+
 function deleteBookmark(id) {
   bookmarks = bookmarks.filter(b => b.id !== id);
   saveBookmarks();
@@ -9456,10 +9480,13 @@ function renderBookmarkList() {
     <div class="bm-item" onclick="openBookmark(${b.id})">
       <img class="bm-icon" loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'">
       <div class="bm-text">
-        <div class="bm-title">${esc(Bookmarks.labelOf(b))}</div>
+        ${b.id === editingBookmarkId
+          ? `<input type="text" class="form-input bm-title-input" id="bookmarkTitleInput" maxlength="100" value="${esc(b.title || '')}" placeholder="${esc(Bookmarks.hostOf(b.url))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();finishBookmarkTitle(true)}else if(event.key==='Escape'){finishBookmarkTitle(false)}" onblur="finishBookmarkTitle(true)">`
+          : `<div class="bm-title">${esc(Bookmarks.labelOf(b))}</div>`}
         <div class="bm-url">${esc(b.url)}</div>
       </div>
-      <button class="bm-del" onclick="deleteBookmark(${b.id});event.stopPropagation()">✕</button>
+      <button class="bm-del" title="제목 수정" onclick="editBookmarkTitle(${b.id});event.stopPropagation()">✎</button>
+      <button class="bm-del" title="삭제" onclick="deleteBookmark(${b.id});event.stopPropagation()">✕</button>
     </div>`).join('');
 }
 
