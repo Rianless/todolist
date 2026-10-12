@@ -4084,6 +4084,18 @@ body::after {
 .bm-text { flex: 1; min-width: 0; }
 .bm-title { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bm-url { font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
+.bm-chips::-webkit-scrollbar { display: none; }
+.bm-chip { flex: 0 0 auto; background: var(--panel); border: 1px solid var(--border); color: var(--text2, var(--text)); font-size: 12px; padding: 5px 10px; border-radius: 14px; cursor: pointer; white-space: nowrap; }
+.bm-chip.on { border-color: var(--accent, var(--yellow)); color: var(--text); font-weight: 700; }
+.bm-chip-n { font-size: 10px; color: var(--text3); }
+.bm-chip-add { border-style: dashed; color: var(--text3); }
+.bm-folder-edit { display: flex; gap: 6px; margin-bottom: 8px; }
+.bm-folder-edit .form-input { flex: 1; min-width: 0; }
+.bm-folder-actions { display: flex; gap: 12px; margin: -2px 0 8px 2px; }
+.bm-folder-actions button { background: none; border: none; color: var(--text3); font-size: 11px; cursor: pointer; padding: 2px 0; text-decoration: underline; }
+.bm-move { position: relative; display: inline-block; }
+.bm-move select { position: absolute; inset: 0; width: 100%; height: 100%; opacity: 0; cursor: pointer; font-size: 16px; }
 .bm-title-input { width: 100%; padding: 4px 8px; font-size: 13px; }
 .bm-del { background: none; border: none; color: var(--text3); font-size: 14px; cursor: pointer; padding: 4px; }
 
@@ -6915,6 +6927,8 @@ button:active:not(:disabled) {
               </div>
               <div class="bm-hint" id="bookmarkHint"></div>
 
+              <div id="bookmarkFolders"></div>
+
               <div id="bookmarkList"></div>
 
             </div>
@@ -8412,6 +8426,8 @@ function getCloudStatePayload() {
     memoNextId,
     bookmarks,
     bookmarkNextId,
+    bookmarkFolders,
+    bookmarkFolderNextId,
     nickname: localStorage.getItem('rianless_nickname') || 'Rianless',
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   };
@@ -8568,7 +8584,7 @@ async function pullCloudState() {
 }
 
 function hasLocalUserData() {
-  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || bookmarks.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || bookmarks.length > 0 || bookmarkFolders.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
 }
 
 function applyCloudState(payload) {
@@ -8599,6 +8615,8 @@ function applyCloudState(payload) {
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (Array.isArray(payload.bookmarks)) bookmarks = payload.bookmarks;
   if (Number.isFinite(payload.bookmarkNextId)) bookmarkNextId = payload.bookmarkNextId;
+  if (Array.isArray(payload.bookmarkFolders)) bookmarkFolders = payload.bookmarkFolders;
+  if (Number.isFinite(payload.bookmarkFolderNextId)) bookmarkFolderNextId = payload.bookmarkFolderNextId;
   if (payload.nickname) localStorage.setItem('rianless_nickname', payload.nickname);
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
@@ -8607,7 +8625,7 @@ function applyCloudState(payload) {
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
-  localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId }));
+  localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId, bookmarkFolders, bookmarkFolderNextId }));
 
   buildFilters();
   buildCatSelect();
@@ -9402,8 +9420,12 @@ function renderMemoList() {
 
 ══════════════════════════════════════ */
 
-let bookmarks = [];       // { id, url, title, createdAt }
+let bookmarks = [];       // { id, url, title, createdAt, folderId? } — folderId 없으면 미분류
 let bookmarkNextId = 1;
+let bookmarkFolders = []; // { id, name }
+let bookmarkFolderNextId = 1;
+let bookmarkFilter = 'all';          // 'all' | 'none'(미분류) | 폴더 id — 화면에서만 쓰고 저장하지 않는다
+let bookmarkFolderEdit = null;       // null | 'new' | 'rename'
 
 function addBookmark(openAfter) {
   const input = document.getElementById('bookmarkInput');
@@ -9412,7 +9434,9 @@ function addBookmark(openAfter) {
   if (!url) { hint.textContent = '열 수 있는 링크가 아니에요 (http/https 주소만 가능)'; return; }
   hint.textContent = '';
   if (!Bookmarks.findDuplicate(bookmarks, url)) {
-    bookmarks.push({ id: bookmarkNextId++, url, title: '', createdAt: fmtDate(new Date()) });
+    const b = { id: bookmarkNextId++, url, title: '', createdAt: fmtDate(new Date()) };
+    if (typeof bookmarkFilter === 'number' && bookmarkFolders.some(f => f.id === bookmarkFilter)) b.folderId = bookmarkFilter;
+    bookmarks.push(b);
     saveBookmarks();
     renderBookmarkList();
   } else if (!openAfter) {
@@ -9450,6 +9474,62 @@ function finishBookmarkTitle(save) {
   renderBookmarkList();
 }
 
+function selectBookmarkFilter(f) {
+  bookmarkFilter = f;
+  bookmarkFolderEdit = null;
+  renderBookmarkList();
+}
+
+function startBookmarkFolderEdit(mode) {
+  bookmarkFolderEdit = mode;
+  renderBookmarkList();
+  const input = document.getElementById('bookmarkFolderInput');
+  if (input) { input.focus(); input.select(); }
+}
+
+function cancelBookmarkFolderEdit() {
+  bookmarkFolderEdit = null;
+  renderBookmarkList();
+}
+
+function submitBookmarkFolderEdit() {
+  const input = document.getElementById('bookmarkFolderInput');
+  const name = Bookmarks.cleanFolderName(input && input.value);
+  if (!name) { cancelBookmarkFolderEdit(); return; }
+  const cur = typeof bookmarkFilter === 'number' ? bookmarkFolders.find(f => f.id === bookmarkFilter) : null;
+  if (bookmarkFolderEdit === 'rename' && cur) {
+    cur.name = name;
+  } else {
+    const same = bookmarkFolders.find(f => f.name === name);
+    if (same) bookmarkFilter = same.id;
+    else { const f = { id: bookmarkFolderNextId++, name }; bookmarkFolders.push(f); bookmarkFilter = f.id; }
+  }
+  bookmarkFolderEdit = null;
+  saveBookmarks();
+  renderBookmarkList();
+}
+
+// 폴더만 지우고 안의 북마크는 미분류로 돌린다
+function deleteBookmarkFolder() {
+  const cur = typeof bookmarkFilter === 'number' ? bookmarkFolders.find(f => f.id === bookmarkFilter) : null;
+  if (!cur) return;
+  const n = bookmarks.filter(b => b.folderId === cur.id).length;
+  if (!confirm(`"${cur.name}" 폴더를 삭제할까요?` + (n ? `\n안의 북마크 ${n}개는 미분류로 옮겨져요.` : ''))) return;
+  bookmarks.forEach(b => { if (b.folderId === cur.id) delete b.folderId; });
+  bookmarkFolders = bookmarkFolders.filter(f => f.id !== cur.id);
+  bookmarkFilter = 'all';
+  saveBookmarks();
+  renderBookmarkList();
+}
+
+function moveBookmark(id, value) {
+  const b = bookmarks.find(x => x.id === id);
+  if (!b) return;
+  if (value === 'none') delete b.folderId; else b.folderId = Number(value);
+  saveBookmarks();
+  renderBookmarkList();
+}
+
 function deleteBookmark(id) {
   bookmarks = bookmarks.filter(b => b.id !== id);
   saveBookmarks();
@@ -9457,7 +9537,7 @@ function deleteBookmark(id) {
 }
 
 function saveBookmarks() {
-  try { localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId })); } catch(e) {}
+  try { localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId, bookmarkFolders, bookmarkFolderNextId })); } catch(e) {}
   queueCloudStateSync();
 }
 
@@ -9467,6 +9547,8 @@ function loadBookmarks() {
     if (raw && Array.isArray(raw.bookmarks)) {
       bookmarks = raw.bookmarks;
       bookmarkNextId = Math.max(Number(raw.bookmarkNextId) || 1, ...bookmarks.map(b => b.id + 1));
+      if (Array.isArray(raw.bookmarkFolders)) bookmarkFolders = raw.bookmarkFolders;
+      bookmarkFolderNextId = Math.max(Number(raw.bookmarkFolderNextId) || 1, ...bookmarkFolders.map(f => f.id + 1));
     }
   } catch(e) {}
 }
@@ -9474,17 +9556,41 @@ function loadBookmarks() {
 function renderBookmarkList() {
   const el = document.getElementById('bookmarkList');
   if (!el) return;
-  if (!bookmarks.length) { el.innerHTML = '<div class="memo-empty">저장한 링크가 없습니다</div>'; return; }
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
-  el.innerHTML = [...bookmarks].reverse().map(b => `
+
+  // 지워진 폴더를 보고 있었다면(다른 기기에서 삭제 등) 전체로 돌아간다
+  if (typeof bookmarkFilter === 'number' && !bookmarkFolders.some(f => f.id === bookmarkFilter)) bookmarkFilter = 'all';
+  const cur = typeof bookmarkFilter === 'number' ? bookmarkFolders.find(f => f.id === bookmarkFilter) : null;
+  const count = f => Bookmarks.filterByFolder(bookmarks, bookmarkFolders, f).length;
+  const chip = (f, label) => `<button class="bm-chip${bookmarkFilter === f ? ' on' : ''}" onclick="selectBookmarkFilter(${typeof f === 'number' ? f : `'${f}'`})">${esc(label)} <span class="bm-chip-n">${count(f)}</span></button>`;
+
+  const fe = document.getElementById('bookmarkFolders');
+  if (fe) {
+    fe.innerHTML = `<div class="bm-chips">${chip('all', '전체')}${bookmarkFolders.map(f => chip(f.id, '📁 ' + f.name)).join('')}${bookmarkFolders.length ? chip('none', '미분류') : ''}<button class="bm-chip bm-chip-add" onclick="startBookmarkFolderEdit('new')">+ 폴더</button></div>`
+      + (bookmarkFolderEdit
+        ? `<div class="bm-folder-edit"><input type="text" class="form-input" id="bookmarkFolderInput" maxlength="30" value="${bookmarkFolderEdit === 'rename' && cur ? esc(cur.name) : ''}" placeholder="폴더 이름" onkeydown="if(event.key==='Enter'){event.preventDefault();submitBookmarkFolderEdit()}else if(event.key==='Escape'){cancelBookmarkFolderEdit()}"><button class="btn-save bm-go" onclick="submitBookmarkFolderEdit()">확인</button><button class="btn-cancel bm-go" onclick="cancelBookmarkFolderEdit()">취소</button></div>`
+        : (cur ? `<div class="bm-folder-actions"><button onclick="startBookmarkFolderEdit('rename')">이름 수정</button><button onclick="deleteBookmarkFolder()">폴더 삭제</button></div>` : ''));
+  }
+
+  const list = Bookmarks.filterByFolder(bookmarks, bookmarkFolders, bookmarkFilter);
+  if (!list.length) {
+    el.innerHTML = `<div class="memo-empty">${bookmarks.length ? '이 폴더가 비어 있어요' : '저장한 링크가 없습니다'}</div>`;
+    return;
+  }
+  const folderName = b => { const f = bookmarkFolders.find(x => x.id === b.folderId); return f ? f.name : ''; };
+  el.innerHTML = [...list].reverse().map(b => `
     <div class="bm-item" onclick="openBookmark(${b.id})">
       <img class="bm-icon" loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'">
       <div class="bm-text">
         ${b.id === editingBookmarkId
           ? `<input type="text" class="form-input bm-title-input" id="bookmarkTitleInput" maxlength="100" value="${esc(b.title || '')}" placeholder="${esc(Bookmarks.hostOf(b.url))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();finishBookmarkTitle(true)}else if(event.key==='Escape'){finishBookmarkTitle(false)}" onblur="finishBookmarkTitle(true)">`
           : `<div class="bm-title">${esc(Bookmarks.labelOf(b))}</div>`}
-        <div class="bm-url">${esc(b.url)}</div>
+        <div class="bm-url">${bookmarkFilter === 'all' && folderName(b) ? '📁 ' + esc(folderName(b)) + ' · ' : ''}${esc(b.url)}</div>
       </div>
+      ${bookmarkFolders.length ? `<span class="bm-del bm-move" title="폴더 이동" onclick="event.stopPropagation()">📁<select aria-label="폴더 이동" onchange="moveBookmark(${b.id}, this.value)">
+        <option value="none"${Bookmarks.folderIdOf(b, bookmarkFolders) === null ? ' selected' : ''}>미분류</option>
+        ${bookmarkFolders.map(f => `<option value="${f.id}"${b.folderId === f.id ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}
+      </select></span>` : ''}
       <button class="bm-del" title="제목 수정" onclick="editBookmarkTitle(${b.id});event.stopPropagation()">✎</button>
       <button class="bm-del" title="삭제" onclick="deleteBookmark(${b.id});event.stopPropagation()">✕</button>
     </div>`).join('');

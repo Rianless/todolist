@@ -39,3 +39,40 @@ assert.strictEqual(m2.bookmarks.length, 1);
 const m3 = mergeStates(base, { bookmarks: [], bookmarkNextId: 2 }, base);
 assert.strictEqual(m3.bookmarks.length, 0);
 console.log('bookmarks.test.js ok');
+
+// 폴더: 이름 정리·필터·사라진 폴더 처리
+{
+  assert.strictEqual(B.cleanFolderName('  업무   자료  '), '업무 자료');
+  assert.strictEqual(B.cleanFolderName(null), '');
+  assert.strictEqual(B.cleanFolderName('가'.repeat(50)).length, 30);
+  const folders = [{ id: 1, name: '업무' }, { id: 2, name: '쇼핑' }];
+  const bms = [{ id: 1, folderId: 1 }, { id: 2, folderId: 2 }, { id: 3 }, { id: 4, folderId: 99 }];
+  const ids = f => B.filterByFolder(bms, folders, f).map(b => b.id);
+  assert.deepStrictEqual(ids('all'), [1, 2, 3, 4]);
+  assert.deepStrictEqual(ids(1), [1]);
+  assert.deepStrictEqual(ids('none'), [3, 4]); // 폴더 99 는 없으므로 미분류
+  assert.strictEqual(B.folderIdOf(bms[3], folders), null);
+
+  // 폴더 병합: 양쪽에서 같은 id 로 새 폴더를 만들어도 둘 다 남고, 한쪽 삭제는 반영된다
+  const fb = { bookmarkFolders: [{ id: 1, name: '업무' }], bookmarkFolderNextId: 2 };
+  const fl = { bookmarkFolders: [...fb.bookmarkFolders, { id: 2, name: '쇼핑' }], bookmarkFolderNextId: 3 };
+  const fr = { bookmarkFolders: [...fb.bookmarkFolders, { id: 2, name: '여행' }], bookmarkFolderNextId: 3 };
+  const fm = mergeStates(fb, fl, fr);
+  assert.deepStrictEqual(fm.bookmarkFolders.map(f => f.name).sort(), ['쇼핑', '업무', '여행']);
+  assert.strictEqual(new Set(fm.bookmarkFolders.map(f => f.id)).size, 3);
+  assert.strictEqual(mergeStates(fb, { bookmarkFolders: [], bookmarkFolderNextId: 2 }, fb).bookmarkFolders.length, 0);
+}
+console.log('bookmark folders ok');
+
+// 같은 id 로 만든 폴더가 충돌해도, 이 기기 북마크는 이 기기 폴더를 따라간다
+{
+  const b0 = { bookmarkFolders: [], bookmarkFolderNextId: 1, bookmarks: [], bookmarkNextId: 1 };
+  const l = { bookmarkFolders: [{ id: 1, name: '내폴더' }], bookmarkFolderNextId: 2, bookmarks: [{ id: 1, url: 'https://l.com/', folderId: 1 }], bookmarkNextId: 2 };
+  const r = { bookmarkFolders: [{ id: 1, name: '서버폴더' }], bookmarkFolderNextId: 2, bookmarks: [{ id: 2, url: 'https://r.com/', folderId: 1 }], bookmarkNextId: 3 };
+  const m = mergeStates(b0, l, r);
+  const folderOf = url => m.bookmarks.find(b => b.url === url).folderId;
+  const nameOf = id => m.bookmarkFolders.find(f => f.id === id).name;
+  assert.strictEqual(nameOf(folderOf('https://l.com/')), '내폴더');
+  assert.strictEqual(nameOf(folderOf('https://r.com/')), '서버폴더');
+}
+console.log('folder collision ok');

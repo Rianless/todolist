@@ -24,7 +24,20 @@
     return (list || []).find(b => key(b.url) === target) || null;
   }
 
-  const api = { normalizeUrl, hostOf, labelOf, faviconOf, findDuplicate };
+  const cleanFolderName = name => String(name == null ? '' : name).replace(/\s+/g, ' ').trim().slice(0, 30);
+
+  // 북마크가 들어 있는 폴더 id. 폴더가 없어졌으면(다른 기기에서 삭제 등) 미분류(null)로 본다.
+  function folderIdOf(b, folders) {
+    return b && b.folderId != null && (folders || []).some(f => f.id === b.folderId) ? b.folderId : null;
+  }
+
+  // filter: 'all' 전체 | 'none' 미분류 | 폴더 id
+  function filterByFolder(list, folders, filter) {
+    if (filter === 'all') return list || [];
+    return (list || []).filter(b => folderIdOf(b, folders) === (filter === 'none' ? null : filter));
+  }
+
+  const api = { normalizeUrl, hostOf, labelOf, faviconOf, findDuplicate, cleanFolderName, folderIdOf, filterByFolder };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Bookmarks = api;
 })();
