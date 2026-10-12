@@ -6308,6 +6308,29 @@ button:active:not(:disabled) {
   #viewCalendar .cal-subtab-bar { box-sizing: border-box; width: calc(100% - 8px); max-width: none; margin-left: 4px; margin-right: 4px; }
   #viewCalendar .cal-subtab-bar .cal-subtab { flex: 1 1 0; min-width: 0; }
 }
+
+/* Windows 98 달력 모양 (PC, 윈도우 98 스킨이 켜져 있을 때만) */
+@media (min-width: 900px) {
+  html[data-skin="w98"] .calendar-surface { background: #c0c0c0 !important; padding: 6px !important; box-shadow: var(--w98-raised) !important; }
+  html[data-skin="w98"] .calendar-surface .cal-grid { gap: 0 !important; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; align-content: stretch; flex: 1; grid-template-rows: auto; grid-auto-rows: 1fr; }
+  html[data-skin="w98"] .calendar-surface .cal-dow { background: #c0c0c0 !important; box-shadow: var(--w98-raised); color: #000 !important; font-size: 12px !important; font-weight: 700; padding: 5px 0 !important; margin: 0 -1px 0 0; }
+  html[data-skin="w98"] .calendar-surface .cal-dow.sun { color: #c00000 !important; }
+  html[data-skin="w98"] .calendar-surface .cal-dow.sat { color: #000080 !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell { background: #fff !important; border: 0 !important; border-right: 1px solid #c0c0c0 !important; border-bottom: 1px solid #c0c0c0 !important; box-shadow: none !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.empty { background: #dfdfdf !important; }
+  html[data-skin="w98"] .calendar-surface .cal-daynum { font-weight: 700 !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.sun .cal-daynum { color: #c00000 !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.sat .cal-daynum { color: #000080 !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.today { background: #ffffc0 !important; outline: 2px solid #000 !important; outline-offset: -2px; z-index: 1; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.today .cal-daynum { color: #000 !important; text-decoration: underline; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.selected { background: #000080 !important; outline: 1px dotted #fff !important; outline-offset: -3px; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.selected * { color: #fff !important; }
+  html[data-skin="w98"] #viewCal .cal-nav { background: #c0c0c0; box-shadow: var(--w98-raised); padding: 4px 6px; min-height: 0 !important; }
+  html[data-skin="w98"] #viewCal .cal-nav .cal-month { font-size: 16px !important; font-weight: 700 !important; }
+  html[data-skin="w98"] .cal-subtab-bar { background: transparent !important; box-shadow: none !important; gap: 0 !important; padding: 0 !important; }
+  html[data-skin="w98"] .cal-subtab { box-shadow: inset -1px 0 #404040, inset 1px 1px #fff, inset -2px 0 #808080, inset 2px 2px #dfdfdf !important; padding: 6px 18px !important; flex: 0 0 auto !important; min-width: 70px; margin-bottom: -2px; }
+  html[data-skin="w98"] .cal-subtab.active { background: #c0c0c0 !important; font-weight: 700 !important; padding-top: 8px !important; z-index: 2; position: relative; }
+}
 </style>
 
 </head>
