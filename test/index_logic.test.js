@@ -109,4 +109,14 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   assert.strictEqual(A.routineBestStreak(weekdays, '2026-10-10'), 7);
 }
 
+// ── 하루만 하는 루틴: 시작일 = 종료일 = 그 날짜, 요일은 그 날의 요일 하나 → 그날에만 나타난다
+{
+  const once = { id: 7, once: true, days: [4], startDate: '2026-10-15', endDate: '2026-10-15' };   // 2026-10-15 는 목요일
+  assert.strictEqual(A.routineOccursOn(once, '2026-10-15'), true);
+  assert.strictEqual(A.routineOccursOn(once, '2026-10-22'), false);     // 다음 주 같은 요일
+  assert.strictEqual(A.routineOccursOn(once, '2026-10-08'), false);     // 지난 주 같은 요일
+  setLog([once], { '2026-10-15': [7] });
+  assert.deepStrictEqual({ ...A.routineMonth(once, '2026-10-31') }, { due: 1, done: 1 });
+}
+
 console.log('OK (index logic)');
