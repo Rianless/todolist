@@ -7376,6 +7376,13 @@ button:active:not(:disabled) {
           <input class="form-input" id="r_name" type="text" maxlength="30" placeholder="예: 운동 30분, 영양제 먹기">
         </div>
         <div class="form-group">
+          <label class="form-label">반복</label>
+          <div class="extra-toggle-row" id="r_modeRow">
+            <button type="button" id="r_modeRepeat" class="on" onclick="setRoutineMode(false)">🔁 반복</button>
+            <button type="button" id="r_modeOnce" onclick="setRoutineMode(true)">1️⃣ 반복 안 함 (하루만)</button>
+          </div>
+        </div>
+        <div class="form-group" id="r_repeatBox">
           <label class="form-label">반복 요일</label>
           <div class="routine-days" id="r_days">
             <button type="button" data-d="0" onclick="toggleRoutineDay(this)">일</button>
@@ -7398,11 +7405,11 @@ button:active:not(:disabled) {
             <input class="form-input" id="r_time" type="time">
           </div>
           <div>
-            <label class="form-label">시작일</label>
+            <label class="form-label" id="r_start_label">시작일</label>
             <input class="form-input" id="r_start" type="date">
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" id="r_endGroup">
           <label class="form-label">종료일 (선택)</label>
           <input class="form-input" id="r_end" type="date">
         </div>
@@ -10433,7 +10440,7 @@ function buildRoutineRow(r, ds) {
   const streak = routineStreak(r, fmtDate(new Date()));
   const items = routineItems(r);
   const checked = items.filter(it => routineCheckedIds(r.id, ds).includes(it.id)).length;
-  meta.textContent = ['루틴', r.time, items.length ? `${checked}/${items.length}` : '', streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
+  meta.textContent = ['루틴', r.once ? '하루만' : '', r.time, items.length ? `${checked}/${items.length}` : '', !r.once && streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
   body.append(title, meta);
   const edit = document.createElement('button');
   edit.type = 'button';
@@ -14457,6 +14464,7 @@ async function deleteTransfer(id) {
 const ROUTINE_DOW = ['일', '월', '화', '수', '목', '금', '토'];
 const ROUTINE_PRESETS = { all: [0, 1, 2, 3, 4, 5, 6], weekday: [1, 2, 3, 4, 5], weekend: [0, 6] };
 let editingRoutineId = null;
+let routineOnce = false;   // 반복 없이 하루만 하는 루틴을 입력 중인가
 let routineEditList = [];
 
 function routineOccursOn(r, ds) {
@@ -14649,18 +14657,26 @@ function renderRoutines() {
     const month = routineMonth(r, today);
     const best = routineBestStreak(r, today);
     const ended = r.endDate && r.endDate < today;
-    meta.textContent = [routineDaysLabel(r.days), r.time, ended ? '종료' : '',
-      month.due ? `이번 달 ${month.done}/${month.due}` : '', best ? `최장 ${best}일` : ''].filter(Boolean).join(' · ');
+    meta.textContent = (r.once
+      ? ['하루만', r.startDate.slice(5).replace('-', '/'), r.time]
+      : [routineDaysLabel(r.days), r.time, ended ? '종료' : '', month.due ? `이번 달 ${month.done}/${month.due}` : '', best ? `최장 ${best}일` : '']).filter(Boolean).join(' · ');
     info.append(name, meta);
     const streak = document.createElement('div');
     streak.className = 'invest-val';
     const n = routineStreak(r, today);
     const main = document.createElement('div');
     main.className = 'invest-val-main';
-    main.textContent = n ? `🔥 ${n}일` : '—';
     const sub = document.createElement('div');
     sub.className = 'invest-val-sub';
-    sub.textContent = '연속 달성';
+    if (r.once) {
+      // 하루만 하는 루틴은 연속 기록 대신 그날의 상태를 보여준다
+      const done = isRoutineDone(r.id, r.startDate);
+      main.textContent = done ? '✓ 완료' : (r.startDate > today ? '예정' : '미완료');
+      sub.textContent = r.startDate.slice(5).replace('-', '/');
+    } else {
+      main.textContent = n ? `🔥 ${n}일` : '—';
+      sub.textContent = '연속 달성';
+    }
     streak.append(main, sub);
     const edit = document.createElement('button');
     edit.type = 'button';
@@ -14680,6 +14696,16 @@ function syncRoutineDayButtons(days) {
 function currentRoutineDays() {
   return [...document.querySelectorAll('#r_days button.on')].map(b => Number(b.dataset.d));
 }
+// 반복 / 반복 안 함(하루만) 전환. 하루만이면 요일·종료일 대신 날짜 하나만 받는다.
+function setRoutineMode(once) {
+  routineOnce = once;
+  document.getElementById('r_modeRepeat').classList.toggle('on', !once);
+  document.getElementById('r_modeOnce').classList.toggle('on', once);
+  document.getElementById('r_repeatBox').hidden = once;
+  document.getElementById('r_endGroup').hidden = once;
+  document.getElementById('r_start_label').textContent = once ? '날짜' : '시작일';
+}
+
 function toggleRoutineDay(btn) { btn.classList.toggle('on'); }
 function setRoutineDays(kind) { syncRoutineDayButtons(ROUTINE_PRESETS[kind]); }
 
@@ -14744,7 +14770,8 @@ function openRoutineModal(id, date) {
   document.getElementById('r_name').value = r ? r.name : '';
   document.getElementById('r_time').value = r ? (r.time || '') : '';
   document.getElementById('r_start').value = r ? (r.startDate || '') : (date || fmtDate(new Date()));
-  document.getElementById('r_end').value = r ? (r.endDate || '') : '';
+  document.getElementById('r_end').value = r && !r.once ? (r.endDate || '') : '';
+  setRoutineMode(!!(r && r.once));
   document.getElementById('r_memo').value = r ? (r.memo || '') : '';
   routineEditList = r ? routineItems(r).map(x => ({ ...x })) : [];
   renderRoutineCheckEditor();
@@ -14769,7 +14796,9 @@ function refreshRoutineViews() {
 function saveRoutine() {
   const nameInput = document.getElementById('r_name');
   const name = nameInput.value.trim();
-  const days = currentRoutineDays();
+  const startDate = document.getElementById('r_start').value || fmtDate(new Date());
+  // 하루만: 그 날짜의 요일 하나, 시작일 = 종료일 로 저장해서 반복 루틴과 같은 규칙으로 그날에만 나타나게 한다
+  const days = routineOnce ? [new Date(startDate + 'T00:00:00').getDay()] : currentRoutineDays();
   if (!name) {
     nameInput.classList.add('form-error');
     setTimeout(() => nameInput.classList.remove('form-error'), 1500);
@@ -14778,9 +14807,10 @@ function saveRoutine() {
   if (!days.length) { showToast('반복할 요일을 하나 이상 골라 주세요', { type: 'error', duration: 2200 }); return; }
   const fields = {
     name, days,
+    once: routineOnce,
     time: document.getElementById('r_time').value || '',
-    startDate: document.getElementById('r_start').value || fmtDate(new Date()),
-    endDate: document.getElementById('r_end').value || '',
+    startDate,
+    endDate: routineOnce ? startDate : (document.getElementById('r_end').value || ''),
     memo: routineExtraOn('memo') ? document.getElementById('r_memo').value.trim() : '',
     checklist: routineExtraOn('check') ? routineEditList.map(x => ({ id: x.id, text: x.text.trim() })).filter(x => x.text) : []
   };
