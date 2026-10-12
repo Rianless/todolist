@@ -6113,7 +6113,15 @@ button:active:not(:disabled) {
 
 /* 달력 월 보기 — 모바일 폭(900px 미만)만. 일정·구독·적금·루틴은 점, 수입·지출은 금액 글자. PC 폭은 건드리지 않는다. */
 .cal-legend { display: none; }
+.cal-month-summary { display: none; }
 @media (max-width: 899px) {
+  .cal-month-summary { display: grid; grid-template-columns: repeat(3, 1fr); gap: 6px; margin: 2px 0 8px; }
+  .cal-month-box { padding: 8px 4px; border-radius: 12px; background: var(--panel); border: 1px solid var(--border); text-align: center; min-width: 0; }
+  .cal-month-label { font-size: 10px; color: var(--text3); }
+  .cal-month-val { margin-top: 2px; font-size: 13px; font-weight: 800; white-space: nowrap; font-variant-numeric: tabular-nums; }
+  .cal-month-val.income { color: var(--green); }
+  .cal-month-val.expense { color: var(--red); }
+  .cal-month-note { grid-column: 1 / -1; font-size: 10px; color: var(--text3); text-align: center; }
   .cal-cell, [data-theme="dark"] .cal-cell { height: auto; min-height: 84px; }
   .calendar-surface .cal-ledger-bar { display: none; }
   .calendar-surface .cal-dots { display: flex; flex-wrap: wrap; justify-content: center; align-items: center; gap: 2px; max-width: 100%; margin: 3px auto 2px; min-height: 6px; }
@@ -6270,6 +6278,8 @@ button:active:not(:disabled) {
           </div>
 
         </div>
+
+        <div class="cal-month-summary" id="calMonthSummary" aria-label="이번 달 수입·지출 합계"></div>
 
         <div class="calendar-stage">
           <div class="calendar-surface">
@@ -9866,6 +9876,38 @@ compactCalQuery.addEventListener('change', () => {
   if (currentMainTab === 'calendar' && currentCalSubTab === 'cal') renderCal();
 });
 
+// 달력 위 월간 수입·지출 합계 (모바일 폭에서만 보인다)
+function renderCalMonthSummary(income, expense, subExpense) {
+  const el = document.getElementById('calMonthSummary');
+  if (!el) return;
+  el.textContent = '';
+  const balance = income - expense;
+  const box = (label, text, cls) => {
+    const b = document.createElement('div');
+    b.className = 'cal-month-box';
+    const l = document.createElement('div');
+    l.className = 'cal-month-label';
+    l.textContent = label;
+    const v = document.createElement('div');
+    v.className = 'cal-month-val ' + cls;
+    v.textContent = text;
+    b.append(l, v);
+    return b;
+  };
+  el.append(
+    box('수입', `+${income.toLocaleString()}원`, 'income'),
+    box('지출', `-${expense.toLocaleString()}원`, 'expense'),
+    box('합계', `${balance > 0 ? '+' : balance < 0 ? '-' : ''}${Math.abs(balance).toLocaleString()}원`, balance >= 0 ? 'income' : 'expense')
+  );
+  el.title = subExpense ? `지출에는 구독 결제 ${subExpense.toLocaleString()}원이 포함돼요` : '';
+  if (subExpense) {
+    const note = document.createElement('div');
+    note.className = 'cal-month-note';
+    note.textContent = `지출에 구독 결제 ${subExpense.toLocaleString()}원 포함`;
+    el.appendChild(note);
+  }
+}
+
 function renderCal() {
   const compactCal = isCompactCal();
 
@@ -9995,6 +10037,7 @@ function renderCal() {
   for(let i=0;i<firstDow;i++){
     const e=document.createElement('div'); e.className='cal-cell empty'; grid.appendChild(e);
   }
+  let monthIncome = 0, monthExpense = 0, monthSubExpense = 0;   // 칸에 보이는 금액과 같은 기준(가계부 + 구독 결제)
 
 
 
@@ -10070,8 +10113,11 @@ function renderCal() {
       inc.title = `이 날 수입 +${dayIncomeSum.toLocaleString()}원`;
       cell.appendChild(inc);
     }
-    const dayExpense = (lmap[ds] ? lmap[ds].expense : 0)
-      + evts.filter(it => it.isSub).reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    const daySubExpense = evts.filter(it => it.isSub).reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    const dayExpense = (lmap[ds] ? lmap[ds].expense : 0) + daySubExpense;
+    monthIncome += dayIncomeSum;
+    monthExpense += dayExpense;
+    monthSubExpense += daySubExpense;
     if (dayExpense > 0) {
       const spend = document.createElement('span');
       spend.className = 'cal-spend';
@@ -10267,6 +10313,7 @@ function renderCal() {
 
 
   connectCalSpans(grid);
+  renderCalMonthSummary(monthIncome, monthExpense, monthSubExpense);
   if (!compactCal) fitCalCells(grid);
   renderCalDayList(calSelectedDate, dmap[calSelectedDate] || []);
 
