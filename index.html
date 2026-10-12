@@ -6284,8 +6284,6 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .pc-topbar-title::before { color: #fff !important; font-size: 13px !important; }
   html[data-skin="w98"] .pc-topbar button { box-shadow: var(--w98-raised) !important; }
   html[data-skin="w98"] .cal-cell { background: #fff !important; border: none !important; box-shadow: none !important; }
-  html[data-skin="w98"] .cal-cell.selected, html[data-skin="w98"] .cal-cell.today { background: #000080 !important; color: #fff !important; }
-  html[data-skin="w98"] .cal-cell.selected *, html[data-skin="w98"] .cal-cell.today * { color: #fff !important; }
   html[data-skin="w98"] .calendar-surface { background: #fff !important; box-shadow: var(--w98-sunken) !important; }
   html[data-skin="w98"] .fab-add { background: #c0c0c0 !important; color: #000 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
   html[data-skin="w98"] .main-content, html[data-skin="w98"] .app-main, html[data-skin="w98"] main { background: #c0c0c0 !important; }
@@ -6298,7 +6296,6 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .asset-card, html[data-skin="w98"] .collapse-card, html[data-skin="w98"] .section-card, html[data-skin="w98"] .mp-card, html[data-skin="w98"] .panel-card { background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
   html[data-skin="w98"] .modal-overlay { background: rgba(0,0,0,.35) !important; }
   html[data-skin="w98"] .calendar-surface table, html[data-skin="w98"] .cal-grid { background: #c0c0c0 !important; }
-  html[data-skin="w98"] .cal-day.today, html[data-skin="w98"] .cal-day.selected { background: #000080 !important; color: #fff !important; }
 }
 
 .skin-btn { display: none; }
@@ -6321,10 +6318,13 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .calendar-surface .cal-daynum { font-weight: 700 !important; }
   html[data-skin="w98"] .calendar-surface .cal-cell.sun .cal-daynum { color: #c00000 !important; }
   html[data-skin="w98"] .calendar-surface .cal-cell.sat .cal-daynum { color: #000080 !important; }
-  html[data-skin="w98"] .calendar-surface .cal-cell.today { background: #ffffc0 !important; outline: 2px solid #000 !important; outline-offset: -2px; z-index: 1; }
-  html[data-skin="w98"] .calendar-surface .cal-cell.today .cal-daynum { color: #000 !important; text-decoration: underline; }
-  html[data-skin="w98"] .calendar-surface .cal-cell.selected { background: #000080 !important; outline: 1px dotted #fff !important; outline-offset: -3px; }
-  html[data-skin="w98"] .calendar-surface .cal-cell.selected * { color: #fff !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.today { background: #fff !important; outline: 2px solid #000080 !important; outline-offset: -2px; z-index: 1; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.today .cal-daynum { color: #000080 !important; text-decoration: underline; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.today .cal-daynum { background: none !important; padding: 0 !important; }
+  html[data-skin="w98"] .calendar-surface .cal-dot { color: #000 !important; background: #fff !important; box-shadow: inset 4px 0 var(--event-color, #000080), inset 0 0 0 1px #808080 !important; padding-left: 8px !important; font-weight: 400 !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.selected { background: #e4e4e4 !important; box-shadow: var(--w98-sunken) !important; outline: none !important; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.selected .cal-daynum { background: #000080; color: #fff !important; padding: 0 5px; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.selected.today { outline: 2px solid #000080 !important; outline-offset: -2px; }
   html[data-skin="w98"] #viewCal .cal-nav { background: #c0c0c0; box-shadow: var(--w98-raised); padding: 4px 6px; min-height: 0 !important; }
   html[data-skin="w98"] #viewCal .cal-nav .cal-month { font-size: 16px !important; font-weight: 700 !important; }
   html[data-skin="w98"] .cal-subtab-bar { background: transparent !important; box-shadow: none !important; gap: 0 !important; padding: 0 !important; }
