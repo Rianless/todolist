@@ -6200,6 +6200,33 @@ button:active:not(:disabled) {
 /* 요약 상자(구독의 월·연 예상 지출 등)도 다른 카드와 같은 면 · 테두리 */
 .sub-total { background: var(--panel2); border: 1px solid var(--border); }
 .sub-total-label { letter-spacing: 0; font-size: 11px; }
+
+/* 모바일 폭(900px 미만): 아래에서 올라오던 팝업(일정 상세, 카테고리 관리, 확인창)과 하루 목록도
+   다른 입력 팝업처럼 화면 가운데에 같은 너비·여백·테두리로 띄운다. PC 폭은 건드리지 않는다. */
+@media (max-width: 899px) {
+  #ledgerCatModal, #cheongdoManagerModal, #detailModal, #confirmModal, #dayModal {
+    align-items: center; justify-content: center; padding: 16px;
+  }
+  #ledgerCatModal .modal-sheet, #cheongdoManagerModal .modal-sheet, #detailModal .modal-sheet, #dayModal .modal-sheet {
+    width: 100%; max-width: 440px; margin: 0 auto; max-height: calc(100dvh - 32px);
+  }
+  #confirmModal .modal-sheet, #confirmModal .confirm-sheet { width: 100% !important; max-width: 440px; margin: 0 auto; }
+  /* 위쪽 강조 줄 대신 모든 팝업이 같은 얇은 테두리 */
+  .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
+  [data-theme="dark"] .modal-sheet, [data-theme="dark"] .add-sheet, [data-theme="dark"] .day-sheet, [data-theme="dark"] .detail-sheet {
+    border: 1px solid var(--border2) !important;
+  }
+}
+
+/* 화면의 동작 버튼(+ 추가, 이체, + 일정 추가)을 같은 모양·높이로, 버튼 줄은 카드 가로를 꽉 채운다 */
+.ledger-add-btn, .ledger-export-btn, .add-btn, [data-theme="dark"] .add-btn {
+  min-height: 40px; padding: 0 14px;
+  border: 1px solid var(--border2); background: var(--panel2); color: var(--text2);
+  border-radius: var(--ui-r-ctl); clip-path: none;
+  font-size: 12px; letter-spacing: 0; text-align: center;
+}
+.ledger-actions .ledger-add-btn { margin-top: 0; }
+.ledger-actions > :only-child { grid-column: 1 / -1; }
 </style>
 
 </head>
