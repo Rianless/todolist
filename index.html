@@ -6227,6 +6227,12 @@ button:active:not(:disabled) {
 }
 .ledger-actions .ledger-add-btn { margin-top: 0; }
 .ledger-actions > :only-child { grid-column: 1 / -1; }
+
+/* 모바일: 월/주/리스트/루틴 바를 달성률 박스와 같은 가로 폭으로 */
+@media (max-width: 899px) {
+  #viewCalendar .cal-subtab-bar { box-sizing: border-box; width: calc(100% - 8px); max-width: none; margin-left: 4px; margin-right: 4px; }
+  #viewCalendar .cal-subtab-bar .cal-subtab { flex: 1 1 0; min-width: 0; }
+}
 </style>
 
 </head>
