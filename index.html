@@ -3,6 +3,7 @@
 <html lang="ko" data-theme="light">
 
 <head>
+<script>try{var __sk=localStorage.getItem("rianless_skin");document.documentElement.setAttribute("data-skin",__sk===null?"w98":__sk);}catch(e){document.documentElement.setAttribute("data-skin","w98");}</script>
 
 <meta charset="UTF-8">
 
@@ -6228,6 +6229,80 @@ button:active:not(:disabled) {
 .ledger-actions .ledger-add-btn { margin-top: 0; }
 .ledger-actions > :only-child { grid-column: 1 / -1; }
 
+/* ===== Windows 98 스킨 (PC 전용, 헤더의 🖥️ 단추로 켜고 끔) ===== */
+@media (min-width: 900px) {
+  html[data-skin="w98"] {
+    --bg: #c0c0c0; --bg2: #c0c0c0; --panel: #c0c0c0; --panel2: #dfdfdf;
+    --border: #808080; --border2: #404040;
+    --cyan: #000080; --magenta: #800080; --purple: #000080; --yellow: #808000;
+    --accent: #000080; --accent2: #000080;
+    --text: #000000; --text2: #202020; --text3: #404040;
+    --red: #c00000; --green: #006000;
+    --radius-sm: 0px; --radius-md: 0px; --radius-lg: 0px;
+    --angular-shadow: none;
+    --w98-raised: inset -1px -1px #404040, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf;
+    --w98-sunken: inset 1px 1px #404040, inset -1px -1px #fff, inset 2px 2px #808080, inset -2px -2px #dfdfdf;
+    --w98-title: linear-gradient(90deg, #000080, #1084d0);
+  }
+  html[data-skin="w98"] body { background: #008080 !important; color: #000; font-family: Tahoma, 'MS Sans Serif', 'Malgun Gothic', 'Noto Sans KR', sans-serif !important; font-size: 12px; }
+  html[data-skin="w98"] *, html[data-skin="w98"] *::before, html[data-skin="w98"] *::after { font-family: Tahoma, 'MS Sans Serif', 'Malgun Gothic', 'Noto Sans KR', sans-serif !important; border-radius: 0 !important; text-shadow: none !important; letter-spacing: 0 !important; }
+  html[data-skin="w98"] .header-sys, html[data-skin="w98"] .header-badges, html[data-skin="w98"] .header-sys-extra { display: none !important; }
+
+  /* 창 본체 */
+  html[data-skin="w98"] .app-header, html[data-skin="w98"] .tab-bar, html[data-skin="w98"] .progress-bar-wrap,
+  html[data-skin="w98"] .stat-card, html[data-skin="w98"] .calendar-surface, html[data-skin="w98"] .modal-sheet, html[data-skin="w98"] .detail-sheet {
+    background: #c0c0c0 !important; border: none !important; box-shadow: var(--w98-raised) !important; color: #000 !important;
+  }
+  html[data-skin="w98"] .app-header { border-right: 2px solid #404040 !important; }
+  html[data-skin="w98"] .header-title { color: #fff !important; background: var(--w98-title); padding: 4px 8px; font-size: 14px !important; font-weight: 700; margin: 0 0 10px; }
+  html[data-skin="w98"] .header-title span { color: #fff !important; }
+  html[data-skin="w98"] .header-sub, html[data-skin="w98"] .header-left p { color: #000 !important; }
+
+  /* 단추 */
+  html[data-skin="w98"] button, html[data-skin="w98"] .add-btn, html[data-skin="w98"] .ledger-add-btn, html[data-skin="w98"] .ledger-export-btn,
+  html[data-skin="w98"] .notif-btn, html[data-skin="w98"] .cal-today-btn, html[data-skin="w98"] .tab-item, html[data-skin="w98"] .cal-subtab {
+    background: #c0c0c0 !important; color: #000 !important; border: none !important; box-shadow: var(--w98-raised) !important; font-weight: 400 !important;
+  }
+  html[data-skin="w98"] button:active, html[data-skin="w98"] .tab-item.active, html[data-skin="w98"] .cal-subtab.active {
+    box-shadow: var(--w98-sunken) !important; background: #dfdfdf !important; font-weight: 700 !important;
+  }
+  html[data-skin="w98"] .tab-item.active::before, html[data-skin="w98"] .tab-item::after, html[data-skin="w98"] .cal-subtab.active::after { display: none !important; }
+  html[data-skin="w98"] .cal-subtab-bar { background: #c0c0c0 !important; border: none !important; box-shadow: var(--w98-sunken) !important; }
+  html[data-skin="w98"] .fab, html[data-skin="w98"] .add-fab { background: #c0c0c0 !important; color: #000 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
+
+  /* 입력칸 */
+  html[data-skin="w98"] input:not([type=checkbox]):not([type=radio]), html[data-skin="w98"] select, html[data-skin="w98"] textarea {
+    background: #fff !important; color: #000 !important; border: none !important; box-shadow: var(--w98-sunken) !important;
+  }
+  /* 달성률 막대 */
+  html[data-skin="w98"] .prog-track { background: #fff !important; box-shadow: var(--w98-sunken) !important; }
+  html[data-skin="w98"] .prog-fill { background: repeating-linear-gradient(90deg, #000080 0 8px, #fff 8px 10px) !important; box-shadow: none !important; }
+  html[data-skin="w98"] .prog-label, html[data-skin="w98"] .prog-pct { color: #000 !important; }
+
+  /* 위쪽 제목줄 */
+  html[data-skin="w98"] .pc-topbar { background: var(--w98-title) !important; border: none !important; height: 28px !important; padding: 0 10px !important; box-shadow: none !important; }
+  html[data-skin="w98"] .pc-topbar-title::before { color: #fff !important; font-size: 13px !important; }
+  html[data-skin="w98"] .pc-topbar button { box-shadow: var(--w98-raised) !important; }
+  html[data-skin="w98"] .cal-cell { background: #fff !important; border: none !important; box-shadow: none !important; }
+  html[data-skin="w98"] .cal-cell.selected, html[data-skin="w98"] .cal-cell.today { background: #000080 !important; color: #fff !important; }
+  html[data-skin="w98"] .cal-cell.selected *, html[data-skin="w98"] .cal-cell.today * { color: #fff !important; }
+  html[data-skin="w98"] .calendar-surface { background: #fff !important; box-shadow: var(--w98-sunken) !important; }
+  html[data-skin="w98"] .fab-add { background: #c0c0c0 !important; color: #000 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
+  html[data-skin="w98"] .main-content, html[data-skin="w98"] .app-main, html[data-skin="w98"] main { background: #c0c0c0 !important; }
+  /* 팝업 제목줄 */
+  html[data-skin="w98"] .modal-sheet .modal-header { background: var(--w98-title) !important; padding: 4px 6px !important; border: none !important; margin: 0 0 10px; }
+  html[data-skin="w98"] .modal-sheet .modal-title { color: #fff !important; background: none !important; padding: 0 !important; font-size: 13px !important; font-weight: 700; }
+  html[data-skin="w98"] .modal-sheet .modal-header button { width: 20px !important; height: 20px !important; min-height: 0 !important; padding: 0 !important; font-size: 12px !important; line-height: 1; }
+  html[data-skin="w98"] .modal-sheet .modal-header .cheongdo-manager-help { color: #fff !important; }
+  html[data-skin="w98"] .dc { display: none !important; }
+  html[data-skin="w98"] .asset-card, html[data-skin="w98"] .collapse-card, html[data-skin="w98"] .section-card, html[data-skin="w98"] .mp-card, html[data-skin="w98"] .panel-card { background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
+  html[data-skin="w98"] .modal-overlay { background: rgba(0,0,0,.35) !important; }
+  html[data-skin="w98"] .calendar-surface table, html[data-skin="w98"] .cal-grid { background: #c0c0c0 !important; }
+  html[data-skin="w98"] .cal-day.today, html[data-skin="w98"] .cal-day.selected { background: #000080 !important; color: #fff !important; }
+}
+
+.skin-btn { display: none; }
+@media (min-width: 900px) { .skin-btn { display: inline-flex; align-items: center; justify-content: center; } }
 /* 모바일: 월/주/리스트/루틴 바를 달성률 박스와 같은 가로 폭으로 */
 @media (max-width: 899px) {
   #viewCalendar .cal-subtab-bar { box-sizing: border-box; width: calc(100% - 8px); max-width: none; margin-left: 4px; margin-right: 4px; }
@@ -6308,6 +6383,7 @@ button:active:not(:disabled) {
         <button class="theme-btn" onclick="openSearch()" title="검색" aria-label="검색 열기">🔍</button>
 
         <button class="theme-btn" onclick="toggleTheme()" title="테마 전환" id="themeBtn" aria-label="테마 전환">☀️</button>
+        <button class="theme-btn skin-btn" onclick="toggleSkin()" title="윈도우 98 스타일 켜기/끄기 (PC)" id="skinBtn" aria-label="윈도우 98 스타일 켜기/끄기">🖥️</button>
 
       </div>
 
@@ -8820,6 +8896,12 @@ async function loadItemsFromAPI() {
    THEME
 
 ══════════════════════════════════════ */
+
+function toggleSkin() {
+  const on = document.documentElement.getAttribute('data-skin') === 'w98';
+  document.documentElement.setAttribute('data-skin', on ? 'classic' : 'w98');
+  try { localStorage.setItem('rianless_skin', on ? 'classic' : 'w98'); } catch (e) {}
+}
 
 function toggleTheme() {
 
