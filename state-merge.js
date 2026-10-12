@@ -5,7 +5,7 @@
 // 한쪽만 바꾼 건 그대로 받고, 양쪽이 같은 걸 바꾸면 이 기기(local)가 이긴다.
 // 브라우저(window.StateMerge)와 Node 테스트(module.exports) 양쪽에서 쓴다.
 (function () {
-  const COUNTERS = ['nextId', 'ledgerNextId', 'accountNextId', 'transferNextId', 'investmentNextId', 'routineNextId', 'memoNextId', 'bookmarkNextId'];
+  const COUNTERS = ['nextId', 'ledgerNextId', 'accountNextId', 'transferNextId', 'investmentNextId', 'routineNextId', 'memoNextId', 'bookmarkNextId', 'bookmarkFolderNextId'];
 
   const subscriptionKey = s => (s && s.id !== undefined ? `id:${s.id}` : `${s && s.name}|${s && s.cycle}|${s && s.date}`);
   const byId = x => x && x.id;
@@ -22,12 +22,13 @@
     investments: byId,
     routines: byId,
     memos: byId,
-    bookmarks: byId
+    bookmarks: byId,
+    bookmarkFolders: byId
   };
   // 새 id 를 받을 수 있는 컬렉션과, 그 id 를 만드는 카운터
   const COUNTER_OF = {
     items: 'nextId', ledger: 'ledgerNextId', accounts: 'accountNextId', transfers: 'transferNextId',
-    investments: 'investmentNextId', routines: 'routineNextId', memos: 'memoNextId', bookmarks: 'bookmarkNextId'
+    investments: 'investmentNextId', routines: 'routineNextId', memos: 'memoNextId', bookmarks: 'bookmarkNextId', bookmarkFolders: 'bookmarkFolderNextId'
   };
 
   function stable(value) {
@@ -188,6 +189,16 @@
           });
         });
         remapReferences(out, coll, oldId, copy.id, localOnly);
+        // 새 id 를 받은 폴더 안에 있던 이 기기의 북마크가 서버 쪽 같은 id 폴더로 딸려가지 않게 따라 옮긴다
+        if (coll === 'bookmarkFolders' && Array.isArray(out.bookmarks)) {
+          const remoteById = new Map((remote.bookmarks || []).map(b => [String(b.id), b]));
+          (local.bookmarks || []).forEach(lb => {
+            if (lb.folderId !== oldId) return;
+            const o = out.bookmarks.find(b => String(b.id) === String(lb.id));
+            const rb = remoteById.get(String(lb.id));
+            if (o && o.folderId === oldId && !(rb && eq(rb, o))) o.folderId = copy.id;
+          });
+        }
       });
       out[COUNTER_OF[coll]] = Math.max(Number(out[COUNTER_OF[coll]]) || 0, nextFree);
     });
