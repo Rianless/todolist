@@ -21,7 +21,8 @@ function extractFunction(name) {
 const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFixed', 'investTaxFor', 'calcInvestment',
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
   'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs',
-  'statsMonthTotals', 'statsCategoryBreakdown', 'routineHeat', 'routineRates'];
+  'statsMonthTotals', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
+  'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText'];
 
 const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
@@ -218,6 +219,27 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   const rates = A.routineRates(rts, log, occ, '2026-10-14', 7);       // 10-08 ~ 10-14
   assert.deepStrictEqual(rates.map(r => [r.name, r.done, r.total, r.pct]), [['A', 4, 7, 57], ['B', 2, 2, 100]]);
   assert.deepStrictEqual(A.routineRates([{ id: 3, name: 'C', days: [] }], {}, occ, '2026-10-14', 7), []);   // 기간 중 해당 없는 루틴은 뺀다
+}
+
+// ── 메모장: 제목·미리보기·검색·정렬·검색어 강조
+{
+  assert.strictEqual(A.memoTitle('\n\n  장보기 목록 \n우유\n계란'), '장보기 목록');
+  assert.strictEqual(A.memoTitle('가'.repeat(40)), '가'.repeat(28) + '…');
+  assert.strictEqual(A.memoTitle('  \n '), '(빈 메모)');
+  assert.strictEqual(A.memoPreview('제목\n우유\n\n계란'), '우유 계란');
+  assert.strictEqual(A.memoPreview('제목만'), '');
+  const list = [
+    { id: 1, content: 'Apple 사기', date: '2026-10-01' },
+    { id: 2, content: '운동 계획', date: '2026-10-05', updated: '2026-10-07T09:00:00.000Z' },
+    { id: 3, content: '오래된 고정', date: '2026-09-01', pinned: true },
+    { id: 4, content: '사과 주스', date: '2026-10-05' }
+  ];
+  assert.deepStrictEqual(A.memoFilter(list, ' apple ').map(m => m.id), [1]);
+  assert.deepStrictEqual(A.memoFilter(list, '').map(m => m.id), [1, 2, 3, 4]);
+  assert.deepStrictEqual(A.memoFilter(list, '없는말'), []);
+  assert.deepStrictEqual(A.memoSort(list).map(m => m.id), [3, 2, 4, 1]);   // 고정 → 최근 수정 → (같은 날은 id 큰 순)
+  assert.strictEqual(A.memoHighlight('a<b>Apple', 'apple'), 'a&lt;b&gt;<mark>Apple</mark>');
+  assert.strictEqual(A.memoHighlight('<x>', ''), '&lt;x&gt;');
 }
 
 console.log('OK (index logic)');
