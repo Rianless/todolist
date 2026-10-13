@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v66-bookmark-grid';
+const CACHE_NAME = 'todolist-v67-desktop-skin';
 const ASSETS = [
   './',
   './index.html',
