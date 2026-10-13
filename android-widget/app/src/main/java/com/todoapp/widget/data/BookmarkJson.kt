@@ -1,6 +1,5 @@
 package com.todoapp.widget.data
 
-import org.json.JSONArray
 import org.json.JSONObject
 
 /** `/api/state` 의 data 에서 북마크와 폴더를 읽는다. 없는 필드는 빈 목록. */
@@ -24,17 +23,4 @@ fun parseBookmarkData(state: JSONObject): BookmarkData {
         }
     }
     return BookmarkData(folders, bookmarks)
-}
-
-/** [parseBookmarkData] 가 읽는 것과 같은 모양으로 되돌린다. (마지막으로 받은 목록을 기기에 저장해 둘 때 쓴다) */
-fun bookmarkDataToJson(data: BookmarkData): JSONObject {
-    val folders = JSONArray()
-    data.folders.forEach { folders.put(JSONObject().put("id", it.id).put("name", it.name)) }
-    val bookmarks = JSONArray()
-    data.bookmarks.forEach { b ->
-        val o = JSONObject().put("id", b.id).put("url", b.url).put("title", b.title)
-        if (b.folderId != null) o.put("folderId", b.folderId)
-        bookmarks.put(o)
-    }
-    return JSONObject().put("bookmarkFolders", folders).put("bookmarks", bookmarks)
 }

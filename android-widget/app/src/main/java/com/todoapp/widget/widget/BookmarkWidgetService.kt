@@ -33,7 +33,7 @@ class BookmarkWidgetFactory(
 
     /** 위젯 본체(provider)가 받아 둔 데이터로 목록을 만든다. 아직 없으면 여기서 한 번 받는다. */
     override fun onDataSetChanged() {
-        BookmarkStore.ensureLoaded(context)
+        BookmarkStore.ensureLoaded()
         val offset = context.getSharedPreferences(BookmarkWidgetProvider.PREFS, Context.MODE_PRIVATE)
             .getInt(BookmarkWidgetProvider.offsetKey(widgetId), 0)
         shown = bookmarkView(BookmarkStore.data, offset).items
