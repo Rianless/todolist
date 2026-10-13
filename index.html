@@ -6459,6 +6459,64 @@ button:active:not(:disabled) {
   html[data-desktop][data-skin="w98"] #desktopStartMenu button:hover, html[data-desktop][data-skin="w98"] #desktopStartMenu button:focus-visible { background: #000080 !important; color: #fff !important; }
   html[data-desktop][data-skin="w98"] #desktopStartMenu hr { border: 0; height: 2px; margin: 4px 2px; box-shadow: inset 0 1px #808080, inset 0 -1px #fff; }
 }
+
+/* ===== 날짜별 가계부 달력 (PC 전용): 가계부 화면 맨 위 ===== */
+.ledger-cal { display: none; }
+@media (min-width: 900px) {
+  .ledger-cal { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: 16px; margin-bottom: 16px; align-items: start; }
+  .ledger-cal-main, .ledger-cal-detail { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px; min-width: 0; }
+  .lc-nav { display: flex; align-items: center; gap: 8px; }
+  .lc-month { flex: 1; text-align: center; font-size: 17px; font-weight: 800; color: var(--text); }
+  .lc-today { padding: 6px 12px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: var(--panel2); color: var(--text); border-radius: 8px; }
+  .lc-sum { display: flex; gap: 16px; flex-wrap: wrap; margin: 10px 2px; font-size: 12px; }
+  .lc-sum-inc { color: var(--green); font-weight: 700; }
+  .lc-sum-exp { color: var(--red); font-weight: 700; }
+  .lc-sum-bal { color: var(--text2); }
+  .lc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); gap: 4px; }
+  .lc-dow { text-align: center; font-size: 11px; font-weight: 700; padding: 4px 0; color: var(--text3); }
+  .lc-dow.sun, .lc-cell.sun .lc-day { color: var(--red); }
+  .lc-dow.sat, .lc-cell.sat .lc-day { color: var(--accent); }
+  .lc-cell { display: flex; flex-direction: column; gap: 1px; min-height: 64px; padding: 5px 7px; overflow: hidden; cursor: pointer; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; }
+  .lc-cell.empty { background: transparent; border-color: transparent; cursor: default; }
+  .lc-cell:not(.empty):hover { border-color: var(--accent); }
+  .lc-day { font-size: 12px; font-weight: 700; color: var(--text); }
+  .lc-exp, .lc-inc { font-size: 11px; font-weight: 700; white-space: nowrap; }
+  .lc-exp { color: var(--red); }
+  .lc-inc { color: var(--green); }
+  .lc-cell.today .lc-day { text-decoration: underline; }
+  .lc-cell.selected { background: var(--tab-act); outline: 2px solid var(--accent); outline-offset: -2px; }
+  .lc-detail-head { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
+  .lc-detail-date { font-size: 16px; font-weight: 800; color: var(--text); }
+  .lc-detail-totals { display: flex; gap: 14px; margin-top: 4px; font-size: 12px; }
+  .lc-rows { display: flex; flex-direction: column; }
+  .lc-row { display: flex; align-items: center; gap: 8px; padding: 9px 4px; border-bottom: 1px solid var(--border); }
+  .lc-row-info { flex: 1; min-width: 0; }
+  .lc-row-title { font-size: 13px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .lc-row-amt { font-size: 13px; font-weight: 800; white-space: nowrap; color: var(--text2); }
+  .lc-row-amt.expense { color: var(--red); }
+  .lc-row-amt.income { color: var(--green); }
+  .lc-row.transfer { opacity: .75; }
+  .lc-empty { padding: 28px 0; text-align: center; font-size: 12px; color: var(--text3); }
+  .lc-add { margin-top: 10px; width: 100%; }
+
+  /* 윈도우 98 스킨 */
+  html[data-skin="w98"] .ledger-cal-main, html[data-skin="w98"] .ledger-cal-detail { background: #c0c0c0 !important; border: none !important; box-shadow: var(--w98-raised) !important; }
+  html[data-skin="w98"] .lc-grid { gap: 0; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
+  html[data-skin="w98"] .lc-dow { background: #c0c0c0; box-shadow: var(--w98-raised); color: #000; padding: 5px 0; }
+  html[data-skin="w98"] .lc-dow.sun { color: #c00000; }
+  html[data-skin="w98"] .lc-dow.sat { color: #000080; }
+  html[data-skin="w98"] .lc-cell { background: #fff !important; border: 0 !important; border-right: 1px solid #c0c0c0 !important; border-bottom: 1px solid #c0c0c0 !important; }
+  html[data-skin="w98"] .lc-cell.empty { background: #dfdfdf !important; }
+  html[data-skin="w98"] .lc-cell.sun .lc-day { color: #c00000; }
+  html[data-skin="w98"] .lc-cell.sat .lc-day { color: #000080; }
+  html[data-skin="w98"] .lc-cell.selected { background: #e4e4e4 !important; outline: 2px solid #000080; }
+  html[data-skin="w98"] .lc-exp { color: #c00000; }
+  html[data-skin="w98"] .lc-inc, html[data-skin="w98"] .lc-sum-inc, html[data-skin="w98"] .lc-row-amt.income { color: #006000; }
+  html[data-skin="w98"] .lc-sum-exp, html[data-skin="w98"] .lc-row-amt.expense { color: #c00000; }
+  html[data-skin="w98"] .lc-rows { background: #fff; box-shadow: var(--w98-sunken); padding: 2px 6px; margin-top: 8px; }
+  html[data-skin="w98"] .lc-row { border-bottom-color: #c0c0c0; }
+  html[data-skin="w98"] .lc-detail-head { border-bottom-color: #808080; }
+}
 </style>
 
 </head>
@@ -6717,77 +6775,22 @@ button:active:not(:disabled) {
 
     <div class="view" id="viewCategory">
 
+      <!-- 날짜별 가계부 (PC 전용): 달력의 각 날짜에 그날 지출·수입, 날짜를 누르면 오른쪽에 그날 산 것 -->
+      <section class="ledger-cal" id="ledgerCalPanel" aria-label="날짜별 가계부">
+        <div class="ledger-cal-main">
+          <div class="lc-nav">
+            <button type="button" class="ledger-nav-btn" onclick="ledgerMonthMove(-1)" aria-label="이전 달">‹</button>
+            <div class="lc-month" id="lcMonth"></div>
+            <button type="button" class="ledger-nav-btn" onclick="ledgerMonthMove(1)" aria-label="다음 달">›</button>
+            <button type="button" class="lc-today" onclick="ledgerCalToday()">오늘</button>
+          </div>
+          <div class="lc-sum" id="lcSum"></div>
+          <div class="lc-grid" id="lcGrid" role="grid" aria-label="날짜별 지출 수입"></div>
+        </div>
+        <div class="ledger-cal-detail" id="lcDetail" aria-live="polite"></div>
+      </section>
+
       <div class="mypage-cards">
-
-
-
-        <!-- ── 통장 카드 ── -->
-        <div class="mp-card" id="mpCardAccounts">
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardAccounts')">
-            <span class="mp-card-icon">🏦</span>
-            <span class="mp-card-label">자산 · 통장 / 투자 / 저축</span>
-            <span class="mp-card-chevron">▼</span>
-          </div>
-          <div class="mp-card-body">
-            <div class="mp-card-inner">
-              <div id="assetTotal"></div>
-
-              <div class="asset-section"><span>🏦 통장</span><small id="accountSub"></small></div>
-              <div id="accountList"></div>
-              <div class="ledger-actions">
-                <button class="ledger-add-btn" onclick="openAccountModal();event.stopPropagation()">+ 통장 추가</button>
-                <button class="ledger-export-btn" onclick="openTransferModal();event.stopPropagation()" aria-label="통장 간 이체">이체</button>
-              </div>
-
-              <div class="asset-section"><span>📈 투자 · 저축</span><small id="investSub"></small></div>
-              <div class="asset-hint" id="investHint"></div>
-              <div class="invest-tax-row">
-                <span>이자소득세</span>
-                <input type="number" id="investTaxInput" min="0" max="100" step="0.1" inputmode="decimal" aria-label="이자소득세율(%)" onchange="setInvestTaxRate(this.value)">
-                <span>%</span>
-                <button type="button" onclick="setInvestTaxRate(15.4)">일반 15.4</button>
-                <button type="button" onclick="setInvestTaxRate(9.5)">세금우대 9.5</button>
-                <button type="button" onclick="setInvestTaxRate(0)">비과세</button>
-              </div>
-              <div id="investList"></div>
-              <div class="ledger-actions">
-                <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── 구독 카드 ── -->
-
-        <div class="mp-card" id="mpCardSubs">
-
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardSubs')">
-
-            <span class="mp-card-icon">🔖</span>
-
-            <span class="mp-card-label" id="subsSysLabel">구독</span>
-
-            <span class="mp-card-chevron">▼</span>
-
-          </div>
-
-          <div class="mp-card-body">
-
-            <div class="mp-card-inner">
-
-              <div id="subTotal" class="sub-summary" style="display:none;"></div>
-
-              <div id="subCatBar" class="sub-cat-bar"></div>
-
-              <div id="subsList"></div>
-
-              <button class="ledger-add-btn" onclick="openLedger(null, true)">+ 구독 항목 추가</button>
-
-            </div>
-
-          </div>
-
-        </div>
 
 
 
@@ -6850,6 +6853,76 @@ button:active:not(:disabled) {
 
           </div>
 
+        </div>
+
+
+
+        <!-- ── 구독 카드 ── -->
+
+        <div class="mp-card" id="mpCardSubs">
+
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardSubs')">
+
+            <span class="mp-card-icon">🔖</span>
+
+            <span class="mp-card-label" id="subsSysLabel">구독</span>
+
+            <span class="mp-card-chevron">▼</span>
+
+          </div>
+
+          <div class="mp-card-body">
+
+            <div class="mp-card-inner">
+
+              <div id="subTotal" class="sub-summary" style="display:none;"></div>
+
+              <div id="subCatBar" class="sub-cat-bar"></div>
+
+              <div id="subsList"></div>
+
+              <button class="ledger-add-btn" onclick="openLedger(null, true)">+ 구독 항목 추가</button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ── 통장 카드 ── -->
+        <div class="mp-card" id="mpCardAccounts">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardAccounts')">
+            <span class="mp-card-icon">🏦</span>
+            <span class="mp-card-label">자산 · 통장 / 투자 / 저축</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div id="assetTotal"></div>
+
+              <div class="asset-section"><span>🏦 통장</span><small id="accountSub"></small></div>
+              <div id="accountList"></div>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openAccountModal();event.stopPropagation()">+ 통장 추가</button>
+                <button class="ledger-export-btn" onclick="openTransferModal();event.stopPropagation()" aria-label="통장 간 이체">이체</button>
+              </div>
+
+              <div class="asset-section"><span>📈 투자 · 저축</span><small id="investSub"></small></div>
+              <div class="asset-hint" id="investHint"></div>
+              <div class="invest-tax-row">
+                <span>이자소득세</span>
+                <input type="number" id="investTaxInput" min="0" max="100" step="0.1" inputmode="decimal" aria-label="이자소득세율(%)" onchange="setInvestTaxRate(this.value)">
+                <span>%</span>
+                <button type="button" onclick="setInvestTaxRate(15.4)">일반 15.4</button>
+                <button type="button" onclick="setInvestTaxRate(9.5)">세금우대 9.5</button>
+                <button type="button" onclick="setInvestTaxRate(0)">비과세</button>
+              </div>
+              <div id="investList"></div>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
+              </div>
+            </div>
+          </div>
         </div>
 
 
@@ -9463,6 +9536,8 @@ function renderCategoryView() {
   renderAccounts();
   renderInvestments();
   renderSubs();
+
+  renderLedgerCalendar();
 
   if (document.getElementById('mpCardLedger').classList.contains('open')) renderLedgerCard();
 
@@ -14432,7 +14507,134 @@ function ledgerMonthMove(d) {
 
 
 
+/* ══════════════════════════════════════
+   날짜별 가계부 달력 (PC 전용 패널)
+══════════════════════════════════════ */
+let ledgerCalSelected = null;   // 'YYYY-MM-DD' — 달력에서 고른 날
+
+// 한 달의 날짜별 지출·수입·내역. 지출에는 구독 결제를 포함하고(웹 달력의 "오늘의 일정"과 같은 기준), 이체는 합계에서 뺀다.
+function ledgerDayData(ledgerList, subList, transferList, y, m, subDatesFn) {
+  const prefix = `${y}-${String(m + 1).padStart(2, '0')}`;
+  const days = {};
+  const day = ds => days[ds] || (days[ds] = { expense: 0, income: 0, entries: [], subs: [], transfers: [] });
+  (ledgerList || []).forEach(e => {
+    if (!e.date || !e.date.startsWith(prefix)) return;
+    const d = day(e.date);
+    d.entries.push(e);
+    const amount = Number(e.amount) || 0;
+    if (e.type === 'income') d.income += amount;
+    else if (e.type === 'expense') d.expense += amount;
+  });
+  (subList || []).forEach(sub => {
+    if (!sub.date || sub.paused) return;
+    subDatesFn(sub, y, m).forEach(ds => {
+      if (!ds.startsWith(prefix)) return;
+      const amount = Number(sub.amount) || 0;
+      const d = day(ds);
+      d.subs.push({ name: sub.name, category: sub.category || '구독', amount });
+      d.expense += amount;
+    });
+  });
+  (transferList || []).forEach(t => {
+    if (t.date && t.date.startsWith(prefix)) day(t.date).transfers.push(t);
+  });
+  Object.values(days).forEach(d => d.entries.sort((a, b) => (b.id - a.id)));
+  return days;
+}
+
+function ledgerCalSelect(ds) {
+  ledgerCalSelected = ds;
+  renderLedgerCalendar();
+}
+
+function ledgerCalToday() {
+  const now = new Date();
+  ledgerY = now.getFullYear();
+  ledgerM = now.getMonth();
+  ledgerCalSelected = fmtDate(now);
+  renderLedgerCard();   // 월 이동과 같이 카드와 달력을 함께 다시 그린다
+  renderAccounts();
+}
+
+function renderLedgerCalendar() {
+  const grid = document.getElementById('lcGrid');
+  if (!grid) return;
+  const y = ledgerY, m = ledgerM;
+  const mm = String(m + 1).padStart(2, '0');
+  const days = ledgerDayData(ledger, subscriptions, transfers, y, m, getSubDatesForMonth);
+  const todayStr = fmtDate(new Date());
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  const dsOf = n => `${y}-${mm}-${String(n).padStart(2, '0')}`;
+
+  // 고른 날이 이 달이 아니면 오늘(이 달이면) 또는 1일
+  if (!ledgerCalSelected || !ledgerCalSelected.startsWith(`${y}-${mm}`)) {
+    ledgerCalSelected = todayStr.startsWith(`${y}-${mm}`) ? todayStr : dsOf(1);
+  }
+
+  document.getElementById('lcMonth').textContent = `${y}년 ${mm}월`;
+  const monthExpense = Object.values(days).reduce((sum, d) => sum + d.expense, 0);
+  const monthIncome = Object.values(days).reduce((sum, d) => sum + d.income, 0);
+  document.getElementById('lcSum').innerHTML =
+    `<span class="lc-sum-inc">수입 +${monthIncome.toLocaleString()}원</span>` +
+    `<span class="lc-sum-exp">지출 -${monthExpense.toLocaleString()}원</span>` +
+    `<span class="lc-sum-bal">차액 ${monthIncome - monthExpense >= 0 ? '+' : '-'}${Math.abs(monthIncome - monthExpense).toLocaleString()}원</span>`;
+
+  let html = DOW_KO.map((d, i) => `<div class="lc-dow${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}">${d}</div>`).join('');
+  const lead = new Date(y, m, 1).getDay();
+  for (let i = 0; i < lead; i++) html += '<div class="lc-cell empty"></div>';
+  for (let n = 1; n <= lastDay; n++) {
+    const ds = dsOf(n);
+    const d = days[ds];
+    const dow = new Date(y, m, n).getDay();
+    const cls = ['lc-cell', dow === 0 ? 'sun' : dow === 6 ? 'sat' : '', ds === todayStr ? 'today' : '', ds === ledgerCalSelected ? 'selected' : ''].filter(Boolean).join(' ');
+    html += `<div class="${cls}" role="gridcell" tabindex="0" data-date="${ds}" onclick="ledgerCalSelect('${ds}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ledgerCalSelect('${ds}')}">` +
+      `<span class="lc-day">${n}</span>` +
+      (d && d.expense ? `<span class="lc-exp">-${d.expense.toLocaleString()}</span>` : '') +
+      (d && d.income ? `<span class="lc-inc">+${d.income.toLocaleString()}</span>` : '') +
+      `</div>`;
+  }
+  grid.innerHTML = html;
+
+  // 오른쪽: 고른 날의 상세
+  const ds = ledgerCalSelected;
+  const d = days[ds] || { expense: 0, income: 0, entries: [], subs: [], transfers: [] };
+  const date = new Date(ds + 'T00:00:00');
+  const rows = [];
+  d.entries.forEach(e => {
+    const sign = e.type === 'income' ? '+' : '-';
+    rows.push(`<div class="lc-row">
+      <div class="lc-row-info"><div class="lc-row-title">${escapeLedgerText(e.title)}</div>${ledgerEntryMeta(e)}</div>
+      <div class="lc-row-amt ${e.type}">${sign}${(Number(e.amount) || 0).toLocaleString()}원</div>
+      <button type="button" class="ledger-entry-edit" onclick="editLedgerEntry(${e.id})" aria-label="${escapeLedgerText(e.title)} 수정">수정</button>
+      <button type="button" class="ledger-entry-del" onclick="deleteLedgerEntry(${e.id})" aria-label="${escapeLedgerText(e.title)} 삭제">✕</button>
+    </div>`);
+  });
+  d.subs.forEach(sub => {
+    rows.push(`<div class="lc-row sub">
+      <div class="lc-row-info"><div class="lc-row-title">🔖 ${escapeLedgerText(sub.name)}</div><div class="ledger-entry-cat">구독 결제 · ${escapeLedgerText(sub.category)}</div></div>
+      <div class="lc-row-amt expense">-${sub.amount.toLocaleString()}원</div>
+    </div>`);
+  });
+  d.transfers.forEach(t => {
+    rows.push(`<div class="lc-row transfer">
+      <div class="lc-row-info"><div class="lc-row-title">⇄ ${escapeLedgerText(accountName(t.fromId) || '삭제된 통장')} → ${escapeLedgerText(accountName(t.toId) || '삭제된 통장')}</div><div class="ledger-entry-cat">이체 (합계에서 제외)</div></div>
+      <div class="lc-row-amt">${(Number(t.amount) || 0).toLocaleString()}원</div>
+    </div>`);
+  });
+  document.getElementById('lcDetail').innerHTML = `
+    <div class="lc-detail-head">
+      <div class="lc-detail-date">${date.getMonth() + 1}월 ${date.getDate()}일 (${DOW_KO[date.getDay()]})${ds === todayStr ? ' · 오늘' : ''}</div>
+      <div class="lc-detail-totals">
+        <span class="lc-sum-exp">지출 -${d.expense.toLocaleString()}원</span>
+        <span class="lc-sum-inc">수입 +${d.income.toLocaleString()}원</span>
+      </div>
+    </div>
+    <div class="lc-rows">${rows.join('') || '<div class="lc-empty">이 날은 기록이 없어요</div>'}</div>
+    <button type="button" class="ledger-add-btn lc-add" onclick="openLedger('${ds}')">+ 이 날 수입 / 지출 추가</button>`;
+}
+
 function renderLedgerCard() {
+  renderLedgerCalendar();   // PC 의 날짜별 달력도 같이 (카드가 닫혀 있어도)
 
   const isDark = document.documentElement.getAttribute('data-theme') === 'dark';
 
