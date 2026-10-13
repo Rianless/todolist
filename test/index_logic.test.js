@@ -20,9 +20,9 @@ function extractFunction(name) {
 
 const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFixed', 'investTaxFor', 'calcInvestment',
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
-  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData'];
+  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText'];
 
-const ctx = vm.createContext({ investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
+const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
 // vm 안에서 만든 배열·객체는 다른 realm 이라 deepStrictEqual 이 거부하므로 JSON 으로 옮겨 받는다
 const A = Object.fromEntries(NAMES.map(n => [n, (...args) => JSON.parse(JSON.stringify(ctx.api[n](...args) ?? null))]));
@@ -144,6 +144,21 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   assert.deepStrictEqual(days['2026-10-13'].subs, [{ name: 'Netflix', category: '구독', amount: 17000 }]);
   assert.strictEqual(days['2026-10-13'].transfers.length, 1);
   assert.deepStrictEqual(Object.keys(A.ledgerDayData([], [], [], 2026, 9, subDates)), []);
+}
+
+// ── 바탕화면 스킨 맨 위 요약 막대: 오늘 할일·루틴·이번 달 달성률(오늘 기준)·구독 결제
+{
+  const its = [
+    { id: 1, date: '2026-10-13', done: true }, { id: 2, date: '2026-10-13', done: false },
+    { id: 3, date: '2026-10-01', done: true }, { id: 4, date: '2026-10-20', done: false },
+    { id: 5, date: '2026-09-30', done: true },                         // 다른 달은 달성률에 안 센다
+    { id: 6, date: '2026-10-13', done: false, isSub: true }              // 구독 가상 일정은 뺀다
+  ];
+  const rts = [{ id: 10 }, { id: 11 }];
+  const done = (id, ds) => id === 10 && ds === '2026-10-13';
+  assert.strictEqual(ctx.api.desktopTickerText('2026-10-13', its, rts, done, 1),
+    '▸ 10월 13일 화요일 … 오늘 할일 2개 중 1개 완료 … 루틴 2개 중 1개 완료 … 10월 달성률 50% (2/4) … 오늘 구독 결제 1건');
+  assert.strictEqual(ctx.api.desktopTickerText('2026-11-02', [], [], done, 0), '▸ 11월 2일 월요일 … 오늘 할일 없음 … 11월 달성률 0% (0/0)');
 }
 
 console.log('OK (index logic)');
