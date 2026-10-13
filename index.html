@@ -6407,7 +6407,7 @@ button:active:not(:disabled) {
 .desk-extra, #desktopTaskbar, #desktopStartMenu, .dk-winbtns { display: none; }
 @keyframes dkTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 @media (prefers-reduced-motion: reduce) { .dk-ticker.marquee #dkTickerText { animation: none !important; padding-left: 0 !important; } }
-.dk-ticker, .dk-widgets, #viewStats, #viewMemo { display: none; }
+.dk-ticker, .dk-widgets, #viewStats, #viewMemo, #viewBookmark { display: none; }
 @media (min-width: 900px) {
   html[data-desktop][data-skin="w98"] { --dk-left: 128px; --dk-top: 40px; --dk-right: 16px; --dk-bottom: 44px; }
   html[data-desktop][data-desktop-max] { --dk-left: 0px; --dk-top: 0px; --dk-right: 0px; --dk-bottom: 34px; }
@@ -6426,6 +6426,7 @@ button:active:not(:disabled) {
   html[data-desktop][data-main-tab="mypage"][data-skin="w98"] .pc-topbar-title::before { content: '👤 마이페이지 — 나의 하루'; }
   html[data-desktop][data-main-tab="stats"][data-skin="w98"] .pc-topbar-title::before { content: '📊 통계 — 나의 하루'; }
   html[data-desktop][data-main-tab="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
+  html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] .pc-topbar-title::before { content: '🔖 북마크 — 나의 하루'; }
   html[data-desktop][data-skin="w98"] .dk-winbtns { display: flex; gap: 2px; }
   html[data-desktop][data-skin="w98"] .dk-winbtn { width: 20px !important; height: 18px !important; min-height: 0 !important; padding: 0 !important; font-size: 11px !important; font-weight: 700 !important; line-height: 1; color: #000 !important; }
   /* 닫음·최소화: 창을 숨기고 바탕화면만 */
@@ -6571,6 +6572,44 @@ button:active:not(:disabled) {
   .mm-editor { flex: 1; min-height: 0; width: 100%; box-sizing: border-box; resize: none; padding: 10px 12px; font: 14px/1.6 'Malgun Gothic', 'Noto Sans KR', sans-serif; color: #000; background: #fff; border: none; box-shadow: var(--w98-sunken); outline: none; }
   .mm-editor:disabled { background: #dfdfdf; }
   .mm-status { margin-top: 6px; padding: 3px 8px; font-size: 11px; color: #000; box-shadow: var(--w98-sunken); min-height: 18px; }
+
+  /* ----- 북마크 앱: 주소창 + 폴더 목록 + 북마크 모음 ----- */
+  html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] #mainContent { overflow: hidden; }
+  html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] #viewBookmark.active { display: flex !important; flex-direction: column !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
+  .bk-addr { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #000; }
+  .bk-addr button, .bk-tools button { padding: 3px 12px; font-size: 12px; color: #000 !important; }
+  .bk-input { flex: 1; min-width: 0; box-sizing: border-box; padding: 5px 8px; font-size: 13px; background: #fff; color: #000; border: none; box-shadow: var(--w98-sunken); }
+  .bk-hint { flex: 0 0 auto; font-size: 11px; color: #c00000; max-width: 280px; }
+  .bk-body { flex: 1; min-height: 0; display: flex; gap: 8px; }
+  .bk-folders { flex: 0 0 210px; min-height: 0; overflow-y: auto; background: #fff; box-shadow: var(--w98-sunken); padding: 4px; color: #000; font-size: 13px; }
+  .bk-fitem { display: flex; align-items: center; gap: 6px; width: 100%; padding: 5px 8px; text-align: left; cursor: pointer; background: transparent !important; box-shadow: none !important; border: 1px solid transparent; color: #000 !important; font-size: 13px; }
+  .bk-fitem span.n { margin-left: auto; font-size: 11px; opacity: .65; }
+  .bk-fitem.on { background: #000080 !important; color: #fff !important; }
+  .bk-fitem.drop { outline: 2px dashed #000080; background: #dfdfff !important; }
+  .bk-fsep { height: 2px; margin: 6px 2px; box-shadow: inset 0 1px #808080, inset 0 -1px #fff; }
+  .bk-fbtns { display: flex; flex-direction: column; gap: 4px; padding: 2px; }
+  .bk-fbtns button { padding: 3px 8px; font-size: 12px; color: #000 !important; }
+  .bk-fedit { display: flex; flex-direction: column; gap: 4px; padding: 2px; }
+  .bk-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
+  .bk-tools { display: flex; align-items: center; gap: 8px; }
+  .bk-tools .bm-view { margin-bottom: 0; border: none; }
+  .bk-tools .bm-view button { background: #c0c0c0; box-shadow: var(--w98-raised); color: #000; padding: 3px 10px; }
+  .bk-tools .bm-view button.on { box-shadow: var(--w98-sunken); background: #dfdfdf; color: #000; font-weight: 700; }
+  .bk-content { flex: 1; min-height: 0; overflow-y: auto; background: #fff; box-shadow: var(--w98-sunken); padding: 10px; color: #000; }
+  .bk-content .bm-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 10px; }
+  .bk-content .bm-tile { padding: 6px 8px 10px; }
+  .bk-content .bm-tile:hover { background: #e8e8ff !important; }
+  .bk-content .bm-tile-icon { width: 48px; height: 48px; }
+  .bk-content .bm-tile-actions { opacity: 0; transition: opacity .12s; }
+  .bk-content .bm-tile:hover .bm-tile-actions, .bk-content .bm-tile:focus-within .bm-tile-actions { opacity: 1; }
+  .bk-content .bm-tile-title { color: #000; font-size: 13px; }
+  .bk-content .bm-tile.dragging { opacity: .4; }
+  .bk-content .bm-item { background: transparent !important; border: none !important; border-bottom: 1px dotted #c0c0c0 !important; box-shadow: none !important; border-radius: 0; }
+  .bk-content .bm-item:hover { background: #e8e8ff !important; }
+  .bk-content .bm-title { color: #000; font-size: 13px; }
+  .bk-content .bm-url { color: #606060; }
+  .bk-content .bm-del { color: #000; }
+  .bk-status { padding: 3px 8px; font-size: 11px; color: #000; box-shadow: var(--w98-sunken); min-height: 18px; }
 }
 
 /* ===== 날짜별 가계부 달력 (PC 전용): 가계부 화면 맨 위 ===== */
@@ -6727,7 +6766,7 @@ button:active:not(:disabled) {
 
     <!-- 바탕화면 스킨(PC) 전용 바로가기 아이콘 — 다른 스킨에서는 숨겨져 있다 -->
     <div class="desk-extra" aria-label="바로가기">
-      <button type="button" class="desk-ico" data-app="bookmark" onclick="desktopOpen('mypage','mpCardBookmark')"><div class="tab-icon" aria-hidden="true">🔖</div><div class="tab-label">북마크</div></button>
+      <button type="button" class="desk-ico" data-app="bookmark" onclick="desktopOpen('bookmark')"><div class="tab-icon" aria-hidden="true">🔖</div><div class="tab-label">북마크</div></button>
       <button type="button" class="desk-ico" data-app="memo" onclick="desktopOpen('memo')"><div class="tab-icon" aria-hidden="true">📝</div><div class="tab-label">메모</div></button>
       <button type="button" class="desk-ico" data-app="stats" onclick="desktopOpen('stats')"><div class="tab-icon" aria-hidden="true">📊</div><div class="tab-label">통계</div></button>
     </div>
@@ -7271,6 +7310,28 @@ button:active:not(:disabled) {
       </section>
     </div>
 
+    <!-- ══ 북마크 뷰 (바탕화면 스킨 PC 전용) ══ -->
+    <div class="view" id="viewBookmark">
+      <div class="bk-addr">
+        <label for="bmAppInput">주소:</label>
+        <input type="text" id="bmAppInput" class="bk-input" placeholder="링크를 붙여넣고 Enter — 바로 열면서 저장해요" autocomplete="off" onkeydown="if(event.key==='Enter'){event.preventDefault();addBookmark(true)}">
+        <button type="button" onclick="addBookmark(true)">이동</button>
+        <button type="button" onclick="addBookmark(false)">저장</button>
+        <span class="bk-hint" id="bmAppHint" role="status"></span>
+      </div>
+      <div class="bk-body">
+        <aside class="bk-folders" id="bkFolders" aria-label="폴더"></aside>
+        <section class="bk-main">
+          <div class="bk-tools">
+            <input type="search" id="bmAppSearch" class="bk-input" placeholder="🔍 북마크 검색 (이름·주소)" oninput="bkSearchInput(this.value)" aria-label="북마크 검색" autocomplete="off">
+            <div class="bm-view" id="bkViewBtns"></div>
+          </div>
+          <div class="bk-content" id="bkContent"></div>
+        </section>
+      </div>
+      <div class="bk-status" id="bkStatus"></div>
+    </div>
+
   </main><!-- end mainContent -->
 
 
@@ -7325,7 +7386,7 @@ button:active:not(:disabled) {
   <div id="desktopStartMenu" role="menu" onclick="event.stopPropagation()">
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
     <button type="button" role="menuitem" onclick="desktopOpen('category')">💰 가계부</button>
-    <button type="button" role="menuitem" onclick="desktopOpen('mypage','mpCardBookmark')">🔖 북마크</button>
+    <button type="button" role="menuitem" onclick="desktopOpen('bookmark')">🔖 북마크</button>
     <button type="button" role="menuitem" onclick="desktopOpen('memo')">📝 메모</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
     <button type="button" role="menuitem" onclick="desktopOpen('stats')">📊 통계</button>
@@ -9372,7 +9433,7 @@ function toggleSkin() {
 /* ══════════════════════════════════════
    바탕화면 스킨 (PC): 윈도우 98 바탕화면에 앱 아이콘 + 창 하나
 ══════════════════════════════════════ */
-const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', stats: '📊 통계 — 나의 하루', memo: '📝 메모장 — 나의 하루' };
+const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', stats: '📊 통계 — 나의 하루', memo: '📝 메모장 — 나의 하루', bookmark: '🔖 북마크 — 나의 하루' };
 
 // 이번 주(오늘부터 토요일까지) 남은 구독 결제를 날짜순으로. 한 주가 두 달에 걸쳐도 둘 다 본다.
 function desktopWeekSubs(subList, todayStr, subDatesFn) {
@@ -9579,7 +9640,7 @@ function updateDesktopWidgets() {
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
 function statsGuard() {
   try {
-    if ((currentMainTab === 'stats' || currentMainTab === 'memo') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
+    if ((currentMainTab === 'stats' || currentMainTab === 'memo' || currentMainTab === 'bookmark') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
       setMainTab('calendar', document.getElementById('mainTab-calendar'));
     }
   } catch (e) {}
@@ -9750,6 +9811,87 @@ function memoEnter() {
 }
 window.addEventListener('pagehide', memoFlush);
 
+/* ══════════════════════════════════════
+   북마크 앱 (PC 바탕화면 스킨): 주소창 + 폴더 + 북마크 모음 + 검색 + 끌어다 놓기
+══════════════════════════════════════ */
+let bookmarkSearchText = '';
+
+function bkSearchInput(v) { bookmarkSearchText = v; renderBookmarkApp(); }
+function bkDrag(e, id) { e.dataTransfer.setData('text/plain', String(id)); e.dataTransfer.effectAllowed = 'move'; e.currentTarget.classList.add('dragging'); }
+function bkDragEnd(e) { e.currentTarget.classList.remove('dragging'); }
+function bkDragOver(e) { e.preventDefault(); e.dataTransfer.dropEffect = 'move'; e.currentTarget.classList.add('drop'); }
+function bkDragLeave(e) { e.currentTarget.classList.remove('drop'); }
+function bkDrop(e, target) {
+  e.preventDefault();
+  e.currentTarget.classList.remove('drop');
+  const id = Number(e.dataTransfer.getData('text/plain'));
+  if (id) moveBookmark(id, target);
+}
+
+function renderBookmarkApp() {
+  const content = document.getElementById('bkContent');
+  if (!content) return;
+  const esc = s => String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+  if (typeof bookmarkFilter === 'number' && !bookmarkFolders.some(f => f.id === bookmarkFilter)) bookmarkFilter = 'all';
+  const cur = typeof bookmarkFilter === 'number' ? bookmarkFolders.find(f => f.id === bookmarkFilter) : null;
+  const count = f => Bookmarks.filterByFolder(bookmarks, bookmarkFolders, f).length;
+
+  // 왼쪽: 폴더 (북마크를 끌어다 폴더에 놓으면 옮겨진다)
+  const fitem = (f, icon, label, droppable) => `<button type="button" class="bk-fitem${bookmarkFilter === f ? ' on' : ''}" onclick="selectBookmarkFilter(${typeof f === 'number' ? f : `'${f}'`})"` +
+    (droppable ? ` ondragover="bkDragOver(event)" ondragleave="bkDragLeave(event)" ondrop="bkDrop(event, ${typeof f === 'number' ? f : `'none'`})"` : '') +
+    `>${icon} <span>${esc(label)}</span><span class="n">${count(f)}</span></button>`;
+  document.getElementById('bkFolders').innerHTML =
+    fitem('all', '🗂️', '전체', false) +
+    bookmarkFolders.map(f => fitem(f.id, '📁', f.name, true)).join('') +
+    (bookmarkFolders.length ? fitem('none', '📄', '미분류', true) : '') +
+    '<div class="bk-fsep"></div>' +
+    (bookmarkFolderEdit
+      ? `<div class="bk-fedit"><input type="text" class="bk-input" id="bookmarkFolderInput" maxlength="30" value="${bookmarkFolderEdit === 'rename' && cur ? esc(cur.name) : ''}" placeholder="폴더 이름" onkeydown="if(event.key==='Enter'){event.preventDefault();submitBookmarkFolderEdit()}else if(event.key==='Escape'){cancelBookmarkFolderEdit()}"><button type="button" onclick="submitBookmarkFolderEdit()">확인</button><button type="button" onclick="cancelBookmarkFolderEdit()">취소</button></div>`
+      : `<div class="bk-fbtns"><button type="button" onclick="startBookmarkFolderEdit('new')">＋ 새 폴더</button>` +
+        (cur ? `<button type="button" onclick="startBookmarkFolderEdit('rename')">이름 수정</button><button type="button" onclick="deleteBookmarkFolder()">폴더 삭제</button>` : '') + `</div>`);
+  if (bookmarkFolderEdit) { const fi = document.getElementById('bookmarkFolderInput'); if (fi && document.activeElement !== fi) { fi.focus(); fi.select(); } }
+
+  // 위: 보기 전환
+  const viewBtn = (mode, icon, label) => `<button type="button" class="${bookmarkViewMode === mode ? 'on' : ''}" aria-pressed="${bookmarkViewMode === mode}" onclick="setBookmarkView('${mode}')">${icon} ${label}</button>`;
+  document.getElementById('bkViewBtns').innerHTML = viewBtn('grid', '▦', '그리드') + viewBtn('list', '☰', '목록');
+
+  // 오른쪽: 북마크 (폴더 필터 → 검색, 새로 저장한 순)
+  const shown = Bookmarks.searchBookmarks(Bookmarks.filterByFolder(bookmarks, bookmarkFolders, bookmarkFilter), bookmarkSearchText);
+  const folderName = b => { const f = bookmarkFolders.find(x => x.id === b.folderId); return f ? f.name : ''; };
+  const titleHtml = (b, cls) => b.id === editingBookmarkId
+    ? `<input type="text" class="bk-input bm-title-input" id="bookmarkTitleInput" maxlength="100" value="${esc(b.title || '')}" placeholder="${esc(Bookmarks.hostOf(b.url))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();finishBookmarkTitle(true)}else if(event.key==='Escape'){finishBookmarkTitle(false)}" onblur="finishBookmarkTitle(true)">`
+    : `<div class="${cls}">${esc(Bookmarks.labelOf(b))}</div>`;
+  const moveHtml = b => bookmarkFolders.length ? `<span class="bm-del bm-move" title="폴더 이동" onclick="event.stopPropagation()">📁<select aria-label="폴더 이동" onchange="moveBookmark(${b.id}, this.value)">
+        <option value="none"${Bookmarks.folderIdOf(b, bookmarkFolders) === null ? ' selected' : ''}>미분류</option>
+        ${bookmarkFolders.map(f => `<option value="${f.id}"${b.folderId === f.id ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}
+      </select></span>` : '';
+  const actionsHtml = b => `${moveHtml(b)}<button class="bm-del" title="제목 수정" onclick="editBookmarkTitle(${b.id});event.stopPropagation()">✎</button><button class="bm-del" title="삭제" onclick="deleteBookmark(${b.id});event.stopPropagation()">✕</button>`;
+  const drag = b => `draggable="true" ondragstart="bkDrag(event, ${b.id})" ondragend="bkDragEnd(event)"`;
+
+  if (!shown.length) {
+    content.innerHTML = `<div class="memo-empty">${bookmarkSearchText.trim() ? '찾는 북마크가 없어요' : bookmarks.length ? '이 폴더가 비어 있어요' : '저장한 링크가 없어요. 위 주소창에 링크를 붙여넣어 보세요'}</div>`;
+  } else if (bookmarkViewMode === 'grid') {
+    content.innerHTML = '<div class="bm-grid">' + [...shown].reverse().map(b => `
+    <div class="bm-tile" ${drag(b)} onclick="openBookmark(${b.id})" title="${esc(b.url)}">
+      <div class="bm-tile-actions">${actionsHtml(b)}</div>
+      <div class="bm-tile-icon"><span class="bm-tile-letter">${esc(Bookmarks.labelOf(b).slice(0, 1).toUpperCase())}</span><img loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'"></div>
+      ${titleHtml(b, 'bm-tile-title')}
+      <div class="bm-tile-host">${Bookmarks.labelOf(b) === Bookmarks.hostOf(b.url) ? '&nbsp;' : esc(Bookmarks.hostOf(b.url) || b.url)}</div>
+      ${bookmarkFilter === 'all' && folderName(b) ? `<div class="bm-tile-folder">📁 ${esc(folderName(b))}</div>` : ''}
+    </div>`).join('') + '</div>';
+  } else {
+    content.innerHTML = [...shown].reverse().map(b => `
+    <div class="bm-item" ${drag(b)} onclick="openBookmark(${b.id})">
+      <img class="bm-icon" loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'">
+      <div class="bm-text">${titleHtml(b, 'bm-title')}<div class="bm-url">${bookmarkFilter === 'all' && folderName(b) ? '📁 ' + esc(folderName(b)) + ' · ' : ''}${esc(b.url)}</div></div>
+      ${actionsHtml(b)}
+    </div>`).join('');
+  }
+  const where = cur ? `📁 ${cur.name}` : bookmarkFilter === 'none' ? '미분류' : '전체';
+  document.getElementById('bkStatus').textContent = `북마크 ${bookmarks.length}개 · 폴더 ${bookmarkFolders.length}개 · ${where} ${shown.length}개 보는 중` + (bookmarkSearchText.trim() ? ` (검색: ${bookmarkSearchText.trim()})` : '') + ' · 북마크를 끌어서 폴더에 놓으면 옮겨져요';
+  if (editingBookmarkId !== null) { const ti = document.getElementById('bookmarkTitleInput'); if (ti && document.activeElement !== ti) { ti.focus(); ti.select(); } }
+}
+
 // 맨 위 요약 막대의 글: 오늘 날짜 · 오늘 할일 · 루틴 · 오늘 가계부 지출 · 이번 달 달성률 · 이번 주 구독 결제 예정
 function desktopTickerText(todayStr, itemsList, routinesToday, isDoneFn, weekSubs, todayExpense) {
   const d = new Date(todayStr + 'T00:00:00');
@@ -9791,10 +9933,9 @@ function updateDesktopTicker() {
 }
 
 // 작업표시줄의 창 버튼을 지금 상태(열림 / 최소화 / 닫힘)와 맞춘다
-// 지금 열린 앱 아이콘(이름이 파란 칸 + 흰 글씨). 북마크는 마이페이지 화면 안에 있어서 따로 기억한다.
-let deskApp = null;
+// 지금 열린 앱 아이콘(이름이 파란 칸 + 흰 글씨)
 function desktopMarkIcon() {
-  const app = currentMainTab === 'mypage' && deskApp ? deskApp : currentMainTab;
+  const app = currentMainTab;
   document.querySelectorAll('#mainTab-calendar, #mainTab-category, #mainTab-mypage, .desk-ico[data-app]').forEach(el => {
     const name = el.dataset.app || el.id.replace('mainTab-', '');
     el.classList.toggle('dk-sel', name === app);
@@ -9833,8 +9974,6 @@ function desktopTaskClick() {
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
 function desktopOpen(tab, cardId) {
   setMainTab(tab, document.getElementById('mainTab-' + tab));
-  deskApp = cardId === 'mpCardBookmark' ? 'bookmark' : null;
-  desktopMarkIcon();
   if (cardId) {
     const card = document.getElementById(cardId);
     if (card && !card.classList.contains('open')) toggleMpCard(cardId);
@@ -9995,11 +10134,11 @@ let currentCalSubTab = 'cal';
 function setMainTab(tab, btn) {
 
   if (currentMainTab === 'memo' && tab !== 'memo') { memoFlush(); memoPruneEmpty(null); }
+  if (currentMainTab === 'bookmark' && tab !== 'bookmark') { editingBookmarkId = null; bookmarkFolderEdit = null; }
   document.documentElement.setAttribute('data-main-tab', tab);
   document.documentElement.removeAttribute('data-desktop-win');
 
   currentMainTab = tab;
-  deskApp = null;
   desktopSync();
 
   document.querySelectorAll('.tab-item').forEach(b => {
@@ -10014,7 +10153,7 @@ function setMainTab(tab, btn) {
 
   // Only toggle top-level views (direct children of mainContent)
 
-  ['viewCalendar','viewCategory','viewMypage','viewStats','viewMemo'].forEach(id => {
+  ['viewCalendar','viewCategory','viewMypage','viewStats','viewMemo','viewBookmark'].forEach(id => {
 
     const el = document.getElementById(id);
 
@@ -10022,7 +10161,7 @@ function setMainTab(tab, btn) {
 
   });
 
-  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage', stats: 'viewStats', memo: 'viewMemo' };
+  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage', stats: 'viewStats', memo: 'viewMemo', bookmark: 'viewBookmark' };
 
   const el = document.getElementById(viewMap[tab]);
 
@@ -10055,6 +10194,8 @@ function setMainTab(tab, btn) {
   if (tab === 'stats') renderStatsView();
 
   if (tab === 'memo') memoEnter();
+
+  if (tab === 'bookmark') renderBookmarkApp();
 
 }
 
@@ -10155,6 +10296,7 @@ function renderMypageView() {
   if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
   if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
   if (currentMainTab === 'memo') renderMemoApp();
+  if (currentMainTab === 'bookmark') renderBookmarkApp();
   if (document.getElementById('mpCardBookmark').classList.contains('open')) renderBookmarkList();
 
 }
@@ -10307,8 +10449,9 @@ let bookmarkFolderEdit = null;       // null | 'new' | 'rename'
 let bookmarkViewMode = 'list';       // 'list' | 'grid' — 이 기기의 보기 취향이라 동기화하지 않고 localStorage 에만 둔다
 
 function addBookmark(openAfter) {
-  const input = document.getElementById('bookmarkInput');
-  const hint = document.getElementById('bookmarkHint');
+  const inApp = currentMainTab === 'bookmark';   // PC 북마크 앱의 주소창에서 부른 경우
+  const input = document.getElementById(inApp ? 'bmAppInput' : 'bookmarkInput');
+  const hint = document.getElementById(inApp ? 'bmAppHint' : 'bookmarkHint');
   const url = Bookmarks.normalizeUrl(input.value);
   if (!url) { hint.textContent = '열 수 있는 링크가 아니에요 (http/https 주소만 가능)'; return; }
   hint.textContent = '';
@@ -10440,6 +10583,7 @@ function loadBookmarks() {
 }
 
 function renderBookmarkList() {
+  if (currentMainTab === 'bookmark') { renderBookmarkApp(); return; }   // 앱 화면일 때는 앱만 그린다(같은 id 가 겹치지 않게)
   const el = document.getElementById('bookmarkList');
   if (!el) return;
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/"/g,'&quot;');
