@@ -5,7 +5,7 @@
     android:layout_height="wrap_content"
     android:orientation="horizontal"
     android:gravity="center_vertical"
-    android:background="#06070f"
+    android:background="#C0C0C0"
     android:paddingLeft="12dp"
     android:paddingRight="12dp"
     android:paddingTop="14dp"
@@ -14,7 +14,7 @@
     <ImageView
         android:layout_width="3dp"
         android:layout_height="14dp"
-        android:background="#9d00ff"
+        android:background="#000080"
         android:layout_marginRight="7dp"/>
 
     <TextView
@@ -23,7 +23,7 @@
         android:layout_height="wrap_content"
         android:textSize="12sp"
         android:fontFamily="monospace"
-        android:textColor="#9d00ff"
+        android:textColor="#000080"
         android:textStyle="bold"
         android:letterSpacing="0.12"/>
 
@@ -32,6 +32,6 @@
         android:layout_height="1dp"
         android:layout_weight="1"
         android:layout_marginLeft="10dp"
-        android:background="#449d00ff"/>
+        android:background="#808080"/>
 
 </LinearLayout>

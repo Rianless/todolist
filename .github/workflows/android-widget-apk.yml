@@ -6,6 +6,10 @@ on:
     paths:
       - 'android-widget/**'
       - '.github/workflows/android-widget-apk.yml'
+  pull_request:
+    paths:
+      - 'android-widget/**'
+      - '.github/workflows/android-widget-apk.yml'
   workflow_dispatch:
 
 jobs:

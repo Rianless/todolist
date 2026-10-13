@@ -1,0 +1,135 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 북마크 바로가기 위젯 (Windows 98 모양): 제목 막대 / 폴더 넘기기 줄 / 북마크 목록 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bookmark_root"
+    android:layout_width="match_parent"
+    android:layout_height="match_parent"
+    android:background="@drawable/widget_background"
+    android:orientation="vertical"
+    android:padding="4dp">
+
+    <!-- 제목 막대 -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:background="@drawable/widget_titlebar"
+        android:gravity="center_vertical"
+        android:minHeight="24dp"
+        android:orientation="horizontal"
+        android:paddingStart="6dp"
+        android:paddingEnd="3dp">
+
+        <TextView
+            android:layout_width="0dp"
+            android:layout_height="wrap_content"
+            android:layout_weight="1"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:singleLine="true"
+            android:text="🔖 북마크"
+            android:textColor="#FFFFFF"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <!-- 웹앱 열기 (링크 저장은 웹앱에서) -->
+        <TextView
+            android:id="@+id/bookmark_add"
+            android:layout_width="20dp"
+            android:layout_height="18dp"
+            android:layout_marginEnd="2dp"
+            android:background="@drawable/bg_widget_btn"
+            android:gravity="center"
+            android:text="+"
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <!-- 새로고침 -->
+        <TextView
+            android:id="@+id/bookmark_refresh"
+            android:layout_width="20dp"
+            android:layout_height="18dp"
+            android:background="@drawable/bg_widget_btn"
+            android:gravity="center"
+            android:text="⟳"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+    </LinearLayout>
+
+    <!-- 폴더 넘기기: ‹ 폴더 이름 (개수) › -->
+    <LinearLayout
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:layout_marginTop="4dp"
+        android:gravity="center_vertical"
+        android:orientation="horizontal">
+
+        <TextView
+            android:id="@+id/bookmark_folder_prev"
+            android:layout_width="30dp"
+            android:layout_height="26dp"
+            android:background="@drawable/bg_widget_btn"
+            android:gravity="center"
+            android:text="‹"
+            android:textColor="#000000"
+            android:textSize="18sp" />
+
+        <TextView
+            android:id="@+id/bookmark_folder_label"
+            android:layout_width="0dp"
+            android:layout_height="26dp"
+            android:layout_marginStart="4dp"
+            android:layout_marginEnd="4dp"
+            android:layout_weight="1"
+            android:background="@drawable/widget_todo_card_bg"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:gravity="center"
+            android:paddingHorizontal="6dp"
+            android:singleLine="true"
+            android:text="불러오는 중…"
+            android:textColor="#000000"
+            android:textSize="12sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/bookmark_folder_next"
+            android:layout_width="30dp"
+            android:layout_height="26dp"
+            android:background="@drawable/bg_widget_btn"
+            android:gravity="center"
+            android:text="›"
+            android:textColor="#000000"
+            android:textSize="18sp" />
+    </LinearLayout>
+
+    <!-- 북마크 목록 (들어간 흰 바탕) -->
+    <FrameLayout
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_marginTop="4dp"
+        android:layout_weight="1"
+        android:background="@drawable/widget_todo_card_bg"
+        android:padding="3dp">
+
+        <ListView
+            android:id="@+id/bookmark_list"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:divider="@null"
+            android:dividerHeight="0dp" />
+
+        <TextView
+            android:id="@+id/bookmark_empty"
+            android:layout_width="match_parent"
+            android:layout_height="match_parent"
+            android:gravity="center"
+            android:lineSpacingExtra="3dp"
+            android:padding="12dp"
+            android:text="불러오는 중…"
+            android:textColor="#404040"
+            android:textSize="12sp" />
+    </FrameLayout>
+
+</LinearLayout>

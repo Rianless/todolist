@@ -1,0 +1,63 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 북마크 한 줄: [첫 글자 상자] 이름 / 도메인 -->
+<LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/bookmark_item_root"
+    android:layout_width="match_parent"
+    android:layout_height="wrap_content"
+    android:gravity="center_vertical"
+    android:minHeight="44dp"
+    android:orientation="horizontal"
+    android:paddingHorizontal="6dp"
+    android:paddingVertical="5dp">
+
+    <TextView
+        android:id="@+id/bookmark_item_letter"
+        android:layout_width="28dp"
+        android:layout_height="28dp"
+        android:background="@drawable/widget_titlebar"
+        android:fontFamily="sans-serif-medium"
+        android:gravity="center"
+        android:text=""
+        android:textColor="#FFFFFF"
+        android:textSize="14sp"
+        android:textStyle="bold" />
+
+    <LinearLayout
+        android:layout_width="0dp"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="9dp"
+        android:layout_weight="1"
+        android:orientation="vertical">
+
+        <TextView
+            android:id="@+id/bookmark_item_title"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:fontFamily="sans-serif-medium"
+            android:singleLine="true"
+            android:text=""
+            android:textColor="#000000"
+            android:textSize="13sp"
+            android:textStyle="bold" />
+
+        <TextView
+            android:id="@+id/bookmark_item_host"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:ellipsize="end"
+            android:singleLine="true"
+            android:text=""
+            android:textColor="#404040"
+            android:textSize="10sp" />
+    </LinearLayout>
+
+    <TextView
+        android:layout_width="wrap_content"
+        android:layout_height="wrap_content"
+        android:layout_marginStart="6dp"
+        android:text="›"
+        android:textColor="#808080"
+        android:textSize="16sp" />
+
+</LinearLayout>

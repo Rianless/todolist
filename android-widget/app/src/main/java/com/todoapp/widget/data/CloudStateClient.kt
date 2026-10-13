@@ -249,6 +249,12 @@ object CloudStateClient {
         return postState(state)
     }
 
+    /** 웹앱에 저장한 북마크와 폴더. 네트워크 오류 등으로 못 가져오면 null. */
+    fun fetchBookmarks(): BookmarkData? {
+        val state = fetchState() ?: return null
+        return parseBookmarkData(state)
+    }
+
     private fun fetchState(): JSONObject? {
         return runCatching {
             val connection = URL(STATE_API_URL).openConnection() as HttpURLConnection

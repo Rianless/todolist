@@ -17,7 +17,7 @@
         android:layout_width="3dp"
         android:layout_height="match_parent"
         android:minHeight="62dp"
-        android:background="#4a4f72"/>
+        android:background="#404040"/>
 
     <LinearLayout
         android:layout_width="0dp"
@@ -42,7 +42,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
                 android:fontFamily="monospace"
-                android:textColor="#00ffe7"
+                android:textColor="#000080"
                 android:paddingLeft="6dp"
                 android:paddingRight="6dp"
                 android:paddingTop="2dp"
@@ -56,7 +56,7 @@
                 android:layout_height="wrap_content"
                 android:textSize="11sp"
                 android:fontFamily="monospace"
-                android:textColor="#4a4f72"/>
+                android:textColor="#404040"/>
 
         </LinearLayout>
 
@@ -67,7 +67,7 @@
             android:textSize="16sp"
             android:textStyle="bold"
             android:fontFamily="monospace"
-            android:textColor="#e8eaf6"
+            android:textColor="#000000"
             android:singleLine="true"
             android:ellipsize="end"/>
 
@@ -86,7 +86,7 @@
             android:layout_height="wrap_content"
             android:text="&#x250C;"
             android:textSize="12sp"
-            android:textColor="#2a2d4a"
+            android:textColor="#404040"
             android:fontFamily="monospace"
             android:layout_marginRight="4dp"
             android:layout_marginTop="3dp"/>
@@ -103,7 +103,7 @@
             android:textStyle="bold"
             android:letterSpacing="0.1"
             android:text=""
-            android:textColor="#2a2d4a"
+            android:textColor="#404040"
             android:background="#00000000"/>
 
     </LinearLayout>

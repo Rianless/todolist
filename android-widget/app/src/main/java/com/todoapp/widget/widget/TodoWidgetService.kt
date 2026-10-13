@@ -177,9 +177,9 @@ class TodoWidgetFactory(
     private fun buildExtraView(extra: DayExtra): RemoteViews {
         val views = RemoteViews(context.packageName, R.layout.widget_item)
         val accent = when (extra.kind) {
-            "income" -> "#2DA77A"
-            "expense" -> "#E45F68"
-            else -> "#9D00FF"
+            "income" -> "#006000"
+            "expense" -> "#C00000"
+            else -> "#000080"
         }
         views.setInt(R.id.widget_item_accent, "setBackgroundColor", Color.parseColor(accent))
         views.setTextViewText(R.id.widget_item_category, extra.kindLabel)
