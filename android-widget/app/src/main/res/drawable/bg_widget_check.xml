@@ -1,7 +1,16 @@
 <?xml version="1.0" encoding="utf-8"?>
-<shape xmlns:android="http://schemas.android.com/apk/res/android"
-    android:shape="rectangle">
-    <solid android:color="#FFFFFF" />
-    <stroke android:width="1.5dp" android:color="#A8ADBC" />
-    <corners android:radius="2dp" />
-</shape>
+<!-- Windows 98 체크박스(빈 칸) -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item>
+        <shape android:shape="rectangle"><solid android:color="#FFFFFF" /></shape>
+    </item>
+    <item android:right="1dp" android:bottom="1dp">
+        <shape android:shape="rectangle"><solid android:color="#808080" /></shape>
+    </item>
+    <item android:left="1dp" android:top="1dp" android:right="1dp" android:bottom="1dp">
+        <shape android:shape="rectangle"><solid android:color="#404040" /></shape>
+    </item>
+    <item android:left="2dp" android:top="2dp" android:right="1dp" android:bottom="1dp">
+        <shape android:shape="rectangle"><solid android:color="#FFFFFF" /></shape>
+    </item>
+</layer-list>

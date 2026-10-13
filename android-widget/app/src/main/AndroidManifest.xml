@@ -72,6 +72,27 @@
                 android:resource="@xml/todo_widget_info" />
         </receiver>
 
+        <!-- 북마크 바로가기 위젯 -->
+        <receiver
+            android:name=".widget.BookmarkWidgetProvider"
+            android:exported="true"
+            android:label="@string/bookmark_widget_label">
+            <intent-filter>
+                <action android:name="android.appwidget.action.APPWIDGET_UPDATE" />
+                <action android:name="com.todoapp.widget.ACTION_BOOKMARK_FOLDER_PREV" />
+                <action android:name="com.todoapp.widget.ACTION_BOOKMARK_FOLDER_NEXT" />
+                <action android:name="com.todoapp.widget.ACTION_BOOKMARK_REFRESH" />
+            </intent-filter>
+            <meta-data
+                android:name="android.appwidget.provider"
+                android:resource="@xml/bookmark_widget_info" />
+        </receiver>
+
+        <service
+            android:name=".widget.BookmarkWidgetService"
+            android:exported="false"
+            android:permission="android.permission.BIND_REMOTEVIEWS" />
+
         <!-- Widget List Service -->
         <service
             android:name=".widget.TodoWidgetService"

@@ -435,23 +435,23 @@ class TodoWidgetProvider : AppWidgetProvider() {
                 if (isToday) {
                     // 오늘이자 선택됨: 시안색 채움
                     views.setInt(CAL_DAY_IDS[i], "setBackgroundResource", R.drawable.bg_widget_cal_today)
-                    views.setTextColor(CAL_DAY_IDS[i], Color.parseColor("#6366F1"))
+                    views.setTextColor(CAL_DAY_IDS[i], Color.parseColor("#000080"))
                 } else {
                     // 선택만: 테두리 느낌 (시안색 배경 + 원형)
                     views.setInt(CAL_DAY_IDS[i], "setBackgroundResource", R.drawable.bg_widget_cal_today)
-                    views.setTextColor(CAL_DAY_IDS[i], Color.parseColor("#6366F1"))
+                    views.setTextColor(CAL_DAY_IDS[i], Color.parseColor("#000080"))
                 }
             } else if (isToday) {
                 // 오늘이지만 선택 안 됨: 작은 하이라이트 (시안색 텍스트)
                 views.setInt(CAL_DAY_IDS[i], "setBackgroundColor", Color.TRANSPARENT)
-                views.setTextColor(CAL_DAY_IDS[i], Color.parseColor("#6366F1"))
+                views.setTextColor(CAL_DAY_IDS[i], Color.parseColor("#000080"))
             } else {
                 views.setInt(CAL_DAY_IDS[i], "setBackgroundColor", Color.TRANSPARENT)
                 // 일요일 빨강, 토요일 시안, 평일 흰색
                 val color = when (i) {
-                    0 -> Color.parseColor("#FF6B6B")
-                    6 -> Color.parseColor("#6366F1")
-                    else -> Color.parseColor("#1F2430")
+                    0 -> Color.parseColor("#C00000")
+                    6 -> Color.parseColor("#000080")
+                    else -> Color.parseColor("#000000")
                 }
                 views.setTextColor(CAL_DAY_IDS[i], color)
             }
@@ -560,16 +560,16 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
                     if (isSelected) {
                         setInt(CAL_DAY_IDS[i], "setBackgroundResource", R.drawable.bg_widget_cal_today)
-                        setTextColor(CAL_DAY_IDS[i], Color.parseColor("#6366F1"))
+                        setTextColor(CAL_DAY_IDS[i], Color.parseColor("#000080"))
                     } else if (isToday) {
                         setInt(CAL_DAY_IDS[i], "setBackgroundColor", Color.TRANSPARENT)
-                        setTextColor(CAL_DAY_IDS[i], Color.parseColor("#6366F1"))
+                        setTextColor(CAL_DAY_IDS[i], Color.parseColor("#000080"))
                     } else {
                         setInt(CAL_DAY_IDS[i], "setBackgroundColor", Color.TRANSPARENT)
                         val color = when (i) {
-                            0 -> Color.parseColor("#FF6B6B")
-                            6 -> Color.parseColor("#6366F1")
-                            else -> Color.parseColor("#1F2430")
+                            0 -> Color.parseColor("#C00000")
+                            6 -> Color.parseColor("#000080")
+                            else -> Color.parseColor("#000000")
                         }
                         setTextColor(CAL_DAY_IDS[i], color)
                     }
@@ -692,14 +692,14 @@ class TodoWidgetProvider : AppWidgetProvider() {
             views.setTextViewText(dayId, day.dayOfMonth.toString())
             if (day == selected) {
                 views.setInt(dayId, "setBackgroundResource", R.drawable.bg_widget_cal_today)
-                views.setTextColor(dayId, Color.parseColor("#6366F1"))
+                views.setTextColor(dayId, Color.parseColor("#000080"))
             } else {
                 views.setInt(dayId, "setBackgroundColor", Color.TRANSPARENT)
                 val color = when {
-                    day == today -> Color.parseColor("#6366F1")
-                    !inMonth -> Color.parseColor("#B8BDCC")
-                    i % 7 == 0 -> Color.parseColor("#FF6B6B")
-                    else -> Color.parseColor("#1F2430")
+                    day == today -> Color.parseColor("#000080")
+                    !inMonth -> Color.parseColor("#808080")
+                    i % 7 == 0 -> Color.parseColor("#C00000")
+                    else -> Color.parseColor("#000000")
                 }
                 views.setTextColor(dayId, color)
             }
@@ -870,7 +870,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
                     } else {
                         setViewVisibility(rowId, android.view.View.VISIBLE)
                         setTextViewText(rowId, if (todo.done) "✓ ${todo.title}" else "• ${todo.title}")
-                        setTextColor(rowId, if (todo.done) Color.parseColor("#A8ADBC") else parseColorSafe(todo.categoryColor))
+                        setTextColor(rowId, if (todo.done) Color.parseColor("#808080") else parseColorSafe(todo.categoryColor))
                         setOnClickPendingIntent(
                             rowId,
                             makeTodoDetailPending(context, todo.id, widgetId, 410 + index)
@@ -987,7 +987,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
                     DateTodo(
                         id = item.optInt("id"),
                         title = item.optString("title", "제목 없는 일정"),
-                        categoryColor = item.optString("category_color", "#6366F1"),
+                        categoryColor = item.optString("category_color", "#000080"),
                         done = item.optBoolean("done")
                     )
                 )

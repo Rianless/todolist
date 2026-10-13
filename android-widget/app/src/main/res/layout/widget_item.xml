@@ -49,7 +49,7 @@
                     android:fontFamily="monospace"
                     android:paddingHorizontal="5dp"
                     android:paddingVertical="2dp"
-                    android:textColor="#6366F1"
+                    android:textColor="#000080"
                     android:textSize="8sp" />
 
                 <TextView
@@ -58,7 +58,7 @@
                     android:layout_height="wrap_content"
                     android:layout_marginStart="5dp"
                     android:fontFamily="monospace"
-                    android:textColor="#8A90A2"
+                    android:textColor="#404040"
                     android:textSize="9sp" />
 
                 <TextView
@@ -68,7 +68,7 @@
                     android:layout_weight="1"
                     android:fontFamily="monospace"
                     android:gravity="end"
-                    android:textColor="#767B8D"
+                    android:textColor="#404040"
                     android:textSize="9sp" />
             </LinearLayout>
 
@@ -79,7 +79,7 @@
                 android:ellipsize="end"
                 android:fontFamily="sans-serif-medium"
                 android:singleLine="true"
-                android:textColor="#1F2430"
+                android:textColor="#000000"
                 android:textSize="13sp" />
 
             <TextView
@@ -89,7 +89,7 @@
                 android:layout_marginTop="2dp"
                 android:ellipsize="end"
                 android:singleLine="true"
-                android:textColor="#8A90A2"
+                android:textColor="#404040"
                 android:textSize="10sp" />
         </LinearLayout>
 
