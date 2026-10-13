@@ -20,7 +20,7 @@ function extractFunction(name) {
 
 const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFixed', 'investTaxFor', 'calcInvestment',
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
-  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak'];
+  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData'];
 
 const ctx = vm.createContext({ investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
@@ -117,6 +117,33 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   assert.strictEqual(A.routineOccursOn(once, '2026-10-08'), false);     // 지난 주 같은 요일
   setLog([once], { '2026-10-15': [7] });
   assert.deepStrictEqual({ ...A.routineMonth(once, '2026-10-31') }, { due: 1, done: 1 });
+}
+
+// ── 날짜별 가계부 달력: 지출에는 구독 결제를 포함하고, 이체는 합계에서 뺀다
+{
+  const led = [
+    { id: 1, date: '2026-10-13', type: 'expense', title: '점심', amount: 9000 },
+    { id: 2, date: '2026-10-13', type: 'expense', title: '커피', amount: 3500 },
+    { id: 3, date: '2026-10-13', type: 'income', title: '용돈', amount: 50000 },
+    { id: 4, date: '2026-10-12', type: 'expense', title: '교통', amount: 20000 },
+    { id: 5, date: '2026-09-30', type: 'expense', title: '지난 달', amount: 777 }       // 다른 달은 뺀다
+  ];
+  const subs = [
+    { name: 'Netflix', date: '2026-01-13', amount: '17000', category: '구독', cycle: 'monthly' },
+    { name: '멈춘 구독', date: '2026-01-13', amount: 5000, paused: true },                // 멈춘 구독은 뺀다
+    { name: '날짜 없음', amount: 100 }
+  ];
+  const trs = [{ id: 1, date: '2026-10-13', fromId: 1, toId: 2, amount: 100000 }];
+  const subDates = (sub, y, m) => [`${y}-${String(m + 1).padStart(2, '0')}-13`];          // 매월 13일
+  const days = JSON.parse(JSON.stringify(A.ledgerDayData(led, subs, trs, 2026, 9, subDates)));
+  assert.deepStrictEqual(Object.keys(days).sort(), ['2026-10-12', '2026-10-13']);
+  assert.strictEqual(days['2026-10-13'].expense, 9000 + 3500 + 17000);                    // 가계부 지출 + 구독 결제
+  assert.strictEqual(days['2026-10-13'].income, 50000);                                   // 이체 100,000 은 수입이 아니다
+  assert.strictEqual(days['2026-10-12'].expense, 20000);
+  assert.deepStrictEqual(days['2026-10-13'].entries.map(e => e.id), [3, 2, 1]);           // 최근 등록이 위로
+  assert.deepStrictEqual(days['2026-10-13'].subs, [{ name: 'Netflix', category: '구독', amount: 17000 }]);
+  assert.strictEqual(days['2026-10-13'].transfers.length, 1);
+  assert.deepStrictEqual(Object.keys(A.ledgerDayData([], [], [], 2026, 9, subDates)), []);
 }
 
 console.log('OK (index logic)');

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v68-ledger-order';
+const CACHE_NAME = 'todolist-v69-ledger-cal';
 const ASSETS = [
   './',
   './index.html',
