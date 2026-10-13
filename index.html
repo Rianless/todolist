@@ -6449,7 +6449,7 @@ button:active:not(:disabled) {
   html[data-desktop][data-skin="w98"] .tab-item, html[data-desktop][data-skin="w98"] .tab-item.active, html[data-desktop][data-skin="w98"] .tab-item:active, html[data-desktop][data-skin="w98"] .desk-ico, html[data-desktop][data-skin="w98"] .desk-ico:active { display: flex !important; position: fixed !important; z-index: 2; left: 6px; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; width: 108px !important; height: 66px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 3px !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
   html[data-desktop][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-skin="w98"] .desk-ico .tab-icon { font-size: 34px !important; line-height: 40px; height: 40px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.45)); }
   html[data-desktop][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-skin="w98"] .desk-ico .tab-label { font-size: 11px !important; font-weight: 400 !important; padding: 1px 4px; color: #fff !important; }
-  html[data-desktop][data-skin="w98"] .tab-item.active .tab-label, html[data-desktop][data-skin="w98"] .tab-item:focus-visible .tab-label, html[data-desktop][data-skin="w98"] .desk-ico:focus-visible .tab-label { background: #000080; outline: 1px dotted #ff0; }
+  html[data-desktop][data-skin="w98"] .dk-sel .tab-label, html[data-desktop][data-skin="w98"] .tab-item:focus-visible .tab-label, html[data-desktop][data-skin="w98"] .desk-ico:focus-visible .tab-label { background: #000080; outline: 1px dotted #ff0; }
 
   /* 오른쪽 아래 트레이: 기존 알림·검색·테마·스킨 단추와 달성률 */
   html[data-desktop][data-skin="w98"] .header-controls { position: fixed !important; z-index: 22; right: 96px; bottom: 4px; margin: 0 !important; padding: 0 !important; gap: 2px !important; flex-direction: row !important; }
@@ -6727,9 +6727,9 @@ button:active:not(:disabled) {
 
     <!-- 바탕화면 스킨(PC) 전용 바로가기 아이콘 — 다른 스킨에서는 숨겨져 있다 -->
     <div class="desk-extra" aria-label="바로가기">
-      <button type="button" class="desk-ico" onclick="desktopOpen('mypage','mpCardBookmark')"><div class="tab-icon" aria-hidden="true">🔖</div><div class="tab-label">북마크</div></button>
-      <button type="button" class="desk-ico" onclick="desktopOpen('memo')"><div class="tab-icon" aria-hidden="true">📝</div><div class="tab-label">메모</div></button>
-      <button type="button" class="desk-ico" onclick="desktopOpen('stats')"><div class="tab-icon" aria-hidden="true">📊</div><div class="tab-label">통계</div></button>
+      <button type="button" class="desk-ico" data-app="bookmark" onclick="desktopOpen('mypage','mpCardBookmark')"><div class="tab-icon" aria-hidden="true">🔖</div><div class="tab-label">북마크</div></button>
+      <button type="button" class="desk-ico" data-app="memo" onclick="desktopOpen('memo')"><div class="tab-icon" aria-hidden="true">📝</div><div class="tab-label">메모</div></button>
+      <button type="button" class="desk-ico" data-app="stats" onclick="desktopOpen('stats')"><div class="tab-icon" aria-hidden="true">📊</div><div class="tab-label">통계</div></button>
     </div>
 
   </header>
@@ -9791,7 +9791,18 @@ function updateDesktopTicker() {
 }
 
 // 작업표시줄의 창 버튼을 지금 상태(열림 / 최소화 / 닫힘)와 맞춘다
+// 지금 열린 앱 아이콘(이름이 파란 칸 + 흰 글씨). 북마크는 마이페이지 화면 안에 있어서 따로 기억한다.
+let deskApp = null;
+function desktopMarkIcon() {
+  const app = currentMainTab === 'mypage' && deskApp ? deskApp : currentMainTab;
+  document.querySelectorAll('#mainTab-calendar, #mainTab-category, #mainTab-mypage, .desk-ico[data-app]').forEach(el => {
+    const name = el.dataset.app || el.id.replace('mainTab-', '');
+    el.classList.toggle('dk-sel', name === app);
+  });
+}
+
 function desktopSync() {
+  desktopMarkIcon();
   updateDesktopTicker();
   const task = document.getElementById('dkTask');
   if (!task) return;
@@ -9822,6 +9833,8 @@ function desktopTaskClick() {
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
 function desktopOpen(tab, cardId) {
   setMainTab(tab, document.getElementById('mainTab-' + tab));
+  deskApp = cardId === 'mpCardBookmark' ? 'bookmark' : null;
+  desktopMarkIcon();
   if (cardId) {
     const card = document.getElementById(cardId);
     if (card && !card.classList.contains('open')) toggleMpCard(cardId);
@@ -9986,6 +9999,7 @@ function setMainTab(tab, btn) {
   document.documentElement.removeAttribute('data-desktop-win');
 
   currentMainTab = tab;
+  deskApp = null;
   desktopSync();
 
   document.querySelectorAll('.tab-item').forEach(b => {
