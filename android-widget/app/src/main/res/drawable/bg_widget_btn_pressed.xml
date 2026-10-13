@@ -1,16 +1,28 @@
 <?xml version="1.0" encoding="utf-8"?>
-<!-- Windows 98 버튼: 눌렀을 때(들어간 모양) -->
+<!-- Windows 98 버튼(둥근): 눌렀을 때 -->
 <layer-list xmlns:android="http://schemas.android.com/apk/res/android">
     <item>
-        <shape android:shape="rectangle"><solid android:color="#FFFFFF" /></shape>
+        <shape android:shape="rectangle">
+            <solid android:color="#FFFFFF" />
+            <corners android:radius="6dp" />
+        </shape>
     </item>
     <item android:right="1dp" android:bottom="1dp">
-        <shape android:shape="rectangle"><solid android:color="#808080" /></shape>
+        <shape android:shape="rectangle">
+            <solid android:color="#808080" />
+            <corners android:radius="6dp" />
+        </shape>
     </item>
     <item android:left="1dp" android:top="1dp" android:right="1dp" android:bottom="1dp">
-        <shape android:shape="rectangle"><solid android:color="#404040" /></shape>
+        <shape android:shape="rectangle">
+            <solid android:color="#404040" />
+            <corners android:radius="5dp" />
+        </shape>
     </item>
     <item android:left="2dp" android:top="2dp" android:right="1dp" android:bottom="1dp">
-        <shape android:shape="rectangle"><solid android:color="#C0C0C0" /></shape>
+        <shape android:shape="rectangle">
+            <solid android:color="#C0C0C0" />
+            <corners android:radius="5dp" />
+        </shape>
     </item>
 </layer-list>
