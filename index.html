@@ -6721,76 +6721,6 @@ button:active:not(:disabled) {
 
 
 
-        <!-- ── 통장 카드 ── -->
-        <div class="mp-card" id="mpCardAccounts">
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardAccounts')">
-            <span class="mp-card-icon">🏦</span>
-            <span class="mp-card-label">자산 · 통장 / 투자 / 저축</span>
-            <span class="mp-card-chevron">▼</span>
-          </div>
-          <div class="mp-card-body">
-            <div class="mp-card-inner">
-              <div id="assetTotal"></div>
-
-              <div class="asset-section"><span>🏦 통장</span><small id="accountSub"></small></div>
-              <div id="accountList"></div>
-              <div class="ledger-actions">
-                <button class="ledger-add-btn" onclick="openAccountModal();event.stopPropagation()">+ 통장 추가</button>
-                <button class="ledger-export-btn" onclick="openTransferModal();event.stopPropagation()" aria-label="통장 간 이체">이체</button>
-              </div>
-
-              <div class="asset-section"><span>📈 투자 · 저축</span><small id="investSub"></small></div>
-              <div class="asset-hint" id="investHint"></div>
-              <div class="invest-tax-row">
-                <span>이자소득세</span>
-                <input type="number" id="investTaxInput" min="0" max="100" step="0.1" inputmode="decimal" aria-label="이자소득세율(%)" onchange="setInvestTaxRate(this.value)">
-                <span>%</span>
-                <button type="button" onclick="setInvestTaxRate(15.4)">일반 15.4</button>
-                <button type="button" onclick="setInvestTaxRate(9.5)">세금우대 9.5</button>
-                <button type="button" onclick="setInvestTaxRate(0)">비과세</button>
-              </div>
-              <div id="investList"></div>
-              <div class="ledger-actions">
-                <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
-              </div>
-            </div>
-          </div>
-        </div>
-
-        <!-- ── 구독 카드 ── -->
-
-        <div class="mp-card" id="mpCardSubs">
-
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardSubs')">
-
-            <span class="mp-card-icon">🔖</span>
-
-            <span class="mp-card-label" id="subsSysLabel">구독</span>
-
-            <span class="mp-card-chevron">▼</span>
-
-          </div>
-
-          <div class="mp-card-body">
-
-            <div class="mp-card-inner">
-
-              <div id="subTotal" class="sub-summary" style="display:none;"></div>
-
-              <div id="subCatBar" class="sub-cat-bar"></div>
-
-              <div id="subsList"></div>
-
-              <button class="ledger-add-btn" onclick="openLedger(null, true)">+ 구독 항목 추가</button>
-
-            </div>
-
-          </div>
-
-        </div>
-
-
-
         <!-- ── 가계부 카드 ── -->
 
         <div class="mp-card" id="mpCardLedger">
@@ -6850,6 +6780,76 @@ button:active:not(:disabled) {
 
           </div>
 
+        </div>
+
+
+
+        <!-- ── 구독 카드 ── -->
+
+        <div class="mp-card" id="mpCardSubs">
+
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardSubs')">
+
+            <span class="mp-card-icon">🔖</span>
+
+            <span class="mp-card-label" id="subsSysLabel">구독</span>
+
+            <span class="mp-card-chevron">▼</span>
+
+          </div>
+
+          <div class="mp-card-body">
+
+            <div class="mp-card-inner">
+
+              <div id="subTotal" class="sub-summary" style="display:none;"></div>
+
+              <div id="subCatBar" class="sub-cat-bar"></div>
+
+              <div id="subsList"></div>
+
+              <button class="ledger-add-btn" onclick="openLedger(null, true)">+ 구독 항목 추가</button>
+
+            </div>
+
+          </div>
+
+        </div>
+
+        <!-- ── 통장 카드 ── -->
+        <div class="mp-card" id="mpCardAccounts">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardAccounts')">
+            <span class="mp-card-icon">🏦</span>
+            <span class="mp-card-label">자산 · 통장 / 투자 / 저축</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div id="assetTotal"></div>
+
+              <div class="asset-section"><span>🏦 통장</span><small id="accountSub"></small></div>
+              <div id="accountList"></div>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openAccountModal();event.stopPropagation()">+ 통장 추가</button>
+                <button class="ledger-export-btn" onclick="openTransferModal();event.stopPropagation()" aria-label="통장 간 이체">이체</button>
+              </div>
+
+              <div class="asset-section"><span>📈 투자 · 저축</span><small id="investSub"></small></div>
+              <div class="asset-hint" id="investHint"></div>
+              <div class="invest-tax-row">
+                <span>이자소득세</span>
+                <input type="number" id="investTaxInput" min="0" max="100" step="0.1" inputmode="decimal" aria-label="이자소득세율(%)" onchange="setInvestTaxRate(this.value)">
+                <span>%</span>
+                <button type="button" onclick="setInvestTaxRate(15.4)">일반 15.4</button>
+                <button type="button" onclick="setInvestTaxRate(9.5)">세금우대 9.5</button>
+                <button type="button" onclick="setInvestTaxRate(0)">비과세</button>
+              </div>
+              <div id="investList"></div>
+              <div class="ledger-actions">
+                <button class="ledger-add-btn" onclick="openInvestModal();event.stopPropagation()">+ 적금·예금·투자 추가</button>
+              </div>
+            </div>
+          </div>
         </div>
 
 
