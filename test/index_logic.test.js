@@ -20,7 +20,8 @@ function extractFunction(name) {
 
 const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFixed', 'investTaxFor', 'calcInvestment',
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
-  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs'];
+  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs',
+  'statsMonthTotals', 'statsCategoryBreakdown', 'routineHeat', 'routineRates'];
 
 const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
@@ -176,6 +177,47 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   // 2026-10-29(목) → 토요일 10-31: 이번 달만. 2026-09-30(수) → 토요일 10-03: 9월 30일과 10월 1~3일 모두
   assert.deepStrictEqual(week([s('말일', 30), s('초하루', 2)], '2026-09-30').map(x => x.date), ['2026-09-30', '2026-10-02']);
   assert.deepStrictEqual(week([s('x', 31)], '2026-10-29').map(x => x.date), ['2026-10-31']);
+}
+
+// ── 통계: 월 합계(구독 포함·이체 제외), 카테고리 지출, 루틴 히트맵·달성률
+{
+  const led = [
+    { id: 1, date: '2026-10-03', type: 'expense', amount: 10000, category: '식비' },
+    { id: 2, date: '2026-10-04', type: 'expense', amount: '5000', category: '식비' },
+    { id: 3, date: '2026-10-05', type: 'expense', amount: 3000 },                         // 카테고리 없음 → 기타
+    { id: 4, date: '2026-10-06', type: 'income', amount: 100000, category: '월급' },
+    { id: 5, date: '2026-09-30', type: 'expense', amount: 9999, category: '식비' }          // 다른 달
+  ];
+  const subs = [{ name: 'Netflix', date: '2026-01-15', amount: '2000', category: '구독' }, { name: '멈춤', date: '2026-01-15', amount: '9', paused: true }];
+  const fn = (sub, y, m) => [`${y}-${String(m + 1).padStart(2, '0')}-15`];
+  assert.deepStrictEqual(A.statsMonthTotals(led, subs, 2026, 9, fn), { expense: 20000, income: 100000 });
+  assert.deepStrictEqual(A.statsMonthTotals([], [], 2026, 9, fn), { expense: 0, income: 0 });
+  assert.deepStrictEqual(A.statsCategoryBreakdown(led, subs, 2026, 9, fn), [
+    { name: '식비', amount: 15000, pct: 75 }, { name: '구독', amount: 2000, pct: 10 }, { name: '기타', amount: 3000, pct: 15 }
+  ].sort((a, b) => b.amount - a.amount));
+  assert.deepStrictEqual(A.statsCategoryBreakdown([], [], 2026, 9, fn), []);
+
+  // 2026-10-14 는 수요일. 12주 → 84칸, 첫 칸은 일요일, 마지막 칸은 그 주 토요일(10-17, 아직 안 온 날)
+  const rts = [{ id: 1, name: 'A', days: [0, 1, 2, 3, 4, 5, 6] }, { id: 2, name: 'B', days: [1, 3] }];
+  const occ = (r, ds) => r.days.includes(new Date(ds + 'T00:00:00').getDay());
+  const log = { '2026-10-13': [1], '2026-10-12': [1, 2], '2026-10-11': [1], '2026-10-14': [1, 2] };
+  const heat = A.routineHeat(rts, log, occ, '2026-10-14', 12);
+  assert.strictEqual(heat.length, 84);
+  assert.strictEqual(heat[0].date, '2026-07-26');
+  assert.strictEqual(heat[83].date, '2026-10-17');
+  const at = ds => heat.find(c => c.date === ds);
+  assert.strictEqual(at('2026-10-17').level, -1);                      // 아직 안 온 날
+  assert.strictEqual(at('2026-10-14').level, 4);                       // 수요일: A,B 모두 완료
+  assert.strictEqual(at('2026-10-13').level, 4);                       // 화요일: B 는 해당 없고 A 하나뿐이라 1/1 모두 완료
+  assert.strictEqual(at('2026-10-14').done, 2);
+  assert.strictEqual(at('2026-10-12').level, 4);
+  assert.strictEqual(at('2026-10-10').level, 1);                       // 토요일: A 해당, 못 함
+  assert.strictEqual(at('2026-10-11').level, 4);
+  assert.strictEqual(A.routineHeat([], {}, occ, '2026-10-14', 1)[0].level, 0);   // 루틴이 없으면 0
+
+  const rates = A.routineRates(rts, log, occ, '2026-10-14', 7);       // 10-08 ~ 10-14
+  assert.deepStrictEqual(rates.map(r => [r.name, r.done, r.total, r.pct]), [['A', 4, 7, 57], ['B', 2, 2, 100]]);
+  assert.deepStrictEqual(A.routineRates([{ id: 3, name: 'C', days: [] }], {}, occ, '2026-10-14', 7), []);   // 기간 중 해당 없는 루틴은 뺀다
 }
 
 console.log('OK (index logic)');
