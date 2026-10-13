@@ -6407,7 +6407,7 @@ button:active:not(:disabled) {
 .desk-extra, #desktopTaskbar, #desktopStartMenu, .dk-winbtns { display: none; }
 @keyframes dkTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 @media (prefers-reduced-motion: reduce) { .dk-ticker.marquee #dkTickerText { animation: none !important; padding-left: 0 !important; } }
-.dk-ticker, .dk-widgets, #viewStats { display: none; }
+.dk-ticker, .dk-widgets, #viewStats, #viewMemo { display: none; }
 @media (min-width: 900px) {
   html[data-desktop][data-skin="w98"] { --dk-left: 128px; --dk-top: 40px; --dk-right: 16px; --dk-bottom: 44px; }
   html[data-desktop][data-desktop-max] { --dk-left: 0px; --dk-top: 0px; --dk-right: 0px; --dk-bottom: 34px; }
@@ -6425,6 +6425,7 @@ button:active:not(:disabled) {
   html[data-desktop][data-main-tab="category"][data-skin="w98"] .pc-topbar-title::before { content: '💰 가계부 — 나의 하루'; }
   html[data-desktop][data-main-tab="mypage"][data-skin="w98"] .pc-topbar-title::before { content: '👤 마이페이지 — 나의 하루'; }
   html[data-desktop][data-main-tab="stats"][data-skin="w98"] .pc-topbar-title::before { content: '📊 통계 — 나의 하루'; }
+  html[data-desktop][data-main-tab="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
   html[data-desktop][data-skin="w98"] .dk-winbtns { display: flex; gap: 2px; }
   html[data-desktop][data-skin="w98"] .dk-winbtn { width: 20px !important; height: 18px !important; min-height: 0 !important; padding: 0 !important; font-size: 11px !important; font-weight: 700 !important; line-height: 1; color: #000 !important; }
   /* 닫음·최소화: 창을 숨기고 바탕화면만 */
@@ -6538,6 +6539,38 @@ button:active:not(:disabled) {
   .st-legend { align-items: center; flex-wrap: wrap; }
   .st-legend .st-heat-cell { display: inline-block; flex: 0 0 auto; width: 12px; height: 12px; margin-right: -8px; }
   .st-empty { padding: 14px 0; text-align: center; color: #808080; }
+
+  /* ----- 메모장 앱: 왼쪽 목록 + 오른쪽 탭·편집기 ----- */
+  html[data-desktop][data-main-tab="memo"][data-skin="w98"] #mainContent { overflow: hidden; }
+  html[data-desktop][data-main-tab="memo"][data-skin="w98"] #viewMemo.active { display: flex !important; flex-direction: row !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
+  .mm-side { flex: 0 0 270px; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
+  .mm-side-top { display: flex; flex-direction: column; gap: 6px; }
+  .mm-new { padding: 6px 10px; font-size: 13px; font-weight: 700; color: #000 !important; }
+  .mm-search { width: 100%; box-sizing: border-box; padding: 5px 8px; font-size: 12px; background: #fff; color: #000; border: none; box-shadow: var(--w98-sunken); }
+  .mm-list { flex: 1; min-height: 0; overflow-y: auto; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
+  .mm-item { display: block; width: 100%; text-align: left; padding: 6px 8px; cursor: pointer; background: transparent !important; box-shadow: none !important; color: #000 !important; border: none; border-bottom: 1px dotted #c0c0c0; }
+  .mm-item.active { background: #000080 !important; color: #fff !important; }
+  .mm-item-title { display: flex; gap: 4px; font-size: 13px; font-weight: 700; }
+  .mm-item-title span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mm-item-prev { margin-top: 2px; font-size: 11px; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; opacity: .75; }
+  .mm-item-date { margin-top: 1px; font-size: 10px; opacity: .6; }
+  .mm-item mark { background: #ff0; color: #000; }
+  .mm-count { font-size: 11px; color: #404040; padding: 0 2px; }
+  .mm-empty { padding: 18px 8px; text-align: center; font-size: 12px; color: #808080; }
+  .mm-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; }
+  .mm-tabs { display: flex; gap: 2px; overflow-x: auto; min-height: 30px; align-items: flex-end; }
+  .mm-tab { background: #c0c0c0; box-shadow: var(--w98-raised); display: flex; align-items: center; gap: 6px; flex: 0 0 auto; max-width: 190px; padding: 5px 6px 5px 10px; font-size: 12px; cursor: pointer; color: #000 !important; }
+  .mm-tab.active { font-weight: 700; padding-top: 7px; margin-bottom: -2px; position: relative; z-index: 2; background: #c0c0c0 !important; }
+  .mm-tab > span { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .mm-tab-x { flex: 0 0 auto; width: 16px; height: 16px; line-height: 14px; text-align: center; font-size: 10px; cursor: pointer; }
+  .mm-tab-x:hover { background: #000080; color: #fff; }
+  .mm-tools { display: flex; align-items: center; gap: 6px; padding: 6px 0; }
+  .mm-tools button { padding: 3px 10px; font-size: 12px; color: #000 !important; }
+  .mm-tools button:disabled { opacity: .5; }
+  .mm-tools-hint { margin-left: auto; font-size: 11px; color: #404040; }
+  .mm-editor { flex: 1; min-height: 0; width: 100%; box-sizing: border-box; resize: none; padding: 10px 12px; font: 14px/1.6 'Malgun Gothic', 'Noto Sans KR', sans-serif; color: #000; background: #fff; border: none; box-shadow: var(--w98-sunken); outline: none; }
+  .mm-editor:disabled { background: #dfdfdf; }
+  .mm-status { margin-top: 6px; padding: 3px 8px; font-size: 11px; color: #000; box-shadow: var(--w98-sunken); min-height: 18px; }
 }
 
 /* ===== 날짜별 가계부 달력 (PC 전용): 가계부 화면 맨 위 ===== */
@@ -6695,7 +6728,7 @@ button:active:not(:disabled) {
     <!-- 바탕화면 스킨(PC) 전용 바로가기 아이콘 — 다른 스킨에서는 숨겨져 있다 -->
     <div class="desk-extra" aria-label="바로가기">
       <button type="button" class="desk-ico" onclick="desktopOpen('mypage','mpCardBookmark')"><div class="tab-icon" aria-hidden="true">🔖</div><div class="tab-label">북마크</div></button>
-      <button type="button" class="desk-ico" onclick="desktopOpen('mypage','mpCardMemo')"><div class="tab-icon" aria-hidden="true">📝</div><div class="tab-label">메모</div></button>
+      <button type="button" class="desk-ico" onclick="desktopOpen('memo')"><div class="tab-icon" aria-hidden="true">📝</div><div class="tab-label">메모</div></button>
       <button type="button" class="desk-ico" onclick="desktopOpen('stats')"><div class="tab-icon" aria-hidden="true">📊</div><div class="tab-label">통계</div></button>
     </div>
 
@@ -7216,6 +7249,28 @@ button:active:not(:disabled) {
       <div id="statsBody"></div>
     </div>
 
+    <!-- ══ 메모장 뷰 (바탕화면 스킨 PC 전용) ══ -->
+    <div class="view" id="viewMemo">
+      <aside class="mm-side">
+        <div class="mm-side-top">
+          <button type="button" class="mm-new" onclick="memoNew()">＋ 새 메모</button>
+          <input type="search" id="memoSearch" class="mm-search" placeholder="🔍 메모 검색" oninput="memoSearchInput(this.value)" aria-label="메모 검색" autocomplete="off">
+        </div>
+        <div class="mm-list" id="memoAppList"></div>
+        <div class="mm-count" id="memoAppCount"></div>
+      </aside>
+      <section class="mm-main">
+        <div class="mm-tabs" id="memoTabs" role="tablist"></div>
+        <div class="mm-tools">
+          <button type="button" id="memoPinBtn" onclick="memoTogglePin()" title="맨 위에 고정">📌 고정</button>
+          <button type="button" id="memoDelBtn" onclick="memoDeleteActive()" title="이 메모 지우기">🗑️ 지우기</button>
+          <span class="mm-tools-hint">입력하면 자동으로 저장돼요</span>
+        </div>
+        <textarea id="memoEditor" class="mm-editor" spellcheck="false" oninput="memoInput()" placeholder="왼쪽에서 메모를 고르거나 '새 메모'를 눌러 시작하세요." aria-label="메모 내용"></textarea>
+        <div class="mm-status" id="memoStatus"></div>
+      </section>
+    </div>
+
   </main><!-- end mainContent -->
 
 
@@ -7271,7 +7326,7 @@ button:active:not(:disabled) {
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
     <button type="button" role="menuitem" onclick="desktopOpen('category')">💰 가계부</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage','mpCardBookmark')">🔖 북마크</button>
-    <button type="button" role="menuitem" onclick="desktopOpen('mypage','mpCardMemo')">📝 메모</button>
+    <button type="button" role="menuitem" onclick="desktopOpen('memo')">📝 메모</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
     <button type="button" role="menuitem" onclick="desktopOpen('stats')">📊 통계</button>
     <hr>
@@ -9317,7 +9372,7 @@ function toggleSkin() {
 /* ══════════════════════════════════════
    바탕화면 스킨 (PC): 윈도우 98 바탕화면에 앱 아이콘 + 창 하나
 ══════════════════════════════════════ */
-const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', stats: '📊 통계 — 나의 하루' };
+const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', stats: '📊 통계 — 나의 하루', memo: '📝 메모장 — 나의 하루' };
 
 // 이번 주(오늘부터 토요일까지) 남은 구독 결제를 날짜순으로. 한 주가 두 달에 걸쳐도 둘 다 본다.
 function desktopWeekSubs(subList, todayStr, subDatesFn) {
@@ -9524,12 +9579,176 @@ function updateDesktopWidgets() {
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
 function statsGuard() {
   try {
-    if (currentMainTab === 'stats' && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
+    if ((currentMainTab === 'stats' || currentMainTab === 'memo') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
       setMainTab('calendar', document.getElementById('mainTab-calendar'));
     }
   } catch (e) {}
 }
 window.addEventListener('resize', statsGuard);
+
+/* ══════════════════════════════════════
+   메모장 앱 (PC 바탕화면 스킨): 목록 + 탭 + 검색 + 자동 저장
+══════════════════════════════════════ */
+// 메모의 첫 줄을 제목으로 쓴다
+function memoTitle(content) {
+  const line = String(content || '').split('\n').map(x => x.trim()).find(Boolean);
+  if (!line) return '(빈 메모)';
+  return line.length > 28 ? line.slice(0, 28) + '…' : line;
+}
+// 첫 줄 다음 내용 한 줄 미리보기
+function memoPreview(content) {
+  const lines = String(content || '').split('\n').map(x => x.trim()).filter(Boolean).slice(1);
+  const text = lines.join(' ');
+  return text.length > 60 ? text.slice(0, 60) + '…' : text;
+}
+function memoFilter(list, query) {
+  const q = String(query || '').trim().toLowerCase();
+  if (!q) return list.slice();
+  return list.filter(m => String(m.content || '').toLowerCase().includes(q));
+}
+// 고정한 메모가 맨 위, 그다음 최근에 고친 순
+function memoSort(list) {
+  return list.slice().sort((a, b) =>
+    (b.pinned ? 1 : 0) - (a.pinned ? 1 : 0) ||
+    String(b.updated || b.date || '').localeCompare(String(a.updated || a.date || '')) ||
+    b.id - a.id);
+}
+function memoHighlight(text, query) {
+  const safe = escapeLedgerText(text);
+  const q = escapeLedgerText(String(query || '').trim());
+  if (!q) return safe;
+  const at = safe.toLowerCase().indexOf(q.toLowerCase());
+  return at < 0 ? safe : safe.slice(0, at) + '<mark>' + safe.slice(at, at + q.length) + '</mark>' + safe.slice(at + q.length);
+}
+
+let memoTabs = [];          // 열어 둔 탭(메모 id)
+let memoActive = null;      // 지금 편집 중인 메모 id
+let memoSearchText = '';
+let memoSaveTimer = null;
+
+function memoCurrent() { return memos.find(x => x.id === memoActive) || null; }
+
+// 아직 아무것도 안 쓴 빈 메모는 지운다 (keepId 는 남김)
+function memoPruneEmpty(keepId) {
+  const before = memos.length;
+  memos = memos.filter(m => m.id === keepId || String(m.content || '').trim() || m.pinned);
+  if (memos.length !== before) { saveMemos(); memoTabs = memoTabs.filter(id => memos.some(m => m.id === id)); }
+}
+
+// 편집기에 쓴 글을 메모에 반영하고 저장
+function memoFlush() {
+  if (memoSaveTimer) { clearTimeout(memoSaveTimer); memoSaveTimer = null; }
+  const m = memoCurrent(), ta = document.getElementById('memoEditor');
+  if (m && ta && !ta.disabled && ta.value !== m.content) {
+    m.content = ta.value;
+    m.updated = new Date().toISOString();
+    saveMemos();
+  }
+}
+function memoInput() {
+  if (memoSaveTimer) clearTimeout(memoSaveTimer);
+  memoSaveTimer = setTimeout(() => { memoFlush(); renderMemoSide(); renderMemoTabs(); renderMemoStatus(); }, 400);
+  renderMemoStatus(true);
+}
+
+function memoOpen(id) {
+  memoFlush();
+  memoPruneEmpty(id);
+  if (!memoTabs.includes(id)) memoTabs.push(id);
+  memoActive = id;
+  renderMemoApp();
+}
+function memoNew() {
+  memoFlush();
+  memoPruneEmpty(null);
+  const m = { id: memoNextId++, content: '', date: fmtDate(new Date()), updated: new Date().toISOString() };
+  memos.push(m);
+  memoSearchText = '';
+  const box = document.getElementById('memoSearch'); if (box) box.value = '';
+  memoTabs.push(m.id);
+  memoActive = m.id;
+  renderMemoApp();
+  const ta = document.getElementById('memoEditor'); if (ta) ta.focus();
+}
+function memoSearchInput(v) { memoSearchText = v; renderMemoSide(); }
+function memoCloseTab(id, ev) {
+  if (ev) ev.stopPropagation();
+  memoFlush();
+  memoTabs = memoTabs.filter(x => x !== id);
+  if (memoActive === id) memoActive = memoTabs.length ? memoTabs[memoTabs.length - 1] : null;
+  memoPruneEmpty(memoActive);
+  renderMemoApp();
+}
+function memoTogglePin() {
+  memoFlush();
+  const m = memoCurrent(); if (!m) return;
+  m.pinned = !m.pinned;
+  saveMemos();
+  renderMemoApp();
+}
+function memoDeleteActive() {
+  const m = memoCurrent(); if (!m) return;
+  memoFlush();
+  if (String(m.content || '').trim() && !confirm(`'${memoTitle(m.content)}' 메모를 지울까요?`)) return;
+  memos = memos.filter(x => x.id !== m.id);
+  memoTabs = memoTabs.filter(x => x !== m.id);
+  memoActive = memoTabs.length ? memoTabs[memoTabs.length - 1] : null;
+  saveMemos();
+  renderMemoApp();
+}
+
+function renderMemoSide() {
+  const box = document.getElementById('memoAppList');
+  if (!box) return;
+  const list = memoSort(memoFilter(memos, memoSearchText));
+  box.innerHTML = list.length ? list.map(m => `<button type="button" class="mm-item${m.id === memoActive ? ' active' : ''}" onclick="memoOpen(${m.id})">` +
+    `<div class="mm-item-title">${m.pinned ? '<b>📌</b>' : ''}<span>${memoHighlight(memoTitle(m.content), memoSearchText)}</span></div>` +
+    (memoPreview(m.content) ? `<div class="mm-item-prev">${escapeLedgerText(memoPreview(m.content))}</div>` : '') +
+    `<div class="mm-item-date">${escapeLedgerText(String(m.updated || m.date || '').slice(0, 10))}</div></button>`).join('')
+    : `<div class="mm-empty">${memoSearchText.trim() ? '찾는 메모가 없어요' : '메모가 없어요. 새 메모를 만들어 보세요'}</div>`;
+  const cnt = document.getElementById('memoAppCount');
+  if (cnt) cnt.textContent = memoSearchText.trim() ? `${list.length}개 찾음 (전체 ${memos.length}개)` : `메모 ${memos.length}개`;
+}
+function renderMemoTabs() {
+  const box = document.getElementById('memoTabs');
+  if (!box) return;
+  box.innerHTML = memoTabs.map(id => memos.find(m => m.id === id)).filter(Boolean).map(m =>
+    `<div class="mm-tab${m.id === memoActive ? ' active' : ''}" role="tab" aria-selected="${m.id === memoActive}" onclick="memoOpen(${m.id})" title="${escapeLedgerText(memoTitle(m.content))}"><span>${escapeLedgerText(memoTitle(m.content))}</span><i class="mm-tab-x" onclick="memoCloseTab(${m.id}, event)" aria-label="탭 닫기">✕</i></div>`).join('');
+}
+function renderMemoStatus(typing) {
+  const st = document.getElementById('memoStatus'), ta = document.getElementById('memoEditor');
+  if (!st || !ta) return;
+  const m = memoCurrent();
+  if (!m) { st.textContent = '열린 메모가 없어요'; return; }
+  const chars = ta.value.length, lines = ta.value ? ta.value.split('\n').length : 0;
+  st.textContent = `${chars.toLocaleString()}자 · ${lines}줄 · ` + (typing ? '저장 중…' : `저장됨 ${String(m.updated || m.date || '').replace('T', ' ').slice(0, 16)}`);
+}
+function renderMemoEditor() {
+  const ta = document.getElementById('memoEditor'), m = memoCurrent();
+  if (!ta) return;
+  ta.disabled = !m;
+  // 입력 중(저장 대기)이면 쓰는 글을 덮어쓰지 않는다
+  if (!(memoSaveTimer && document.activeElement === ta)) ta.value = m ? m.content : '';
+  const pin = document.getElementById('memoPinBtn'), del = document.getElementById('memoDelBtn');
+  if (pin) { pin.disabled = !m; pin.textContent = m && m.pinned ? '📌 고정 해제' : '📌 고정'; }
+  if (del) del.disabled = !m;
+  renderMemoStatus();
+}
+function renderMemoApp() {
+  memoTabs = memoTabs.filter(id => memos.some(m => m.id === id));
+  if (memoActive !== null && !memos.some(m => m.id === memoActive)) memoActive = null;
+  if (memoActive === null && memoTabs.length) memoActive = memoTabs[memoTabs.length - 1];
+  renderMemoSide(); renderMemoTabs(); renderMemoEditor();
+}
+// 메모장을 처음 열 때: 탭이 없으면 가장 최근 메모를 연다
+function memoEnter() {
+  if (!memoTabs.length && memos.length) {
+    const top = memoSort(memos)[0];
+    memoTabs = [top.id]; memoActive = top.id;
+  }
+  renderMemoApp();
+}
+window.addEventListener('pagehide', memoFlush);
 
 // 맨 위 요약 막대의 글: 오늘 날짜 · 오늘 할일 · 루틴 · 오늘 가계부 지출 · 이번 달 달성률 · 이번 주 구독 결제 예정
 function desktopTickerText(todayStr, itemsList, routinesToday, isDoneFn, weekSubs, todayExpense) {
@@ -9762,6 +9981,7 @@ let currentCalSubTab = 'cal';
 
 function setMainTab(tab, btn) {
 
+  if (currentMainTab === 'memo' && tab !== 'memo') { memoFlush(); memoPruneEmpty(null); }
   document.documentElement.setAttribute('data-main-tab', tab);
   document.documentElement.removeAttribute('data-desktop-win');
 
@@ -9780,7 +10000,7 @@ function setMainTab(tab, btn) {
 
   // Only toggle top-level views (direct children of mainContent)
 
-  ['viewCalendar','viewCategory','viewMypage','viewStats'].forEach(id => {
+  ['viewCalendar','viewCategory','viewMypage','viewStats','viewMemo'].forEach(id => {
 
     const el = document.getElementById(id);
 
@@ -9788,7 +10008,7 @@ function setMainTab(tab, btn) {
 
   });
 
-  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage', stats: 'viewStats' };
+  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage', stats: 'viewStats', memo: 'viewMemo' };
 
   const el = document.getElementById(viewMap[tab]);
 
@@ -9819,6 +10039,8 @@ function setMainTab(tab, btn) {
   if (tab === 'mypage') renderMypageView();
 
   if (tab === 'stats') renderStatsView();
+
+  if (tab === 'memo') memoEnter();
 
 }
 
@@ -9918,6 +10140,7 @@ function renderMypageView() {
 
   if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
   if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
+  if (currentMainTab === 'memo') renderMemoApp();
   if (document.getElementById('mpCardBookmark').classList.contains('open')) renderBookmarkList();
 
 }
@@ -9980,9 +10203,9 @@ function saveMemoModal() {
   if (!text.trim()) { closeMemoModal(); return; }
   if (editingMemoId !== null) {
     const m = memos.find(x => x.id === editingMemoId);
-    if (m) m.content = text;
+    if (m) { m.content = text; m.updated = new Date().toISOString(); }
   } else {
-    memos.push({ id: memoNextId++, content: text, date: fmtDate(new Date()) });
+    memos.push({ id: memoNextId++, content: text, date: fmtDate(new Date()), updated: new Date().toISOString() });
   }
   editingMemoId = null;
   closeMemoModal();
