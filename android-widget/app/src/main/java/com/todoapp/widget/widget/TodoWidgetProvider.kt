@@ -547,6 +547,10 @@ class TodoWidgetProvider : AppWidgetProvider() {
                     makeBroadcastPending(context, ACTION_WEEK_TODAY, widgetId, 1002)
                 )
 
+                // 이번 주에 지출이 하나도 없으면 점 아래 지출 줄을 아예 없애 구분선과 붙인다.
+                // (하루라도 있으면 날짜 줄 높이가 서로 어긋나지 않도록 7칸 모두 자리를 둔다)
+                val anySpend = spendByDay.values.any { it > 0 }
+
                 for (i in 0..6) {
                     val day = weekStart.plusDays(i.toLong())
                     val dayStr = day.format(DateTimeFormatter.ISO_LOCAL_DATE)
@@ -557,6 +561,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
 
                     val spend = spendByDay[dayStr] ?: 0L
                     setTextViewText(CAL_SPEND_IDS[i], if (spend > 0) "-${formatCompactWon(spend)}" else "")
+                    setViewVisibility(CAL_SPEND_IDS[i], if (anySpend) android.view.View.VISIBLE else android.view.View.GONE)
 
                     if (isSelected) {
                         setInt(CAL_DAY_IDS[i], "setBackgroundResource", R.drawable.bg_widget_cal_today)
