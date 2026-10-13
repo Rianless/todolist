@@ -20,7 +20,7 @@ function extractFunction(name) {
 
 const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFixed', 'investTaxFor', 'calcInvestment',
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
-  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText'];
+  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs'];
 
 const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
@@ -146,7 +146,7 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   assert.deepStrictEqual(Object.keys(A.ledgerDayData([], [], [], 2026, 9, subDates)), []);
 }
 
-// ── 바탕화면 스킨 맨 위 요약 막대: 오늘 할일·루틴·이번 달 달성률(오늘 기준)·구독 결제
+// ── 바탕화면 스킨 맨 위 요약 막대: 오늘 할일·루틴·오늘 가계부 지출·이번 달 달성률(오늘 기준)·이번 주 구독 결제 예정
 {
   const its = [
     { id: 1, date: '2026-10-13', done: true }, { id: 2, date: '2026-10-13', done: false },
@@ -156,9 +156,26 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   ];
   const rts = [{ id: 10 }, { id: 11 }];
   const done = (id, ds) => id === 10 && ds === '2026-10-13';
-  assert.strictEqual(ctx.api.desktopTickerText('2026-10-13', its, rts, done, 1),
-    '▸ 10월 13일 화요일 … 오늘 할일 2개 중 1개 완료 … 루틴 2개 중 1개 완료 … 10월 달성률 50% (2/4) … 오늘 구독 결제 1건');
-  assert.strictEqual(ctx.api.desktopTickerText('2026-11-02', [], [], done, 0), '▸ 11월 2일 월요일 … 오늘 할일 없음 … 11월 달성률 0% (0/0)');
+  const subs = [{ name: 'Netflix', date: '2026-10-15', amount: 17000 }, { name: '유튜브', date: '2026-10-17', amount: 14900 }];
+  assert.strictEqual(ctx.api.desktopTickerText('2026-10-13', its, rts, done, subs, { total: 12500, count: 2 }),
+    '▸ 10월 13일 화요일 … 오늘 할일 1/2 완료 … 루틴 1/2 완료 … 오늘 가계부 지출 -12,500원 (2건) … 10월 달성률 50% (2/4) … 이번 주 구독 결제 예정 2건 31,900원 (Netflix 15일, 유튜브 17일)');
+  assert.strictEqual(ctx.api.desktopTickerText('2026-11-02', [], [], done, [], { total: 0, count: 0 }),
+    '▸ 11월 2일 월요일 … 오늘 할일 없음 … 오늘 가계부 지출 없음 … 11월 달성률 0% (0/0) … 이번 주 구독 결제 예정 없음');
+  const many = ['a', 'b', 'c', 'd', 'e'].map((n, i) => ({ name: n, date: `2026-10-1${3 + (i % 3)}`, amount: 1000 }));
+  assert.ok(ctx.api.desktopTickerText('2026-10-13', [], [], done, many, null).endsWith('이번 주 구독 결제 예정 5건 5,000원 (a 13일, b 14일, c 15일 외 2건)'));
+}
+
+// ── 이번 주(오늘~토요일) 구독 결제 예정: 지난 결제·다음 주·멈춘 구독은 뺀다, 한 주가 두 달에 걸쳐도 센다
+{
+  const monthly = (day) => (sub, y, m) => [`${y}-${String(m + 1).padStart(2, '0')}-${String(day).padStart(2, '0')}`];
+  const week = (subs, today) => JSON.parse(JSON.stringify(ctx.api.desktopWeekSubs(subs, today, (sub, y, m) => sub.fn(sub, y, m))));
+  const s = (name, day, extra = {}) => ({ name, date: '2026-01-01', amount: '1000', fn: monthly(day), ...extra });
+  // 2026-10-13 은 화요일 → 이번 주 토요일은 10-17
+  assert.deepStrictEqual(week([s('오늘', 13), s('토요일', 17), s('다음주', 18), s('지난', 12)], '2026-10-13').map(x => x.name), ['오늘', '토요일']);
+  assert.deepStrictEqual(week([s('멈춤', 14, { paused: true }), { name: '날짜없음', fn: monthly(14) }], '2026-10-13'), []);
+  // 2026-10-29(목) → 토요일 10-31: 이번 달만. 2026-09-30(수) → 토요일 10-03: 9월 30일과 10월 1~3일 모두
+  assert.deepStrictEqual(week([s('말일', 30), s('초하루', 2)], '2026-09-30').map(x => x.date), ['2026-09-30', '2026-10-02']);
+  assert.deepStrictEqual(week([s('x', 31)], '2026-10-29').map(x => x.date), ['2026-10-31']);
 }
 
 console.log('OK (index logic)');
