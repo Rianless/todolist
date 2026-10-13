@@ -6407,7 +6407,7 @@ button:active:not(:disabled) {
 .desk-extra, #desktopTaskbar, #desktopStartMenu, .dk-winbtns { display: none; }
 @keyframes dkTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 @media (prefers-reduced-motion: reduce) { .dk-ticker.marquee #dkTickerText { animation: none !important; padding-left: 0 !important; } }
-.dk-ticker { display: none; }
+.dk-ticker, .dk-widgets, #viewStats { display: none; }
 @media (min-width: 900px) {
   html[data-desktop][data-skin="w98"] { --dk-left: 128px; --dk-top: 40px; --dk-right: 16px; --dk-bottom: 44px; }
   html[data-desktop][data-desktop-max] { --dk-left: 0px; --dk-top: 0px; --dk-right: 0px; --dk-bottom: 34px; }
@@ -6424,6 +6424,7 @@ button:active:not(:disabled) {
   html[data-desktop][data-skin="w98"] .pc-topbar-title::before { content: '📅 달력 — 나의 하루'; }
   html[data-desktop][data-main-tab="category"][data-skin="w98"] .pc-topbar-title::before { content: '💰 가계부 — 나의 하루'; }
   html[data-desktop][data-main-tab="mypage"][data-skin="w98"] .pc-topbar-title::before { content: '👤 마이페이지 — 나의 하루'; }
+  html[data-desktop][data-main-tab="stats"][data-skin="w98"] .pc-topbar-title::before { content: '📊 통계 — 나의 하루'; }
   html[data-desktop][data-skin="w98"] .dk-winbtns { display: flex; gap: 2px; }
   html[data-desktop][data-skin="w98"] .dk-winbtn { width: 20px !important; height: 18px !important; min-height: 0 !important; padding: 0 !important; font-size: 11px !important; font-weight: 700 !important; line-height: 1; color: #000 !important; }
   /* 닫음·최소화: 창을 숨기고 바탕화면만 */
@@ -6443,6 +6444,7 @@ button:active:not(:disabled) {
   html[data-desktop][data-skin="w98"] .desk-ico:nth-child(1) { top: 176px; }
   html[data-desktop][data-skin="w98"] .desk-ico:nth-child(2) { top: 256px; }
   html[data-desktop][data-skin="w98"] #mainTab-mypage { top: 336px; }
+  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(3) { top: 416px; }
   html[data-desktop][data-skin="w98"] .tab-item, html[data-desktop][data-skin="w98"] .tab-item.active, html[data-desktop][data-skin="w98"] .tab-item:active, html[data-desktop][data-skin="w98"] .desk-ico, html[data-desktop][data-skin="w98"] .desk-ico:active { display: flex !important; position: fixed !important; z-index: 2; left: 6px; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; width: 108px !important; height: 66px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 3px !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
   html[data-desktop][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-skin="w98"] .desk-ico .tab-icon { font-size: 34px !important; line-height: 40px; height: 40px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.45)); }
   html[data-desktop][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-skin="w98"] .desk-ico .tab-label { font-size: 11px !important; font-weight: 400 !important; padding: 1px 4px; color: #fff !important; }
@@ -6470,6 +6472,72 @@ button:active:not(:disabled) {
   html[data-desktop][data-skin="w98"] #desktopStartMenu button { display: block; width: 100%; text-align: left; padding: 8px 12px !important; font-size: 13px !important; background: transparent !important; box-shadow: none !important; color: #000 !important; }
   html[data-desktop][data-skin="w98"] #desktopStartMenu button:hover, html[data-desktop][data-skin="w98"] #desktopStartMenu button:focus-visible { background: #000080 !important; color: #fff !important; }
   html[data-desktop][data-skin="w98"] #desktopStartMenu hr { border: 0; height: 2px; margin: 4px 2px; box-shadow: inset 0 1px #808080, inset 0 -1px #fff; }
+
+  /* ----- 바탕화면 위젯: 창을 최소화·닫으면 바탕화면에 떠 있는 작은 98 창들 ----- */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-wrap: wrap; align-items: flex-start; align-content: flex-start; gap: 16px; position: fixed; z-index: 3; left: 128px; right: 16px; top: 48px; bottom: 44px; overflow: auto; pointer-events: none; }
+  html[data-desktop][data-skin="w98"] .dk-widget { pointer-events: auto; width: 300px; max-height: 100%; display: flex; flex-direction: column; padding: 3px; background: #c0c0c0; box-shadow: var(--w98-raised), 3px 3px 0 rgba(0,0,0,.4); color: #000; font-size: 12px; }
+  html[data-desktop][data-skin="w98"] .dkw-title { display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 6px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-weight: 700; font-size: 12px; }
+  html[data-desktop][data-skin="w98"] .dkw-title span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  html[data-desktop][data-skin="w98"] .dkw-title button { height: 16px !important; min-height: 0 !important; padding: 0 6px !important; font-size: 10px !important; font-weight: 400 !important; color: #000 !important; }
+  html[data-desktop][data-skin="w98"] .dkw-body { margin-top: 3px; padding: 8px 10px; background: #fff; box-shadow: var(--w98-sunken); overflow-y: auto; min-height: 60px; }
+  .dkw-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; line-height: 1.35; }
+  .dkw-row.done .dkw-text { text-decoration: line-through; color: #808080; }
+  .dkw-check { flex: 0 0 auto; width: 16px; height: 16px; padding: 0 !important; min-height: 0 !important; font-size: 12px !important; line-height: 14px; color: #000 !important; }
+  .dkw-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dkw-time { flex: 0 0 auto; color: #808080; font-size: 11px; }
+  .dkw-sub { margin: 6px 0 2px; font-weight: 700; color: #000080; }
+  .dkw-empty { color: #808080; padding: 4px 0; }
+  .dkw-kv { display: flex; justify-content: space-between; padding: 2px 0; }
+  .dkw-exp { color: #c00000; font-weight: 700; }
+  .dkw-inc { color: #006400; font-weight: 700; }
+  .dkw-bar { height: 12px; margin: 3px 0 6px; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
+  .dkw-bar > i { display: block; height: 100%; background: #000080; }
+
+  /* ----- 통계 앱 ----- */
+  html[data-desktop][data-main-tab="stats"][data-skin="w98"] #viewStats.active { display: block; padding: 16px 20px 24px; }
+  .st-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+  .st-month { min-width: 130px; text-align: center; font-size: 17px; font-weight: 800; }
+  .st-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+  .st-card { padding: 10px 12px; background: #c0c0c0; box-shadow: var(--w98-raised); }
+  .st-card-label { font-size: 11px; color: #404040; }
+  .st-card-val { margin-top: 4px; font-size: 19px; font-weight: 800; color: #000; white-space: nowrap; }
+  .st-card-val.exp { color: #c00000; }
+  .st-card-val.inc { color: #006400; }
+  .st-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+  .st-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+  .st-panel { padding: 3px; background: #c0c0c0; box-shadow: var(--w98-raised); }
+  .st-panel-title { padding: 3px 8px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-size: 12px; font-weight: 700; }
+  .st-panel-body { margin-top: 3px; padding: 12px; background: #fff; box-shadow: var(--w98-sunken); color: #000; font-size: 12px; }
+  .st-bars { display: flex; align-items: flex-end; gap: 10px; height: 190px; }
+  .st-bargroup { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: stretch; height: 100%; cursor: pointer; }
+  .st-bargroup.cur .st-bar-label { font-weight: 800; text-decoration: underline; }
+  .st-bar-pair { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 3px; min-height: 0; }
+  .st-bar { flex: 1; max-width: 26px; min-height: 2px; position: relative; }
+  .st-bar.exp { background: #c00000; }
+  .st-bar.inc { background: #008000; }
+  .st-bar span { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); font-size: 10px; white-space: nowrap; color: #000; }
+  .st-bar-label { margin-top: 4px; text-align: center; font-size: 11px; }
+  .st-legend { display: flex; gap: 14px; margin-top: 8px; font-size: 11px; color: #404040; }
+  .st-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; }
+  .st-cat { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 4px 0; }
+  .st-cat-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .st-cat-track { height: 12px; background: #dfdfdf; box-shadow: var(--w98-sunken); padding: 2px; }
+  .st-cat-track > i { display: block; height: 100%; background: #000080; }
+  .st-cat-amt { text-align: right; white-space: nowrap; font-weight: 700; }
+  .st-cat-amt small { margin-left: 4px; font-weight: 400; color: #404040; }
+  .st-heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 22px); grid-auto-columns: 22px; gap: 4px; justify-content: start; }
+  .st-heat-cell { box-shadow: var(--w98-sunken); background: #dfdfdf; }
+  .st-heat-cell.l1 { background: #f2c4c4; }
+  .st-heat-cell.l2 { background: #b8dcb8; }
+  .st-heat-cell.l3 { background: #5fae5f; }
+  .st-heat-cell.l4 { background: #006400; }
+  .st-heat-cell.future { background: transparent; box-shadow: none; }
+  .st-heat-cell.today { outline: 2px solid #000080; outline-offset: 0; }
+  .st-heat-wrap { display: flex; gap: 6px; }
+  .st-heat-dows { display: grid; grid-template-rows: repeat(7, 22px); gap: 4px; font-size: 11px; line-height: 22px; color: #404040; }
+  .st-legend { align-items: center; flex-wrap: wrap; }
+  .st-legend .st-heat-cell { display: inline-block; flex: 0 0 auto; width: 12px; height: 12px; margin-right: -8px; }
+  .st-empty { padding: 14px 0; text-align: center; color: #808080; }
 }
 
 /* ===== 날짜별 가계부 달력 (PC 전용): 가계부 화면 맨 위 ===== */
@@ -6628,6 +6696,7 @@ button:active:not(:disabled) {
     <div class="desk-extra" aria-label="바로가기">
       <button type="button" class="desk-ico" onclick="desktopOpen('mypage','mpCardBookmark')"><div class="tab-icon" aria-hidden="true">🔖</div><div class="tab-label">북마크</div></button>
       <button type="button" class="desk-ico" onclick="desktopOpen('mypage','mpCardMemo')"><div class="tab-icon" aria-hidden="true">📝</div><div class="tab-label">메모</div></button>
+      <button type="button" class="desk-ico" onclick="desktopOpen('stats')"><div class="tab-icon" aria-hidden="true">📊</div><div class="tab-label">통계</div></button>
     </div>
 
   </header>
@@ -7136,6 +7205,17 @@ button:active:not(:disabled) {
 
 
 
+    <!-- ══ 통계 뷰 (바탕화면 스킨 PC 전용) ══ -->
+    <div class="view" id="viewStats">
+      <div class="st-nav">
+        <button type="button" class="cal-arrow" onclick="statsMove(-1)" aria-label="이전 달">‹</button>
+        <div class="st-month" id="stMonth"></div>
+        <button type="button" class="cal-arrow" onclick="statsMove(1)" aria-label="다음 달">›</button>
+        <button type="button" class="lc-today" onclick="statsGoToday()">이번 달</button>
+      </div>
+      <div id="statsBody"></div>
+    </div>
+
   </main><!-- end mainContent -->
 
 
@@ -7185,6 +7265,7 @@ button:active:not(:disabled) {
     <span class="dk-spacer"></span>
     <span class="dk-clock" id="dkClock"></span>
   </div>
+  <div id="desktopWidgets" class="dk-widgets" aria-label="바탕화면 위젯"></div>
   <div id="desktopTicker" class="dk-ticker" role="status" aria-label="오늘 요약"><span id="dkTickerText"></span></div>
   <div id="desktopStartMenu" role="menu" onclick="event.stopPropagation()">
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
@@ -7192,6 +7273,7 @@ button:active:not(:disabled) {
     <button type="button" role="menuitem" onclick="desktopOpen('mypage','mpCardBookmark')">🔖 북마크</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage','mpCardMemo')">📝 메모</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
+    <button type="button" role="menuitem" onclick="desktopOpen('stats')">📊 통계</button>
     <hr>
     <button type="button" role="menuitem" onclick="closeStartMenu();toggleSkin()">🖥️ 화면 스타일 바꾸기</button>
   </div>
@@ -9221,6 +9303,7 @@ function applySkin(name) {
   h.removeAttribute('data-desktop-win');
   h.removeAttribute('data-desktop-max');
   try { localStorage.setItem('rianless_skin', name); } catch (e) {}
+  statsGuard();
   desktopSync();
 }
 
@@ -9234,7 +9317,7 @@ function toggleSkin() {
 /* ══════════════════════════════════════
    바탕화면 스킨 (PC): 윈도우 98 바탕화면에 앱 아이콘 + 창 하나
 ══════════════════════════════════════ */
-const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루' };
+const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', stats: '📊 통계 — 나의 하루' };
 
 // 이번 주(오늘부터 토요일까지) 남은 구독 결제를 날짜순으로. 한 주가 두 달에 걸쳐도 둘 다 본다.
 function desktopWeekSubs(subList, todayStr, subDatesFn) {
@@ -9252,6 +9335,201 @@ function desktopWeekSubs(subList, todayStr, subDatesFn) {
   });
   return out.sort((x, y) => x.date.localeCompare(y.date) || String(x.name).localeCompare(String(y.name)));
 }
+
+/* ══════════════════════════════════════
+   통계 계산 (바탕화면 위젯 · 통계 앱 공용, 순수 함수)
+══════════════════════════════════════ */
+// 한 달의 지출·수입 합계 (구독 결제 포함, 이체 제외 — 가계부 달력과 같은 기준)
+function statsMonthTotals(ledgerList, subList, y, m, subDatesFn) {
+  const days = ledgerDayData(ledgerList, subList, [], y, m, subDatesFn);
+  let expense = 0, income = 0;
+  Object.values(days).forEach(d => { expense += d.expense; income += d.income; });
+  return { expense, income };
+}
+
+// 카테고리별 지출 (많은 순). 구독 결제는 구독의 카테고리로 센다.
+function statsCategoryBreakdown(ledgerList, subList, y, m, subDatesFn) {
+  const days = ledgerDayData(ledgerList, subList, [], y, m, subDatesFn);
+  const map = {};
+  const add = (name, amount) => { map[name] = (map[name] || 0) + amount; };
+  Object.values(days).forEach(d => {
+    d.entries.forEach(e => { if (e.type === 'expense') add(e.category || '기타', Number(e.amount) || 0); });
+    d.subs.forEach(sub => add(sub.category || '구독', sub.amount));
+  });
+  const total = Object.values(map).reduce((sum, v) => sum + v, 0);
+  return Object.entries(map)
+    .map(([name, amount]) => ({ name, amount, pct: total ? Math.round(amount / total * 100) : 0 }))
+    .sort((a, b) => b.amount - a.amount || a.name.localeCompare(b.name));
+}
+
+// 루틴 달성 히트맵: endStr 이 든 주까지 weeks 주, 일요일부터 칸 하나씩.
+// level 0 = 그날 루틴 없음, 1 = 하나도 못 함, 2 = 절반 미만, 3 = 절반 이상, 4 = 모두 완료, -1 = 아직 안 온 날
+function routineHeat(routineList, log, occursFn, endStr, weeks) {
+  const end = new Date(endStr + 'T00:00:00');
+  const start = new Date(end);
+  start.setDate(start.getDate() - end.getDay() - (weeks - 1) * 7);
+  const cells = [];
+  for (let i = 0; i < weeks * 7; i++) {
+    const dt = new Date(start); dt.setDate(start.getDate() + i);
+    const ds = fmtDate(dt);
+    const due = routineList.filter(r => occursFn(r, ds));
+    const doneIds = log[ds] || [];
+    const done = due.filter(r => doneIds.includes(r.id)).length;
+    let level;
+    if (ds > endStr) level = -1;
+    else if (!due.length) level = 0;
+    else if (!done) level = 1;
+    else if (done === due.length) level = 4;
+    else level = done / due.length < 0.5 ? 2 : 3;
+    cells.push({ date: ds, total: due.length, done, level });
+  }
+  return cells;
+}
+
+// 루틴별 최근 days 일(endStr 포함) 달성률. 그 기간에 한 번도 해당 없던 루틴은 뺀다.
+function routineRates(routineList, log, occursFn, endStr, days) {
+  const dates = [];
+  for (let i = 0; i < days; i++) {
+    const dt = new Date(endStr + 'T00:00:00'); dt.setDate(dt.getDate() - i);
+    dates.push(fmtDate(dt));
+  }
+  return routineList.map(r => {
+    const due = dates.filter(ds => occursFn(r, ds));
+    const done = due.filter(ds => (log[ds] || []).includes(r.id)).length;
+    return { id: r.id, name: r.name, total: due.length, done, pct: due.length ? Math.round(done / due.length * 100) : 0 };
+  }).filter(x => x.total > 0);
+}
+
+function statsShort(v) { return v >= 10000 ? (Math.round(v / 1000) / 10).toLocaleString() + '만' : v.toLocaleString(); }
+function statsWon(v) { return v.toLocaleString() + '원'; }
+let statsY = new Date().getFullYear(), statsM = new Date().getMonth();
+
+function statsMove(delta) {
+  statsM += delta;
+  if (statsM < 0) { statsM = 11; statsY--; }
+  if (statsM > 11) { statsM = 0; statsY++; }
+  renderStatsView();
+}
+function statsGoToday() { statsY = new Date().getFullYear(); statsM = new Date().getMonth(); renderStatsView(); }
+function statsPick(y, m) { statsY = y; statsM = m; renderStatsView(); }
+
+function renderStatsView() {
+  const body = document.getElementById('statsBody');
+  if (!body) return;
+  const y = statsY, m = statsM, mm = String(m + 1).padStart(2, '0');
+  document.getElementById('stMonth').textContent = `${y}년 ${mm}월`;
+  const now = new Date(), todayStr = fmtDate(now);
+  const isCur = y === now.getFullYear() && m === now.getMonth();
+  const lastDay = new Date(y, m + 1, 0).getDate();
+  const tot = statsMonthTotals(ledger, subscriptions, y, m, getSubDatesForMonth);
+  const bal = tot.income - tot.expense;
+  const avg = Math.round(tot.expense / (isCur ? now.getDate() : lastDay));
+
+  // 최근 6개월 (고른 달이 마지막)
+  const months = [];
+  for (let i = 5; i >= 0; i--) {
+    const dt = new Date(y, m - i, 1);
+    months.push({ y: dt.getFullYear(), m: dt.getMonth(), ...statsMonthTotals(ledger, subscriptions, dt.getFullYear(), dt.getMonth(), getSubDatesForMonth) });
+  }
+  const maxV = Math.max(1, ...months.flatMap(x => [x.expense, x.income]));
+  const h = v => Math.max(v ? 2 : 0, Math.round(v / maxV * 150));
+  const bars = months.map(x => `<div class="st-bargroup${x.y === y && x.m === m ? ' cur' : ''}" onclick="statsPick(${x.y},${x.m})" title="${x.y}년 ${x.m + 1}월 · 지출 ${statsWon(x.expense)} · 수입 ${statsWon(x.income)}">` +
+    `<div class="st-bar-pair"><div class="st-bar exp" style="height:${h(x.expense)}px">${x.expense ? `<span>${statsShort(x.expense)}</span>` : ''}</div>` +
+    `<div class="st-bar inc" style="height:${h(x.income)}px">${x.income ? `<span>${statsShort(x.income)}</span>` : ''}</div></div>` +
+    `<div class="st-bar-label">${x.m + 1}월</div></div>`).join('');
+
+  const cats = statsCategoryBreakdown(ledger, subscriptions, y, m, getSubDatesForMonth);
+  const topAmt = cats.length ? cats[0].amount : 1;
+  const catHtml = cats.length ? cats.map(c => `<div class="st-cat"><span class="st-cat-name" title="${escapeLedgerText(c.name)}">${escapeLedgerText(c.name)}</span>` +
+    `<div class="st-cat-track"><i style="width:${Math.max(2, Math.round(c.amount / topAmt * 100))}%"></i></div>` +
+    `<span class="st-cat-amt">${statsWon(c.amount)}<small>${c.pct}%</small></span></div>`).join('') : '<div class="st-empty">이 달 지출 내역이 없어요</div>';
+
+  const real = i => !i.isSub && !i.isInvest;
+  const monthItems = items.filter(i => i.date && i.date.startsWith(`${y}-${mm}`) && real(i));
+  const doneN = monthItems.filter(i => i.done).length;
+  const todoPct = monthItems.length ? Math.round(doneN / monthItems.length * 100) : 0;
+
+  const endStr = isCur ? todayStr : fmtDate(new Date(y, m, lastDay));
+  const heat = routineHeat(routines, routineLog, routineOccursOn, endStr, 12);
+  const heatHtml = heat.map(c => `<div class="st-heat-cell ${c.level < 0 ? 'future' : 'l' + c.level}${c.date === todayStr ? ' today' : ''}" title="${c.date}${c.level >= 0 && c.total ? ` · ${c.done}/${c.total} 완료` : ''}"></div>`).join('');
+  const rates = routineRates(routines, routineLog, routineOccursOn, endStr, 30);
+  const rateHtml = rates.length ? rates.map(r => `<div class="st-cat"><span class="st-cat-name" title="${escapeLedgerText(r.name)}">${escapeLedgerText(r.name)}</span>` +
+    `<div class="st-cat-track"><i style="width:${r.pct}%"></i></div><span class="st-cat-amt">${r.pct}%<small>${r.done}/${r.total}</small></span></div>`).join('') : '<div class="st-empty">등록된 루틴이 없어요</div>';
+
+  const panel = (title, inner) => `<section class="st-panel"><div class="st-panel-title">${title}</div><div class="st-panel-body">${inner}</div></section>`;
+  const card = (label, val, cls) => `<div class="st-card"><div class="st-card-label">${label}</div><div class="st-card-val ${cls || ''}">${val}</div></div>`;
+  body.innerHTML =
+    `<div class="st-cards">${card('이번 달 지출', '-' + statsWon(tot.expense), 'exp')}${card('이번 달 수입', '+' + statsWon(tot.income), 'inc')}` +
+    `${card('차액', (bal >= 0 ? '+' : '-') + statsWon(Math.abs(bal)))}${card('하루 평균 지출', statsWon(avg))}</div>` +
+    `<div class="st-grid"><div class="st-col">` +
+      panel('📈 최근 6개월 수입·지출', `<div class="st-bars">${bars}</div><div class="st-legend"><span><i style="background:#c00000"></i>지출</span><span><i style="background:#008000"></i>수입</span><span>막대를 누르면 그 달로 이동</span></div>`) +
+      panel('🗂️ 카테고리별 지출', catHtml) +
+    `</div><div class="st-col">` +
+      panel('🎯 할 일 달성', monthItems.length ? `<div class="dkw-kv"><span>${m + 1}월 할 일</span><b>${doneN}/${monthItems.length} (${todoPct}%)</b></div><div class="dkw-bar"><i style="width:${todoPct}%"></i></div>` : '<div class="st-empty">이 달 할 일이 없어요</div>') +
+      panel('🔥 루틴 달성 (최근 12주)', `<div class="st-heat-wrap"><div class="st-heat-dows"><span>일</span><span></span><span>화</span><span></span><span>목</span><span></span><span>토</span></div><div class="st-heat">${heatHtml}</div></div>` +
+        `<div class="st-legend"><span class="st-heat-cell"></span>없음<span class="st-heat-cell l1"></span>0%<span class="st-heat-cell l2"></span>절반 미만<span class="st-heat-cell l3"></span>절반 이상<span class="st-heat-cell l4"></span>모두</div>`) +
+      panel('✅ 루틴별 달성률 (최근 30일)', rateHtml) +
+    `</div></div>`;
+}
+
+/* ══════════════════════════════════════
+   바탕화면 위젯 (창을 최소화·닫았을 때 바탕화면에 보이는 작은 창)
+══════════════════════════════════════ */
+function updateDesktopWidgets() {
+  const box = document.getElementById('desktopWidgets');
+  if (!box) return;
+  const now = new Date(), todayStr = fmtDate(now);
+  const real = i => !i.isSub && !i.isInvest;
+  const esc = escapeLedgerText;
+  const win = (title, link, inner) => `<section class="dk-widget"><div class="dkw-title"><span>${title}</span>${link || ''}</div><div class="dkw-body">${inner}</div></section>`;
+  const open = (label, call) => `<button type="button" onclick="${call}">${label}</button>`;
+  const MAX = 7;
+
+  // ① 오늘 할 일 + 루틴 (체크 가능)
+  const todayItems = items.filter(i => i.date === todayStr && real(i)).sort((a, b) => String(a.time || '99').localeCompare(String(b.time || '99')));
+  const rts = routinesForDate(todayStr);
+  const row = (done, onclick, text, time) => `<div class="dkw-row${done ? ' done' : ''}"><button type="button" class="dkw-check" onclick="${onclick}" aria-label="완료 표시">${done ? '✓' : ''}</button><span class="dkw-text" title="${esc(text)}">${esc(text)}</span>${time ? `<span class="dkw-time">${esc(time)}</span>` : ''}</div>`;
+  let todayHtml = '';
+  todayHtml += `<div class="dkw-sub">할 일 ${todayItems.filter(i => i.done).length}/${todayItems.length}</div>`;
+  todayHtml += todayItems.length ? todayItems.slice(0, MAX).map(i => row(i.done, `agendaToggleDone(${i.id})`, i.title, i.time)).join('') + (todayItems.length > MAX ? `<div class="dkw-empty">외 ${todayItems.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 할 일이 없어요</div>';
+  todayHtml += `<div class="dkw-sub">루틴 ${rts.filter(r => isRoutineDone(r.id, todayStr)).length}/${rts.length}</div>`;
+  todayHtml += rts.length ? rts.slice(0, MAX).map(r => row(isRoutineDone(r.id, todayStr), `toggleRoutine(${r.id},'${todayStr}')`, r.name, r.time)).join('') + (rts.length > MAX ? `<div class="dkw-empty">외 ${rts.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 루틴이 없어요</div>';
+
+  // ② 이번 달 가계부
+  const y = now.getFullYear(), m = now.getMonth();
+  const tot = statsMonthTotals(ledger, subscriptions, y, m, getSubDatesForMonth);
+  const spentToday = ledger.filter(e => e.date === todayStr && e.type === 'expense').reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
+  const cats = statsCategoryBreakdown(ledger, subscriptions, y, m, getSubDatesForMonth).slice(0, 3);
+  const bal = tot.income - tot.expense;
+  const moneyHtml = `<div class="dkw-kv"><span>오늘 지출</span><span class="dkw-exp">-${statsWon(spentToday)}</span></div>` +
+    `<div class="dkw-kv"><span>${m + 1}월 지출</span><span class="dkw-exp">-${statsWon(tot.expense)}</span></div>` +
+    `<div class="dkw-kv"><span>${m + 1}월 수입</span><span class="dkw-inc">+${statsWon(tot.income)}</span></div>` +
+    `<div class="dkw-kv"><span>차액</span><b>${bal >= 0 ? '+' : '-'}${statsWon(Math.abs(bal))}</b></div>` +
+    (cats.length ? `<div class="dkw-sub">많이 쓴 곳</div>` + cats.map(c => `<div class="dkw-kv"><span>${esc(c.name)}</span><span>${statsWon(c.amount)} (${c.pct}%)</span></div>`).join('') : '');
+
+  // ③ 달성률 + 이번 주 구독
+  const monthItems = items.filter(i => i.date && i.date.startsWith(todayStr.slice(0, 7)) && real(i));
+  const mDone = monthItems.filter(i => i.done).length;
+  const pct = monthItems.length ? Math.round(mDone / monthItems.length * 100) : 0;
+  const subs = desktopWeekSubs(subscriptions, todayStr, getSubDatesForMonth);
+  const goalHtml = `<div class="dkw-kv"><span>${m + 1}월 할 일 달성률</span><b>${pct}% (${mDone}/${monthItems.length})</b></div><div class="dkw-bar"><i style="width:${pct}%"></i></div>` +
+    `<div class="dkw-sub">이번 주 구독 결제 예정</div>` +
+    (subs.length ? subs.slice(0, 5).map(x => `<div class="dkw-kv"><span>${esc(x.name)} · ${new Date(x.date + 'T00:00:00').getDate()}일</span><span>${statsWon(x.amount)}</span></div>`).join('') + (subs.length > 5 ? `<div class="dkw-empty">외 ${subs.length - 5}건</div>` : '') : '<div class="dkw-empty">없음</div>');
+
+  box.innerHTML = win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
+    win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
+    win('🎯 달성 · 구독', open('통계', "desktopOpen('stats')"), goalHtml);
+}
+
+// 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
+function statsGuard() {
+  try {
+    if (currentMainTab === 'stats' && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
+      setMainTab('calendar', document.getElementById('mainTab-calendar'));
+    }
+  } catch (e) {}
+}
+window.addEventListener('resize', statsGuard);
 
 // 맨 위 요약 막대의 글: 오늘 날짜 · 오늘 할일 · 루틴 · 오늘 가계부 지출 · 이번 달 달성률 · 이번 주 구독 결제 예정
 function desktopTickerText(todayStr, itemsList, routinesToday, isDoneFn, weekSubs, todayExpense) {
@@ -9278,6 +9556,7 @@ function desktopTickerText(todayStr, itemsList, routinesToday, isDoneFn, weekSub
 }
 
 function updateDesktopTicker() {
+  updateDesktopWidgets();
   const box = document.getElementById('desktopTicker');
   const text = document.getElementById('dkTickerText');
   if (!box || !text) return;
@@ -9501,7 +9780,7 @@ function setMainTab(tab, btn) {
 
   // Only toggle top-level views (direct children of mainContent)
 
-  ['viewCalendar','viewCategory','viewMypage'].forEach(id => {
+  ['viewCalendar','viewCategory','viewMypage','viewStats'].forEach(id => {
 
     const el = document.getElementById(id);
 
@@ -9509,7 +9788,7 @@ function setMainTab(tab, btn) {
 
   });
 
-  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage' };
+  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage', stats: 'viewStats' };
 
   const el = document.getElementById(viewMap[tab]);
 
@@ -9538,6 +9817,8 @@ function setMainTab(tab, btn) {
   if (tab === 'category') renderCategoryView();
 
   if (tab === 'mypage') renderMypageView();
+
+  if (tab === 'stats') renderStatsView();
 
 }
 
@@ -15506,6 +15787,8 @@ function setRoutineDone(id, ds, done) {
 function afterRoutineChange() {
   saveData();
   renderRoutines();
+  updateDesktopTicker();
+  if (currentMainTab === 'stats') renderStatsView();
   if (currentMainTab === 'calendar') {
     if (currentCalSubTab === 'cal') renderCal();
     else if (currentCalSubTab === 'week') renderWeek();

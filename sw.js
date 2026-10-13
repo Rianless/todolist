@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v73-desktop-ticker-money';
+const CACHE_NAME = 'todolist-v74-desktop-widgets-stats';
 const ASSETS = [
   './',
   './index.html',
