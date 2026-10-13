@@ -138,8 +138,8 @@
         android:layout_height="wrap_content"
         android:orientation="horizontal"
         android:paddingHorizontal="10dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="8dp">
+        android:paddingTop="6dp"
+        android:paddingBottom="4dp">
 
         <!-- 일 -->
         <LinearLayout
@@ -199,6 +199,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/widget_cal_spend0"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="11dp"
                 android:layout_marginTop="1dp"
@@ -268,6 +269,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/widget_cal_spend1"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="11dp"
                 android:layout_marginTop="1dp"
@@ -337,6 +339,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/widget_cal_spend2"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="11dp"
                 android:layout_marginTop="1dp"
@@ -406,6 +409,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/widget_cal_spend3"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="11dp"
                 android:layout_marginTop="1dp"
@@ -475,6 +479,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/widget_cal_spend4"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="11dp"
                 android:layout_marginTop="1dp"
@@ -544,6 +549,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/widget_cal_spend5"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="11dp"
                 android:layout_marginTop="1dp"
@@ -613,6 +619,7 @@
             </LinearLayout>
             <TextView
                 android:id="@+id/widget_cal_spend6"
+                android:visibility="gone"
                 android:layout_width="wrap_content"
                 android:layout_height="11dp"
                 android:layout_marginTop="1dp"
@@ -640,8 +647,8 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
         android:paddingHorizontal="14dp"
-        android:paddingTop="8dp"
-        android:paddingBottom="4dp"
+        android:paddingTop="6dp"
+        android:paddingBottom="2dp"
         android:text=""
         android:textSize="12sp"
         android:textColor="#000080"
