@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v70-ledger-cal-tall';
+const CACHE_NAME = 'todolist-v71-desktop-icon-order';
 const ASSETS = [
   './',
   './index.html',
