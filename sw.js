@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v78-mobile-stats-memo-search';
+const CACHE_NAME = 'todolist-v79-phone-desktop';
 const ASSETS = [
   './',
   './index.html',

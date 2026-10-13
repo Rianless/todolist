@@ -6511,12 +6511,6 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   html[data-desktop][data-skin="w98"] .fab-add { z-index: 7; right: calc(var(--dk-right) + 24px) !important; bottom: calc(var(--dk-bottom) + 20px) !important; }
   html[data-desktop][data-skin="w98"] #mainContent > .view.active { padding: 16px 20px 0; }
   /* 창 제목: 지금 보고 있는 화면 이름 */
-  html[data-desktop][data-skin="w98"] .pc-topbar-title::before { content: '📅 달력 — 나의 하루'; }
-  html[data-desktop][data-main-tab="category"][data-skin="w98"] .pc-topbar-title::before { content: '💰 가계부 — 나의 하루'; }
-  html[data-desktop][data-main-tab="mypage"][data-skin="w98"] .pc-topbar-title::before { content: '👤 마이페이지 — 나의 하루'; }
-  html[data-desktop][data-main-tab="stats"][data-skin="w98"] .pc-topbar-title::before { content: '📊 통계 — 나의 하루'; }
-  html[data-desktop][data-main-tab="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
-  html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] .pc-topbar-title::before { content: '🔖 북마크 — 나의 하루'; }
   html[data-desktop][data-skin="w98"] .dk-winbtns { display: flex; gap: 2px; }
   html[data-desktop][data-skin="w98"] .dk-winbtn { width: 20px !important; height: 18px !important; min-height: 0 !important; padding: 0 !important; font-size: 11px !important; font-weight: 700 !important; line-height: 1; color: #000 !important; }
   /* 닫음·최소화: 창을 숨기고 바탕화면만 */
@@ -6567,26 +6561,7 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
 
   /* ----- 바탕화면 위젯: 창을 최소화·닫으면 바탕화면에 떠 있는 작은 98 창들 ----- */
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-wrap: wrap; align-items: flex-start; align-content: flex-start; gap: 16px; position: fixed; z-index: 3; left: 128px; right: 16px; top: 48px; bottom: 44px; overflow: auto; pointer-events: none; }
-  html[data-desktop][data-skin="w98"] .dk-widget { pointer-events: auto; width: 300px; max-height: 100%; display: flex; flex-direction: column; padding: 3px; background: #c0c0c0; box-shadow: var(--w98-raised), 3px 3px 0 rgba(0,0,0,.4); color: #000; font-size: 12px; }
-  html[data-desktop][data-skin="w98"] .dkw-title { display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 6px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-weight: 700; font-size: 12px; }
-  html[data-desktop][data-skin="w98"] .dkw-title span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  html[data-desktop][data-skin="w98"] .dkw-title button { height: 16px !important; min-height: 0 !important; padding: 0 6px !important; font-size: 10px !important; font-weight: 400 !important; color: #000 !important; }
-  html[data-desktop][data-skin="w98"] .dkw-body { margin-top: 3px; padding: 8px 10px; background: #fff; box-shadow: var(--w98-sunken); overflow-y: auto; min-height: 60px; }
-  .dkw-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; line-height: 1.35; }
-  .dkw-row.done .dkw-text { text-decoration: line-through; color: #808080; }
-  .dkw-check { flex: 0 0 auto; width: 16px; height: 16px; padding: 0 !important; min-height: 0 !important; font-size: 12px !important; line-height: 14px; color: #000 !important; }
-  .dkw-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dkw-time { flex: 0 0 auto; color: #808080; font-size: 11px; }
-  .dkw-sub { margin: 6px 0 2px; font-weight: 700; color: #000080; }
-  .dkw-empty { color: #808080; padding: 4px 0; }
-  .dkw-kv { display: flex; justify-content: space-between; padding: 2px 0; }
-  .dkw-exp { color: #c00000; font-weight: 700; }
-  .dkw-inc { color: #006400; font-weight: 700; }
-  .dkw-bar { height: 12px; margin: 3px 0 6px; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
-  .dkw-bar > i { display: block; height: 100%; background: #000080; }
 
-  /* ----- 통계 앱 ----- */
-  html[data-desktop][data-main-tab="stats"][data-skin="w98"] #viewStats.active { display: block; padding: 16px 20px 24px; }
   /* ----- 메모장 앱: 왼쪽 목록 + 오른쪽 탭·편집기 ----- */
   html[data-desktop][data-main-tab="memo"][data-skin="w98"] #mainContent { overflow: hidden; }
   html[data-desktop][data-main-tab="memo"][data-skin="w98"] #viewMemo.active { display: flex !important; flex-direction: row !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
@@ -6657,6 +6632,101 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   .bk-content .bm-del { color: #000; }
   .bk-status { padding: 3px 8px; font-size: 11px; color: #000; box-shadow: var(--w98-sunken); min-height: 18px; }
 }
+
+/* ----- 바탕화면 위젯 (PC·폰 공용 모양) ----- */
+html[data-desktop][data-skin="w98"] .dk-widget { pointer-events: auto; width: 300px; max-height: 100%; display: flex; flex-direction: column; padding: 3px; background: #c0c0c0; box-shadow: var(--w98-raised), 3px 3px 0 rgba(0,0,0,.4); color: #000; font-size: 12px; }
+html[data-desktop][data-skin="w98"] .dkw-title { display: flex; align-items: center; gap: 6px; padding: 3px 4px 3px 6px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-weight: 700; font-size: 12px; }
+html[data-desktop][data-skin="w98"] .dkw-title span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-desktop][data-skin="w98"] .dkw-title button { height: 16px !important; min-height: 0 !important; padding: 0 6px !important; font-size: 10px !important; font-weight: 400 !important; color: #000 !important; }
+html[data-desktop][data-skin="w98"] .dkw-body { margin-top: 3px; padding: 8px 10px; background: #fff; box-shadow: var(--w98-sunken); overflow-y: auto; min-height: 60px; }
+.dkw-row { display: flex; align-items: center; gap: 6px; padding: 3px 0; line-height: 1.35; }
+.dkw-row.done .dkw-text { text-decoration: line-through; color: #808080; }
+.dkw-check { flex: 0 0 auto; width: 16px; height: 16px; padding: 0 !important; min-height: 0 !important; font-size: 12px !important; line-height: 14px; color: #000 !important; }
+.dkw-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dkw-time { flex: 0 0 auto; color: #808080; font-size: 11px; }
+.dkw-sub { margin: 6px 0 2px; font-weight: 700; color: #000080; }
+.dkw-empty { color: #808080; padding: 4px 0; }
+.dkw-kv { display: flex; justify-content: space-between; padding: 2px 0; }
+.dkw-exp { color: #c00000; font-weight: 700; }
+.dkw-inc { color: #006400; font-weight: 700; }
+.dkw-bar { height: 12px; margin: 3px 0 6px; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
+.dkw-bar > i { display: block; height: 100%; background: #000080; }
+
+/* ----- 통계 앱 ----- */
+html[data-desktop][data-main-tab="stats"][data-skin="w98"] #viewStats.active { display: block; padding: 16px 20px 24px; }
+
+/* ----- 창 제목 (PC·폰 공용) ----- */
+html[data-desktop][data-skin="w98"] .pc-topbar-title::before { content: '📅 달력 — 나의 하루'; }
+html[data-desktop][data-main-tab="category"][data-skin="w98"] .pc-topbar-title::before { content: '💰 가계부 — 나의 하루'; }
+html[data-desktop][data-main-tab="mypage"][data-skin="w98"] .pc-topbar-title::before { content: '👤 마이페이지 — 나의 하루'; }
+html[data-desktop][data-main-tab="stats"][data-skin="w98"] .pc-topbar-title::before { content: '📊 통계 — 나의 하루'; }
+html[data-desktop][data-main-tab="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
+html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] .pc-topbar-title::before { content: '🔖 북마크 — 나의 하루'; }
+
+html[data-desktop][data-desk-app="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
+html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::before { content: '🔖 북마크 — 나의 하루'; }
+html[data-desktop][data-desk-app="stats"][data-skin="w98"] .pc-topbar-title::before { content: '📊 통계 — 나의 하루'; }
+
+/* ===== 바탕화면 스킨 (폰): PC 바탕화면을 폰 크기에 맞춘 것 =====
+   창은 화면 전체 크기, 아이콘은 바탕화면(창을 최소화·닫았을 때)에 격자로 놓고 아래는 작업표시줄. 알림·검색·테마는 시작 메뉴에 있다. */
+.dk-phone-only { display: none; }
+@media (max-width: 899px) {
+  html[data-desktop][data-skin="w98"] { --dk-bar: calc(40px + env(safe-area-inset-bottom, 0px)); }
+  html[data-desktop][data-skin="w98"] body, html[data-desktop][data-skin="w98"] #app { background: #5a9488 !important; }
+  html[data-desktop][data-skin="w98"] #app { display: block !important; position: relative; width: 100%; max-width: none !important; height: 100dvh; margin: 0 !important; box-shadow: none !important; }
+
+  /* 헤더·아래 탭 바는 없애고 아이콘만 바탕화면에 꺼낸다 */
+  html[data-desktop][data-skin="w98"] .app-header { display: contents !important; }
+  html[data-desktop][data-skin="w98"] .header-top, html[data-desktop][data-skin="w98"] .progress-bar-wrap, html[data-desktop][data-skin="w98"] .header-sys-extra { display: none !important; }
+  html[data-desktop][data-skin="w98"] .tab-bar, html[data-desktop][data-skin="w98"] .desk-extra { display: contents !important; }
+  html[data-desktop]:not([data-desktop-win])[data-skin="w98"] .tab-item, html[data-desktop]:not([data-desktop-win])[data-skin="w98"] .desk-ico { display: none !important; }
+
+  /* 바탕화면 아이콘: 3열 × 2줄 */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico { display: flex !important; position: fixed !important; z-index: 2; width: 30% !important; height: 84px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 4px !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-icon { font-size: 38px !important; line-height: 46px; height: 46px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.45)); }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-label { font-size: 12px !important; font-weight: 400 !important; padding: 1px 4px; color: #fff !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item:active .tab-label, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico:active .tab-label { background: #000080; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-calendar { left: 3%; top: 36px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-category { left: 35%; top: 36px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="bookmark"] { left: 67%; top: 36px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="memo"] { left: 3%; top: 126px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-mypage { left: 35%; top: 126px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="stats"] { left: 67%; top: 126px; }
+
+  /* 위젯: 아이콘 아래에 세로로 */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-direction: column; gap: 10px; position: fixed; z-index: 3; left: 8px; right: 8px; top: 222px; bottom: calc(var(--dk-bar) + 6px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; flex: none; max-height: none; box-sizing: border-box; }
+  html[data-desktop][data-skin="w98"] .dkw-check { width: 22px; height: 22px; font-size: 14px !important; }
+
+  /* 창: 화면 전체 (제목 막대 + 내용) */
+  html[data-desktop][data-skin="w98"] #pcTopbar { display: flex !important; position: fixed !important; z-index: 6; left: 0; right: 0; top: 26px; height: 30px !important; padding: 0 6px 0 10px !important; }
+  html[data-desktop][data-skin="w98"] #mainContent { position: fixed; z-index: 6; left: 0; right: 0; top: 56px; bottom: var(--dk-bar); height: auto; background: #c0c0c0; box-sizing: border-box; }
+  html[data-desktop][data-skin="w98"] .fab-add { z-index: 7; right: 14px !important; bottom: calc(var(--dk-bar) + 14px) !important; }
+  html[data-desktop][data-skin="w98"] .pc-topbar-title { font-size: 0; min-width: 0; overflow: hidden; white-space: nowrap; }
+  html[data-desktop][data-skin="w98"] .pc-topbar-spacer { flex: 1; }
+  html[data-desktop][data-skin="w98"] .dk-winbtns { display: flex; gap: 3px; }
+  html[data-desktop][data-skin="w98"] .dk-winbtn { width: 28px !important; height: 22px !important; min-height: 0 !important; padding: 0 !important; font-size: 12px !important; font-weight: 700 !important; line-height: 1; color: #000 !important; }
+  html[data-desktop][data-skin="w98"] .dk-winbtn.dk-max { display: none; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #pcTopbar, html[data-desktop][data-desktop-win][data-skin="w98"] #mainContent, html[data-desktop][data-desktop-win][data-skin="w98"] .fab-add { display: none !important; }
+
+  /* 맨 위 요약 막대 + 아래 작업표시줄 */
+  html[data-desktop][data-skin="w98"] .dk-ticker { display: block; position: fixed; z-index: 20; left: 0; right: 0; top: 0; height: 26px; overflow: hidden; padding: 0 8px; background: #fff; box-shadow: var(--w98-sunken); font-size: 12px; line-height: 26px; white-space: nowrap; color: #000; }
+  html[data-desktop][data-skin="w98"] .dk-ticker.marquee #dkTickerText { display: inline-block; padding-left: 0; animation: dkTicker 30s linear 2.5s infinite; }
+  html[data-desktop][data-skin="w98"] #desktopTaskbar { display: flex; position: fixed; z-index: 20; left: 0; right: 0; bottom: 0; height: var(--dk-bar); box-sizing: border-box; align-items: center; gap: 4px; padding: 3px 4px calc(3px + env(safe-area-inset-bottom, 0px)); background: #c0c0c0; box-shadow: inset 0 1px #dfdfdf, inset 0 2px #fff; }
+  html[data-desktop][data-skin="w98"] .dk-start, html[data-desktop][data-skin="w98"] .dk-task { height: 32px !important; min-height: 0 !important; padding: 0 10px !important; display: flex; align-items: center; gap: 6px; font-size: 13px !important; }
+  html[data-desktop][data-skin="w98"] .dk-task { flex: 1; min-width: 0; max-width: none; justify-content: flex-start; font-weight: 700 !important; overflow: hidden; white-space: nowrap; }
+  html[data-desktop][data-skin="w98"] .dk-task.pressed { box-shadow: var(--w98-sunken) !important; background: #dfdfdf !important; }
+  html[data-desktop][data-skin="w98"] .dk-sep, html[data-desktop][data-skin="w98"] .dk-spacer { display: none; }
+  html[data-desktop][data-skin="w98"] .dk-clock { height: 32px; min-width: 64px; display: flex; align-items: center; justify-content: center; padding: 0 8px; font-size: 12px; background: #c0c0c0; box-shadow: var(--w98-sunken); }
+  html[data-desktop][data-skin="w98"] #desktopStartMenu { position: fixed; z-index: 21; left: 2px; bottom: calc(var(--dk-bar) + 2px); width: 240px; max-height: calc(100dvh - var(--dk-bar) - 40px); overflow-y: auto; padding: 4px; background: #c0c0c0; box-shadow: var(--w98-raised), 3px 3px 0 rgba(0,0,0,.35); }
+  html[data-desktop][data-skin="w98"] #desktopStartMenu.open { display: block; }
+  html[data-desktop][data-skin="w98"] #desktopStartMenu button { display: block; width: 100%; text-align: left; padding: 11px 12px !important; font-size: 14px !important; background: transparent !important; box-shadow: none !important; color: #000 !important; }
+  html[data-desktop][data-skin="w98"] #desktopStartMenu button:active { background: #000080 !important; color: #fff !important; }
+  html[data-desktop][data-skin="w98"] #desktopStartMenu hr { border: 0; height: 2px; margin: 4px 2px; box-shadow: inset 0 1px #808080, inset 0 -1px #fff; }
+  html[data-desktop][data-skin="w98"] #desktopStartMenu .dk-phone-only { display: block; }
+  html[data-desktop][data-skin="w98"] #desktopStartMenu hr.dk-phone-only { display: block; }
+}
+@media (min-width: 900px) { html[data-desktop][data-skin="w98"] #desktopStartMenu .dk-phone-only { display: none; } }
 
 /* ===== 날짜별 가계부 달력 (PC 전용): 가계부 화면 맨 위 ===== */
 .ledger-cal { display: none; }
@@ -7459,6 +7529,10 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
     <button type="button" role="menuitem" onclick="desktopOpen('memo')">📝 메모</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
     <button type="button" role="menuitem" onclick="desktopOpen('stats')">📊 통계</button>
+    <hr class="dk-phone-only">
+    <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleNotif()">🔔 알림</button>
+    <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();openSearch()">🔍 검색</button>
+    <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleTheme()">☀️ 테마 바꾸기</button>
     <hr>
     <button type="button" role="menuitem" onclick="closeStartMenu();toggleSkin()">🖥️ 화면 스타일 바꾸기</button>
   </div>
@@ -9493,7 +9567,7 @@ function applySkin(name) {
 }
 
 function toggleSkin() {
-  const order = window.innerWidth >= 900 ? ['w98', 'desktop', 'classic'] : ['w98', 'classic'];
+  const order = ['w98', 'desktop', 'classic'];
   const cur = currentSkinName();
   // 폰에 'desktop' 이 저장돼 있으면(98 과 똑같이 보임) 한 번에 클래식으로
   applySkin(order.includes(cur) ? order[(order.indexOf(cur) + 1) % order.length] : 'classic');
@@ -10004,8 +10078,9 @@ function updateDesktopTicker() {
 
 // 작업표시줄의 창 버튼을 지금 상태(열림 / 최소화 / 닫힘)와 맞춘다
 // 지금 열린 앱 아이콘(이름이 파란 칸 + 흰 글씨)
+let deskApp = null;   // 폰에서 마이페이지 카드로 여는 앱(메모·북마크·통계)
 function desktopMarkIcon() {
-  const app = currentMainTab;
+  const app = deskApp || currentMainTab;
   document.querySelectorAll('#mainTab-calendar, #mainTab-category, #mainTab-mypage, .desk-ico[data-app]').forEach(el => {
     const name = el.dataset.app || el.id.replace('mainTab-', '');
     el.classList.toggle('dk-sel', name === app);
@@ -10018,7 +10093,8 @@ function desktopSync() {
   const task = document.getElementById('dkTask');
   if (!task) return;
   const st = document.documentElement.getAttribute('data-desktop-win');
-  task.textContent = DK_TITLES[currentMainTab] || DK_TITLES.calendar;
+  task.textContent = DK_TITLES[deskApp || currentMainTab] || DK_TITLES.calendar;
+  if (deskApp) document.documentElement.setAttribute('data-desk-app', deskApp); else document.documentElement.removeAttribute('data-desk-app');
   task.style.display = st === 'closed' ? 'none' : '';
   task.classList.toggle('pressed', !st);
 }
@@ -10042,11 +10118,18 @@ function desktopTaskClick() {
 }
 
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
+const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark', stats: 'mpCardStats' };
 function desktopOpen(tab, cardId) {
+  // 폰에는 메모·북마크·통계 전용 창이 없어서 마이페이지의 그 카드를 펼쳐 보여 준다
+  let app = null;
+  if (window.innerWidth < 900 && DK_PHONE_CARD[tab]) { app = tab; cardId = DK_PHONE_CARD[tab]; tab = 'mypage'; }
   setMainTab(tab, document.getElementById('mainTab-' + tab));
+  deskApp = app;
+  desktopSync();
   if (cardId) {
     const card = document.getElementById(cardId);
     if (card && !card.classList.contains('open')) toggleMpCard(cardId);
+    if (card && window.innerWidth < 900) card.scrollIntoView({ block: 'start' });
   }
   closeStartMenu();
 }
@@ -10211,6 +10294,7 @@ function setMainTab(tab, btn) {
   document.documentElement.removeAttribute('data-desktop-win');
 
   currentMainTab = tab;
+  deskApp = null;
   desktopSync();
 
   document.querySelectorAll('.tab-item').forEach(b => {
@@ -17482,8 +17566,6 @@ if ('serviceWorker' in navigator) {
 /* ── PC 레이아웃 초기화 ── */
 (function() {
   function initPCLayout() {
-    if (window.innerWidth < 900) return;
-
     const app    = document.getElementById('app');
     const header = app.querySelector('.app-header');
     const tabBar = app.querySelector('.tab-bar');
@@ -17499,14 +17581,14 @@ if ('serviceWorker' in navigator) {
         '<span class="pc-topbar-spacer"></span>' +
         '<span class="dk-winbtns">' +
           '<button type="button" class="dk-winbtn" title="최소화" aria-label="최소화" onclick="desktopWin(\'min\')">_</button>' +
-          '<button type="button" class="dk-winbtn" title="최대화 / 이전 크기" aria-label="최대화 또는 이전 크기" onclick="desktopWin(\'max\')">□</button>' +
+          '<button type="button" class="dk-winbtn dk-max" title="최대화 / 이전 크기" aria-label="최대화 또는 이전 크기" onclick="desktopWin(\'max\')">□</button>' +
           '<button type="button" class="dk-winbtn" title="닫기" aria-label="닫기" onclick="desktopWin(\'close\')">✕</button>' +
         '</span>';
       app.insertBefore(topbar, mainContent);
     }
 
-    // 2) 탭바를 사이드바(header) 맨 아래로 이동
-    if (tabBar && tabBar.parentElement !== header) {
+    // 2) 탭바를 사이드바(header) 맨 아래로 이동 (PC 만)
+    if (window.innerWidth >= 900 && tabBar && tabBar.parentElement !== header) {
       header.appendChild(tabBar);
     }
   }
