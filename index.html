@@ -6405,8 +6405,11 @@ button:active:not(:disabled) {
 /* ===== 바탕화면 스킨 (PC 전용): 윈도우 98 바탕화면에 앱 아이콘 + 창 하나 =====
    🖥️ 단추로 [윈도우 98 → 바탕화면 → 클래식] 을 고른다. html[data-skin="w98"][data-desktop] 일 때만 적용되고 폰(900px 미만)에서는 98 과 같다. */
 .desk-extra, #desktopTaskbar, #desktopStartMenu, .dk-winbtns { display: none; }
+@keyframes dkTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
+@media (prefers-reduced-motion: reduce) { .dk-ticker.marquee #dkTickerText { animation: none !important; padding-left: 0 !important; } }
+.dk-ticker { display: none; }
 @media (min-width: 900px) {
-  html[data-desktop][data-skin="w98"] { --dk-left: 128px; --dk-top: 20px; --dk-right: 16px; --dk-bottom: 44px; }
+  html[data-desktop][data-skin="w98"] { --dk-left: 128px; --dk-top: 40px; --dk-right: 16px; --dk-bottom: 44px; }
   html[data-desktop][data-desktop-max] { --dk-left: 0px; --dk-top: 0px; --dk-right: 0px; --dk-bottom: 34px; }
   html[data-desktop][data-skin="w98"] body, html[data-desktop][data-skin="w98"] #app { background: #5a9488 !important; }
   html[data-desktop][data-skin="w98"] #app { display: block; position: relative; height: 100dvh; }
@@ -6457,6 +6460,10 @@ button:active:not(:disabled) {
   html[data-desktop][data-skin="w98"] .dk-task.pressed { box-shadow: var(--w98-sunken) !important; background: #dfdfdf !important; }
   html[data-desktop][data-skin="w98"] .dk-sep { width: 2px; height: 22px; box-shadow: inset 1px 0 #808080, inset -1px 0 #fff; }
   html[data-desktop][data-skin="w98"] .dk-spacer { flex: 1; }
+  html[data-desktop][data-skin="w98"] .dk-ticker { display: block; position: fixed; z-index: 20; left: var(--dk-left); right: var(--dk-right); top: 8px; height: 24px; overflow: hidden; padding: 0 10px; background: #fff; box-shadow: var(--w98-sunken); font-size: 12px; line-height: 24px; white-space: nowrap; color: #000; }
+  html[data-desktop][data-desktop-max][data-skin="w98"] .dk-ticker { display: none; }
+  html[data-desktop][data-skin="w98"] .dk-ticker.marquee #dkTickerText { display: inline-block; padding-left: 100%; animation: dkTicker 40s linear infinite; }
+  html[data-desktop][data-skin="w98"] .dk-ticker.marquee:hover #dkTickerText { animation-play-state: paused; }
   html[data-desktop][data-skin="w98"] .dk-clock { height: 26px; min-width: 84px; display: flex; align-items: center; justify-content: center; padding: 0 10px; font-size: 12px; background: #c0c0c0; box-shadow: var(--w98-sunken); }
   html[data-desktop][data-skin="w98"] #desktopStartMenu { position: fixed; z-index: 21; left: 2px; bottom: 36px; width: 210px; padding: 4px; background: #c0c0c0; box-shadow: var(--w98-raised), 3px 3px 0 rgba(0,0,0,.35); }
   html[data-desktop][data-skin="w98"] #desktopStartMenu.open { display: block; }
@@ -7178,6 +7185,7 @@ button:active:not(:disabled) {
     <span class="dk-spacer"></span>
     <span class="dk-clock" id="dkClock"></span>
   </div>
+  <div id="desktopTicker" class="dk-ticker" role="status" aria-label="오늘 요약"><span id="dkTickerText"></span></div>
   <div id="desktopStartMenu" role="menu" onclick="event.stopPropagation()">
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
     <button type="button" role="menuitem" onclick="desktopOpen('category')">💰 가계부</button>
@@ -9228,8 +9236,40 @@ function toggleSkin() {
 ══════════════════════════════════════ */
 const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루' };
 
+// 맨 위 요약 막대의 글: 오늘 날짜 · 오늘 할일 · 루틴 · 이번 달 달성률 · 오늘 구독 결제
+function desktopTickerText(todayStr, itemsList, routinesToday, isDoneFn, subPaymentsToday) {
+  const d = new Date(todayStr + 'T00:00:00');
+  const real = i => !i.isSub && !i.isInvest;
+  const todayItems = itemsList.filter(i => i.date === todayStr && real(i));
+  const todayDone = todayItems.filter(i => i.done).length;
+  const monthItems = itemsList.filter(i => i.date && i.date.startsWith(todayStr.slice(0, 7)) && real(i));
+  const monthDone = monthItems.filter(i => i.done).length;
+  const pct = monthItems.length ? Math.round(monthDone / monthItems.length * 100) : 0;
+  const parts = [`${d.getMonth() + 1}월 ${d.getDate()}일 ${DOW_KO[d.getDay()]}요일`];
+  parts.push(todayItems.length ? `오늘 할일 ${todayItems.length}개 중 ${todayDone}개 완료` : '오늘 할일 없음');
+  if (routinesToday.length) parts.push(`루틴 ${routinesToday.length}개 중 ${routinesToday.filter(r => isDoneFn(r.id, todayStr)).length}개 완료`);
+  parts.push(`${d.getMonth() + 1}월 달성률 ${pct}% (${monthDone}/${monthItems.length})`);
+  if (subPaymentsToday) parts.push(`오늘 구독 결제 ${subPaymentsToday}건`);
+  return '▸ ' + parts.join(' … ');
+}
+
+function updateDesktopTicker() {
+  const box = document.getElementById('desktopTicker');
+  const text = document.getElementById('dkTickerText');
+  if (!box || !text) return;
+  const now = new Date();
+  const todayStr = fmtDate(now);
+  const subCount = subscriptions.filter(sub => sub.date && !sub.paused && getSubDatesForMonth(sub, now.getFullYear(), now.getMonth()).includes(todayStr)).length;
+  text.textContent = desktopTickerText(todayStr, items, routinesForDate(todayStr), isRoutineDone, subCount);
+  // 막대보다 글이 길면 천천히 흘려 보낸다 (마우스를 올리면 멈춤)
+  box.classList.remove('marquee');
+  // (줄 안에 있는 글자 span 은 scrollWidth 가 늘 0 이라 실제 폭으로 잰다)
+  if (text.getBoundingClientRect().width > box.clientWidth - 20) box.classList.add('marquee');
+}
+
 // 작업표시줄의 창 버튼을 지금 상태(열림 / 최소화 / 닫힘)와 맞춘다
 function desktopSync() {
+  updateDesktopTicker();
   const task = document.getElementById('dkTask');
   if (!task) return;
   const st = document.documentElement.getAttribute('data-desktop-win');
@@ -9279,6 +9319,7 @@ function closeStartMenu() {
 
 document.addEventListener('click', closeStartMenu);
 window.addEventListener('load', desktopSync);
+setInterval(updateDesktopTicker, 30000);   // 날짜가 바뀌거나 다른 기기에서 고친 것도 따라가게
 
 (function desktopClock() {
   const tick = () => {
@@ -10544,6 +10585,7 @@ function changeListMonth(delta) {
 ══════════════════════════════════════ */
 
 function updateProgress() {
+  updateDesktopTicker();   // 바탕화면 스킨의 맨 위 요약 막대도 같이
 
   const monthKey = `${calY}-${String(calM + 1).padStart(2, '0')}`;
   const monthItems = items.filter(item => item.date && item.date.startsWith(monthKey));
