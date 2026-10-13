@@ -4087,6 +4087,24 @@ body::after {
 .bm-text { flex: 1; min-width: 0; }
 .bm-title { font-size: 13px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bm-url { font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.bm-bar { display: flex; align-items: flex-start; gap: 8px; }
+.bm-bar .bm-chips { flex: 1; min-width: 0; }
+.bm-view { flex: none; display: flex; border: 1px solid var(--border); border-radius: 8px; overflow: hidden; margin-bottom: 8px; }
+.bm-view button { background: var(--panel); border: none; color: var(--text3); font-size: 14px; line-height: 1; padding: 6px 10px; cursor: pointer; }
+.bm-view button + button { border-left: 1px solid var(--border); }
+.bm-view button.on { background: var(--accent, var(--yellow)); color: #fff; }
+.bm-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(96px, 1fr)); gap: 8px; }
+.bm-tile { position: relative; display: flex; flex-direction: column; align-items: center; gap: 3px; min-width: 0; padding: 4px 6px 8px; text-align: center; cursor: pointer; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
+.bm-tile:active { opacity: 0.75; }
+.bm-tile-actions { display: flex; justify-content: flex-end; width: 100%; }
+.bm-tile-actions .bm-del { padding: 2px 4px; font-size: 12px; }
+.bm-tile-icon { position: relative; width: 40px; height: 40px; flex: none; border-radius: 10px; background: var(--panel2, var(--bg2)); overflow: hidden; }
+.bm-tile-icon img, .bm-tile-letter { position: absolute; inset: 0; width: 100%; height: 100%; }
+.bm-tile-icon img { object-fit: contain; padding: 6px; box-sizing: border-box; background: var(--panel2, var(--bg2)); }
+.bm-tile-letter { display: flex; align-items: center; justify-content: center; font-size: 18px; font-weight: 800; color: var(--text3); }
+.bm-tile-title { width: 100%; min-height: 2.6em; font-size: 12px; line-height: 1.3; color: var(--text); overflow: hidden; word-break: break-word; display: -webkit-box; -webkit-line-clamp: 2; -webkit-box-orient: vertical; }
+.bm-tile .bm-title-input { width: 100%; font-size: 12px; padding: 3px 4px; }
+.bm-tile-host, .bm-tile-folder { width: 100%; font-size: 10px; color: var(--text3); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .bm-chips { display: flex; gap: 6px; overflow-x: auto; padding: 2px 0 8px; scrollbar-width: none; }
 .bm-chips::-webkit-scrollbar { display: none; }
 .bm-chip { flex: 0 0 auto; background: var(--panel); border: 1px solid var(--border); color: var(--text2, var(--text)); font-size: 12px; padding: 5px 10px; border-radius: 14px; cursor: pointer; white-space: nowrap; }
@@ -6335,6 +6353,11 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .dc { display: none !important; }
   html[data-skin="w98"] .asset-card, html[data-skin="w98"] .collapse-card, html[data-skin="w98"] .section-card, html[data-skin="w98"] .mp-card, html[data-skin="w98"] .panel-card { background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
   html[data-skin="w98"] .modal-overlay { background: rgba(0,0,0,.35) !important; }
+  html[data-skin="w98"] .bm-chip.on, html[data-skin="w98"] .bm-view button.on { background: #dfdfdf !important; box-shadow: var(--w98-sunken) !important; font-weight: 700 !important; }
+  html[data-skin="w98"] .bm-view { border: none; }
+  html[data-skin="w98"] .bm-move { background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; padding: 2px 4px; }
+  html[data-skin="w98"] .bm-tile { background: #fff !important; border: none !important; box-shadow: var(--w98-sunken) !important; }
+  html[data-skin="w98"] .bm-tile-icon, html[data-skin="w98"] .bm-tile-icon img { background: #fff !important; }
   html[data-skin="w98"] .agenda-check, html[data-skin="w98"] .agenda-row.done .agenda-check { background: #fff !important; color: #000 !important; border: none !important; box-shadow: var(--w98-sunken) !important; }
   html[data-skin="w98"] .calendar-surface table, html[data-skin="w98"] .cal-grid { background: #c0c0c0 !important; }
   html[data-skin="w98"] .routine-sub { background: transparent !important; box-shadow: none !important; padding: 2px 8px 2px 0 !important; }
@@ -9443,6 +9466,7 @@ let bookmarkFolders = []; // { id, name }
 let bookmarkFolderNextId = 1;
 let bookmarkFilter = 'all';          // 'all' | 'none'(미분류) | 폴더 id — 화면에서만 쓰고 저장하지 않는다
 let bookmarkFolderEdit = null;       // null | 'new' | 'rename'
+let bookmarkViewMode = 'list';       // 'list' | 'grid' — 이 기기의 보기 취향이라 동기화하지 않고 localStorage 에만 둔다
 
 function addBookmark(openAfter) {
   const input = document.getElementById('bookmarkInput');
@@ -9488,6 +9512,12 @@ function finishBookmarkTitle(save) {
     b.title = input.value.trim();
     saveBookmarks();
   }
+  renderBookmarkList();
+}
+
+function setBookmarkView(mode) {
+  bookmarkViewMode = mode === 'grid' ? 'grid' : 'list';
+  try { localStorage.setItem('rianless_bookmark_view', bookmarkViewMode); } catch(e) {}
   renderBookmarkList();
 }
 
@@ -9559,6 +9589,7 @@ function saveBookmarks() {
 }
 
 function loadBookmarks() {
+  try { if (localStorage.getItem('rianless_bookmark_view') === 'grid') bookmarkViewMode = 'grid'; } catch(e) {}
   try {
     const raw = JSON.parse(localStorage.getItem('rianless_bookmarks') || 'null');
     if (raw && Array.isArray(raw.bookmarks)) {
@@ -9583,7 +9614,8 @@ function renderBookmarkList() {
 
   const fe = document.getElementById('bookmarkFolders');
   if (fe) {
-    fe.innerHTML = `<div class="bm-chips">${chip('all', '전체')}${bookmarkFolders.map(f => chip(f.id, '📁 ' + f.name)).join('')}${bookmarkFolders.length ? chip('none', '미분류') : ''}<button class="bm-chip bm-chip-add" onclick="startBookmarkFolderEdit('new')">+ 폴더</button></div>`
+    const viewBtn = (mode, icon, label) => `<button type="button" class="${bookmarkViewMode === mode ? 'on' : ''}" title="${label}" aria-label="${label}" aria-pressed="${bookmarkViewMode === mode}" onclick="setBookmarkView('${mode}')">${icon}</button>`;
+    fe.innerHTML = `<div class="bm-bar"><div class="bm-chips">${chip('all', '전체')}${bookmarkFolders.map(f => chip(f.id, '📁 ' + f.name)).join('')}${bookmarkFolders.length ? chip('none', '미분류') : ''}<button class="bm-chip bm-chip-add" onclick="startBookmarkFolderEdit('new')">+ 폴더</button></div><div class="bm-view">${viewBtn('list', '☰', '목록으로 보기')}${viewBtn('grid', '▦', '그리드로 보기')}</div></div>`
       + (bookmarkFolderEdit
         ? `<div class="bm-folder-edit"><input type="text" class="form-input" id="bookmarkFolderInput" maxlength="30" value="${bookmarkFolderEdit === 'rename' && cur ? esc(cur.name) : ''}" placeholder="폴더 이름" onkeydown="if(event.key==='Enter'){event.preventDefault();submitBookmarkFolderEdit()}else if(event.key==='Escape'){cancelBookmarkFolderEdit()}"><button class="btn-save bm-go" onclick="submitBookmarkFolderEdit()">확인</button><button class="btn-cancel bm-go" onclick="cancelBookmarkFolderEdit()">취소</button></div>`
         : (cur ? `<div class="bm-folder-actions"><button onclick="startBookmarkFolderEdit('rename')">이름 수정</button><button onclick="deleteBookmarkFolder()">폴더 삭제</button></div>` : ''));
@@ -9595,21 +9627,37 @@ function renderBookmarkList() {
     return;
   }
   const folderName = b => { const f = bookmarkFolders.find(x => x.id === b.folderId); return f ? f.name : ''; };
+  // 목록·그리드가 같이 쓰는 부품
+  const titleHtml = (b, cls) => b.id === editingBookmarkId
+    ? `<input type="text" class="form-input bm-title-input" id="bookmarkTitleInput" maxlength="100" value="${esc(b.title || '')}" placeholder="${esc(Bookmarks.hostOf(b.url))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();finishBookmarkTitle(true)}else if(event.key==='Escape'){finishBookmarkTitle(false)}" onblur="finishBookmarkTitle(true)">`
+    : `<div class="${cls}">${esc(Bookmarks.labelOf(b))}</div>`;
+  const moveHtml = b => bookmarkFolders.length ? `<span class="bm-del bm-move" title="폴더 이동" onclick="event.stopPropagation()">📁<select aria-label="폴더 이동" onchange="moveBookmark(${b.id}, this.value)">
+        <option value="none"${Bookmarks.folderIdOf(b, bookmarkFolders) === null ? ' selected' : ''}>미분류</option>
+        ${bookmarkFolders.map(f => `<option value="${f.id}"${b.folderId === f.id ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}
+      </select></span>` : '';
+  const actionsHtml = b => `${moveHtml(b)}<button class="bm-del" title="제목 수정" onclick="editBookmarkTitle(${b.id});event.stopPropagation()">✎</button><button class="bm-del" title="삭제" onclick="deleteBookmark(${b.id});event.stopPropagation()">✕</button>`;
+
+  if (bookmarkViewMode === 'grid') {
+    // 아이콘 뒤에 첫 글자를 깔아 둬서, 아이콘을 못 불러와도(오프라인 등) 빈칸이 되지 않는다
+    el.innerHTML = '<div class="bm-grid">' + [...list].reverse().map(b => `
+    <div class="bm-tile" onclick="openBookmark(${b.id})" title="${esc(b.url)}">
+      <div class="bm-tile-actions">${actionsHtml(b)}</div>
+      <div class="bm-tile-icon"><span class="bm-tile-letter">${esc(Bookmarks.labelOf(b).slice(0, 1).toUpperCase())}</span><img loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'"></div>
+      ${titleHtml(b, 'bm-tile-title')}
+      <div class="bm-tile-host">${Bookmarks.labelOf(b) === Bookmarks.hostOf(b.url) ? '&nbsp;' : esc(Bookmarks.hostOf(b.url) || b.url)}</div>
+      ${bookmarkFilter === 'all' && folderName(b) ? `<div class="bm-tile-folder">📁 ${esc(folderName(b))}</div>` : ''}
+    </div>`).join('') + '</div>';
+    return;
+  }
+
   el.innerHTML = [...list].reverse().map(b => `
     <div class="bm-item" onclick="openBookmark(${b.id})">
       <img class="bm-icon" loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'">
       <div class="bm-text">
-        ${b.id === editingBookmarkId
-          ? `<input type="text" class="form-input bm-title-input" id="bookmarkTitleInput" maxlength="100" value="${esc(b.title || '')}" placeholder="${esc(Bookmarks.hostOf(b.url))}" onclick="event.stopPropagation()" onkeydown="if(event.key==='Enter'){event.preventDefault();finishBookmarkTitle(true)}else if(event.key==='Escape'){finishBookmarkTitle(false)}" onblur="finishBookmarkTitle(true)">`
-          : `<div class="bm-title">${esc(Bookmarks.labelOf(b))}</div>`}
+        ${titleHtml(b, 'bm-title')}
         <div class="bm-url">${bookmarkFilter === 'all' && folderName(b) ? '📁 ' + esc(folderName(b)) + ' · ' : ''}${esc(b.url)}</div>
       </div>
-      ${bookmarkFolders.length ? `<span class="bm-del bm-move" title="폴더 이동" onclick="event.stopPropagation()">📁<select aria-label="폴더 이동" onchange="moveBookmark(${b.id}, this.value)">
-        <option value="none"${Bookmarks.folderIdOf(b, bookmarkFolders) === null ? ' selected' : ''}>미분류</option>
-        ${bookmarkFolders.map(f => `<option value="${f.id}"${b.folderId === f.id ? ' selected' : ''}>${esc(f.name)}</option>`).join('')}
-      </select></span>` : ''}
-      <button class="bm-del" title="제목 수정" onclick="editBookmarkTitle(${b.id});event.stopPropagation()">✎</button>
-      <button class="bm-del" title="삭제" onclick="deleteBookmark(${b.id});event.stopPropagation()">✕</button>
+      ${actionsHtml(b)}
     </div>`).join('');
 }
 
