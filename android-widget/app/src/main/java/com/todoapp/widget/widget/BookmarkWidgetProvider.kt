@@ -3,13 +3,19 @@ package com.todoapp.widget.widget
 import android.app.PendingIntent
 import android.appwidget.AppWidgetManager
 import android.appwidget.AppWidgetProvider
-import android.content.ComponentName
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
 import android.os.Build
+import android.view.View
 import android.widget.RemoteViews
 import com.todoapp.widget.R
+import com.todoapp.widget.data.bookmarkEmptyText
+import com.todoapp.widget.data.bookmarkHeaderLabel
+import com.todoapp.widget.data.bookmarkView
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
 
 /**
  * 북마크 바로가기 위젯. 웹앱에 저장한 북마크를 폴더별로 보여 주고, 누르면 바로 그 사이트를 연다.
@@ -25,19 +31,15 @@ class BookmarkWidgetProvider : AppWidgetProvider() {
         const val PREFS = "bookmark_widget_prefs"
         private const val WEB_APP_URL = "https://todolist-liart-mu.vercel.app/"
 
-        /** ‹ › 를 누른 횟수(앞으로 +1, 뒤로 -1). 보기 칸 번호는 서비스가 칸 수에 맞춰 돌려 계산한다. */
+        /** ‹ › 를 누른 횟수(앞으로 +1, 뒤로 -1). 보기 칸 번호는 칸 수에 맞춰 빙 돌려 계산한다. */
         fun offsetKey(widgetId: Int) = "folder_offset_$widgetId"
-
-        /** 위젯이 놓인 모든 북마크 위젯의 목록을 다시 불러온다. */
-        fun refreshAll(context: Context) {
-            val manager = AppWidgetManager.getInstance(context)
-            val ids = manager.getAppWidgetIds(ComponentName(context, BookmarkWidgetProvider::class.java))
-            ids.forEach { manager.notifyAppWidgetViewDataChanged(it, R.id.bookmark_list) }
-        }
     }
 
     override fun onUpdate(context: Context, appWidgetManager: AppWidgetManager, appWidgetIds: IntArray) {
-        appWidgetIds.forEach { updateWidget(context, appWidgetManager, it) }
+        // 1차: 지금 가진 것으로 바로 그린다 (처음엔 "불러오는 중…")
+        appWidgetIds.forEach { render(context, appWidgetManager, it) }
+        // 2차: 서버에서 받아 와서 다시 그린다 (기존 일정 위젯과 같은 방식: 위젯 전체를 다시 그림)
+        refreshAndRender(context, appWidgetManager, appWidgetIds, null)
     }
 
     override fun onDeleted(context: Context, appWidgetIds: IntArray) {
@@ -57,14 +59,52 @@ class BookmarkWidgetProvider : AppWidgetProvider() {
                 val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 val delta = if (intent.action == ACTION_FOLDER_NEXT) 1 else -1
                 prefs.edit().putInt(offsetKey(widgetId), prefs.getInt(offsetKey(widgetId), 0) + delta).apply()
-                manager.notifyAppWidgetViewDataChanged(widgetId, R.id.bookmark_list)
+                // 이미 받아 둔 데이터로 바로 넘긴다 (네트워크 없이)
+                render(context, manager, widgetId)
             }
-            ACTION_REFRESH -> manager.notifyAppWidgetViewDataChanged(widgetId, R.id.bookmark_list)
+            ACTION_REFRESH -> refreshAndRender(context, manager, intArrayOf(widgetId), goAsync())
         }
     }
 
-    private fun updateWidget(context: Context, manager: AppWidgetManager, widgetId: Int) {
+    /** 서버에서 새로 받은 뒤 [widgetIds] 를 다시 그린다. [pending] 은 방송 수신 중이면 끝날 때까지 프로세스를 붙잡아 둔다. */
+    private fun refreshAndRender(
+        context: Context,
+        manager: AppWidgetManager,
+        widgetIds: IntArray,
+        pending: android.content.BroadcastReceiver.PendingResult?
+    ) {
+        val appContext = context.applicationContext
+        CoroutineScope(Dispatchers.IO).launch {
+            try {
+                BookmarkStore.refresh()
+                widgetIds.forEach { render(appContext, manager, it) }
+            } finally {
+                pending?.finish()
+            }
+        }
+    }
+
+    /** 위젯 하나를 지금 가진 데이터로 전체를 다시 그린다. */
+    private fun render(context: Context, manager: AppWidgetManager, widgetId: Int) {
         val views = RemoteViews(context.packageName, R.layout.bookmark_widget_layout)
+
+        // 폴더 줄·빈 화면 글
+        val offset = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(offsetKey(widgetId), 0)
+        val loaded = BookmarkStore.data
+        val view = bookmarkView(loaded, offset)
+        val neverLoaded = loaded == null && BookmarkStore.stale
+        val stillLoading = loaded == null && !BookmarkStore.stale
+        views.setTextViewText(
+            R.id.bookmark_folder_label,
+            if (stillLoading) "불러오는 중…" else bookmarkHeaderLabel(view, neverLoaded, BookmarkStore.stale && loaded != null)
+        )
+        views.setTextViewText(
+            R.id.bookmark_empty,
+            if (stillLoading) "불러오는 중…" else bookmarkEmptyText(view, neverLoaded)
+        )
+        val arrows = if (view.canSwitch) View.VISIBLE else View.INVISIBLE
+        views.setViewVisibility(R.id.bookmark_folder_prev, arrows)
+        views.setViewVisibility(R.id.bookmark_folder_next, arrows)
 
         val serviceIntent = Intent(context, BookmarkWidgetService::class.java).apply {
             putExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, widgetId)

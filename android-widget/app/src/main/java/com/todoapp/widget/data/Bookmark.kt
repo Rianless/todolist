@@ -64,3 +64,33 @@ fun filterBookmarks(list: List<Bookmark>, folders: List<BookmarkFolder>, slot: F
 /** 위젯의 ‹ › 가 쌓아 둔 이동 횟수를 보기 칸 번호로 바꾼다. 음수·큰 값도 빙 돌아서 맞춘다. */
 fun wrapSlotIndex(offset: Int, size: Int): Int =
     if (size <= 0) 0 else ((offset % size) + size) % size
+
+/** 위젯이 지금 보여 줄 내용: 선택된 보기 칸, 목록(최신순), ‹ › 를 쓸 수 있는지. */
+data class BookmarkView(
+    val slot: FolderSlot,
+    val items: List<Bookmark>,
+    val canSwitch: Boolean
+)
+
+/** [data] 가 null 이면 아직 한 번도 못 받은 것. [offset] 은 ‹ › 를 누른 횟수. */
+fun bookmarkView(data: BookmarkData?, offset: Int): BookmarkView {
+    val current = data ?: BookmarkData(emptyList(), emptyList())
+    val slots = folderSlots(current.folders)
+    val slot = slots[wrapSlotIndex(offset, slots.size)]
+    // 웹앱처럼 새로 저장한 것이 위로
+    return BookmarkView(slot, filterBookmarks(current.bookmarks, current.folders, slot).reversed(), slots.size > 1)
+}
+
+/** 폴더 줄에 쓸 글: `📁 업무 (3)`. 한 번도 못 받았으면 `연결 실패`, 이전 목록을 쓰는 중이면 끝에 ⚠. */
+fun bookmarkHeaderLabel(view: BookmarkView, neverLoaded: Boolean, stale: Boolean): String {
+    if (neverLoaded) return "연결 실패"
+    val icon = if (view.slot.isAll) "" else "📁 "
+    return "$icon${view.slot.label} (${view.items.size})${if (stale) " ⚠" else ""}"
+}
+
+/** 목록이 비었을 때 보여 줄 글. */
+fun bookmarkEmptyText(view: BookmarkView, neverLoaded: Boolean): String = when {
+    neverLoaded -> "서버에 연결하지 못했어요\n⟳ 를 눌러 다시 시도하세요"
+    view.slot.isAll -> "저장한 북마크가 없어요\n웹앱에서 링크를 저장해 보세요"
+    else -> "이 폴더가 비어 있어요"
+}

@@ -4,20 +4,14 @@ import android.appwidget.AppWidgetManager
 import android.content.Context
 import android.content.Intent
 import android.net.Uri
-import android.view.View
 import android.widget.RemoteViews
 import android.widget.RemoteViewsService
 import com.todoapp.widget.R
 import com.todoapp.widget.data.Bookmark
-import com.todoapp.widget.data.BookmarkData
-import com.todoapp.widget.data.CloudStateClient
-import com.todoapp.widget.data.FolderSlot
 import com.todoapp.widget.data.bookmarkHost
 import com.todoapp.widget.data.bookmarkLabel
-import com.todoapp.widget.data.filterBookmarks
-import com.todoapp.widget.data.folderSlots
+import com.todoapp.widget.data.bookmarkView
 import com.todoapp.widget.data.isOpenableBookmarkUrl
-import com.todoapp.widget.data.wrapSlotIndex
 
 class BookmarkWidgetService : RemoteViewsService() {
     override fun onGetViewFactory(intent: Intent): RemoteViewsFactory {
@@ -33,49 +27,16 @@ class BookmarkWidgetFactory(
     private val widgetId: Int =
         intent.getIntExtra(AppWidgetManager.EXTRA_APPWIDGET_ID, AppWidgetManager.INVALID_APPWIDGET_ID)
 
-    /** 마지막으로 성공해서 받은 데이터. 네트워크가 끊겨도 이걸로 계속 보여 준다. */
-    private var data: BookmarkData? = null
     private var shown: List<Bookmark> = emptyList()
 
     override fun onCreate() {}
 
+    /** 위젯 본체(provider)가 받아 둔 데이터로 목록을 만든다. 아직 없으면 여기서 한 번 받는다. */
     override fun onDataSetChanged() {
-        val fresh = CloudStateClient.fetchBookmarks()
-        if (fresh != null) data = fresh
-        val current = data ?: BookmarkData(emptyList(), emptyList())
-
-        val slots = folderSlots(current.folders)
+        BookmarkStore.ensureLoaded()
         val offset = context.getSharedPreferences(BookmarkWidgetProvider.PREFS, Context.MODE_PRIVATE)
             .getInt(BookmarkWidgetProvider.offsetKey(widgetId), 0)
-        val slot = slots[wrapSlotIndex(offset, slots.size)]
-
-        // 웹앱처럼 새로 저장한 것이 위로
-        shown = filterBookmarks(current.bookmarks, current.folders, slot).reversed()
-        pushHeader(slot, slots.size > 1, offline = fresh == null && data == null, hasStale = fresh == null && data != null)
-    }
-
-    /** 목록 위쪽의 폴더 이름·개수와 ‹ › 단추 표시를 갱신한다. (위젯 전체를 다시 그리지 않고 일부만) */
-    private fun pushHeader(slot: FolderSlot, canSwitch: Boolean, offline: Boolean, hasStale: Boolean) {
-        if (widgetId == AppWidgetManager.INVALID_APPWIDGET_ID) return
-        val label = when {
-            offline -> "연결 실패"
-            else -> "${if (slot.isAll) "" else "📁 "}${slot.label} (${shown.size})${if (hasStale) " ⚠" else ""}"
-        }
-        val views = RemoteViews(context.packageName, R.layout.bookmark_widget_layout).apply {
-            setTextViewText(R.id.bookmark_folder_label, label)
-            val arrows = if (canSwitch) View.VISIBLE else View.INVISIBLE
-            setViewVisibility(R.id.bookmark_folder_prev, arrows)
-            setViewVisibility(R.id.bookmark_folder_next, arrows)
-            setTextViewText(
-                R.id.bookmark_empty,
-                when {
-                    offline -> "서버에 연결하지 못했어요\n⟳ 를 눌러 다시 시도하세요"
-                    slot.isAll -> "저장한 북마크가 없어요\n웹앱에서 링크를 저장해 보세요"
-                    else -> "이 폴더가 비어 있어요"
-                }
-            )
-        }
-        runCatching { AppWidgetManager.getInstance(context).partiallyUpdateAppWidget(widgetId, views) }
+        shown = bookmarkView(BookmarkStore.data, offset).items
     }
 
     override fun onDestroy() {}
