@@ -3774,9 +3774,12 @@ body::after {
 .extra-toggle-row button { flex: 1; font: inherit; font-size: 13px; font-weight: 700; padding: 10px 0; border-radius: 12px; border: 1px solid var(--border); background: var(--panel2); color: var(--text3); cursor: pointer; }
 .extra-toggle-row button.on { background: var(--accent); border-color: var(--accent); color: #fff; }
 #addModal [hidden], #routineModal [hidden] { display: none !important; }
-.routine-detail { grid-column: 2 / -1; display: flex; flex-direction: column; gap: 4px; }
-.routine-memo { font-size: 11px; color: var(--text3); white-space: pre-wrap; }
-.routine-sub { display: flex; align-items: center; gap: 8px; width: 100%; padding: 4px 0; border: 0; background: none; font: inherit; font-size: 12px; color: var(--text); text-align: left; cursor: pointer; }
+.agenda-row.routine { grid-template-columns: 28px minmax(0,1fr) auto; row-gap: 6px; }
+.agenda-row.routine .agenda-row-body strong { white-space: normal; overflow-wrap: anywhere; line-height: 1.35; }
+.agenda-row.routine .routine-edit { padding: 3px 8px; font-size: 11px; }
+.routine-detail { grid-column: 2 / -1; display: flex; flex-flow: row wrap; align-items: center; gap: 6px; }
+.routine-memo { flex: 1 0 100%; font-size: 11px; line-height: 1.4; color: var(--text3); white-space: pre-wrap; overflow-wrap: anywhere; }
+.routine-sub { display: inline-flex; align-items: center; gap: 6px; width: auto; max-width: 100%; padding: 3px 10px 3px 6px; border: 1px solid var(--border); border-radius: 999px; background: var(--panel); font: inherit; font-size: 12px; color: var(--text); text-align: left; cursor: pointer; }
 .routine-sub-check { width: 16px; height: 16px; flex: none; border-radius: 4px; border: 2px solid var(--accent); display: grid; place-items: center; font-size: 10px; color: #fff; }
 .routine-sub.done .routine-sub-check { background: var(--accent); }
 .routine-sub.done .routine-sub-text { text-decoration: line-through; opacity: .55; }
@@ -6327,6 +6330,12 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .asset-card, html[data-skin="w98"] .collapse-card, html[data-skin="w98"] .section-card, html[data-skin="w98"] .mp-card, html[data-skin="w98"] .panel-card { background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
   html[data-skin="w98"] .modal-overlay { background: rgba(0,0,0,.35) !important; }
   html[data-skin="w98"] .calendar-surface table, html[data-skin="w98"] .cal-grid { background: #c0c0c0 !important; }
+  html[data-skin="w98"] .routine-sub { background: transparent !important; box-shadow: none !important; padding: 2px 8px 2px 0 !important; }
+  html[data-skin="w98"] .routine-sub:active { background: #dfdfdf !important; }
+  html[data-skin="w98"] .routine-sub-check, html[data-skin="w98"] .routine-sub.done .routine-sub-check { background: #fff !important; color: #000 !important; border: none !important; box-shadow: var(--w98-sunken) !important; }
+  html[data-skin="w98"] .agenda-row.routine .routine-edit { padding: 2px 8px !important; }
+  /* 모바일: 파란 제목 막대가 오른쪽 단추(알림 등)에 붙거나 겹치지 않게 조금 줄인다 */
+  @media (max-width: 899px) { html[data-skin="w98"] .header-title { width: calc(100% - 20px); box-sizing: border-box; } }
 }
 
 .skin-btn { display: inline-flex; align-items: center; justify-content: center; }
