@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v62-bookmark-folders';
+const CACHE_NAME = 'todolist-v63-w98-mobile';
 const ASSETS = [
   './',
   './index.html',

@@ -6259,8 +6259,8 @@ button:active:not(:disabled) {
 .ledger-actions .ledger-add-btn { margin-top: 0; }
 .ledger-actions > :only-child { grid-column: 1 / -1; }
 
-/* ===== Windows 98 스킨 (PC 전용, 헤더의 🖥️ 단추로 켜고 끔) ===== */
-@media (min-width: 900px) {
+/* ===== Windows 98 스킨 (PC·모바일 공통, 헤더의 🖥️ 단추로 켜고 끔) ===== */
+@media all {
   html[data-skin="w98"] {
     --bg: #c0c0c0; --bg2: #c0c0c0; --panel: #c0c0c0; --panel2: #dfdfdf;
     --border: #808080; --border2: #404040;
@@ -6284,6 +6284,7 @@ button:active:not(:disabled) {
     background: #c0c0c0 !important; border: none !important; box-shadow: var(--w98-raised) !important; color: #000 !important;
   }
   html[data-skin="w98"] .app-header { border-right: 2px solid #404040 !important; }
+  @media (max-width: 899px) { html[data-skin="w98"] .app-header { border-right: none !important; } }
   html[data-skin="w98"] .header-title { color: #fff !important; background: var(--w98-title); padding: 4px 8px; font-size: 14px !important; font-weight: 700; margin: 0 0 10px; }
   html[data-skin="w98"] .header-title span { color: #fff !important; }
   html[data-skin="w98"] .header-sub, html[data-skin="w98"] .header-left p { color: #000 !important; }
@@ -6328,16 +6329,15 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .calendar-surface table, html[data-skin="w98"] .cal-grid { background: #c0c0c0 !important; }
 }
 
-.skin-btn { display: none; }
-@media (min-width: 900px) { .skin-btn { display: inline-flex; align-items: center; justify-content: center; } }
+.skin-btn { display: inline-flex; align-items: center; justify-content: center; }
 /* 모바일: 월/주/리스트/루틴 바를 달성률 박스와 같은 가로 폭으로 */
 @media (max-width: 899px) {
   #viewCalendar .cal-subtab-bar { box-sizing: border-box; width: calc(100% - 8px); max-width: none; margin-left: 4px; margin-right: 4px; }
   #viewCalendar .cal-subtab-bar .cal-subtab { flex: 1 1 0; min-width: 0; }
 }
 
-/* Windows 98 달력 모양 (PC, 윈도우 98 스킨이 켜져 있을 때만) */
-@media (min-width: 900px) {
+/* Windows 98 달력 모양 (윈도우 98 스킨이 켜져 있을 때만) */
+@media all {
   html[data-skin="w98"] .calendar-surface { background: #c0c0c0 !important; padding: 6px !important; box-shadow: var(--w98-raised) !important; }
   html[data-skin="w98"] .calendar-surface .cal-grid { gap: 0 !important; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; align-content: stretch; flex: 1; grid-template-rows: auto; grid-auto-rows: 1fr; }
   html[data-skin="w98"] .calendar-surface .cal-dow { background: #c0c0c0 !important; box-shadow: var(--w98-raised); color: #000 !important; font-size: 12px !important; font-weight: 700; padding: 5px 0 !important; margin: 0 -1px 0 0; }
@@ -6355,6 +6355,7 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .calendar-surface .cal-cell.selected { background: #e4e4e4 !important; box-shadow: var(--w98-sunken) !important; outline: none !important; }
   html[data-skin="w98"] .calendar-surface .cal-cell.selected .cal-daynum { background: #000080; color: #fff !important; padding: 0 5px; }
   html[data-skin="w98"] .calendar-surface .cal-cell.selected.today { outline: 2px solid #000080 !important; outline-offset: -2px; }
+  html[data-skin="w98"] .calendar-surface .cal-cell.selected.today .cal-daynum { background: #000080 !important; color: #fff !important; padding: 0 5px !important; text-decoration: none; }
   html[data-skin="w98"] #viewCal .cal-nav { background: #c0c0c0; box-shadow: var(--w98-raised); padding: 4px 6px; min-height: 0 !important; }
   html[data-skin="w98"] #viewCal .cal-nav .cal-month { font-size: 16px !important; font-weight: 700 !important; }
   html[data-skin="w98"] .cal-subtab-bar { background: transparent !important; box-shadow: none !important; gap: 0 !important; padding: 0 !important; }
@@ -6436,7 +6437,7 @@ button:active:not(:disabled) {
         <button class="theme-btn" onclick="openSearch()" title="검색" aria-label="검색 열기">🔍</button>
 
         <button class="theme-btn" onclick="toggleTheme()" title="테마 전환" id="themeBtn" aria-label="테마 전환">☀️</button>
-        <button class="theme-btn skin-btn" onclick="toggleSkin()" title="윈도우 98 스타일 켜기/끄기 (PC)" id="skinBtn" aria-label="윈도우 98 스타일 켜기/끄기">🖥️</button>
+        <button class="theme-btn skin-btn" onclick="toggleSkin()" title="윈도우 98 스타일 켜기/끄기" id="skinBtn" aria-label="윈도우 98 스타일 켜기/끄기">🖥️</button>
 
       </div>
 
