@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v64-routine-row';
+const CACHE_NAME = 'todolist-v65-agenda-check';
 const ASSETS = [
   './',
   './index.html',
