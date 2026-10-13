@@ -4070,6 +4070,12 @@ body::after {
 
 .memo-item-del { position:absolute; top:8px; right:8px; background:none; border:none; color:var(--text3); font-size:14px; cursor:pointer; }
 
+.memo-item-pin { position:absolute; top:8px; right:34px; background:none; border:none; color:var(--text3); font-size:13px; cursor:pointer; opacity:.55; }
+
+.memo-item.pinned .memo-item-pin { opacity:1; }
+
+.memo-item-content { padding-right: 52px; }
+
 .memo-empty { text-align:center; color:var(--text3); padding:30px 0; font-size:12px; }
 
 /* ══ 북마크 카드 ══ */
@@ -6402,6 +6408,90 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .cal-subtab.active { background: #c0c0c0 !important; font-weight: 700 !important; padding-top: 8px !important; z-index: 2; position: relative; }
 }
 
+/* ===== 통계 (카드·앱 공용) ===== */
+.st-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
+.st-month { min-width: 130px; text-align: center; font-size: 17px; font-weight: 800; }
+.st-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
+.st-card { padding: 10px 12px; background: #c0c0c0; box-shadow: var(--w98-raised); }
+.st-card-label { font-size: 11px; color: #404040; }
+.st-card-val { margin-top: 4px; font-size: 19px; font-weight: 800; color: #000; white-space: nowrap; }
+.st-card-val.exp { color: #c00000; }
+.st-card-val.inc { color: #006400; }
+.st-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: start; }
+.st-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
+.st-panel { padding: 3px; background: #c0c0c0; box-shadow: var(--w98-raised); }
+.st-panel-title { padding: 3px 8px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-size: 12px; font-weight: 700; }
+.st-panel-body { margin-top: 3px; padding: 12px; background: #fff; box-shadow: var(--w98-sunken); color: #000; font-size: 12px; }
+.st-bars { display: flex; align-items: flex-end; gap: 10px; height: 190px; }
+.st-bargroup { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: stretch; height: 100%; cursor: pointer; }
+.st-bargroup.cur .st-bar-label { font-weight: 800; text-decoration: underline; }
+.st-bar-pair { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 3px; min-height: 0; }
+.st-bar { flex: 1; max-width: 26px; min-height: 2px; position: relative; }
+.st-bar.exp { background: #c00000; }
+.st-bar.inc { background: #008000; }
+.st-bar span { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); font-size: 10px; white-space: nowrap; color: #000; }
+.st-bar-label { margin-top: 4px; text-align: center; font-size: 11px; }
+.st-legend { display: flex; gap: 14px; margin-top: 8px; font-size: 11px; color: #404040; }
+.st-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; }
+.st-cat { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 4px 0; }
+.st-cat-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.st-cat-track { height: 12px; background: #dfdfdf; box-shadow: var(--w98-sunken); padding: 2px; }
+.st-cat-track > i { display: block; height: 100%; background: #000080; }
+.st-cat-amt { text-align: right; white-space: nowrap; font-weight: 700; }
+.st-cat-amt small { margin-left: 4px; font-weight: 400; color: #404040; }
+.st-heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 22px); grid-auto-columns: 22px; gap: 4px; justify-content: start; }
+.st-heat-cell { box-shadow: var(--w98-sunken); background: #dfdfdf; }
+.st-heat-cell.l1 { background: #f2c4c4; }
+.st-heat-cell.l2 { background: #b8dcb8; }
+.st-heat-cell.l3 { background: #5fae5f; }
+.st-heat-cell.l4 { background: #006400; }
+.st-heat-cell.future { background: transparent; box-shadow: none; }
+.st-heat-cell.today { outline: 2px solid #000080; outline-offset: 0; }
+.st-heat-wrap { display: flex; gap: 6px; }
+.st-heat-dows { display: grid; grid-template-rows: repeat(7, 22px); gap: 4px; font-size: 11px; line-height: 22px; color: #404040; }
+.st-legend { align-items: center; flex-wrap: wrap; }
+.st-legend .st-heat-cell { display: inline-block; flex: 0 0 auto; width: 12px; height: 12px; margin-right: -8px; }
+.st-empty { padding: 14px 0; text-align: center; color: #808080; }
+
+.dkw-kv { display: flex; justify-content: space-between; padding: 2px 0; }
+.dkw-bar { height: 12px; margin: 3px 0 6px; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
+.dkw-bar > i { display: block; height: 100%; background: #000080; }
+
+/* 통계: 마이페이지 카드(폰·PC 일반 스킨)에 들어갈 때는 한 줄씩 쌓는다 */
+.mp-card-inner .st-cards { grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 8px; margin-bottom: 10px; }
+.mp-card-inner .st-card-val { font-size: 15px; }
+.mp-card-inner .st-grid { grid-template-columns: minmax(0, 1fr); gap: 10px; }
+.mp-card-inner .st-col { gap: 10px; }
+.mp-card-inner .st-bars { height: 160px; gap: 6px; }
+.mp-card-inner .st-bar span { font-size: 9px; }
+.mp-card-inner .st-cat { grid-template-columns: 64px minmax(0, 1fr) auto; gap: 6px; }
+.mp-card-inner .st-heat { grid-template-rows: repeat(7, 15px); grid-auto-columns: 15px; gap: 3px; }
+.mp-card-inner .st-heat-dows { grid-template-rows: repeat(7, 15px); gap: 3px; line-height: 15px; font-size: 10px; }
+.mp-card-inner .st-legend { gap: 8px; font-size: 10px; }
+.st-nav-card { display: flex; align-items: center; gap: 6px; margin-bottom: 10px; }
+.st-nav-card .st-month { min-width: 0; flex: 1; font-size: 15px; }
+.st-nav-card .lc-today { padding: 6px 10px; font-size: 12px; cursor: pointer; border: 1px solid var(--border); background: var(--panel2); color: var(--text); border-radius: 8px; }
+html[data-skin="w98"] .st-nav-card .lc-today { background: #c0c0c0; color: #000; border: none; border-radius: 0; box-shadow: var(--w98-raised); }
+html[data-skin="classic"] .st-card, html[data-skin="classic"] .st-panel { background: var(--panel); box-shadow: none; border: 1px solid var(--border); border-radius: 8px; }
+html[data-skin="classic"] .st-card-label { color: var(--text3); }
+html[data-skin="classic"] .st-card-val { color: var(--text); }
+html[data-skin="classic"] .st-panel-title { background: var(--panel2); color: var(--text); border-radius: 7px 7px 0 0; }
+html[data-skin="classic"] .st-panel-body { background: transparent; box-shadow: none; color: var(--text); }
+html[data-skin="classic"] .st-cat-track, html[data-skin="classic"] .dkw-bar { background: var(--panel2); box-shadow: none; }
+html[data-skin="classic"] .st-cat-track > i, html[data-skin="classic"] .dkw-bar > i { background: var(--accent, #4a7cff); }
+html[data-skin="classic"] .st-legend, html[data-skin="classic"] .st-cat-amt small, html[data-skin="classic"] .st-bar-label { color: var(--text3); }
+html[data-skin="classic"] .st-bar span, html[data-skin="classic"] .st-empty { color: var(--text2, var(--text)); }
+html[data-skin="classic"] .st-heat-cell { box-shadow: none; border-radius: 3px; background: var(--panel2); }
+html[data-skin="classic"] .st-heat-cell.l1 { background: #f2c4c4; }
+html[data-skin="classic"] .st-heat-cell.l2 { background: #b8dcb8; }
+html[data-skin="classic"] .st-heat-cell.l3 { background: #5fae5f; }
+html[data-skin="classic"] .st-heat-cell.l4 { background: #006400; }
+html[data-skin="classic"] .st-heat-cell.future { background: transparent; }
+html[data-skin="classic"] .st-heat-dows, html[data-skin="classic"] .dkw-kv { color: var(--text); }
+html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
+/* 바탕화면 스킨(PC)에는 통계 앱이 따로 있으니 카드는 숨긴다 */
+@media (min-width: 900px) { html[data-desktop][data-skin="w98"] #mpCardStats { display: none; } }
+
 /* ===== 바탕화면 스킨 (PC 전용): 윈도우 98 바탕화면에 앱 아이콘 + 창 하나 =====
    🖥️ 단추로 [윈도우 98 → 바탕화면 → 클래식] 을 고른다. html[data-skin="w98"][data-desktop] 일 때만 적용되고 폰(900px 미만)에서는 98 과 같다. */
 .desk-extra, #desktopTaskbar, #desktopStartMenu, .dk-winbtns { display: none; }
@@ -6497,50 +6587,6 @@ button:active:not(:disabled) {
 
   /* ----- 통계 앱 ----- */
   html[data-desktop][data-main-tab="stats"][data-skin="w98"] #viewStats.active { display: block; padding: 16px 20px 24px; }
-  .st-nav { display: flex; align-items: center; gap: 8px; margin-bottom: 12px; }
-  .st-month { min-width: 130px; text-align: center; font-size: 17px; font-weight: 800; }
-  .st-cards { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 12px; margin-bottom: 14px; }
-  .st-card { padding: 10px 12px; background: #c0c0c0; box-shadow: var(--w98-raised); }
-  .st-card-label { font-size: 11px; color: #404040; }
-  .st-card-val { margin-top: 4px; font-size: 19px; font-weight: 800; color: #000; white-space: nowrap; }
-  .st-card-val.exp { color: #c00000; }
-  .st-card-val.inc { color: #006400; }
-  .st-grid { display: grid; grid-template-columns: minmax(0, 1.25fr) minmax(0, 1fr); gap: 14px; align-items: start; }
-  .st-col { display: flex; flex-direction: column; gap: 14px; min-width: 0; }
-  .st-panel { padding: 3px; background: #c0c0c0; box-shadow: var(--w98-raised); }
-  .st-panel-title { padding: 3px 8px; background: linear-gradient(90deg, #000080, #1084d0); color: #fff; font-size: 12px; font-weight: 700; }
-  .st-panel-body { margin-top: 3px; padding: 12px; background: #fff; box-shadow: var(--w98-sunken); color: #000; font-size: 12px; }
-  .st-bars { display: flex; align-items: flex-end; gap: 10px; height: 190px; }
-  .st-bargroup { flex: 1; min-width: 0; display: flex; flex-direction: column; align-items: stretch; height: 100%; cursor: pointer; }
-  .st-bargroup.cur .st-bar-label { font-weight: 800; text-decoration: underline; }
-  .st-bar-pair { flex: 1; display: flex; align-items: flex-end; justify-content: center; gap: 3px; min-height: 0; }
-  .st-bar { flex: 1; max-width: 26px; min-height: 2px; position: relative; }
-  .st-bar.exp { background: #c00000; }
-  .st-bar.inc { background: #008000; }
-  .st-bar span { position: absolute; left: 50%; bottom: 100%; transform: translateX(-50%); font-size: 10px; white-space: nowrap; color: #000; }
-  .st-bar-label { margin-top: 4px; text-align: center; font-size: 11px; }
-  .st-legend { display: flex; gap: 14px; margin-top: 8px; font-size: 11px; color: #404040; }
-  .st-legend i { display: inline-block; width: 10px; height: 10px; margin-right: 4px; vertical-align: -1px; }
-  .st-cat { display: grid; grid-template-columns: 84px minmax(0, 1fr) auto; align-items: center; gap: 8px; padding: 4px 0; }
-  .st-cat-name { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .st-cat-track { height: 12px; background: #dfdfdf; box-shadow: var(--w98-sunken); padding: 2px; }
-  .st-cat-track > i { display: block; height: 100%; background: #000080; }
-  .st-cat-amt { text-align: right; white-space: nowrap; font-weight: 700; }
-  .st-cat-amt small { margin-left: 4px; font-weight: 400; color: #404040; }
-  .st-heat { display: grid; grid-auto-flow: column; grid-template-rows: repeat(7, 22px); grid-auto-columns: 22px; gap: 4px; justify-content: start; }
-  .st-heat-cell { box-shadow: var(--w98-sunken); background: #dfdfdf; }
-  .st-heat-cell.l1 { background: #f2c4c4; }
-  .st-heat-cell.l2 { background: #b8dcb8; }
-  .st-heat-cell.l3 { background: #5fae5f; }
-  .st-heat-cell.l4 { background: #006400; }
-  .st-heat-cell.future { background: transparent; box-shadow: none; }
-  .st-heat-cell.today { outline: 2px solid #000080; outline-offset: 0; }
-  .st-heat-wrap { display: flex; gap: 6px; }
-  .st-heat-dows { display: grid; grid-template-rows: repeat(7, 22px); gap: 4px; font-size: 11px; line-height: 22px; color: #404040; }
-  .st-legend { align-items: center; flex-wrap: wrap; }
-  .st-legend .st-heat-cell { display: inline-block; flex: 0 0 auto; width: 12px; height: 12px; margin-right: -8px; }
-  .st-empty { padding: 14px 0; text-align: center; color: #808080; }
-
   /* ----- 메모장 앱: 왼쪽 목록 + 오른쪽 탭·편집기 ----- */
   html[data-desktop][data-main-tab="memo"][data-skin="w98"] #mainContent { overflow: hidden; }
   html[data-desktop][data-main-tab="memo"][data-skin="w98"] #viewMemo.active { display: flex !important; flex-direction: row !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
@@ -7224,6 +7270,7 @@ button:active:not(:disabled) {
 
             <div class="mp-card-inner">
 
+              <input type="search" class="form-input" id="memoCardSearch" placeholder="🔍 메모 검색" aria-label="메모 검색" autocomplete="off" style="display:none;margin-bottom:8px;" oninput="memoCardSearchText=this.value;renderMemoList()">
               <div id="memoList"></div>
 
               <button class="ledger-add-btn" style="margin-top:10px;" onclick="openMemoAdd()">+ 메모 추가</button>
@@ -7261,12 +7308,34 @@ button:active:not(:disabled) {
 
               <div id="bookmarkFolders"></div>
 
+              <input type="search" class="form-input" id="bookmarkCardSearch" placeholder="🔍 북마크 검색 (이름·주소)" aria-label="북마크 검색" autocomplete="off" style="display:none;margin-bottom:8px;" oninput="bookmarkCardSearchText=this.value;renderBookmarkList()">
+
               <div id="bookmarkList"></div>
 
             </div>
 
           </div>
 
+        </div>
+
+        <!-- ── 통계 카드 ── -->
+        <div class="mp-card" id="mpCardStats">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardStats')">
+            <span class="mp-card-icon">📊</span>
+            <span class="mp-card-label">통계</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div class="st-nav-card">
+                <button type="button" class="cal-arrow" onclick="statsMove(-1)" aria-label="이전 달">‹</button>
+                <div class="st-month" data-stats-month></div>
+                <button type="button" class="cal-arrow" onclick="statsMove(1)" aria-label="다음 달">›</button>
+                <button type="button" class="lc-today" onclick="statsGoToday()">이번 달</button>
+              </div>
+              <div data-stats-body></div>
+            </div>
+          </div>
         </div>
 
 
@@ -7281,11 +7350,11 @@ button:active:not(:disabled) {
     <div class="view" id="viewStats">
       <div class="st-nav">
         <button type="button" class="cal-arrow" onclick="statsMove(-1)" aria-label="이전 달">‹</button>
-        <div class="st-month" id="stMonth"></div>
+        <div class="st-month" id="stMonth" data-stats-month></div>
         <button type="button" class="cal-arrow" onclick="statsMove(1)" aria-label="다음 달">›</button>
         <button type="button" class="lc-today" onclick="statsGoToday()">이번 달</button>
       </div>
-      <div id="statsBody"></div>
+      <div id="statsBody" data-stats-body></div>
     </div>
 
     <!-- ══ 메모장 뷰 (바탕화면 스킨 PC 전용) ══ -->
@@ -9530,10 +9599,10 @@ function statsGoToday() { statsY = new Date().getFullYear(); statsM = new Date()
 function statsPick(y, m) { statsY = y; statsM = m; renderStatsView(); }
 
 function renderStatsView() {
-  const body = document.getElementById('statsBody');
-  if (!body) return;
+  const bodies = document.querySelectorAll('[data-stats-body]');
+  if (!bodies.length) return;
   const y = statsY, m = statsM, mm = String(m + 1).padStart(2, '0');
-  document.getElementById('stMonth').textContent = `${y}년 ${mm}월`;
+  document.querySelectorAll('[data-stats-month]').forEach(el => { el.textContent = `${y}년 ${mm}월`; });
   const now = new Date(), todayStr = fmtDate(now);
   const isCur = y === now.getFullYear() && m === now.getMonth();
   const lastDay = new Date(y, m + 1, 0).getDate();
@@ -9574,7 +9643,7 @@ function renderStatsView() {
 
   const panel = (title, inner) => `<section class="st-panel"><div class="st-panel-title">${title}</div><div class="st-panel-body">${inner}</div></section>`;
   const card = (label, val, cls) => `<div class="st-card"><div class="st-card-label">${label}</div><div class="st-card-val ${cls || ''}">${val}</div></div>`;
-  body.innerHTML =
+  const html =
     `<div class="st-cards">${card('이번 달 지출', '-' + statsWon(tot.expense), 'exp')}${card('이번 달 수입', '+' + statsWon(tot.income), 'inc')}` +
     `${card('차액', (bal >= 0 ? '+' : '-') + statsWon(Math.abs(bal)))}${card('하루 평균 지출', statsWon(avg))}</div>` +
     `<div class="st-grid"><div class="st-col">` +
@@ -9586,6 +9655,7 @@ function renderStatsView() {
         `<div class="st-legend"><span class="st-heat-cell"></span>없음<span class="st-heat-cell l1"></span>0%<span class="st-heat-cell l2"></span>절반 미만<span class="st-heat-cell l3"></span>절반 이상<span class="st-heat-cell l4"></span>모두</div>`) +
       panel('✅ 루틴별 달성률 (최근 30일)', rateHtml) +
     `</div></div>`;
+  bodies.forEach(b => { b.innerHTML = html; });
 }
 
 /* ══════════════════════════════════════
@@ -10109,6 +10179,8 @@ function toggleMpCard(id) {
 
     if (id === 'mpCardMemo') renderMemoList();
 
+    if (id === 'mpCardStats') renderStatsView();
+
     if (id === 'mpCardBookmark') renderBookmarkList();
 
     if (id === 'mpCardNickname') renderMypageView();
@@ -10295,6 +10367,7 @@ function renderMypageView() {
 
   if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
   if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
+  if (document.getElementById('mpCardStats').classList.contains('open')) renderStatsView();
   if (currentMainTab === 'memo') renderMemoApp();
   if (currentMainTab === 'bookmark') renderBookmarkApp();
   if (document.getElementById('mpCardBookmark').classList.contains('open')) renderBookmarkList();
@@ -10404,32 +10477,40 @@ function loadMemos() {
 
 
 
+let memoCardSearchText = '';   // 마이페이지 메모 카드의 검색어 (화면에서만 쓴다)
+
 function renderMemoList() {
-
   const el = document.getElementById('memoList');
-
   if (!el) return;
-
+  // 메모가 몇 개 없을 때는 검색창을 숨긴다
+  const box = document.getElementById('memoCardSearch');
+  if (box) box.style.display = memos.length >= 3 ? '' : 'none';
   if (!memos.length) {
-
     el.innerHTML = '<div class="memo-empty">메모가 없습니다</div>';
-
     return;
-
   }
-
-  el.innerHTML = [...memos].reverse().map(m => `
-
-    <div class="memo-item" onclick="openMemoAdd(${m.id})">
-
-      <div class="memo-item-date">${m.date}</div>
-
-      <div class="memo-item-content">${m.content.replace(/</g,'&lt;')}</div>
-
-      <button class="memo-item-del" onclick="deleteMemo(${m.id});event.stopPropagation()">✕</button>
-
+  const q = memos.length >= 3 ? memoCardSearchText : '';
+  const list = memoSort(memoFilter(memos, q));
+  if (!list.length) {
+    el.innerHTML = '<div class="memo-empty">찾는 메모가 없어요</div>';
+    return;
+  }
+  // 고정한 메모가 맨 위, 그다음 최근에 고친 순 (PC 메모장과 같은 순서)
+  el.innerHTML = list.map(m => `
+    <div class="memo-item${m.pinned ? ' pinned' : ''}" onclick="openMemoAdd(${m.id})">
+      <div class="memo-item-date">${m.pinned ? '📌 ' : ''}${m.date}</div>
+      <div class="memo-item-content">${escapeLedgerText(m.content)}</div>
+      <button class="memo-item-pin" aria-label="${m.pinned ? '고정 해제' : '맨 위에 고정'}" onclick="toggleMemoPin(${m.id});event.stopPropagation()">${m.pinned ? '📌' : '📍'}</button>
+      <button class="memo-item-del" aria-label="메모 삭제" onclick="deleteMemo(${m.id});event.stopPropagation()">✕</button>
     </div>`).join('');
+}
 
+function toggleMemoPin(id) {
+  const m = memos.find(x => x.id === id);
+  if (!m) return;
+  m.pinned = !m.pinned;
+  saveMemos();
+  renderMemoList();
 }
 
 
@@ -10446,6 +10527,7 @@ let bookmarkFolders = []; // { id, name }
 let bookmarkFolderNextId = 1;
 let bookmarkFilter = 'all';          // 'all' | 'none'(미분류) | 폴더 id — 화면에서만 쓰고 저장하지 않는다
 let bookmarkFolderEdit = null;       // null | 'new' | 'rename'
+let bookmarkCardSearchText = '';    // 마이페이지 북마크 카드의 검색어 (화면에서만 쓴다)
 let bookmarkViewMode = 'list';       // 'list' | 'grid' — 이 기기의 보기 취향이라 동기화하지 않고 localStorage 에만 둔다
 
 function addBookmark(openAfter) {
@@ -10603,9 +10685,12 @@ function renderBookmarkList() {
         : (cur ? `<div class="bm-folder-actions"><button onclick="startBookmarkFolderEdit('rename')">이름 수정</button><button onclick="deleteBookmarkFolder()">폴더 삭제</button></div>` : ''));
   }
 
-  const list = Bookmarks.filterByFolder(bookmarks, bookmarkFolders, bookmarkFilter);
+  const sbox = document.getElementById('bookmarkCardSearch');
+  if (sbox) sbox.style.display = bookmarks.length >= 5 ? '' : 'none';   // 북마크가 몇 개 없으면 검색창을 숨긴다
+  const query = bookmarks.length >= 5 ? bookmarkCardSearchText : '';
+  const list = Bookmarks.searchBookmarks(Bookmarks.filterByFolder(bookmarks, bookmarkFolders, bookmarkFilter), query);
   if (!list.length) {
-    el.innerHTML = `<div class="memo-empty">${bookmarks.length ? '이 폴더가 비어 있어요' : '저장한 링크가 없습니다'}</div>`;
+    el.innerHTML = `<div class="memo-empty">${query.trim() ? '찾는 북마크가 없어요' : bookmarks.length ? '이 폴더가 비어 있어요' : '저장한 링크가 없습니다'}</div>`;
     return;
   }
   const folderName = b => { const f = bookmarkFolders.find(x => x.id === b.folderId); return f ? f.name : ''; };
