@@ -5696,6 +5696,12 @@ body::before, body::after, #bootScreen { display: none !important; }
 .agenda-row-body strong { overflow: hidden; color: var(--text); font-size: 12px; font-weight: 700; text-overflow: ellipsis; white-space: nowrap; }
 .agenda-row-body small { overflow: hidden; color: var(--text3); font-size: 9px; text-overflow: ellipsis; white-space: nowrap; }
 .agenda-arrow { color: var(--text3); font-size: 18px; }
+/* 오늘의 일정(하루 패널) 할일 행: 오른쪽 완료 체크. 누르면 완료/취소, 완료하면 칠해진 ✓ + 취소선 */
+.agenda-check { width: 22px; height: 22px; box-sizing: border-box; flex: none; border-radius: 50%; border: 2px solid var(--agenda-color, var(--accent)); display: grid; place-items: center; font-size: 12px; font-weight: 800; line-height: 1; color: #fff; background: transparent; cursor: pointer; }
+.agenda-check:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+.agenda-row.done .agenda-check { background: var(--agenda-color, var(--accent)); }
+.agenda-row.done .agenda-row-body strong { text-decoration: line-through; opacity: .55; }
+.agenda-row.done .agenda-row-body small, .agenda-row.done .agenda-time { opacity: .55; }
 .agenda-money-icon {
   width: 32px;
   height: 32px;
@@ -6329,6 +6335,7 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .dc { display: none !important; }
   html[data-skin="w98"] .asset-card, html[data-skin="w98"] .collapse-card, html[data-skin="w98"] .section-card, html[data-skin="w98"] .mp-card, html[data-skin="w98"] .panel-card { background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
   html[data-skin="w98"] .modal-overlay { background: rgba(0,0,0,.35) !important; }
+  html[data-skin="w98"] .agenda-check, html[data-skin="w98"] .agenda-row.done .agenda-check { background: #fff !important; color: #000 !important; border: none !important; box-shadow: var(--w98-sunken) !important; }
   html[data-skin="w98"] .calendar-surface table, html[data-skin="w98"] .cal-grid { background: #c0c0c0 !important; }
   html[data-skin="w98"] .routine-sub { background: transparent !important; box-shadow: none !important; padding: 2px 8px 2px 0 !important; }
   html[data-skin="w98"] .routine-sub:active { background: #dfdfdf !important; }
@@ -11060,7 +11067,7 @@ function renderCalDayList(ds, dayEvents) {
     row.setAttribute('role', 'button');
     row.tabIndex = 0;
     row.dataset.itemId = String(item.id);
-    row.className = 'agenda-row';
+    row.className = 'agenda-row' + (item.done ? ' done' : '');
     row.style.setProperty('--agenda-color', getCatColor(item.category));
     const time = document.createElement('span');
     time.className = 'agenda-time';
@@ -11073,10 +11080,19 @@ function renderCalDayList(ds, dayEvents) {
     const spanText = isMultiDay(item) ? `${spanLabel(item)} · ${dayDiff(spanStartOf(item), ds) + 1}일째` : '';
     meta.textContent = [spanText, item.category].filter(Boolean).join(' · ');
     body.append(title, meta);
-    const arrow = document.createElement('span');
-    arrow.className = 'agenda-arrow';
-    arrow.textContent = '›';
-    row.append(time, body, arrow);
+    // 완료 체크: 누르면 바로 완료/취소 (행을 누르면 상세)
+    const check = document.createElement('span');
+    check.className = 'agenda-check';
+    check.setAttribute('role', 'checkbox');
+    check.setAttribute('aria-checked', String(Boolean(item.done)));
+    check.setAttribute('aria-label', `${item.hideTitle ? '비공개 일정' : item.title} ${item.done ? '완료 취소' : '완료 처리'}`);
+    check.tabIndex = 0;
+    check.textContent = item.done ? '✓' : '';
+    check.addEventListener('click', e => { e.stopPropagation(); agendaToggleDone(item.id); });
+    check.addEventListener('keydown', e => {
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); agendaToggleDone(item.id); }
+    });
+    row.append(time, body, check);
     row.onclick = () => openDetail(item.id);
     row.onkeydown = e => {
       if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); openDetail(item.id); }
@@ -13173,6 +13189,21 @@ function closeDetail() {
 }
 
 
+
+// 하루 패널의 완료 체크: 상세를 열지 않고 바로 완료/취소 (detailToggleDone 과 같은 처리)
+function agendaToggleDone(id) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  const wasNotDone = !item.done;
+  item.done = !item.done;
+  saveData();
+  if (currentMainTab === 'calendar') {
+    if (currentCalSubTab === 'cal') renderCal();
+    else if (currentCalSubTab === 'list') renderList();
+  }
+  updateProgress();
+  if (wasNotDone) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
+}
 
 function detailToggleDone() {
 
