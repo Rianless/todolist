@@ -37,7 +37,14 @@
     return (list || []).filter(b => folderIdOf(b, folders) === (filter === 'none' ? null : filter));
   }
 
-  const api = { normalizeUrl, hostOf, labelOf, faviconOf, findDuplicate, cleanFolderName, folderIdOf, filterByFolder };
+  // 이름·주소·도메인에 검색어가 들어 있는 북마크 (대소문자 무시, 비우면 전부)
+  function searchBookmarks(list, query) {
+    const q = String(query == null ? '' : query).trim().toLowerCase();
+    if (!q) return list || [];
+    return (list || []).filter(b => [b.title, b.url, hostOf(b.url)].some(x => String(x || '').toLowerCase().includes(q)));
+  }
+
+  const api = { searchBookmarks, normalizeUrl, hostOf, labelOf, faviconOf, findDuplicate, cleanFolderName, folderIdOf, filterByFolder };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Bookmarks = api;
 })();

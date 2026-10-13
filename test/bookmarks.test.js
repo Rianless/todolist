@@ -76,3 +76,19 @@ console.log('bookmark folders ok');
   assert.strictEqual(nameOf(folderOf('https://r.com/')), '서버폴더');
 }
 console.log('folder collision ok');
+
+// 검색: 이름·주소·도메인, 대소문자 무시, 빈 검색어는 전부
+{
+  const list = [
+    { id: 1, url: 'https://www.naver.com/', title: '네이버 메일' },
+    { id: 2, url: 'https://github.com/Rianless/todolist', title: '' },
+    { id: 3, url: 'https://example.com/a', title: 'Docs' }
+  ];
+  assert.deepStrictEqual(B.searchBookmarks(list, '').map(b => b.id), [1, 2, 3]);
+  assert.deepStrictEqual(B.searchBookmarks(list, ' 메일 ').map(b => b.id), [1]);
+  assert.deepStrictEqual(B.searchBookmarks(list, 'GITHUB').map(b => b.id), [2]);
+  assert.deepStrictEqual(B.searchBookmarks(list, 'docs').map(b => b.id), [3]);
+  assert.deepStrictEqual(B.searchBookmarks(list, '없는말'), []);
+  assert.deepStrictEqual(B.searchBookmarks(null, 'a'), []);
+}
+console.log('bookmark search ok');
