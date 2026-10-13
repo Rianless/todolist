@@ -2,7 +2,7 @@ name: Build widget APK
 
 on:
   push:
-    branches: [claude/eager-babbage-fg9hm4]
+    branches: [claude/eager-babbage-fg9hm4, claude/inspiring-bardeen-5xe2a2]
     paths:
       - 'android-widget/**'
       - '.github/workflows/android-widget-apk.yml'

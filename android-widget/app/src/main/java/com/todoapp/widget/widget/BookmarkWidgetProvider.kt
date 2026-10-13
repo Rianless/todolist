@@ -13,6 +13,7 @@ import com.todoapp.widget.R
 import com.todoapp.widget.data.bookmarkEmptyText
 import com.todoapp.widget.data.bookmarkHeaderLabel
 import com.todoapp.widget.data.bookmarkView
+import com.todoapp.widget.ui.BookmarkOpenActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
@@ -114,8 +115,10 @@ class BookmarkWidgetProvider : AppWidgetProvider() {
         views.setRemoteAdapter(R.id.bookmark_list, serviceIntent)
         views.setEmptyView(R.id.bookmark_list, R.id.bookmark_empty)
 
-        // 항목을 누르면 서비스가 채워 준 주소(fill-in)를 브라우저로 연다
-        val viewTemplate = Intent(Intent.ACTION_VIEW).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
+        // 항목을 누르면 서비스가 채워 준 주소(fill-in)를 BookmarkOpenActivity 가 받아 브라우저로 연다.
+        // 주소를 채워야 해서 PendingIntent 가 mutable 인데, Android 14+ 는 "대상 없는(implicit) 인텐트 + mutable" 을
+        // 막으므로(SecurityException) 반드시 이 앱의 액티비티를 대상으로 지정한다.
+        val viewTemplate = Intent(context, BookmarkOpenActivity::class.java).apply { flags = Intent.FLAG_ACTIVITY_NEW_TASK }
         val templateFlags = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.S) {
             PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_MUTABLE
         } else {
