@@ -6433,9 +6433,14 @@ button:active:not(:disabled) {
   html[data-desktop][data-skin="w98"] .app-header { display: contents !important; }
   html[data-desktop][data-skin="w98"] .header-top { display: block; height: 0; padding: 0; margin: 0; }
   html[data-desktop][data-skin="w98"] .header-left { display: none !important; }
-  html[data-desktop][data-skin="w98"] .tab-bar { position: fixed !important; z-index: 2; left: 6px; top: 16px; right: auto !important; bottom: auto !important; height: auto !important; justify-content: flex-start !important; backdrop-filter: none !important; flex-direction: column !important; width: 108px !important; margin: 0 !important; padding: 0 !important; gap: 14px !important; background: transparent !important; border: none !important; box-shadow: none !important; }
-  html[data-desktop][data-skin="w98"] .desk-extra { display: flex; position: fixed; z-index: 2; left: 6px; top: 256px; flex-direction: column; gap: 14px; width: 108px; }
-  html[data-desktop][data-skin="w98"] .tab-item, html[data-desktop][data-skin="w98"] .tab-item.active, html[data-desktop][data-skin="w98"] .tab-item:active, html[data-desktop][data-skin="w98"] .desk-ico, html[data-desktop][data-skin="w98"] .desk-ico:active { display: flex !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; width: 100% !important; height: 66px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 3px !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
+  html[data-desktop][data-skin="w98"] .tab-bar, html[data-desktop][data-skin="w98"] .desk-extra { display: contents !important; }
+  /* 아이콘 순서(위→아래): 달력 · 가계부 · 북마크 · 메모 · 마이페이지. 한 칸 = 높이 66 + 간격 14 */
+  html[data-desktop][data-skin="w98"] #mainTab-calendar { top: 16px; }
+  html[data-desktop][data-skin="w98"] #mainTab-category { top: 96px; }
+  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(1) { top: 176px; }
+  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(2) { top: 256px; }
+  html[data-desktop][data-skin="w98"] #mainTab-mypage { top: 336px; }
+  html[data-desktop][data-skin="w98"] .tab-item, html[data-desktop][data-skin="w98"] .tab-item.active, html[data-desktop][data-skin="w98"] .tab-item:active, html[data-desktop][data-skin="w98"] .desk-ico, html[data-desktop][data-skin="w98"] .desk-ico:active { display: flex !important; position: fixed !important; z-index: 2; left: 6px; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; width: 108px !important; height: 66px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 3px !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
   html[data-desktop][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-skin="w98"] .desk-ico .tab-icon { font-size: 34px !important; line-height: 40px; height: 40px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.45)); }
   html[data-desktop][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-skin="w98"] .desk-ico .tab-label { font-size: 11px !important; font-weight: 400 !important; padding: 1px 4px; color: #fff !important; }
   html[data-desktop][data-skin="w98"] .tab-item.active .tab-label, html[data-desktop][data-skin="w98"] .tab-item:focus-visible .tab-label, html[data-desktop][data-skin="w98"] .desk-ico:focus-visible .tab-label { background: #000080; outline: 1px dotted #ff0; }
@@ -7176,9 +7181,9 @@ button:active:not(:disabled) {
   <div id="desktopStartMenu" role="menu" onclick="event.stopPropagation()">
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
     <button type="button" role="menuitem" onclick="desktopOpen('category')">💰 가계부</button>
-    <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage','mpCardBookmark')">🔖 북마크</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage','mpCardMemo')">📝 메모</button>
+    <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
     <hr>
     <button type="button" role="menuitem" onclick="closeStartMenu();toggleSkin()">🖥️ 화면 스타일 바꾸기</button>
   </div>
