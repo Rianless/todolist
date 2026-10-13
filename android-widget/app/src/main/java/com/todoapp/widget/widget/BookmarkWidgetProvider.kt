@@ -60,8 +60,13 @@ class BookmarkWidgetProvider : AppWidgetProvider() {
                 val prefs = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE)
                 val delta = if (intent.action == ACTION_FOLDER_NEXT) 1 else -1
                 prefs.edit().putInt(offsetKey(widgetId), prefs.getInt(offsetKey(widgetId), 0) + delta).apply()
-                // 이미 받아 둔 데이터로 바로 넘긴다 (네트워크 없이)
-                render(context, manager, widgetId)
+                // 마지막으로 받아 둔 목록으로 바로 넘긴다 (네트워크 없이). 한 번도 받은 적이 없을 때만 받아 온다.
+                BookmarkStore.restore(context)
+                if (BookmarkStore.data == null) {
+                    refreshAndRender(context, manager, intArrayOf(widgetId), goAsync())
+                } else {
+                    render(context, manager, widgetId)
+                }
             }
             ACTION_REFRESH -> refreshAndRender(context, manager, intArrayOf(widgetId), goAsync())
         }
@@ -77,7 +82,7 @@ class BookmarkWidgetProvider : AppWidgetProvider() {
         val appContext = context.applicationContext
         CoroutineScope(Dispatchers.IO).launch {
             try {
-                BookmarkStore.refresh()
+                BookmarkStore.refresh(appContext)
                 widgetIds.forEach { render(appContext, manager, it) }
             } finally {
                 pending?.finish()
@@ -88,6 +93,9 @@ class BookmarkWidgetProvider : AppWidgetProvider() {
     /** 위젯 하나를 지금 가진 데이터로 전체를 다시 그린다. */
     private fun render(context: Context, manager: AppWidgetManager, widgetId: Int) {
         val views = RemoteViews(context.packageName, R.layout.bookmark_widget_layout)
+
+        // 프로세스가 새로 떴으면 마지막으로 저장해 둔 목록부터 읽는다 (없다고 보고 "불러오는 중…" 으로 그리지 않게)
+        BookmarkStore.restore(context)
 
         // 폴더 줄·빈 화면 글
         val offset = context.getSharedPreferences(PREFS, Context.MODE_PRIVATE).getInt(offsetKey(widgetId), 0)
