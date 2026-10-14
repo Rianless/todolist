@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v93-parcel-paste-share';
+const CACHE_NAME = 'todolist-v94-parcel-auto-add';
 const ASSETS = [
   './',
   './index.html',
