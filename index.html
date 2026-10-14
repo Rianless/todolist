@@ -7439,6 +7439,8 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
               </div>
               <div class="bm-add" style="margin-top:6px;">
                 <input type="text" class="form-input" id="parcelName" maxlength="40" autocomplete="off" placeholder="물건 이름 (선택)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
+                <input type="text" class="form-input" id="parcelShop" maxlength="20" list="parcelShopList" autocomplete="off" placeholder="산 곳 (선택)" style="flex:0 0 36%;" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
+                <datalist id="parcelShopList"></datalist>
                 <button class="btn-save bm-go" onclick="addParcel()">추가</button>
               </div>
               <div class="bm-hint" id="parcelHint"></div>
@@ -10888,11 +10890,14 @@ function addParcel() {
   if (!number && !name) { hint.textContent = '물건 이름이나 운송장 번호를 적어 주세요'; return; }
   if (number && Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return; }
   hint.textContent = '';
+  const shop = Parcels.cleanShop(document.getElementById('parcelShop').value);
   const p = { id: parcelNextId++, name, done: false, createdAt: fmtDate(new Date()) };
+  if (shop) p.shop = shop;
   if (number) { p.carrier = carrier; p.number = number; }
   parcels.push(p);
   document.getElementById('parcelNumber').value = '';
   document.getElementById('parcelName').value = '';
+  document.getElementById('parcelShop').value = '';
   saveParcels();
   renderParcelList();
 }
@@ -10953,6 +10958,7 @@ function renderParcelList() {
   if (sel && !sel.options.length) {
     sel.innerHTML = Parcels.CARRIERS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
     try { const last = localStorage.getItem('rianless_parcel_carrier'); if (last) sel.value = last; } catch(e) {}
+    document.getElementById('parcelShopList').innerHTML = Parcels.SHOPS.map(x => `<option value="${x}">`).join('');
     sel.onchange = () => { try { localStorage.setItem('rianless_parcel_carrier', sel.value); } catch(e) {} };
   }
   const el = document.getElementById('parcelList');
@@ -10974,7 +10980,7 @@ function renderParcelList() {
       <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : Parcels.isPending(p) ? '⏳' : '📦'}</span>
       <div class="bm-text">
         <div class="bm-title">${esc(Parcels.labelOf(p))}</div>
-        <div class="bm-url">${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : esc(Parcels.carrierName(p.carrier)) + ' · ' + esc(p.number)}</div>
+        <div class="bm-url">${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : esc(Parcels.carrierName(p.carrier)) + ' · ' + esc(p.number)}</div>
       </div>
       <button class="bm-del" title="${p.done ? '다시 배송 중으로' : '수령 완료'}" onclick="toggleParcelDone(${p.id});event.stopPropagation()">${p.done ? '↩' : '✔'}</button>
       <button class="bm-del" title="삭제" onclick="deleteParcel(${p.id});event.stopPropagation()">✕</button>
