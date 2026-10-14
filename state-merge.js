@@ -5,7 +5,7 @@
 // 한쪽만 바꾼 건 그대로 받고, 양쪽이 같은 걸 바꾸면 이 기기(local)가 이긴다.
 // 브라우저(window.StateMerge)와 Node 테스트(module.exports) 양쪽에서 쓴다.
 (function () {
-  const COUNTERS = ['nextId', 'ledgerNextId', 'accountNextId', 'transferNextId', 'investmentNextId', 'routineNextId', 'memoNextId', 'bookmarkNextId', 'bookmarkFolderNextId'];
+  const COUNTERS = ['nextId', 'ledgerNextId', 'accountNextId', 'transferNextId', 'investmentNextId', 'routineNextId', 'memoNextId', 'bookmarkNextId', 'bookmarkFolderNextId', 'parcelNextId'];
 
   const subscriptionKey = s => (s && s.id !== undefined ? `id:${s.id}` : `${s && s.name}|${s && s.cycle}|${s && s.date}`);
   const byId = x => x && x.id;
@@ -23,12 +23,13 @@
     routines: byId,
     memos: byId,
     bookmarks: byId,
-    bookmarkFolders: byId
+    bookmarkFolders: byId,
+    parcels: byId
   };
   // 새 id 를 받을 수 있는 컬렉션과, 그 id 를 만드는 카운터
   const COUNTER_OF = {
     items: 'nextId', ledger: 'ledgerNextId', accounts: 'accountNextId', transfers: 'transferNextId',
-    investments: 'investmentNextId', routines: 'routineNextId', memos: 'memoNextId', bookmarks: 'bookmarkNextId', bookmarkFolders: 'bookmarkFolderNextId'
+    investments: 'investmentNextId', routines: 'routineNextId', memos: 'memoNextId', bookmarks: 'bookmarkNextId', bookmarkFolders: 'bookmarkFolderNextId', parcels: 'parcelNextId'
   };
 
   function stable(value) {
