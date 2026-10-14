@@ -39,6 +39,23 @@ assert.strictEqual(P.detectShop('쿠팡이츠 치킨'), null);
 assert.strictEqual(P.detectShop('당근 직거래'), null);
 assert.strictEqual(P.detectShop(''), null);
 
+// 문구에서 운송장·택배사 찾기
+{
+  const r = (text) => P.parseText(text);
+  assert.deepStrictEqual(r('[CJ대한통운] 고객님의 상품이 배송 출발했습니다. 운송장번호 123456789012'), { number: '123456789012', carrier: 'kr.cjlogistics', guessed: false });
+  assert.deepStrictEqual(r('롯데택배 송장번호: 4012-3456-7890 오늘 도착 예정'), { number: '401234567890', carrier: 'kr.lotte', guessed: false });
+  assert.deepStrictEqual(r('한진택배 6012345678901 배송 출발'), { number: '6012345678901', carrier: 'kr.hanjin', guessed: false });
+  assert.strictEqual(r('배송기사 010-1234-5678 운송장 123456789012').number, '123456789012');            // 전화번호는 건너뜀
+  assert.deepStrictEqual(r('기사님 연락처 010-1234-5678 번호 3012345678901'), { number: '3012345678901', carrier: 'kr.epost', guessed: true });
+  assert.deepStrictEqual(r('https://trace.cjlogistics.com/next/tracking.html?wblNo=123456789012'), { number: '123456789012', carrier: 'kr.cjlogistics', guessed: false });
+  assert.deepStrictEqual(r('EE123456789KR'), { number: 'EE123456789KR', carrier: 'kr.epost', guessed: false });
+  assert.deepStrictEqual(r('123456789012'), { number: '123456789012', carrier: 'kr.cjlogistics', guessed: true });
+  assert.deepStrictEqual(r('1234567890'), { number: '1234567890', carrier: null, guessed: false });         // 10자리는 택배사를 못 정함
+  assert.strictEqual(r('주문번호 20251014123456789 결제 12,000원 2025-10-14').number, null);                 // 주문번호·금액·날짜는 아님
+  assert.strictEqual(r('').number, null);
+  assert.strictEqual(r(null).number, null);
+}
+
 // 동기화: 두 기기에서 각각 추가한 택배가 둘 다 남는다
 const base = { parcels: [], parcelNextId: 1 };
 const local = { parcels: [{ id: 1, carrier: 'kr.hanjin', number: '111111' }], parcelNextId: 2 };

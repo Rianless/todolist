@@ -7159,9 +7159,10 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
             <div class="mp-card-inner">
 
+              <button type="button" class="btn-cancel" style="width:100%;margin-bottom:8px;" onclick="parcelPasteAdd()">📋 복사한 문자·운송장 붙여넣어 바로 추가</button>
               <div class="bm-add">
                 <select class="form-input" id="parcelCarrier" aria-label="택배사" style="flex:0 0 auto;max-width:42%;"></select>
-                <input type="text" class="form-input" id="parcelNumber" inputmode="numeric" autocomplete="off" placeholder="운송장 번호 (아직 없으면 비워 두세요)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
+                <input type="text" class="form-input" id="parcelNumber" autocomplete="off" placeholder="운송장 번호 (문자째 붙여넣어도 돼요)" oninput="smartParcelNumber(this,'parcelCarrier','parcelHint')" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
               </div>
               <div class="bm-add" style="margin-top:6px;">
                 <input type="text" class="form-input" id="parcelName" maxlength="40" autocomplete="off" placeholder="물건 이름 (선택)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
@@ -10950,6 +10951,72 @@ function addParcel() {
 
 let attachingParcelId = null;   // 운송장 번호를 입력 중인 (대기 중) 택배
 
+// ── 붙여넣기로 운송장 입력 ──
+// 번호 칸에 문자·카톡 문구를 통째로 붙여넣으면 번호만 골라 넣고, 글에 택배사 이름이 있으면 택배사도 맞춘다
+function fillParcelFromText(text, carrierId, numberId, hintId) {
+  const r = Parcels.parseText(text);
+  const hint = document.getElementById(hintId);
+  if (!r.number) { if (hint) hint.textContent = '붙여넣은 글에서 운송장 번호를 찾지 못했어요'; return r; }
+  document.getElementById(numberId).value = r.number;
+  if (r.carrier) document.getElementById(carrierId).value = r.carrier;
+  if (hint) hint.textContent = r.guessed ? '택배사를 번호 길이로 추정했어요 — 맞는지 확인해 주세요' : '';
+  return r;
+}
+
+function smartParcelNumber(input, carrierId, hintId) {
+  const v = input.value;
+  // 번호만 적는 중이면 건드리지 않고, 글이 섞여 있거나 길 때만 번호를 골라낸다
+  if (v.length <= 14 && !/[가-힣:/?=]/.test(v)) return;
+  const r = fillParcelFromText(v, carrierId, input.id, hintId);
+  if (!r.number) input.value = v;
+}
+
+// 클립보드를 읽어 바로 등록한다. 택배사 이름이 글에 있을 때만 바로 추가하고, 번호 길이로 추정한 경우는 채워 두고 확인을 받는다
+async function parcelPasteAdd() {
+  const hint = document.getElementById('parcelHint');
+  let text = '';
+  try { text = await navigator.clipboard.readText(); }
+  catch (e) { hint.textContent = '붙여넣기 권한이 없어요 — 아래 번호 칸에 직접 붙여넣어 주세요'; document.getElementById('parcelNumber').focus(); return; }
+  const r = fillParcelFromText(text, 'parcelCarrier', 'parcelNumber', 'parcelHint');
+  if (!r.number) return;
+  if (r.guessed || !r.carrier) {
+    if (!r.carrier) hint.textContent = '택배사를 골라 주세요';
+    return;
+  }
+  addParcel();
+  showToast(`📦 ${Parcels.carrierName(r.carrier)} ${r.number} 등록`, { type: 'success', duration: 1800 });
+}
+
+async function parcelAttachPaste() {
+  const hint = document.getElementById('parcelAttachHint');
+  let text = '';
+  try { text = await navigator.clipboard.readText(); }
+  catch (e) { hint.textContent = '붙여넣기 권한이 없어요 — 번호 칸에 직접 붙여넣어 주세요'; document.getElementById('parcelAttachNumber').focus(); return; }
+  const r = fillParcelFromText(text, 'parcelAttachCarrier', 'parcelAttachNumber', 'parcelAttachHint');
+  if (r.number && r.carrier && !r.guessed) attachParcelSubmit();
+}
+
+// 안드로이드 공유 메뉴(문자·카톡 → 공유 → 이 앱)로 들어온 글: 주소에 title/text/url 이 붙어 열린다
+function handleParcelShare() {
+  let params;
+  try { params = new URLSearchParams(location.search); } catch (e) { return; }
+  if (!['title', 'text', 'url'].some(k => params.has(k))) return;
+  const text = ['title', 'text', 'url'].map(k => params.get(k) || '').join('\n');
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}   // 새로고침해도 또 등록되지 않게 주소를 정리
+  if (document.documentElement.hasAttribute('data-desktop')) desktopOpen('category', 'mpCardParcel');
+  else {
+    setMainTab('category', document.getElementById('mainTab-category'));
+    if (!document.getElementById('mpCardParcel').classList.contains('open')) toggleMpCard('mpCardParcel');
+  }
+  renderParcelList();
+  const r = fillParcelFromText(text, 'parcelCarrier', 'parcelNumber', 'parcelHint');
+  if (!r.number) { showToast('공유받은 글에서 운송장 번호를 찾지 못했어요', { type: 'info', duration: 2500 }); return; }
+  if (r.guessed || !r.carrier) { showToast('운송장 번호를 채웠어요 — 택배사를 확인하고 추가를 눌러 주세요', { type: 'info', duration: 3000 }); return; }
+  addParcel();
+  showToast(`📦 ${Parcels.carrierName(r.carrier)} ${r.number} 등록`, { type: 'success', duration: 2200 });
+}
+window.addEventListener('load', () => setTimeout(handleParcelShare, 400));
+
 function trackParcel(id) {
   const p = parcels.find(x => x.id === id);
   if (Parcels.isPending(p)) { attachParcelStart(id); return; }
@@ -11017,9 +11084,9 @@ function renderParcelList() {
       <div class="bm-title">📦 ${esc(Parcels.labelOf(p))} — 운송장 번호 입력</div>
       <div class="bm-add">
         <select class="form-input" id="parcelAttachCarrier" aria-label="택배사" style="flex:0 0 auto;max-width:42%;">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === lastCarrier ? ' selected' : ''}>${c.name}</option>`).join('')}</select>
-        <input type="text" class="form-input" id="parcelAttachNumber" inputmode="numeric" autocomplete="off" placeholder="운송장 번호" onkeydown="if(event.key==='Enter'){event.preventDefault();attachParcelSubmit()}else if(event.key==='Escape'){attachParcelCancel()}">
+        <input type="text" class="form-input" id="parcelAttachNumber" autocomplete="off" placeholder="운송장 번호 (문자째 붙여넣어도 돼요)" oninput="smartParcelNumber(this,'parcelAttachCarrier','parcelAttachHint')" onkeydown="if(event.key==='Enter'){event.preventDefault();attachParcelSubmit()}else if(event.key==='Escape'){attachParcelCancel()}">
       </div>
-      <div class="bm-add"><button class="btn-save bm-go" onclick="attachParcelSubmit()">등록</button><button class="btn-cancel bm-go" onclick="attachParcelCancel()">취소</button></div>
+      <div class="bm-add"><button class="btn-save bm-go" onclick="attachParcelSubmit()">등록</button><button class="btn-cancel bm-go" onclick="parcelAttachPaste()">📋 붙여넣기</button><button class="btn-cancel bm-go" onclick="attachParcelCancel()">취소</button></div>
       <div class="bm-hint" id="parcelAttachHint"></div>
     </div>` : `
     <div class="bm-item" onclick="trackParcel(${p.id})" style="${p.done ? 'opacity:.55;' : ''}">
