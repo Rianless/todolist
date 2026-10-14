@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v92-sub-form-order';
+const CACHE_NAME = 'todolist-v93-parcel-paste-share';
 const ASSETS = [
   './',
   './index.html',
@@ -37,6 +37,8 @@ self.addEventListener('fetch', e => {
   if (req.method !== 'GET') return;
 
   const url = new URL(req.url);
+  // 공유 메뉴로 들어온 주소에는 문자 내용이 들어 있으니 캐시하지 않고 그대로 네트워크로 보낸다
+  if (['title', 'text', 'url'].some(k => url.searchParams.has(k)) && req.mode === 'navigate') return;
   const isAPI = url.pathname.startsWith('/api/');
   const isSameOrigin = url.origin === self.location.origin;
 

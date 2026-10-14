@@ -39,6 +39,51 @@
     return /^[A-Za-z0-9]{6,30}$/.test(n) ? n : null;
   }
 
+  // ── 문자·카톡 문구에서 운송장 번호와 택배사를 찾는다 ──
+  // 택배사 이름이 글에 있으면 그것을 쓰고(확실), 없으면 번호 길이로 추정한다(guessed: true).
+  const CARRIER_WORDS = [
+    ['kr.cjlogistics', /CJ\s*대한통운|대한통운|CJ\s*GLS|CJ\s*택배|cjlogistics/i],
+    ['kr.hanjin', /한진/],
+    ['kr.lotte', /롯데\s*(?:글로벌\s*)?(?:로지스|택배)|lotteglogis/i],
+    ['kr.epost', /우체국|epost/i],
+    ['kr.logen', /로젠|logen/i],
+    ['kr.cupost', /CU\s*(?:편의점\s*)?택배|cupost/i],
+    ['kr.cvsnet', /GS\s*25\s*(?:편의점\s*)?택배|반값택배|cvsnet/i],
+    ['kr.daesin', /대신\s*(?:택배|화물)/],
+    ['kr.kyoungdong', /경동/]
+  ];
+  const digitsOnly = v => String(v).replace(/[^0-9]/g, '');
+  const okLen = v => { const n = digitsOnly(v).length; return n >= 10 && n <= 14; };
+
+  function extractNumber(text) {
+    // 1) 조회 주소의 번호 (…?wblNo=123…)
+    let m = text.match(/[?&](?:inv_?no|invc_?no|wbl_?no|wblnumtext2|sid1|invoice(?:no)?|tracking(?:_?no)?|track_?no|waybill)=([A-Za-z0-9-]{8,20})/i);
+    if (m && normalizeNumber(m[1])) return normalizeNumber(m[1]);
+    // 2) "운송장 번호: 1234-5678-9012" 처럼 이름표가 붙은 번호
+    m = text.match(/(?:운송장|송장|등기|invoice|tracking|waybill)\s*(?:번호|no\.?|number)?\s*[:：]?\s*([0-9](?:[0-9]|[- ](?=[0-9])){8,18})/i);
+    if (m && okLen(m[1])) return digitsOnly(m[1]);
+    // 3) 국제우편(EMS) 번호
+    m = text.match(/\b[A-Z]{2}\d{9}[A-Z]{2}\b/);
+    if (m) return m[0];
+    // 4) 이름표가 없으면: 주소·전화번호를 빼고 10~14자리 숫자를 찾는다
+    const rest = text.replace(/https?:\/\/\S+/gi, ' ').replace(/(?<![0-9])0\d{1,2}[-\s]?\d{3,4}[-\s]?\d{4}(?![0-9])/g, ' ');
+    const re = /(?<![0-9])[0-9](?:[0-9]|-(?=[0-9])){9,17}(?![0-9])/g;
+    let t;
+    while ((t = re.exec(rest))) if (okLen(t[0])) return digitsOnly(t[0]);
+    return null;
+  }
+
+  function parseText(input) {
+    const text = String(input == null ? '' : input);
+    const number = extractNumber(text);
+    if (!number) return { number: null, carrier: null, guessed: false };
+    const named = CARRIER_WORDS.find(([, re]) => re.test(text));
+    if (named) return { number, carrier: named[0], guessed: false };
+    if (/^[A-Z]{2}/.test(number)) return { number, carrier: 'kr.epost', guessed: false };
+    const byLen = { 13: 'kr.epost', 12: 'kr.cjlogistics', 11: 'kr.logen' }[number.length];
+    return { number, carrier: byLen || null, guessed: !!byLen };
+  }
+
   // 운송장 번호가 아직 없는(물건 이름만 적어 둔) 택배
   const isPending = p => !!p && !p.number;
 
@@ -55,7 +100,7 @@
   // 진행 중(받기 전) 먼저, 받은 것은 뒤로. 같은 그룹 안에서는 최근 추가한 순서.
   const sortParcels = list => (list || []).slice().sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || b.id - a.id);
 
-  const api = { detectShop, CARRIERS, SHOPS, cleanShop, carrierName, normalizeNumber, trackUrl, labelOf, isPending, findDuplicate, sortParcels };
+  const api = { parseText, detectShop, CARRIERS, SHOPS, cleanShop, carrierName, normalizeNumber, trackUrl, labelOf, isPending, findDuplicate, sortParcels };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Parcels = api;
 })();
