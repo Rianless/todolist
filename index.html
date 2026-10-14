@@ -10926,27 +10926,29 @@ function loadParcels() {
   } catch(e) {}
 }
 
-function addParcel() {
+// opts.guessed: 택배사를 번호 길이로 추정해 넣은 경우 (목록에 '추정' 표시를 남긴다). 등록되면 true
+function addParcel(opts) {
   const hint = document.getElementById('parcelHint');
   const carrier = document.getElementById('parcelCarrier').value;
   const rawNumber = document.getElementById('parcelNumber').value;
   const name = document.getElementById('parcelName').value.trim().slice(0, 40);
   // 운송장 번호는 나중에 넣을 수 있다. 번호를 적었다면 올바른 형식이어야 하고, 번호가 없으면 물건 이름이 있어야 한다.
   const number = rawNumber.trim() ? Parcels.normalizeNumber(rawNumber) : '';
-  if (number === null) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return; }
-  if (!number && !name) { hint.textContent = '물건 이름이나 운송장 번호를 적어 주세요'; return; }
-  if (number && Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return; }
+    if (number === null) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return false; }
+  if (!number && !name) { hint.textContent = '물건 이름이나 운송장 번호를 적어 주세요'; return false; }
+  if (number && Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return false; }
   hint.textContent = '';
   const shop = Parcels.cleanShop(document.getElementById('parcelShop').value);
   const p = { id: parcelNextId++, name, done: false, createdAt: fmtDate(new Date()) };
   if (shop) p.shop = shop;
-  if (number) { p.carrier = carrier; p.number = number; }
+    if (number) { p.carrier = carrier; p.number = number; if (opts && opts.guessed) p.guess = true; }
   parcels.push(p);
   document.getElementById('parcelNumber').value = '';
   document.getElementById('parcelName').value = '';
-  document.getElementById('parcelShop').value = '';
+    document.getElementById('parcelShop').value = '';
   saveParcels();
   renderParcelList();
+  return true;
 }
 
 let attachingParcelId = null;   // 운송장 번호를 입력 중인 (대기 중) 택배
@@ -10958,17 +10960,31 @@ function fillParcelFromText(text, carrierId, numberId, hintId) {
   const hint = document.getElementById(hintId);
   if (!r.number) { if (hint) hint.textContent = '붙여넣은 글에서 운송장 번호를 찾지 못했어요'; return r; }
   document.getElementById(numberId).value = r.number;
-  if (r.carrier) document.getElementById(carrierId).value = r.carrier;
-  if (hint) hint.textContent = r.guessed ? '택배사를 번호 길이로 추정했어요 — 맞는지 확인해 주세요' : '';
+    if (r.carrier) document.getElementById(carrierId).value = r.carrier;
+  if (hint) hint.textContent = '';
+  const shopBox = document.getElementById('parcelShop');
+  if (numberId === 'parcelNumber' && shopBox && !shopBox.value.trim()) shopBox.value = Parcels.detectShop(text) || '';   // 글에 산 곳(쿠팡·핀둬둬 등)이 있으면 같이 채운다
   return r;
+}
+
+// 찾은 번호를 바로 등록한다. 택배사 이름이 글에 없으면(번호 길이로 추정하거나 못 정하면) 지금 골라 둔 택배사로 등록하고 '추정'으로 표시한다
+function autoSubmitParcel(r, attach) {
+  const guessed = r.guessed || !r.carrier;
+  const ok = attach ? attachParcelSubmit({ guessed }) : addParcel({ guessed });
+  if (!ok) return false;
+  const carrierId = document.getElementById(attach ? 'parcelAttachCarrier' : 'parcelCarrier');
+  const carrier = r.carrier || (carrierId ? carrierId.value : '');
+  showToast(`📦 ${Parcels.carrierName(carrier)} ${r.number} 등록${guessed ? ' · 택배사는 목록에서 바꿀 수 있어요' : ''}`, { type: 'success', duration: guessed ? 3000 : 1800 });
+  return true;
 }
 
 function smartParcelNumber(input, carrierId, hintId) {
   const v = input.value;
   // 번호만 적는 중이면 건드리지 않고, 글이 섞여 있거나 길 때만 번호를 골라낸다
   if (v.length <= 14 && !/[가-힣:/?=]/.test(v)) return;
-  const r = fillParcelFromText(v, carrierId, input.id, hintId);
-  if (!r.number) input.value = v;
+    const r = fillParcelFromText(v, carrierId, input.id, hintId);
+  if (!r.number) { input.value = v; return; }
+  autoSubmitParcel(r, carrierId === 'parcelAttachCarrier');   // 문자째 붙여넣으면 바로 등록
 }
 
 // 클립보드를 읽어 바로 등록한다. 택배사 이름이 글에 있을 때만 바로 추가하고, 번호 길이로 추정한 경우는 채워 두고 확인을 받는다
@@ -10978,13 +10994,8 @@ async function parcelPasteAdd() {
   try { text = await navigator.clipboard.readText(); }
   catch (e) { hint.textContent = '붙여넣기 권한이 없어요 — 아래 번호 칸에 직접 붙여넣어 주세요'; document.getElementById('parcelNumber').focus(); return; }
   const r = fillParcelFromText(text, 'parcelCarrier', 'parcelNumber', 'parcelHint');
-  if (!r.number) return;
-  if (r.guessed || !r.carrier) {
-    if (!r.carrier) hint.textContent = '택배사를 골라 주세요';
-    return;
-  }
-  addParcel();
-  showToast(`📦 ${Parcels.carrierName(r.carrier)} ${r.number} 등록`, { type: 'success', duration: 1800 });
+    if (!r.number) return;
+  autoSubmitParcel(r, false);
 }
 
 async function parcelAttachPaste() {
@@ -10993,7 +11004,7 @@ async function parcelAttachPaste() {
   try { text = await navigator.clipboard.readText(); }
   catch (e) { hint.textContent = '붙여넣기 권한이 없어요 — 번호 칸에 직접 붙여넣어 주세요'; document.getElementById('parcelAttachNumber').focus(); return; }
   const r = fillParcelFromText(text, 'parcelAttachCarrier', 'parcelAttachNumber', 'parcelAttachHint');
-  if (r.number && r.carrier && !r.guessed) attachParcelSubmit();
+    if (r.number) autoSubmitParcel(r, true);
 }
 
 // 안드로이드 공유 메뉴(문자·카톡 → 공유 → 이 앱)로 들어온 글: 주소에 title/text/url 이 붙어 열린다
@@ -11011,9 +11022,7 @@ function handleParcelShare() {
   renderParcelList();
   const r = fillParcelFromText(text, 'parcelCarrier', 'parcelNumber', 'parcelHint');
   if (!r.number) { showToast('공유받은 글에서 운송장 번호를 찾지 못했어요', { type: 'info', duration: 2500 }); return; }
-  if (r.guessed || !r.carrier) { showToast('운송장 번호를 채웠어요 — 택배사를 확인하고 추가를 눌러 주세요', { type: 'info', duration: 3000 }); return; }
-  addParcel();
-  showToast(`📦 ${Parcels.carrierName(r.carrier)} ${r.number} 등록`, { type: 'success', duration: 2200 });
+    autoSubmitParcel(r, false);
 }
 window.addEventListener('load', () => setTimeout(handleParcelShare, 400));
 
@@ -11037,17 +11046,30 @@ function attachParcelCancel() {
 }
 
 // 대기 중이던 택배에 택배사·운송장 번호를 붙인다
-function attachParcelSubmit() {
+function attachParcelSubmit(opts) {
   const p = parcels.find(x => x.id === attachingParcelId);
-  if (!p) { attachParcelCancel(); return; }
+  if (!p) { attachParcelCancel(); return false; }
   const carrier = document.getElementById('parcelAttachCarrier').value;
   const number = Parcels.normalizeNumber(document.getElementById('parcelAttachNumber').value);
   const hint = document.getElementById('parcelAttachHint');
-  if (!number) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return; }
-  if (Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return; }
+    if (!number) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return false; }
+  if (Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return false; }
   p.carrier = carrier;
   p.number = number;
+  if (opts && opts.guessed) p.guess = true; else delete p.guess;
   attachingParcelId = null;
+  saveParcels();
+  renderParcelList();
+  return true;
+}
+
+// 택배사를 잘못 추정했을 때 목록에서 바로 고친다 (고르면 '추정' 표시가 사라진다)
+function changeParcelCarrier(id, carrier) {
+  const p = parcels.find(x => x.id === id);
+  if (!p || !Parcels.CARRIERS.some(c => c.id === carrier)) return;
+  if (Parcels.findDuplicate(parcels.filter(x => x !== p), carrier, p.number)) { showToast('그 택배사로 이미 등록된 운송장이에요', { type: 'info', duration: 2000 }); renderParcelList(); return; }
+  p.carrier = carrier;
+  delete p.guess;
   saveParcels();
   renderParcelList();
 }
@@ -11093,7 +11115,7 @@ function renderParcelList() {
       <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : Parcels.isPending(p) ? '⏳' : '📦'}</span>
       <div class="bm-text">
         <div class="bm-title">${esc(Parcels.labelOf(p))}</div>
-        <div class="bm-url">${p.ledgerId != null ? '💳 ' : ''}${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : esc(Parcels.carrierName(p.carrier)) + ' · ' + esc(p.number)}</div>
+        <div class="bm-url">${p.ledgerId != null ? '💳 ' : ''}${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : `<select aria-label="택배사 바꾸기" title="택배사 바꾸기" style="font-size:10px;max-width:120px;" onclick="event.stopPropagation()" onchange="changeParcelCarrier(${p.id}, this.value)">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === p.carrier ? ' selected' : ''}>${c.name}</option>`).join('')}</select>${p.guess ? ' <span style="color:var(--red,#e5484d);">⚠ 추정</span>' : ''} · ${esc(p.number)}`}</div>
       </div>
       <button class="bm-del" title="${p.done ? '다시 배송 중으로' : '수령 완료'}" onclick="toggleParcelDone(${p.id});event.stopPropagation()">${p.done ? '↩' : '✔'}</button>
       <button class="bm-del" title="삭제" onclick="deleteParcel(${p.id});event.stopPropagation()">✕</button>
