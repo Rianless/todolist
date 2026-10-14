@@ -8146,10 +8146,9 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
           <div>
 
-            <label class="form-label">카테고리</label>
+            <label class="form-label">종료일 (선택)</label>
 
-            <input class="form-input" id="f_subcat" type="text" list="subCatOptions" placeholder="엔터테인먼트">
-            <datalist id="subCatOptions"></datalist>
+            <input class="form-input" id="f_subend" type="date">
 
           </div>
 
@@ -8159,9 +8158,10 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
           <div>
 
-            <label class="form-label">종료일 (선택)</label>
+            <label class="form-label">카테고리</label>
 
-            <input class="form-input" id="f_subend" type="date">
+            <input class="form-input" id="f_subcat" type="text" list="subCatOptions" placeholder="엔터테인먼트">
+            <datalist id="subCatOptions"></datalist>
 
           </div>
 
@@ -8183,6 +8183,13 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
         </div>
 
+        <div class="toggle-row" id="f_subledger_row" style="padding:8px 0;">
+          <div>
+            <div class="sub-toggle-title">📊 가계부 지출에 합산</div>
+            <div style="font-size:10px;color:var(--text3);">끄면 이 구독만 월 지출·통계에서 빠져요 (이미 지출로 적었을 때)</div>
+          </div>
+          <div class="toggle-switch on" id="f_subledger" onclick="this.classList.toggle('on')"></div>
+        </div>
         <div class="toggle-row" id="f_subpaused_row" style="padding:8px 0;">
 
           <div>
@@ -9669,6 +9676,16 @@ function desktopWeekSubs(subList, todayStr, subDatesFn) {
    통계 계산 (바탕화면 위젯 · 통계 앱 공용, 순수 함수)
 ══════════════════════════════════════ */
 // 한 달의 지출·수입 합계 (구독 결제 포함, 이체 제외 — 가계부 달력과 같은 기준)
+// 그 달에 결제되는 구독(일시정지·'지출에 합산 안 함' 제외)의 금액 합계 — 가계부 카드의 지출 합계에 더할 때 쓴다
+function ledgerSubMonthTotal(subList, y, m, subDatesFn) {
+  const prefix = `${y}-${String(m + 1).padStart(2, '0')}`;
+  let total = 0;
+  (subList || []).forEach(sub => {
+    if (!sub.date || sub.paused || sub.noLedger) return;
+    subDatesFn(sub, y, m).forEach(ds => { if (ds.startsWith(prefix)) total += Number(sub.amount) || 0; });
+  });
+  return total;
+}
 function statsMonthTotals(ledgerList, subList, y, m, subDatesFn) {
   const days = ledgerDayData(ledgerList, subList, [], y, m, subDatesFn);
   let expense = 0, income = 0;
@@ -9683,7 +9700,7 @@ function statsCategoryBreakdown(ledgerList, subList, y, m, subDatesFn) {
   const add = (name, amount) => { map[name] = (map[name] || 0) + amount; };
   Object.values(days).forEach(d => {
     d.entries.forEach(e => { if (e.type === 'expense') add(e.category || '기타', Number(e.amount) || 0); });
-    d.subs.forEach(sub => add(sub.category || '구독', sub.amount));
+        d.subs.forEach(sub => { if (sub.counted !== false) add(sub.category || '구독', sub.amount); });
   });
   const total = Object.values(map).reduce((sum, v) => sum + v, 0);
   return Object.entries(map)
@@ -13251,6 +13268,17 @@ function subStatusBadge(s, next, today) {
   return `<span class="sub-badge${days <= 3 ? ' soon' : ''}">${ddayLabel(days)}</span>`;
 }
 
+// 이 구독을 가계부 지출(월 합계·통계·달력)에 합칠지 바꾼다
+function toggleSubLedger(i) {
+  const s = subscriptions[i];
+  if (!s) return;
+  if (s.noLedger) delete s.noLedger; else s.noLedger = true;
+  saveData();
+  renderCategoryView();
+  updateDesktopWidgets();
+  if (currentMainTab === 'calendar') { if (currentCalSubTab === 'cal') renderCal(); else if (currentCalSubTab === 'week') renderWeek(); }
+  showToast(s.noLedger ? `${s.name}: 지출에 합치지 않습니다` : `${s.name}: 지출에 합산합니다`, { type: 'info', duration: 1600 });
+}
 function toggleSubPaused(i) {
   const s = subscriptions[i];
   if (!s) return;
@@ -13309,7 +13337,7 @@ function renderSubs() {
     const cycleLabel = SUB_CYCLE_LABEL[s.cycle] || '';
     const nextText = next ? `다음 결제 ${next.slice(5).replace('-', '/')}` : (s.paused ? '일시정지 중' : '결제 종료');
     const acc = s.accountId ? accountName(s.accountId) : '';
-    const meta = [s.category, nextText, acc].filter(Boolean).map(escapeLedgerText).join(' · ');
+        const meta = [s.category, nextText, acc, s.noLedger ? '지출에 합산 안 함' : ''].filter(Boolean).map(escapeLedgerText).join(' · ');
     card.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
         <div style="min-width:0">
@@ -13325,11 +13353,13 @@ function renderSubs() {
       </div>
       <div class="sub-card-actions">
         <button type="button" data-act="edit">수정</button>
+                <button type="button" data-act="ledger">${s.noLedger ? '지출 합산 켜기' : '지출 합산 끄기'}</button>
         <button type="button" data-act="pause">${s.paused ? '다시 시작' : '일시정지'}</button>
       </div>`;
     card.onclick = () => editSubscription(i);
     card.querySelector('[data-act="edit"]').onclick = ev => { ev.stopPropagation(); editSubscription(i); };
-    card.querySelector('[data-act="pause"]').onclick = ev => { ev.stopPropagation(); toggleSubPaused(i); };
+        card.querySelector('[data-act="pause"]').onclick = ev => { ev.stopPropagation(); toggleSubPaused(i); };
+    card.querySelector('[data-act="ledger"]').onclick = ev => { ev.stopPropagation(); toggleSubLedger(i); };
     el.appendChild(card);
   });
 }
@@ -15476,7 +15506,9 @@ function openLedger(date, forSub=false) {
   document.getElementById('f_submemo').value = '';
   document.getElementById('f_subend').value = '';
   fillSubAccountSelect(null);
-  document.getElementById('f_subpaused').classList.remove('on');
+    document.getElementById('f_subpaused').classList.remove('on');
+  document.getElementById('f_subledger').classList.add('on');
+
   document.getElementById('f_subdelete').style.display = 'none';
 
   document.getElementById('ledgerSubToggleArea').style.display = '';
@@ -15528,11 +15560,15 @@ function saveSubscription() {
     memo: document.getElementById('f_submemo').value,
     endDate: document.getElementById('f_subend').value || '',
     accountId: document.getElementById('f_subaccount').value ? Number(document.getElementById('f_subaccount').value) : null,
-    paused: document.getElementById('f_subpaused').classList.contains('on')
+        paused: document.getElementById('f_subpaused').classList.contains('on')
   };
+  // 합산을 끈 구독만 noLedger 로 남긴다 (예전에 저장한 구독은 그대로 합산)
+  const noLedger = !document.getElementById('f_subledger').classList.contains('on');
   const wasEditing = editingSubIndex !== null && subscriptions[editingSubIndex];
-  if (wasEditing) subscriptions[editingSubIndex] = { ...subscriptions[editingSubIndex], ...sub };
+    if (wasEditing) subscriptions[editingSubIndex] = { ...subscriptions[editingSubIndex], ...sub };
   else subscriptions.push(sub);
+  const saved = wasEditing ? subscriptions[editingSubIndex] : subscriptions[subscriptions.length - 1];
+  if (noLedger) saved.noLedger = true; else delete saved.noLedger;
   editingSubIndex = null;
   closeLedger();
   saveData();
@@ -15608,7 +15644,9 @@ function editSubscription(index) {
   document.getElementById('f_submemo').value = sub.memo || '';
   document.getElementById('f_subend').value = sub.endDate || '';
   fillSubAccountSelect(sub.accountId);
-  document.getElementById('f_subpaused').classList.toggle('on', !!sub.paused);
+    document.getElementById('f_subpaused').classList.toggle('on', !!sub.paused);
+  document.getElementById('f_subledger').classList.toggle('on', !sub.noLedger);
+
   document.getElementById('f_subdelete').style.display = '';
   document.getElementById('ledgerSubToggleArea').style.display = 'none';
   updateLedgerSubToggle(true);
@@ -15769,8 +15807,10 @@ function ledgerDayData(ledgerList, subList, transferList, y, m, subDatesFn) {
       if (!ds.startsWith(prefix)) return;
       const amount = Number(sub.amount) || 0;
       const d = day(ds);
-      d.subs.push({ name: sub.name, category: sub.category || '구독', amount });
-      d.expense += amount;
+            // 구독마다 '가계부 지출에 합산'을 끌 수 있다(sub.noLedger). 끈 구독은 그날 목록에는 남기되 지출 합계에는 더하지 않는다
+      const counted = !sub.noLedger;
+      d.subs.push({ name: sub.name, category: sub.category || '구독', amount, counted });
+      if (counted) d.expense += amount;
     });
   });
   (transferList || []).forEach(t => {
@@ -15849,8 +15889,8 @@ function renderLedgerCalendar() {
   });
   d.subs.forEach(sub => {
     rows.push(`<div class="lc-row sub">
-      <div class="lc-row-info"><div class="lc-row-title">🔖 ${escapeLedgerText(sub.name)}</div><div class="ledger-entry-cat">구독 결제 · ${escapeLedgerText(sub.category)}</div></div>
-      <div class="lc-row-amt expense">-${sub.amount.toLocaleString()}원</div>
+      <div class="lc-row-info"><div class="lc-row-title">🔖 ${escapeLedgerText(sub.name)}</div><div class="ledger-entry-cat">구독 결제 · ${escapeLedgerText(sub.category)}${sub.counted === false ? ' (지출에 합산 안 함)' : ''}</div></div>
+      <div class="lc-row-amt expense"${sub.counted === false ? ' style="opacity:.55;"' : ''}>-${sub.amount.toLocaleString()}원</div>
     </div>`);
   });
   d.transfers.forEach(t => {
@@ -15889,7 +15929,8 @@ function renderLedgerCard() {
   const monthEntries = ledger.filter(e => e.date && e.date.startsWith(monthStr))
                              .sort((a,b) => b.date.localeCompare(a.date) || (b.id - a.id));
   const income  = monthEntries.filter(e=>e.type==='income').reduce((s,e)=>s+e.amount,0);
-  const expense = monthEntries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0);
+    const subExpense = ledgerSubMonthTotal(subscriptions, ledgerY, ledgerM, getSubDatesForMonth);   // '지출에 합산'이 켜진 구독의 그 달 결제
+  const expense = monthEntries.filter(e=>e.type==='expense').reduce((s,e)=>s+e.amount,0) + subExpense;
   const balance = income - expense;
   const monthTransfers = transfers.filter(t => t.date && t.date.startsWith(monthStr));
   const entries = monthEntries.filter(ledgerMatchesFilter);
@@ -15913,6 +15954,7 @@ function renderLedgerCard() {
       <div class="ledger-sum-label">${isDark?'// 지출':'지출'}</div>
 
       <div class="ledger-sum-val expense">-${expense.toLocaleString()}</div>
+      ${subExpense ? `<div style="font-size:10px;color:var(--text3);margin-top:2px;">구독 ${subExpense.toLocaleString()} 포함</div>` : ''}
 
     </div>
 

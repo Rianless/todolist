@@ -22,7 +22,7 @@ const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFix
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
   'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs',
   'statsMonthTotals', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
-  'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText'];
+  'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText', 'ledgerSubMonthTotal'];
 
 const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
@@ -143,7 +143,7 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   assert.strictEqual(days['2026-10-13'].income, 50000);                                   // 이체 100,000 은 수입이 아니다
   assert.strictEqual(days['2026-10-12'].expense, 20000);
   assert.deepStrictEqual(days['2026-10-13'].entries.map(e => e.id), [3, 2, 1]);           // 최근 등록이 위로
-  assert.deepStrictEqual(days['2026-10-13'].subs, [{ name: 'Netflix', category: '구독', amount: 17000 }]);
+  assert.deepStrictEqual(days['2026-10-13'].subs, [{ name: 'Netflix', category: '구독', amount: 17000, counted: true }]);
   assert.strictEqual(days['2026-10-13'].transfers.length, 1);
   assert.deepStrictEqual(Object.keys(A.ledgerDayData([], [], [], 2026, 9, subDates)), []);
 }
@@ -254,4 +254,23 @@ console.log('OK (index logic)');
   assert.strictEqual(A.ledgerExtrasSum({ amount: 1000, extras: 'x' }), 0);
   assert.strictEqual(A.ledgerExtrasText({ amount: 5000, extras: [{ amount: 1000 }] }), '본 4,000원 + 추가금 1,000원');
   console.log('ledger extras ok');
+}
+
+// 구독마다 '가계부 지출에 합산'(noLedger 로 끔): 끈 구독은 목록에만 남고 지출 합계·통계에서 빠진다
+{
+  const subs = [
+    { name: 'Netflix', amount: 10000, date: '2026-10-05', category: '영상' },
+    { name: '보험', amount: 50000, date: '2026-10-05', category: '보험', noLedger: true },
+    { name: '정지', amount: 5000, date: '2026-10-07', paused: true }
+  ];
+  const subDates = (sub, y, m) => [`${y}-${String(m + 1).padStart(2, '0')}-${sub.date.slice(8)}`];
+  const led = [{ id: 1, date: '2026-10-05', type: 'expense', amount: 3000, category: '식비' }];
+  assert.strictEqual(A.ledgerSubMonthTotal(subs, 2026, 9, subDates), 10000);                       // 보험(끔)·정지는 제외
+  assert.strictEqual(A.ledgerSubMonthTotal(subs, 2026, 9, () => ['2026-11-05']), 0);             // 다른 달 날짜는 세지 않는다
+  assert.strictEqual(A.statsMonthTotals(led, subs, 2026, 9, subDates).expense, 13000);
+  assert.deepStrictEqual(A.statsCategoryBreakdown(led, subs, 2026, 9, subDates).map(c => c.name).sort(), ['식비', '영상']);
+  const day = A.ledgerDayData(led, subs, [], 2026, 9, subDates)['2026-10-05'];
+  assert.deepStrictEqual(day.subs.map(s => [s.name, s.counted]), [['Netflix', true], ['보험', false]]);   // 끈 구독도 목록에는 남는다
+  assert.strictEqual(day.expense, 13000);
+  console.log('per-sub ledger toggle ok');
 }
