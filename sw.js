@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v86-ledger-add-next-to-filter';
+const CACHE_NAME = 'todolist-v87-ledger-pressed-chips';
 const ASSETS = [
   './',
   './index.html',

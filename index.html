@@ -6329,9 +6329,14 @@ button:active:not(:disabled) {
   html[data-skin="w98"] .notif-btn, html[data-skin="w98"] .cal-today-btn, html[data-skin="w98"] .tab-item, html[data-skin="w98"] .cal-subtab {
     background: #c0c0c0 !important; color: #000 !important; border: none !important; box-shadow: var(--w98-raised) !important; font-weight: 400 !important;
   }
-  html[data-skin="w98"] button:active, html[data-skin="w98"] .tab-item.active, html[data-skin="w98"] .cal-subtab.active {
+  html[data-skin="w98"] button:active, html[data-skin="w98"] .tab-item.active, html[data-skin="w98"] .cal-subtab.active,
+  html[data-skin="w98"] .ledger-chip.active, html[data-skin="w98"] .ledger-type-btn.active {
     box-shadow: var(--w98-sunken) !important; background: #dfdfdf !important; font-weight: 700 !important;
   }
+  /* 가계부 전체·수입·지출·이체 단추: 눌려 있는 단추는 움푹 들어가고 글자가 굵고 색이 들어간다 */
+  html[data-skin="w98"] .ledger-chip.active, html[data-skin="w98"] .ledger-type-btn.active { text-decoration: underline; }
+  html[data-skin="w98"] .ledger-chip.income.active, html[data-skin="w98"] .ledger-type-btn.income.active { color: #006400 !important; }
+  html[data-skin="w98"] .ledger-chip.expense.active, html[data-skin="w98"] .ledger-type-btn.expense.active { color: #b00000 !important; }
   html[data-skin="w98"] .tab-item.active::before, html[data-skin="w98"] .tab-item::after, html[data-skin="w98"] .cal-subtab.active::after { display: none !important; }
   html[data-skin="w98"] .cal-subtab-bar { background: #c0c0c0 !important; border: none !important; box-shadow: var(--w98-sunken) !important; }
   html[data-skin="w98"] .fab, html[data-skin="w98"] .add-fab { background: #c0c0c0 !important; color: #000 !important; box-shadow: var(--w98-raised) !important; border: none !important; }
