@@ -10927,6 +10927,24 @@ function loadParcels() {
   } catch(e) {}
 }
 
+// 항목을 막 추가해 목록이 다시 그려진 직후에는 손가락 아래로 온 버튼(✔ 수령 완료, ✕ 삭제 등)이 의도치 않게 눌리기 쉽다.
+// (붙여넣기 메뉴·권한 창을 누른 손가락의 클릭이 새로 그려진 목록에 떨어지는 경우) 그래서 잠깐 동안은 목록 버튼을 무시한다.
+let parcelTapGuardUntil = 0;
+const parcelTapGuarded = () => Date.now() < parcelTapGuardUntil;
+const armParcelTapGuard = () => { parcelTapGuardUntil = Date.now() + 900; };
+
+// 이미 '수령 완료'로 표시된 같은 운송장을 다시 넣으면 새로 만들지 않고 배송 중으로 되돌린다
+function reopenDoneParcel(carrier, number) {
+  const dup = Parcels.findDuplicate(parcels, carrier, number);
+  if (!dup || !dup.done) return null;
+  dup.done = false;
+  saveParcels();
+  renderParcelList();
+  armParcelTapGuard();
+  showToast('수령 완료로 표시돼 있던 택배를 다시 배송 중으로 바꿨어요', { type: 'info', duration: 2800 });
+  return dup;
+}
+
 // opts.guessed: 택배사를 번호 길이로 추정해 넣은 경우 (목록에 '추정' 표시를 남긴다). 등록되면 true
 function addParcel(opts) {
   const hint = document.getElementById('parcelHint');
@@ -10937,6 +10955,7 @@ function addParcel(opts) {
   const number = rawNumber.trim() ? Parcels.normalizeNumber(rawNumber) : '';
     if (number === null) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return false; }
   if (!number && !name) { hint.textContent = '물건 이름이나 운송장 번호를 적어 주세요'; return false; }
+    if (number && reopenDoneParcel(carrier, number)) { hint.textContent = ''; document.getElementById('parcelNumber').value = ''; return 'reopened'; }
   if (number && Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return false; }
   hint.textContent = '';
   const shop = Parcels.cleanShop(document.getElementById('parcelShop').value);
@@ -10946,9 +10965,10 @@ function addParcel(opts) {
   parcels.push(p);
   document.getElementById('parcelNumber').value = '';
   document.getElementById('parcelName').value = '';
-    document.getElementById('parcelShop').value = '';
+      document.getElementById('parcelShop').value = '';
   saveParcels();
   renderParcelList();
+  armParcelTapGuard();
   return true;
 }
 
@@ -10972,7 +10992,8 @@ function fillParcelFromText(text, carrierId, numberId, hintId) {
 function autoSubmitParcel(r, attach) {
   const guessed = r.guessed || !r.carrier;
   const ok = attach ? attachParcelSubmit({ guessed }) : addParcel({ guessed });
-  if (!ok) return false;
+    if (!ok) return false;
+  if (ok === 'reopened') return true;
   const carrierId = document.getElementById(attach ? 'parcelAttachCarrier' : 'parcelCarrier');
   const carrier = r.carrier || (carrierId ? carrierId.value : '');
   showToast(`📦 ${Parcels.carrierName(carrier)} ${r.number} 등록${guessed ? ' · 택배사는 목록에서 바꿀 수 있어요' : ''}`, { type: 'success', duration: guessed ? 3000 : 1800 });
@@ -11028,6 +11049,7 @@ function handleParcelShare() {
 window.addEventListener('load', () => setTimeout(handleParcelShare, 400));
 
 function trackParcel(id) {
+  if (parcelTapGuarded()) return;
   const p = parcels.find(x => x.id === id);
   if (Parcels.isPending(p)) { attachParcelStart(id); return; }
   const url = Parcels.trackUrl(p);
@@ -11054,7 +11076,8 @@ function attachParcelSubmit(opts) {
   const number = Parcels.normalizeNumber(document.getElementById('parcelAttachNumber').value);
   const hint = document.getElementById('parcelAttachHint');
     if (!number) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return false; }
-  if (Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return false; }
+    if (Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return false; }
+  armParcelTapGuard();
   p.carrier = carrier;
   p.number = number;
   if (opts && opts.guessed) p.guess = true; else delete p.guess;
@@ -11066,6 +11089,7 @@ function attachParcelSubmit(opts) {
 
 // 택배사를 잘못 추정했을 때 목록에서 바로 고친다 (고르면 '추정' 표시가 사라진다)
 function changeParcelCarrier(id, carrier) {
+  if (parcelTapGuarded()) { renderParcelList(); return; }
   const p = parcels.find(x => x.id === id);
   if (!p || !Parcels.CARRIERS.some(c => c.id === carrier)) return;
   if (Parcels.findDuplicate(parcels.filter(x => x !== p), carrier, p.number)) { showToast('그 택배사로 이미 등록된 운송장이에요', { type: 'info', duration: 2000 }); renderParcelList(); return; }
@@ -11075,15 +11099,19 @@ function changeParcelCarrier(id, carrier) {
   renderParcelList();
 }
 
-function toggleParcelDone(id) {
+function toggleParcelDone(id, force) {
+  if (!force && parcelTapGuarded()) return;
   const p = parcels.find(x => x.id === id);
   if (!p) return;
   p.done = !p.done;
   saveParcels();
   renderParcelList();
+  // 잘못 눌렀을 때 바로 되돌릴 수 있게 한다
+  if (p.done) showToast('수령 완료로 표시했어요', { type: 'info', duration: 4500, action: { label: '되돌리기', onClick: () => toggleParcelDone(id, true) } });
 }
 
 function deleteParcel(id) {
+  if (parcelTapGuarded()) return;
   parcels = parcels.filter(p => p.id !== id);
   saveParcels();
   renderParcelList();

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v95-share-install-help';
+const CACHE_NAME = 'todolist-v96-parcel-done-guard';
 const ASSETS = [
   './',
   './index.html',
