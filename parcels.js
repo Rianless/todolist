@@ -22,20 +22,23 @@
     return /^[A-Za-z0-9]{6,30}$/.test(n) ? n : null;
   }
 
+  // 운송장 번호가 아직 없는(물건 이름만 적어 둔) 택배
+  const isPending = p => !!p && !p.number;
+
   function trackUrl(p) {
     if (!p || !CARRIERS.some(c => c.id === p.carrier) || !normalizeNumber(p.number)) return null;
     return `https://tracker.delivery/#/${encodeURIComponent(p.carrier)}/${encodeURIComponent(p.number)}`;
   }
 
-  const labelOf = p => (p && p.name && p.name.trim()) || (p && p.number) || '';
+  const labelOf = p => (p && p.name && p.name.trim()) || (p && p.number) || '운송장 대기';
 
   // 같은 택배사의 같은 운송장이 이미 있으면 그 항목을 돌려준다.
-  const findDuplicate = (list, carrier, number) => (list || []).find(p => p.carrier === carrier && p.number === number) || null;
+  const findDuplicate = (list, carrier, number) => (list || []).find(p => p.number && p.carrier === carrier && p.number === number) || null;
 
   // 진행 중(받기 전) 먼저, 받은 것은 뒤로. 같은 그룹 안에서는 최근 추가한 순서.
   const sortParcels = list => (list || []).slice().sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || b.id - a.id);
 
-  const api = { CARRIERS, carrierName, normalizeNumber, trackUrl, labelOf, findDuplicate, sortParcels };
+  const api = { CARRIERS, carrierName, normalizeNumber, trackUrl, labelOf, isPending, findDuplicate, sortParcels };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Parcels = api;
 })();
