@@ -8035,8 +8035,15 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
           <label class="form-label">금액 (원) *</label>
 
-          <input class="form-input" id="l_amount" type="text" placeholder="0" inputmode="numeric" autocomplete="off" oninput="formatLedgerAmount(this)">
+          <input class="form-input" id="l_amount" type="text" placeholder="0" inputmode="numeric" autocomplete="off" oninput="formatLedgerAmount(this);updateLedgerExtrasTotal()">
 
+        </div>
+        <div class="form-group" id="l_extras_group">
+          <label class="form-label">추가금 (선택) <span style="font-weight:400;color:var(--text3);">해외배송비·관세 같은 2차 금액</span></label>
+          <div id="l_extras_list"></div>
+          <button type="button" class="ledger-cat-manage-btn" onclick="addLedgerExtra()">+ 추가금</button>
+          <div id="l_extras_total" style="font-size:11px;color:var(--text3);margin-top:6px;"></div>
+          <datalist id="l_extras_labels"><option value="해외배송비"><option value="배송비"><option value="관세"><option value="부가세"><option value="수수료"></datalist>
         </div>
 
         <div class="form-group">
@@ -12508,7 +12515,7 @@ function renderCalDayList(ds, dayEvents) {
     const title = document.createElement('strong');
     title.textContent = entry.title || (entry.type === 'income' ? '수입' : '지출');
     const meta = document.createElement('small');
-    meta.textContent = entry.category || '가계부';
+        meta.textContent = [entry.category || '가계부', ledgerExtrasText(entry)].filter(Boolean).join(' · ');
     body.append(title, meta);
     const amount = document.createElement('span');
     amount.className = 'agenda-amount';
@@ -12869,7 +12876,7 @@ function makeLedgerCardForDayModal(entry) {
   title.textContent = entry.title || (entry.type === 'income' ? '수입' : '지출');
   const meta = document.createElement('div');
   meta.className = 'day-ledger-meta';
-  meta.textContent = [entry.category, entry.memo].filter(Boolean).join(' · ') || (entry.type === 'income' ? '수입' : '지출');
+    meta.textContent = [entry.category, entry.memo, ledgerExtrasText(entry)].filter(Boolean).join(' · ') || (entry.type === 'income' ? '수입' : '지출');
   info.append(title, meta);
 
   const amount = document.createElement('div');
@@ -15329,6 +15336,55 @@ function renderWeekDayList(dmap) {
 
 ══════════════════════════════════════ */
 
+// 추가금(2차금): 지출 한 건에 붙는 해외배송비·관세 같은 금액. entry.amount 는 본 금액 + 추가금 합계라서
+// 합계·통장 잔액·통계는 그대로 맞고, entry.extras 에 내역만 따로 남긴다.
+function ledgerExtrasOf(entry) {
+  return (entry && Array.isArray(entry.extras) ? entry.extras : []).filter(x => x && Number(x.amount) > 0);
+}
+function ledgerExtrasSum(entry) {
+  return ledgerExtrasOf(entry).reduce((sum, x) => sum + Number(x.amount), 0);
+}
+// "본 12,000원 + 해외배송비 3,000원" — 추가금이 없으면 빈 문자열
+function ledgerExtrasText(entry) {
+  const extras = ledgerExtrasOf(entry);
+  if (!extras.length) return '';
+  const won = n => Number(n).toLocaleString('ko-KR') + '원';
+  return ['본 ' + won(Number(entry.amount) - ledgerExtrasSum(entry))].concat(extras.map(x => `${x.label || '추가금'} ${won(x.amount)}`)).join(' + ');
+}
+
+let ledgerExtrasDraft = [];   // 입력창에서 편집 중인 추가금 [{ label, amount(문자열) }]
+
+function renderLedgerExtras() {
+  document.getElementById('l_extras_list').innerHTML = ledgerExtrasDraft.map((x, i) => `
+    <div class="bm-add" style="margin-bottom:6px;">
+      <input type="text" class="form-input" list="l_extras_labels" maxlength="20" placeholder="이름 (예: 해외배송비)" value="${escapeLedgerText(x.label)}" oninput="ledgerExtrasDraft[${i}].label=this.value">
+      <input type="text" class="form-input" inputmode="numeric" autocomplete="off" placeholder="금액" value="${escapeLedgerText(x.amount)}" style="max-width:38%;" oninput="formatLedgerAmount(this);ledgerExtrasDraft[${i}].amount=this.value;updateLedgerExtrasTotal()">
+      <button type="button" class="bm-del" title="삭제" onclick="removeLedgerExtra(${i})">✕</button>
+    </div>`).join('');
+  updateLedgerExtrasTotal();
+}
+function addLedgerExtra() {
+  ledgerExtrasDraft.push({ label: '', amount: '' });
+  renderLedgerExtras();
+  const inputs = document.querySelectorAll('#l_extras_list input');
+  if (inputs.length >= 2) inputs[inputs.length - 2].focus();
+}
+function removeLedgerExtra(i) {
+  ledgerExtrasDraft.splice(i, 1);
+  renderLedgerExtras();
+}
+function updateLedgerExtrasTotal() {
+  const el = document.getElementById('l_extras_total');
+  if (!el) return;
+  const extra = ledgerExtrasDraft.reduce((sum, x) => sum + parseLedgerAmount(x.amount), 0);
+  const base = parseLedgerAmount(document.getElementById('l_amount').value);
+  el.textContent = extra > 0 ? `본 금액 ${base.toLocaleString('ko-KR')}원 + 추가금 ${extra.toLocaleString('ko-KR')}원 = 합계 ${(base + extra).toLocaleString('ko-KR')}원` : '';
+}
+function setLedgerExtrasDraft(extras) {
+  ledgerExtrasDraft = ledgerExtrasOf({ extras }).map(x => ({ label: x.label || '', amount: Number(x.amount).toLocaleString('ko-KR') }));
+  renderLedgerExtras();
+}
+
 // 가계부 지출 ↔ 택배 연결 (택배의 ledgerId 가 가계부 항목 id)
 let ledgerParcelOn = false;           // "택배로 옴" 스위치
 let ledgerParcelTouched = false;      // 직접 켜고 끈 적이 있으면 이름·메모를 보고 자동으로 바꾸지 않는다
@@ -15336,7 +15392,8 @@ let ledgerParcelShopTouched = false;  // 산 곳을 직접 적었으면 자동�
 const linkedParcelOf = ledgerId => parcels.find(p => p.ledgerId === ledgerId) || null;
 
 function updateLedgerParcelUI() {
-  document.getElementById('l_parcel_group').style.display = ledgerType === 'expense' ? '' : 'none';
+    document.getElementById('l_parcel_group').style.display = ledgerType === 'expense' ? '' : 'none';
+  document.getElementById('l_extras_group').style.display = ledgerType === 'expense' ? '' : 'none';
   document.getElementById('l_parcel_toggle').className = 'toggle-switch' + (ledgerParcelOn ? ' on' : '');
   document.getElementById('l_parcel_shop_row').style.display = ledgerParcelOn ? '' : 'none';
 }
@@ -15425,7 +15482,8 @@ function openLedger(date, forSub=false) {
   setLedgerType('expense');
   fillLedgerCategorySelect('expense', '');
     fillLedgerAccountSelect(lastLedgerAccountId);
-  resetLedgerParcelForm(null);
+    resetLedgerParcelForm(null);
+  setLedgerExtrasDraft([]);
   updateLedgerSubToggle(forSub);
 
   history.pushState({modal:'ledger'}, '');
@@ -15519,14 +15577,17 @@ function editLedgerEntry(id) {
   document.getElementById('ledgerSubToggleArea').style.display = 'none';
   updateLedgerSubToggle(false);
   document.getElementById('l_date').value = entry.date || fmtDate(new Date());
-  document.getElementById('l_amount').value = Number(entry.amount || 0).toLocaleString('ko-KR');
+    // 입력칸에는 본 금액만 보여 주고(추가금은 아래 칸에서 따로), 저장할 때 다시 합친다
+  document.getElementById('l_amount').value = (Number(entry.amount || 0) - ledgerExtrasSum(entry)).toLocaleString('ko-KR');
   document.getElementById('l_title').value = entry.title || '';
   document.getElementById('l_cat').value = '';
   document.getElementById('l_memo').value = entry.memo || '';
   setLedgerType(entry.type === 'income' ? 'income' : 'expense');
   fillLedgerCategorySelect(entry.type === 'income' ? 'income' : 'expense', entry.category || '');
     fillLedgerAccountSelect(entry.accountId);
-  resetLedgerParcelForm(linkedParcelOf(id));
+    resetLedgerParcelForm(linkedParcelOf(id));
+  setLedgerExtrasDraft(entry.type === 'expense' ? entry.extras : []);
+
   document.getElementById('ledgerModal').classList.add('open');
   history.pushState({modal:'ledger'}, '');
 }
@@ -15581,9 +15642,9 @@ function saveLedger() {
 
   if (ledgerSub) { saveSubscription(); return; }
 
-  const amount = parseLedgerAmount(document.getElementById('l_amount').value);
+    const baseAmount = parseLedgerAmount(document.getElementById('l_amount').value);
 
-  if (!amount || amount <= 0) {
+  if (!baseAmount || baseAmount <= 0) {
 
     document.getElementById('l_amount').classList.add('form-error');
 
@@ -15593,6 +15654,11 @@ function saveLedger() {
 
   }
 
+    // 추가금(지출만): 금액이 있는 것만 남기고, 이름이 비면 '추가금'으로 둔다. 저장하는 금액은 본 금액 + 추가금 합계.
+  const extras = ledgerType === 'expense'
+    ? ledgerExtrasDraft.map(x => ({ label: String(x.label || '').trim().slice(0, 20) || '추가금', amount: parseLedgerAmount(x.amount) })).filter(x => x.amount > 0)
+    : [];
+  const amount = baseAmount + extras.reduce((sum, x) => sum + x.amount, 0);
   const entry = {
     date: document.getElementById('l_date').value || fmtDate(new Date()),
 
@@ -15614,10 +15680,13 @@ function saveLedger() {
   let savedLedgerId = editingLedgerId;
   if (editingLedgerId !== null) {
     const index = ledger.findIndex(e => e.id === editingLedgerId);
-    if (index > -1) ledger[index] = { ...ledger[index], ...entry };
+        if (index > -1) {
+      ledger[index] = { ...ledger[index], ...entry };
+      if (extras.length) ledger[index].extras = extras; else delete ledger[index].extras;
+    }
   } else {
     savedLedgerId = ledgerNextId++;
-    ledger.push({ id: savedLedgerId, ...entry });
+        ledger.push({ id: savedLedgerId, ...entry, ...(extras.length ? { extras } : {}) });
   }
   syncLedgerParcel(savedLedgerId, entry, document.getElementById('l_title').value.trim());
 
@@ -16051,7 +16120,9 @@ function ledgerRows(entries, trs) {
 
 function ledgerEntryMeta(e) {
   const parts = [e.category, accountName(e.accountId)].filter(Boolean);
-  return parts.length ? `<div class="ledger-entry-cat">${escapeLedgerText(parts.join(' · '))}</div>` : '';
+  const extras = ledgerExtrasText(e);
+  return (parts.length ? `<div class="ledger-entry-cat">${escapeLedgerText(parts.join(' · '))}</div>` : '') +
+    (extras ? `<div class="ledger-entry-cat">💸 ${escapeLedgerText(extras)}</div>` : '');
 }
 
 function transferRowHtml(t) {
@@ -17329,8 +17400,8 @@ function exportLedgerCSV() {
 
   const csvCell = value => `"${String(value ?? '').replace(/"/g, '""')}"`;
   const csv = [
-    ['날짜', '유형', '항목명', '카테고리', '금액', '메모', '통장'],
-    ...rows.map(e => [e.date, e.type === 'income' ? '수입' : '지출', e.title, e.category, e.amount, e.memo, accountName(e.accountId)])
+    ['날짜', '유형', '항목명', '카테고리', '금액', '추가금 내역', '메모', '통장'],
+    ...rows.map(e => [e.date, e.type === 'income' ? '수입' : '지출', e.title, e.category, e.amount, ledgerExtrasText(e), e.memo, accountName(e.accountId)])
   ].map(row => row.map(csvCell).join(',')).join('\r\n');
 
   const blob = new Blob(['\uFEFF' + csv], { type: 'text/csv;charset=utf-8' });
