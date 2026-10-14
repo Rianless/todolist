@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v81-home-first-stats-in-ledger';
+const CACHE_NAME = 'todolist-v82-parcel-tracking';
 const ASSETS = [
   './',
   './index.html',
@@ -6,7 +6,8 @@ const ASSETS = [
   './icon-192.png',
   './icon-512.png',
   './state-merge.js',
-  './bookmarks.js'
+  './bookmarks.js',
+  './parcels.js'
 ];
 
 // 설치: 핵심 자산 프리캐시
