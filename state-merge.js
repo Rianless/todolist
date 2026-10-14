@@ -138,6 +138,12 @@
         if (t.toId === oldId) t.toId = newId;
       });
     }
+    // 가계부 항목에서 만든 택배는 ledgerId 로 그 항목을 가리킨다
+    if (coll === 'ledger') {
+      (out.parcels || []).forEach(p => {
+        if (localOnly.has(`parcels:${p.id}`) && p.ledgerId === oldId) p.ledgerId = newId;
+      });
+    }
   }
   const keyOfValue = (coll, x) => String(KEYED[coll](x));
 
@@ -183,7 +189,7 @@
         copy.id = nextFree++;
         out[coll].push(copy);
         const localOnly = new Set();
-        ['ledger', 'investments', 'subscriptions', 'transfers'].forEach(c => {
+        ['ledger', 'investments', 'subscriptions', 'transfers', 'parcels'].forEach(c => {
           (local[c] || []).forEach(y => {
             const key = String(KEYED[c](y));
             if (!(Array.isArray(base[c]) ? base[c] : []).some(z => String(KEYED[c](z)) === key)) localOnly.add(`${c}:${key}`);
