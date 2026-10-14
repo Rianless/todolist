@@ -22,7 +22,7 @@ const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFix
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
   'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs',
   'statsMonthTotals', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
-  'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText'];
+  'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText'];
 
 const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
@@ -243,3 +243,15 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
 }
 
 console.log('OK (index logic)');
+
+// 가계부 추가금(2차금): amount 는 본 금액 + 추가금 합계
+{
+  const e = { type: 'expense', amount: 15500, extras: [{ label: '해외배송비', amount: 3000 }, { label: '관세', amount: 500 }, { label: '빈값', amount: 0 }] };
+  assert.strictEqual(A.ledgerExtrasSum(e), 3500);
+  assert.strictEqual(A.ledgerExtrasOf(e).length, 2);
+  assert.strictEqual(A.ledgerExtrasText(e), '본 12,000원 + 해외배송비 3,000원 + 관세 500원');
+  assert.strictEqual(A.ledgerExtrasText({ type: 'expense', amount: 1000 }), '');
+  assert.strictEqual(A.ledgerExtrasSum({ amount: 1000, extras: 'x' }), 0);
+  assert.strictEqual(A.ledgerExtrasText({ amount: 5000, extras: [{ amount: 1000 }] }), '본 4,000원 + 추가금 1,000원');
+  console.log('ledger extras ok');
+}
