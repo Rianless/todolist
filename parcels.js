@@ -20,6 +20,17 @@
   // 구매처: 공백을 정리하고 20자까지만
   const cleanShop = v => String(v == null ? '' : v).replace(/\s+/g, ' ').trim().slice(0, 20);
 
+  // 가계부 지출 이름·메모에서 택배로 올 것 같은지 알아본다. 산 곳 이름이 있으면 그 이름(없으면 '택배'만 있으면 빈 문자열)을,
+  // 택배로 오지 않을 것 같으면 null 을 돌려준다. (쿠팡이츠·배달 같은 음식 배달은 제외, 당근은 직접 만나는 거래가 많아 제외)
+  const NOT_PARCEL = ['쿠팡이츠', '배달', '배민', '요기요'];
+  function detectShop(text) {
+    const t = String(text == null ? '' : text);
+    if (!t.trim() || NOT_PARCEL.some(w => t.includes(w))) return null;
+    const shop = SHOPS.filter(x => x !== '당근').find(x => t.includes(x));
+    if (shop) return shop;
+    return /택배|배송/.test(t) ? '' : null;
+  }
+
   const carrierName = id => (CARRIERS.find(c => c.id === id) || {}).name || '';
 
   // 숫자·영문만 남긴다 (하이픈·공백 제거). 너무 짧거나 길면 null.
@@ -44,7 +55,7 @@
   // 진행 중(받기 전) 먼저, 받은 것은 뒤로. 같은 그룹 안에서는 최근 추가한 순서.
   const sortParcels = list => (list || []).slice().sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || b.id - a.id);
 
-  const api = { CARRIERS, SHOPS, cleanShop, carrierName, normalizeNumber, trackUrl, labelOf, isPending, findDuplicate, sortParcels };
+  const api = { detectShop, CARRIERS, SHOPS, cleanShop, carrierName, normalizeNumber, trackUrl, labelOf, isPending, findDuplicate, sortParcels };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Parcels = api;
 })();

@@ -8036,8 +8036,21 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
           <label class="form-label">항목명</label>
 
-          <input class="form-input" id="l_title" type="text" placeholder="예: 점심, 급여">
+          <input class="form-input" id="l_title" type="text" placeholder="예: 점심, 급여" oninput="onLedgerParcelHint()">
 
+        </div>
+        <div class="form-group" id="l_parcel_group">
+          <div class="toggle-row" style="border:none;padding:0;margin:0;">
+            <div>
+              <div class="sub-toggle-title">📦 택배로 옴</div>
+              <div style="font-size:10px;color:var(--text3);">켜면 택배 추적에 '운송장 대기'로 추가돼요</div>
+            </div>
+            <div class="toggle-switch" id="l_parcel_toggle" onclick="toggleLedgerParcel()"></div>
+          </div>
+          <div id="l_parcel_shop_row" style="display:none;margin-top:8px;">
+            <input class="form-input" id="l_parcel_shop" type="text" maxlength="20" list="l_parcel_shop_list" autocomplete="off" placeholder="산 곳 (선택) 예: 핀둬둬" oninput="ledgerParcelShopTouched=true">
+            <datalist id="l_parcel_shop_list"></datalist>
+          </div>
         </div>
 
         <div class="form-group">
@@ -8057,7 +8070,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
           <label class="form-label">메모</label>
 
-          <textarea class="form-textarea memo-field" id="l_memo" rows="2" placeholder="메모 (선택)"></textarea>
+          <textarea class="form-textarea memo-field" id="l_memo" rows="2" placeholder="메모 (선택)" oninput="onLedgerParcelHint()"></textarea>
 
         </div>
 
@@ -10980,7 +10993,7 @@ function renderParcelList() {
       <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : Parcels.isPending(p) ? '⏳' : '📦'}</span>
       <div class="bm-text">
         <div class="bm-title">${esc(Parcels.labelOf(p))}</div>
-        <div class="bm-url">${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : esc(Parcels.carrierName(p.carrier)) + ' · ' + esc(p.number)}</div>
+        <div class="bm-url">${p.ledgerId != null ? '💳 ' : ''}${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : esc(Parcels.carrierName(p.carrier)) + ' · ' + esc(p.number)}</div>
       </div>
       <button class="bm-del" title="${p.done ? '다시 배송 중으로' : '수령 완료'}" onclick="toggleParcelDone(${p.id});event.stopPropagation()">${p.done ? '↩' : '✔'}</button>
       <button class="bm-del" title="삭제" onclick="deleteParcel(${p.id});event.stopPropagation()">✕</button>
@@ -15309,6 +15322,63 @@ function renderWeekDayList(dmap) {
 
 ══════════════════════════════════════ */
 
+// 가계부 지출 ↔ 택배 연결 (택배의 ledgerId 가 가계부 항목 id)
+let ledgerParcelOn = false;           // "택배로 옴" 스위치
+let ledgerParcelTouched = false;      // 직접 켜고 끈 적이 있으면 이름·메모를 보고 자동으로 바꾸지 않는다
+let ledgerParcelShopTouched = false;  // 산 곳을 직접 적었으면 자동으로 덮어쓰지 않는다
+const linkedParcelOf = ledgerId => parcels.find(p => p.ledgerId === ledgerId) || null;
+
+function updateLedgerParcelUI() {
+  document.getElementById('l_parcel_group').style.display = ledgerType === 'expense' ? '' : 'none';
+  document.getElementById('l_parcel_toggle').className = 'toggle-switch' + (ledgerParcelOn ? ' on' : '');
+  document.getElementById('l_parcel_shop_row').style.display = ledgerParcelOn ? '' : 'none';
+}
+
+function toggleLedgerParcel() {
+  ledgerParcelOn = !ledgerParcelOn;
+  ledgerParcelTouched = true;
+  updateLedgerParcelUI();
+}
+
+// 새 지출을 적는 중 이름·메모에 "핀둬둬", "택배" 같은 말이 있으면 스위치를 미리 켜 준다 (직접 만지기 전까지만)
+function onLedgerParcelHint() {
+  if (editingLedgerId !== null || ledgerParcelTouched || ledgerType !== 'expense') return;
+  const shop = Parcels.detectShop(document.getElementById('l_title').value + ' ' + document.getElementById('l_memo').value);
+  ledgerParcelOn = shop !== null;
+  if (shop && !ledgerParcelShopTouched) document.getElementById('l_parcel_shop').value = shop;
+  updateLedgerParcelUI();
+}
+
+function resetLedgerParcelForm(linked) {
+  ledgerParcelOn = !!linked;
+  ledgerParcelTouched = !!linked;
+  ledgerParcelShopTouched = !!linked;
+  document.getElementById('l_parcel_shop').value = (linked && linked.shop) || '';
+  document.getElementById('l_parcel_shop_list').innerHTML = Parcels.SHOPS.map(x => `<option value="${x}">`).join('');
+  updateLedgerParcelUI();
+}
+
+// 저장한 가계부 항목에 맞춰 택배를 만들거나 고치거나 지운다
+function syncLedgerParcel(ledgerId, entry, rawTitle) {
+  const linked = linkedParcelOf(ledgerId);
+  if (entry.type === 'expense' && ledgerParcelOn) {
+    const shop = Parcels.cleanShop(document.getElementById('l_parcel_shop').value);
+    if (linked) {
+      if (shop) linked.shop = shop; else delete linked.shop;
+      if (Parcels.isPending(linked)) linked.name = rawTitle.slice(0, 40);
+    } else {
+      const p = { id: parcelNextId++, name: rawTitle.slice(0, 40), done: false, createdAt: entry.date, ledgerId };
+      if (shop) p.shop = shop;
+      parcels.push(p);
+    }
+  } else if (linked) {
+    if (Parcels.isPending(linked)) parcels = parcels.filter(p => p !== linked);
+    else delete linked.ledgerId;   // 이미 운송장이 붙은 택배는 남기고 연결만 끊는다
+  }
+  saveParcels();
+  if (document.getElementById('mpCardParcel').classList.contains('open')) renderParcelList();
+}
+
 function openLedger(date, forSub=false) {
 
   editingLedgerId = null;
@@ -15347,7 +15417,8 @@ function openLedger(date, forSub=false) {
 
   setLedgerType('expense');
   fillLedgerCategorySelect('expense', '');
-  fillLedgerAccountSelect(lastLedgerAccountId);
+    fillLedgerAccountSelect(lastLedgerAccountId);
+  resetLedgerParcelForm(null);
   updateLedgerSubToggle(forSub);
 
   history.pushState({modal:'ledger'}, '');
@@ -15418,8 +15489,8 @@ function setLedgerType(type) {
 
   document.getElementById('lTypeIncome').classList.toggle('active', type==='income');
 
-  document.getElementById('lTypeExpense').classList.toggle('active', type==='expense');
-
+    document.getElementById('lTypeExpense').classList.toggle('active', type==='expense');
+  if (document.getElementById('l_parcel_group')) updateLedgerParcelUI();
 }
 
 function formatLedgerAmount(input) {
@@ -15447,7 +15518,8 @@ function editLedgerEntry(id) {
   document.getElementById('l_memo').value = entry.memo || '';
   setLedgerType(entry.type === 'income' ? 'income' : 'expense');
   fillLedgerCategorySelect(entry.type === 'income' ? 'income' : 'expense', entry.category || '');
-  fillLedgerAccountSelect(entry.accountId);
+    fillLedgerAccountSelect(entry.accountId);
+  resetLedgerParcelForm(linkedParcelOf(id));
   document.getElementById('ledgerModal').classList.add('open');
   history.pushState({modal:'ledger'}, '');
 }
@@ -15532,12 +15604,15 @@ function saveLedger() {
     (ledgerCategories[entry.type] = ledgerCategories[entry.type] || []).push(entry.category);
   }
 
+  let savedLedgerId = editingLedgerId;
   if (editingLedgerId !== null) {
     const index = ledger.findIndex(e => e.id === editingLedgerId);
     if (index > -1) ledger[index] = { ...ledger[index], ...entry };
   } else {
-    ledger.push({ id: ledgerNextId++, ...entry });
+    savedLedgerId = ledgerNextId++;
+    ledger.push({ id: savedLedgerId, ...entry });
   }
+  syncLedgerParcel(savedLedgerId, entry, document.getElementById('l_title').value.trim());
 
   const wasEditing = editingLedgerId !== null;
   editingLedgerId = null;
@@ -15559,7 +15634,13 @@ function saveLedger() {
 function deleteLedgerEntry(id) {
 
   const deleted = ledger.find(e => e.id === id);
-
+  const linked = linkedParcelOf(id);
+  if (linked) {
+    if (Parcels.isPending(linked) && confirm('이 지출과 연결된 택배(운송장 대기)도 같이 지울까요?\n취소를 누르면 택배는 남겨 둬요.')) parcels = parcels.filter(p => p !== linked);
+    else delete linked.ledgerId;
+    saveParcels();
+    if (document.getElementById('mpCardParcel').classList.contains('open')) renderParcelList();
+  }
   ledger = ledger.filter(e => e.id !== id);
 
   saveData();
