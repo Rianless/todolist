@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v94-parcel-auto-add';
+const CACHE_NAME = 'todolist-v95-share-install-help';
 const ASSETS = [
   './',
   './index.html',
@@ -56,6 +56,19 @@ self.addEventListener('fetch', e => {
   }
 
   if (!isSameOrigin) return; // 외부 리소스는 브라우저 기본 처리
+
+  // 매니페스트는 항상 최신으로: 캐시된 옛 매니페스트가 나가면 설치된 앱이 공유 설정(share_target)을 못 받는다
+  if (url.pathname === '/manifest.json') {
+    e.respondWith(
+      fetch(req)
+        .then(res => {
+          if (res && res.status === 200) { const clone = res.clone(); caches.open(CACHE_NAME).then(cache => cache.put(req, clone)); }
+          return res;
+        })
+        .catch(() => caches.match(req))
+    );
+    return;
+  }
 
   const isPage = req.mode === 'navigate' || url.pathname === '/' || url.pathname.endsWith('.html');
   if (isPage) {

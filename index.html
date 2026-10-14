@@ -7171,6 +7171,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
                 <button class="btn-save bm-go" onclick="addParcel()">추가</button>
               </div>
               <div class="bm-hint" id="parcelHint"></div>
+              <div id="parcelShareHelp" style="display:none;font-size:11px;color:var(--text3);margin:0 0 8px;line-height:1.5;"></div>
 
               <div id="parcelList"></div>
 
@@ -11088,7 +11089,39 @@ function deleteParcel(id) {
   renderParcelList();
 }
 
+// ── 공유 메뉴에 이 앱이 나오게 하는 안내 ──
+// 안드로이드 공유 목록에는 크롬에서 "앱으로 설치"한 앱만 나온다 (홈 화면 바로가기나 브라우저 탭으로는 안 나온다)
+let installPromptEvent = null;
+window.addEventListener('beforeinstallprompt', e => { e.preventDefault(); installPromptEvent = e; updateParcelShareHelp(); });
+window.addEventListener('appinstalled', () => { installPromptEvent = null; updateParcelShareHelp(); });
+
+const isStandaloneApp = () => (window.matchMedia && matchMedia('(display-mode: standalone)').matches) || navigator.standalone === true;
+
+function updateParcelShareHelp() {
+  const el = document.getElementById('parcelShareHelp');
+  if (!el) return;
+  if (isStandaloneApp()) {
+    el.style.display = '';
+    el.innerHTML = '📲 문자·카톡에서 <b>공유 → 나의 하루</b>를 고르면 운송장이 바로 등록돼요. 목록에 안 나오면 앱을 지웠다가 다시 설치해 주세요.';
+  } else if (installPromptEvent) {
+    el.style.display = '';
+    el.innerHTML = '📲 공유 메뉴에 이 앱이 나오려면 앱으로 설치해야 해요. <button type="button" class="btn-save" style="padding:3px 10px;margin-left:4px;" onclick="installApp()">앱 설치</button>';
+  } else {
+    el.style.display = '';
+    el.innerHTML = '📲 공유 메뉴에 이 앱이 나오려면 크롬 메뉴(⋮)에서 <b>앱 설치</b>를 눌러 설치해야 해요. (홈 화면에 바로가기만 만들면 안 나와요)';
+  }
+}
+
+async function installApp() {
+  if (!installPromptEvent) { updateParcelShareHelp(); return; }
+  installPromptEvent.prompt();
+  try { await installPromptEvent.userChoice; } catch (e) {}
+  installPromptEvent = null;
+  updateParcelShareHelp();
+}
+
 function renderParcelList() {
+  updateParcelShareHelp();
   const sel = document.getElementById('parcelCarrier');
   if (sel && !sel.options.length) {
     sel.innerHTML = Parcels.CARRIERS.map(c => `<option value="${c.id}">${c.name}</option>`).join('');
