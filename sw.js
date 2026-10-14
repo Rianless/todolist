@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v85-ledger-parcel';
+const CACHE_NAME = 'todolist-v86-ledger-add-next-to-filter';
 const ASSETS = [
   './',
   './index.html',

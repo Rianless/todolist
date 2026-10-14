@@ -3675,6 +3675,8 @@ body::after {
 .ledger-filter { margin: 12px 0 6px; }
 .ledger-search { width: 100%; margin-bottom: 8px; }
 .ledger-filter-row { display: flex; gap: 8px; align-items: center; }
+.ledger-filter-row-types { flex-wrap: wrap; }
+.ledger-filter-row .ledger-add-btn.ledger-add-inline { flex: 1 1 auto; width: auto; min-width: 0; min-height: 0; margin-top: 0; padding: 7px 10px; font-size: 12px; font-weight: 600; letter-spacing: 0; white-space: nowrap; border-radius: 8px; }
 .ledger-chips { display: flex; flex: none; border: 1px solid var(--border2); overflow: hidden; border-radius: 8px; }
 .ledger-chip {
   padding: 7px 12px; border: none; background: none; cursor: pointer; color: var(--text3);
@@ -7103,13 +7105,14 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
               <div class="ledger-filter" id="ledgerFilter">
                 <input class="form-input ledger-search" id="ledgerSearch" type="search" placeholder="항목 · 카테고리 · 메모 · 금액 검색" aria-label="가계부 검색" oninput="onLedgerFilterChange()" onclick="event.stopPropagation()">
-                <div class="ledger-filter-row">
+                <div class="ledger-filter-row ledger-filter-row-types">
                   <div class="ledger-chips" id="ledgerTypeChips">
                     <button type="button" class="ledger-chip active" data-type="all" onclick="setLedgerTypeFilter('all');event.stopPropagation()">전체</button>
                     <button type="button" class="ledger-chip income" data-type="income" onclick="setLedgerTypeFilter('income');event.stopPropagation()">수입</button>
                     <button type="button" class="ledger-chip expense" data-type="expense" onclick="setLedgerTypeFilter('expense');event.stopPropagation()">지출</button>
                     <button type="button" class="ledger-chip transfer" data-type="transfer" onclick="setLedgerTypeFilter('transfer');event.stopPropagation()">이체</button>
                   </div>
+                  <button type="button" class="ledger-add-btn ledger-add-inline" onclick="openLedger();event.stopPropagation()">+ 수입 / 지출 추가</button>
                 </div>
                 <div class="ledger-filter-row ledger-filter-selects">
                   <select class="form-select ledger-cat-filter" id="ledgerAccountFilter" aria-label="통장 필터" onchange="onLedgerFilterChange()" onclick="event.stopPropagation()"></select>
@@ -7122,7 +7125,6 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
               <div id="ledgerList"></div>
 
               <div class="ledger-actions ledger-actions-stack">
-                <button class="ledger-add-btn" onclick="openLedger();event.stopPropagation()">+ 수입 / 지출 추가</button>
                 <button class="ledger-export-btn" onclick="exportLedgerCSV();event.stopPropagation()" aria-label="현재 월 가계부 CSV 내보내기">CSV</button>
               </div>
 
