@@ -7141,6 +7141,44 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
 
 
+        <!-- ── 택배 카드 ── -->
+
+        <div class="mp-card" id="mpCardParcel">
+
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardParcel')">
+
+            <span class="mp-card-icon">📦</span>
+
+            <span class="mp-card-label">택배 추적</span>
+
+            <span class="mp-card-chevron">▼</span>
+
+          </div>
+
+          <div class="mp-card-body">
+
+            <div class="mp-card-inner">
+
+              <div class="bm-add">
+                <select class="form-input" id="parcelCarrier" aria-label="택배사" style="flex:0 0 auto;max-width:42%;"></select>
+                <input type="text" class="form-input" id="parcelNumber" inputmode="numeric" autocomplete="off" placeholder="운송장 번호 (아직 없으면 비워 두세요)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
+              </div>
+              <div class="bm-add" style="margin-top:6px;">
+                <input type="text" class="form-input" id="parcelName" maxlength="40" autocomplete="off" placeholder="물건 이름 (선택)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
+                <input type="text" class="form-input" id="parcelShop" maxlength="20" list="parcelShopList" autocomplete="off" placeholder="산 곳 (선택)" style="flex:0 0 36%;" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
+                <datalist id="parcelShopList"></datalist>
+                <button class="btn-save bm-go" onclick="addParcel()">추가</button>
+              </div>
+              <div class="bm-hint" id="parcelHint"></div>
+
+              <div id="parcelList"></div>
+
+            </div>
+
+          </div>
+
+        </div>
+
         <!-- ── 구독 카드 ── -->
 
         <div class="mp-card" id="mpCardSubs">
@@ -7422,43 +7460,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
         </div>
 
-        <!-- ── 택배 카드 ── -->
 
-        <div class="mp-card" id="mpCardParcel">
-
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardParcel')">
-
-            <span class="mp-card-icon">📦</span>
-
-            <span class="mp-card-label">택배 추적</span>
-
-            <span class="mp-card-chevron">▼</span>
-
-          </div>
-
-          <div class="mp-card-body">
-
-            <div class="mp-card-inner">
-
-              <div class="bm-add">
-                <select class="form-input" id="parcelCarrier" aria-label="택배사" style="flex:0 0 auto;max-width:42%;"></select>
-                <input type="text" class="form-input" id="parcelNumber" inputmode="numeric" autocomplete="off" placeholder="운송장 번호 (아직 없으면 비워 두세요)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
-              </div>
-              <div class="bm-add" style="margin-top:6px;">
-                <input type="text" class="form-input" id="parcelName" maxlength="40" autocomplete="off" placeholder="물건 이름 (선택)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
-                <input type="text" class="form-input" id="parcelShop" maxlength="20" list="parcelShopList" autocomplete="off" placeholder="산 곳 (선택)" style="flex:0 0 36%;" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
-                <datalist id="parcelShopList"></datalist>
-                <button class="btn-save bm-go" onclick="addParcel()">추가</button>
-              </div>
-              <div class="bm-hint" id="parcelHint"></div>
-
-              <div id="parcelList"></div>
-
-            </div>
-
-          </div>
-
-        </div>
 
 
 
@@ -10496,6 +10498,7 @@ function renderCategoryView() {
   if (document.getElementById('mpCardLedger').classList.contains('open')) renderLedgerCard();
 
   if (document.getElementById('mpCardStats').classList.contains('open')) renderStatsView();
+  if (document.getElementById('mpCardParcel').classList.contains('open')) renderParcelList();
 
 }
 
@@ -10524,7 +10527,6 @@ function renderMypageView() {
   if (currentMainTab === 'memo') renderMemoApp();
   if (currentMainTab === 'bookmark') renderBookmarkApp();
   if (document.getElementById('mpCardBookmark').classList.contains('open')) renderBookmarkList();
-  if (document.getElementById('mpCardParcel').classList.contains('open')) renderParcelList();
 
 }
 
