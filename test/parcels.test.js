@@ -17,6 +17,13 @@ assert.ok(P.findDuplicate([{ carrier: 'kr.hanjin', number: '111111' }], 'kr.hanj
 assert.strictEqual(P.findDuplicate([{ carrier: 'kr.hanjin', number: '111111' }], 'kr.lotte', '111111'), null);
 assert.deepStrictEqual(P.sortParcels([{ id: 1 }, { id: 2, done: true }, { id: 3 }]).map(p => p.id), [3, 1, 2]);
 
+// 운송장 없이 이름만 적어 둔 택배
+assert.ok(P.isPending({ id: 1, name: '신발' }));
+assert.ok(!P.isPending({ id: 1, carrier: 'kr.hanjin', number: '111111' }));
+assert.strictEqual(P.trackUrl({ id: 1, name: '신발' }), null);
+assert.strictEqual(P.labelOf({ name: '' }), '운송장 대기');
+assert.strictEqual(P.findDuplicate([{ name: '신발', carrier: 'kr.hanjin' }], 'kr.hanjin', ''), null);
+
 // 동기화: 두 기기에서 각각 추가한 택배가 둘 다 남는다
 const base = { parcels: [], parcelNextId: 1 };
 const local = { parcels: [{ id: 1, carrier: 'kr.hanjin', number: '111111' }], parcelNextId: 2 };

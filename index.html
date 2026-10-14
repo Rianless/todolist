@@ -7435,7 +7435,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
               <div class="bm-add">
                 <select class="form-input" id="parcelCarrier" aria-label="택배사" style="flex:0 0 auto;max-width:42%;"></select>
-                <input type="text" class="form-input" id="parcelNumber" inputmode="numeric" autocomplete="off" placeholder="운송장 번호" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
+                <input type="text" class="form-input" id="parcelNumber" inputmode="numeric" autocomplete="off" placeholder="운송장 번호 (아직 없으면 비워 두세요)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
               </div>
               <div class="bm-add" style="margin-top:6px;">
                 <input type="text" class="form-input" id="parcelName" maxlength="40" autocomplete="off" placeholder="물건 이름 (선택)" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
@@ -10880,20 +10880,58 @@ function loadParcels() {
 function addParcel() {
   const hint = document.getElementById('parcelHint');
   const carrier = document.getElementById('parcelCarrier').value;
-  const number = Parcels.normalizeNumber(document.getElementById('parcelNumber').value);
-  if (!number) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return; }
-  if (Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return; }
+  const rawNumber = document.getElementById('parcelNumber').value;
+  const name = document.getElementById('parcelName').value.trim().slice(0, 40);
+  // 운송장 번호는 나중에 넣을 수 있다. 번호를 적었다면 올바른 형식이어야 하고, 번호가 없으면 물건 이름이 있어야 한다.
+  const number = rawNumber.trim() ? Parcels.normalizeNumber(rawNumber) : '';
+  if (number === null) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return; }
+  if (!number && !name) { hint.textContent = '물건 이름이나 운송장 번호를 적어 주세요'; return; }
+  if (number && Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return; }
   hint.textContent = '';
-  parcels.push({ id: parcelNextId++, carrier, number, name: document.getElementById('parcelName').value.trim().slice(0, 40), done: false, createdAt: fmtDate(new Date()) });
+  const p = { id: parcelNextId++, name, done: false, createdAt: fmtDate(new Date()) };
+  if (number) { p.carrier = carrier; p.number = number; }
+  parcels.push(p);
   document.getElementById('parcelNumber').value = '';
   document.getElementById('parcelName').value = '';
   saveParcels();
   renderParcelList();
 }
 
+let attachingParcelId = null;   // 운송장 번호를 입력 중인 (대기 중) 택배
+
 function trackParcel(id) {
-  const url = Parcels.trackUrl(parcels.find(x => x.id === id));
+  const p = parcels.find(x => x.id === id);
+  if (Parcels.isPending(p)) { attachParcelStart(id); return; }
+  const url = Parcels.trackUrl(p);
   if (url) window.open(url, '_blank', 'noopener');
+}
+
+function attachParcelStart(id) {
+  attachingParcelId = id;
+  renderParcelList();
+  const input = document.getElementById('parcelAttachNumber');
+  if (input) input.focus();
+}
+
+function attachParcelCancel() {
+  attachingParcelId = null;
+  renderParcelList();
+}
+
+// 대기 중이던 택배에 택배사·운송장 번호를 붙인다
+function attachParcelSubmit() {
+  const p = parcels.find(x => x.id === attachingParcelId);
+  if (!p) { attachParcelCancel(); return; }
+  const carrier = document.getElementById('parcelAttachCarrier').value;
+  const number = Parcels.normalizeNumber(document.getElementById('parcelAttachNumber').value);
+  const hint = document.getElementById('parcelAttachHint');
+  if (!number) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return; }
+  if (Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return; }
+  p.carrier = carrier;
+  p.number = number;
+  attachingParcelId = null;
+  saveParcels();
+  renderParcelList();
 }
 
 function toggleParcelDone(id) {
@@ -10921,12 +10959,22 @@ function renderParcelList() {
   if (!el) return;
   const esc = s => String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
   if (!parcels.length) { el.innerHTML = '<div class="memo-empty">등록한 택배가 없습니다</div>'; return; }
-  el.innerHTML = Parcels.sortParcels(parcels).map(p => `
+  const lastCarrier = (sel && sel.value) || Parcels.CARRIERS[0].id;
+  el.innerHTML = Parcels.sortParcels(parcels).map(p => p.id === attachingParcelId ? `
+    <div class="bm-item" style="flex-direction:column;align-items:stretch;gap:6px;cursor:default;">
+      <div class="bm-title">📦 ${esc(Parcels.labelOf(p))} — 운송장 번호 입력</div>
+      <div class="bm-add">
+        <select class="form-input" id="parcelAttachCarrier" aria-label="택배사" style="flex:0 0 auto;max-width:42%;">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === lastCarrier ? ' selected' : ''}>${c.name}</option>`).join('')}</select>
+        <input type="text" class="form-input" id="parcelAttachNumber" inputmode="numeric" autocomplete="off" placeholder="운송장 번호" onkeydown="if(event.key==='Enter'){event.preventDefault();attachParcelSubmit()}else if(event.key==='Escape'){attachParcelCancel()}">
+      </div>
+      <div class="bm-add"><button class="btn-save bm-go" onclick="attachParcelSubmit()">등록</button><button class="btn-cancel bm-go" onclick="attachParcelCancel()">취소</button></div>
+      <div class="bm-hint" id="parcelAttachHint"></div>
+    </div>` : `
     <div class="bm-item" onclick="trackParcel(${p.id})" style="${p.done ? 'opacity:.55;' : ''}">
-      <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : '📦'}</span>
+      <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : Parcels.isPending(p) ? '⏳' : '📦'}</span>
       <div class="bm-text">
         <div class="bm-title">${esc(Parcels.labelOf(p))}</div>
-        <div class="bm-url">${esc(Parcels.carrierName(p.carrier))} · ${esc(p.number)}</div>
+        <div class="bm-url">${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : esc(Parcels.carrierName(p.carrier)) + ' · ' + esc(p.number)}</div>
       </div>
       <button class="bm-del" title="${p.done ? '다시 배송 중으로' : '수령 완료'}" onclick="toggleParcelDone(${p.id});event.stopPropagation()">${p.done ? '↩' : '✔'}</button>
       <button class="bm-del" title="삭제" onclick="deleteParcel(${p.id});event.stopPropagation()">✕</button>
