@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v89-parcel-in-ledger';
+const CACHE_NAME = 'todolist-v90-clock-right';
 const ASSETS = [
   './',
   './index.html',
