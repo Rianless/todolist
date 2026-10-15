@@ -6202,17 +6202,32 @@ button:active:not(:disabled) {
   --ui-ctl-h: 40px;                 /* 선택 버튼 높이 */
 }
 
+
+/* 다이어리 (싸이월드 스타일) */
+.dy-counter { font-size: 11px; color: var(--text3); letter-spacing: 1px; margin-bottom: 8px; }
+.dy-counter b { color: var(--accent, #e8590c); }
+.dy-item { background: var(--panel); border: 1px solid var(--border); border-radius: 8px; padding: 10px 12px; margin-bottom: 8px; cursor: pointer; position: relative; }
+.dy-item:active { opacity: .75; }
+.dy-head { display: flex; align-items: center; gap: 6px; font-size: 10px; color: var(--text3); border-bottom: 1px dashed var(--border); padding-bottom: 5px; margin-bottom: 6px; }
+.dy-head .dy-mood { font-size: 16px; }
+.dy-title { font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 4px; padding-right: 24px; }
+.dy-body { font-size: 13px; color: var(--text); line-height: 1.6; white-space: pre-wrap; display: -webkit-box; -webkit-line-clamp: 4; -webkit-box-orient: vertical; overflow: hidden; }
+.dy-del { position: absolute; top: 8px; right: 8px; background: none; border: none; color: var(--text3); font-size: 14px; cursor: pointer; }
+.dy-picks { display: flex; flex-wrap: wrap; gap: 6px; }
+.dy-picks button { font-size: 20px; line-height: 1; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); cursor: pointer; }
+.dy-picks button.on { border-color: var(--accent, #e8590c); box-shadow: 0 0 0 2px rgba(232,89,12,.25); }
+
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
 [data-theme="dark"] .modal-sheet, [data-theme="dark"] .add-sheet, [data-theme="dark"] .day-sheet, [data-theme="dark"] .detail-sheet {
   border-radius: var(--ui-r-sheet) !important;
   clip-path: none !important;
 }
-#addModal, #ledgerModal, #accountModal, #transferModal, #routineModal, #investModal, #memoModal {
+#addModal, #ledgerModal, #accountModal, #transferModal, #routineModal, #investModal, #memoModal, #diaryModal {
   align-items: center; justify-content: center; padding: 16px;
 }
 #addModal .modal-sheet, #ledgerModal .modal-sheet, #accountModal .modal-sheet, #transferModal .modal-sheet,
-#routineModal .modal-sheet, #investModal .modal-sheet, #memoModal .modal-sheet {
+#routineModal .modal-sheet, #investModal .modal-sheet, #memoModal .modal-sheet, #diaryModal .modal-sheet {
   width: 100%; max-width: 440px; margin: 0 auto; max-height: calc(100dvh - 32px);
 }
 
@@ -7396,6 +7411,22 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
         </div>
 
+        <!-- ── 다이어리 카드 ── -->
+        <div class="mp-card" id="mpCardDiary">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardDiary')">
+            <span class="mp-card-icon">📔</span>
+            <span class="mp-card-label">다이어리</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div class="dy-counter" id="diaryCounter"></div>
+              <div id="diaryList"></div>
+              <button class="ledger-add-btn" style="margin-top:10px;" onclick="openDiaryAdd()">+ 오늘의 다이어리 쓰기</button>
+            </div>
+          </div>
+        </div>
+
         <!-- ── 메모 카드 ── -->
 
         <div class="mp-card" id="mpCardMemo">
@@ -8252,6 +8283,46 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   </div>
 </div>
 
+<!-- DIARY MODAL -->
+<div class="modal-overlay" id="diaryModal">
+  <div class="modal-sheet add-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
+      <div class="modal-header">
+        <div class="modal-title" id="diaryModalTitle">다이어리 쓰기</div>
+        <button class="modal-close" onclick="closeDiaryModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">날짜</label>
+          <input type="date" class="form-input" id="diaryDate">
+        </div>
+        <div class="form-group">
+          <label class="form-label">오늘의 기분</label>
+          <div class="dy-picks" id="diaryMoods"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">날씨</label>
+          <div class="dy-picks" id="diaryWeathers"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">제목</label>
+          <input type="text" class="form-input" id="diaryTitle" maxlength="60" placeholder="오늘의 제목" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">내용</label>
+          <textarea class="form-textarea" id="diaryText" rows="9" placeholder="오늘 하루는 어땠나요?"></textarea>
+        </div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeDiaryModal()">취소</button>
+        <button class="btn-save" onclick="saveDiaryModal()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- ROUTINE MODAL -->
 <div class="modal-overlay" id="routineModal">
   <div class="modal-sheet add-sheet">
@@ -9049,6 +9120,8 @@ function getCloudStatePayload() {
     ledgerNextId,
     memos,
     memoNextId,
+    diaries,
+    diaryNextId,
     bookmarks,
     bookmarkNextId,
     bookmarkFolders,
@@ -9211,7 +9284,7 @@ async function pullCloudState() {
 }
 
 function hasLocalUserData() {
-  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || bookmarks.length > 0 || bookmarkFolders.length > 0 || parcels.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || diaries.length > 0 || bookmarks.length > 0 || bookmarkFolders.length > 0 || parcels.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
 }
 
 function applyCloudState(payload) {
@@ -9240,6 +9313,8 @@ function applyCloudState(payload) {
   if (payload.routineChecks && typeof payload.routineChecks === 'object' && !Array.isArray(payload.routineChecks)) routineChecks = payload.routineChecks;
   if (Number.isFinite(payload.routineNextId)) routineNextId = payload.routineNextId;
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
+  if (Array.isArray(payload.diaries)) diaries = payload.diaries;
+  if (Number.isFinite(payload.diaryNextId)) diaryNextId = payload.diaryNextId;
   if (Array.isArray(payload.bookmarks)) bookmarks = payload.bookmarks;
   if (Number.isFinite(payload.bookmarkNextId)) bookmarkNextId = payload.bookmarkNextId;
   if (Array.isArray(payload.bookmarkFolders)) bookmarkFolders = payload.bookmarkFolders;
@@ -9254,6 +9329,7 @@ function applyCloudState(payload) {
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
+  localStorage.setItem('rianless_diaries', JSON.stringify({ diaries, diaryNextId }));
   localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId, bookmarkFolders, bookmarkFolderNextId }));
 
   localStorage.setItem('rianless_parcels', JSON.stringify({ parcels, parcelNextId }));
@@ -10351,6 +10427,8 @@ function toggleMpCard(id) {
 
     if (id === 'mpCardMemo') renderMemoList();
 
+    if (id === 'mpCardDiary') renderDiaryList();
+
     if (id === 'mpCardStats') renderStatsView();
 
     if (id === 'mpCardBookmark') renderBookmarkList();
@@ -10543,6 +10621,7 @@ function renderMypageView() {
 
   if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
   if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
+  if (document.getElementById('mpCardDiary').classList.contains('open')) renderDiaryList();
   if (currentMainTab === 'memo') renderMemoApp();
   if (currentMainTab === 'bookmark') renderBookmarkApp();
   if (document.getElementById('mpCardBookmark').classList.contains('open')) renderBookmarkList();
@@ -10689,6 +10768,97 @@ function toggleMemoPin(id) {
 }
 
 
+
+/* ══════════════════════════════════════
+   DIARY (싸이월드 다이어리)
+══════════════════════════════════════ */
+let diaries = [];       // { id, date:'YYYY-MM-DD', mood, weather, title, content, updated }
+let diaryNextId = 1;
+let editingDiaryId = null;
+let diaryMood = '😊', diaryWeather = '☀️';
+const DIARY_MOODS = ['😊', '😄', '🥰', '😐', '😢', '😡', '😴', '🤒'];
+const DIARY_WEATHERS = ['☀️', '⛅', '☁️', '🌧️', '⛈️', '❄️', '🌫️'];
+
+function renderDiaryPicks() {
+  const draw = (id, list, cur, fn) => {
+    document.getElementById(id).innerHTML = list.map(e => `<button type="button" class="${e === cur ? 'on' : ''}" onclick="${fn}('${e}')">${e}</button>`).join('');
+  };
+  draw('diaryMoods', DIARY_MOODS, diaryMood, 'pickDiaryMood');
+  draw('diaryWeathers', DIARY_WEATHERS, diaryWeather, 'pickDiaryWeather');
+}
+function pickDiaryMood(e) { diaryMood = e; renderDiaryPicks(); }
+function pickDiaryWeather(e) { diaryWeather = e; renderDiaryPicks(); }
+
+function openDiaryAdd(id) {
+  const d = id !== undefined && id !== null ? diaries.find(x => x.id === id) : null;
+  editingDiaryId = d ? d.id : null;
+  diaryMood = d ? d.mood : '😊';
+  diaryWeather = d ? d.weather : '☀️';
+  document.getElementById('diaryModalTitle').textContent = d ? '다이어리 수정' : '다이어리 쓰기';
+  document.getElementById('diaryDate').value = d ? d.date : fmtDate(new Date());
+  document.getElementById('diaryTitle').value = d ? d.title : '';
+  document.getElementById('diaryText').value = d ? d.content : '';
+  renderDiaryPicks();
+  history.pushState({modal:'diary'}, '');
+  document.getElementById('diaryModal').classList.add('open');
+  setTimeout(() => document.getElementById('diaryTitle').focus(), 200);
+}
+
+function closeDiaryModal() { document.getElementById('diaryModal').classList.remove('open'); }
+
+function saveDiaryModal() {
+  const content = document.getElementById('diaryText').value.replace(/\s+$/, '');
+  const title = document.getElementById('diaryTitle').value.trim();
+  if (!content.trim() && !title) { closeDiaryModal(); return; }
+  const date = document.getElementById('diaryDate').value || fmtDate(new Date());
+  const fields = { date, mood: diaryMood, weather: diaryWeather, title, content, updated: new Date().toISOString() };
+  const d = editingDiaryId !== null ? diaries.find(x => x.id === editingDiaryId) : null;
+  if (d) Object.assign(d, fields);
+  else diaries.push({ id: diaryNextId++, ...fields });
+  editingDiaryId = null;
+  closeDiaryModal();
+  saveDiaries();
+  renderDiaryList();
+}
+
+function deleteDiary(id) {
+  if (!confirm('이 다이어리를 지울까요?')) return;
+  diaries = diaries.filter(d => d.id !== id);
+  saveDiaries();
+  renderDiaryList();
+}
+
+function saveDiaries() {
+  try { localStorage.setItem('rianless_diaries', JSON.stringify({ diaries, diaryNextId })); } catch(e) {}
+  queueCloudStateSync();
+}
+
+function loadDiaries() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('rianless_diaries') || 'null');
+    if (raw && Array.isArray(raw.diaries)) {
+      diaries = raw.diaries;
+      diaryNextId = Math.max(Number(raw.diaryNextId) || 1, ...diaries.map(d => d.id + 1));
+    }
+  } catch(e) {}
+}
+
+function renderDiaryList() {
+  const el = document.getElementById('diaryList');
+  if (!el) return;
+  const today = fmtDate(new Date());
+  const todayCount = diaries.filter(d => d.date === today).length;
+  document.getElementById('diaryCounter').innerHTML = `TODAY <b>${todayCount}</b> | TOTAL <b>${diaries.length}</b>`;
+  if (!diaries.length) { el.innerHTML = '<div class="memo-empty">아직 쓴 다이어리가 없어요</div>'; return; }
+  const list = diaries.slice().sort((a, b) => b.date.localeCompare(a.date) || String(b.updated).localeCompare(String(a.updated)));
+  el.innerHTML = list.map(d => `
+    <div class="dy-item" onclick="openDiaryAdd(${d.id})">
+      <div class="dy-head"><span class="dy-mood">${d.mood}</span><span>${d.weather}</span><span>${escapeLedgerText(d.date)}</span></div>
+      ${d.title ? `<div class="dy-title">${escapeLedgerText(d.title)}</div>` : ''}
+      <div class="dy-body">${escapeLedgerText(d.content)}</div>
+      <button class="dy-del" aria-label="다이어리 삭제" onclick="deleteDiary(${d.id});event.stopPropagation()">✕</button>
+    </div>`).join('');
+}
 
 /* ══════════════════════════════════════
 
@@ -17979,6 +18149,8 @@ buildCatSelect();
 loadData();
 
 loadMemos();
+
+loadDiaries();
 
 loadBookmarks();
 loadParcels();
