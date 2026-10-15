@@ -6530,7 +6530,7 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
 .desk-extra, #desktopTaskbar, #desktopStartMenu, .dk-winbtns { display: none; }
 @keyframes dkTicker { from { transform: translateX(0); } to { transform: translateX(-100%); } }
 @media (prefers-reduced-motion: reduce) { .dk-ticker.marquee #dkTickerText { animation: none !important; padding-left: 0 !important; } }
-.dk-ticker, .dk-widgets, #viewMemo, #viewBookmark { display: none; }
+.dk-ticker, .dk-widgets, #viewMemo, #viewBookmark, #viewDiary { display: none; }
 @media (min-width: 900px) {
   html[data-desktop][data-skin="w98"] { --dk-left: 128px; --dk-top: 40px; --dk-right: 16px; --dk-bottom: 44px; }
   html[data-desktop][data-desktop-max] { --dk-left: 0px; --dk-top: 0px; --dk-right: 0px; --dk-bottom: 34px; }
@@ -6627,6 +6627,44 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   .mm-editor:disabled { background: #dfdfdf; }
   .mm-status { margin-top: 6px; padding: 3px 8px; font-size: 11px; color: #000; box-shadow: var(--w98-sunken); min-height: 18px; }
 
+
+  /* ----- 다이어리 앱: 왼쪽 미니홈피 프로필 + 목록, 오른쪽 일기장 ----- */
+  html[data-desktop][data-main-tab="diary"][data-skin="w98"] #mainContent { overflow: hidden; }
+  html[data-desktop][data-main-tab="diary"][data-skin="w98"] #viewDiary.active { display: flex !important; flex-direction: row !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
+  .dya-side { flex: 0 0 270px; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
+  .dya-profile { background: #fff; box-shadow: var(--w98-sunken); padding: 10px; color: #000; display: flex; gap: 10px; align-items: center; }
+  .dya-avatar { flex: 0 0 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #fff; background: #000080; box-shadow: var(--w98-raised); }
+  .dya-name { font-size: 14px; font-weight: 700; }
+  .dya-count { font-size: 11px; margin-top: 2px; letter-spacing: 1px; }
+  .dya-count b { color: #c00000; }
+  .dya-new { padding: 6px 10px; font-size: 13px; font-weight: 700; color: #000 !important; }
+  .dya-list { flex: 1; min-height: 0; overflow-y: auto; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
+  .dya-month { padding: 3px 8px; font-size: 11px; font-weight: 700; color: #fff; background: #808080; }
+  .dya-item { display: block; width: 100%; text-align: left; padding: 6px 8px; cursor: pointer; background: transparent !important; box-shadow: none !important; color: #000 !important; border: none; border-bottom: 1px dotted #c0c0c0; }
+  .dya-item.active { background: #000080 !important; color: #fff !important; }
+  .dya-item-t { display: flex; gap: 4px; font-size: 13px; font-weight: 700; }
+  .dya-item-t span:last-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dya-item-d { margin-top: 1px; font-size: 10px; opacity: .65; }
+  .dya-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
+  .dya-tools { display: flex; gap: 6px; }
+  .dya-tools button { padding: 3px 12px; font-size: 12px; color: #000 !important; }
+  .dya-paper { flex: 1; min-height: 0; overflow-y: auto; background: #fffef2; box-shadow: var(--w98-sunken); padding: 18px 24px; color: #000; background-image: repeating-linear-gradient(transparent 0 27px, #e4e0c8 27px 28px); background-attachment: local; }
+  .dya-head { display: flex; align-items: center; gap: 10px; border-bottom: 2px dashed #b8b090; padding-bottom: 8px; margin-bottom: 12px; background: #fffef2; }
+  .dya-head .m { font-size: 30px; line-height: 1; }
+  .dya-head .w { font-size: 20px; }
+  .dya-head .dt { margin-left: auto; font-size: 12px; color: #555; }
+  .dya-title { font-size: 20px; font-weight: 700; margin-bottom: 10px; background: #fffef2; display: inline-block; }
+  .dya-body { font-size: 15px; line-height: 28px; white-space: pre-wrap; word-break: break-word; }
+  .dya-empty { padding: 60px 10px; text-align: center; font-size: 13px; color: #808080; background: #fffef2; }
+  .dya-form { display: flex; flex-direction: column; gap: 8px; flex: 1; min-height: 0; background: #c0c0c0; padding: 10px; box-shadow: var(--w98-sunken); }
+  .dya-form label { font-size: 12px; font-weight: 700; color: #000; }
+  .dya-form .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .dya-form input[type=text], .dya-form input[type=date] { padding: 5px 8px; font-size: 13px; background: #fff; color: #000; border: none; box-shadow: var(--w98-sunken); box-sizing: border-box; }
+  .dya-form input[type=text] { flex: 1; min-width: 0; }
+  .dya-form textarea { flex: 1; min-height: 0; resize: none; padding: 10px 12px; font: 14px/1.6 'Malgun Gothic', 'Noto Sans KR', sans-serif; color: #000; background: #fff; border: none; box-shadow: var(--w98-sunken); outline: none; }
+  .dya-form .dy-picks button { font-size: 18px; padding: 3px 6px; background: #c0c0c0; box-shadow: var(--w98-raised); border: none; }
+  .dya-form .dy-picks button.on { box-shadow: var(--w98-sunken); background: #dfdfdf; }
+
   /* ----- 북마크 앱: 주소창 + 폴더 목록 + 북마크 모음 ----- */
   html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] #mainContent { overflow: hidden; }
   html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] #viewBookmark.active { display: flex !important; flex-direction: column !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
@@ -6694,6 +6732,8 @@ html[data-desktop][data-main-tab="mypage"][data-skin="w98"] .pc-topbar-title::be
 html[data-desktop][data-main-tab="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
 html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] .pc-topbar-title::before { content: '🔖 북마크 — 나의 하루'; }
 
+html[data-desktop][data-main-tab="diary"][data-skin="w98"] .pc-topbar-title::before { content: '📔 다이어리 — 나의 하루'; }
+html[data-desktop][data-desk-app="diary"][data-skin="w98"] .pc-topbar-title::before { content: '📔 다이어리 — 나의 하루'; }
 html[data-desktop][data-desk-app="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
 html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::before { content: '🔖 북마크 — 나의 하루'; }
 
@@ -6721,6 +6761,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="bookmark"] { left: 67%; top: 50px; }
   html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="memo"] { left: 3%; top: 140px; }
   html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-mypage { left: 35%; top: 140px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="diary"] { left: 67%; top: 140px; }
 
   /* 위젯: 아이콘 아래에 세로로 */
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-direction: column; gap: 10px; position: fixed; z-index: 3; left: 8px; right: 8px; top: 238px; bottom: calc(var(--dk-bar) + 8px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -7525,6 +7566,19 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
         <textarea id="memoEditor" class="mm-editor" spellcheck="false" oninput="memoInput()" placeholder="왼쪽에서 메모를 고르거나 '새 메모'를 눌러 시작하세요." aria-label="메모 내용"></textarea>
         <div class="mm-status" id="memoStatus"></div>
       </section>
+    </div>
+
+    <!-- ══ 다이어리 뷰 (바탕화면 스킨 PC 전용) ══ -->
+    <div class="view" id="viewDiary">
+      <aside class="dya-side">
+        <div class="dya-profile">
+          <div class="dya-avatar" id="dyaAvatar">R</div>
+          <div><div class="dya-name" id="dyaName"></div><div class="dya-count" id="dyaCount"></div></div>
+        </div>
+        <button type="button" class="dya-new" onclick="diaryAppNew()">＋ 새 다이어리 쓰기</button>
+        <div class="dya-list" id="dyaList"></div>
+      </aside>
+      <section class="dya-main" id="dyaMain"></section>
     </div>
 
     <!-- ══ 북마크 뷰 (바탕화면 스킨 PC 전용) ══ -->
@@ -9733,7 +9787,7 @@ function toggleSkin() {
 /* ══════════════════════════════════════
    바탕화면 스킨 (PC): 윈도우 98 바탕화면에 앱 아이콘 + 창 하나
 ══════════════════════════════════════ */
-const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', memo: '📝 메모장 — 나의 하루', bookmark: '🔖 북마크 — 나의 하루' };
+const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', memo: '📝 메모장 — 나의 하루', bookmark: '🔖 북마크 — 나의 하루', diary: '📔 다이어리 — 나의 하루' };
 
 // 이번 주(오늘부터 토요일까지) 남은 구독 결제를 날짜순으로. 한 주가 두 달에 걸쳐도 둘 다 본다.
 function desktopWeekSubs(subList, todayStr, subDatesFn) {
@@ -9951,7 +10005,7 @@ function updateDesktopWidgets() {
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
 function statsGuard() {
   try {
-    if ((currentMainTab === 'memo' || currentMainTab === 'bookmark') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
+    if ((currentMainTab === 'memo' || currentMainTab === 'bookmark' || currentMainTab === 'diary') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
       setMainTab('calendar', document.getElementById('mainTab-calendar'));
     }
   } catch (e) {}
@@ -10285,9 +10339,8 @@ function desktopTaskClick() {
 }
 
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
-const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark' };
+const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark', diary: 'mpCardDiary' };
 function desktopOpen(tab, cardId) {
-  if (tab === 'diary') { tab = 'mypage'; cardId = 'mpCardDiary'; }   // 다이어리는 전용 창 없이 마이페이지 카드로 연다
   // 폰에는 메모·북마크·통계 전용 창이 없어서 마이페이지의 그 카드를 펼쳐 보여 준다
   let app = null;
   if (window.innerWidth < 900 && DK_PHONE_CARD[tab]) { app = tab; cardId = DK_PHONE_CARD[tab]; tab = 'mypage'; }
@@ -10461,6 +10514,7 @@ let currentCalSubTab = 'cal';
 function setMainTab(tab, btn) {
 
   if (currentMainTab === 'memo' && tab !== 'memo') { memoFlush(); memoPruneEmpty(null); }
+  if (currentMainTab === 'diary' && tab !== 'diary') diaryAppEdit = false;
   if (currentMainTab === 'bookmark' && tab !== 'bookmark') { editingBookmarkId = null; bookmarkFolderEdit = null; }
   document.documentElement.setAttribute('data-main-tab', tab);
   document.documentElement.removeAttribute('data-desktop-win');
@@ -10481,7 +10535,7 @@ function setMainTab(tab, btn) {
 
   // Only toggle top-level views (direct children of mainContent)
 
-  ['viewCalendar','viewCategory','viewMypage','viewMemo','viewBookmark'].forEach(id => {
+  ['viewCalendar','viewCategory','viewMypage','viewMemo','viewBookmark','viewDiary'].forEach(id => {
 
     const el = document.getElementById(id);
 
@@ -10489,7 +10543,7 @@ function setMainTab(tab, btn) {
 
   });
 
-  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage', memo: 'viewMemo', bookmark: 'viewBookmark' };
+  const viewMap = { calendar: 'viewCalendar', category: 'viewCategory', mypage: 'viewMypage', memo: 'viewMemo', bookmark: 'viewBookmark', diary: 'viewDiary' };
 
   const el = document.getElementById(viewMap[tab]);
 
@@ -10522,6 +10576,7 @@ function setMainTab(tab, btn) {
   if (tab === 'memo') memoEnter();
 
   if (tab === 'bookmark') renderBookmarkApp();
+  if (tab === 'diary') diaryEnter();
 
 }
 
@@ -10627,6 +10682,7 @@ function renderMypageView() {
   if (document.getElementById('mpCardDiary').classList.contains('open')) renderDiaryList();
   if (currentMainTab === 'memo') renderMemoApp();
   if (currentMainTab === 'bookmark') renderBookmarkApp();
+  if (currentMainTab === 'diary') renderDiaryApp();
   if (document.getElementById('mpCardBookmark').classList.contains('open')) renderBookmarkList();
 
 }
@@ -10861,6 +10917,118 @@ function renderDiaryList() {
       <div class="dy-body">${escapeLedgerText(d.content)}</div>
       <button class="dy-del" aria-label="다이어리 삭제" onclick="deleteDiary(${d.id});event.stopPropagation()">✕</button>
     </div>`).join('');
+}
+
+
+/* ── 다이어리 앱 (PC 바탕화면 스킨): 들어가면 가장 최근 일기가 바로 펼쳐진다 ── */
+let diaryAppSel = null;     // 지금 읽고 있는 일기 id
+let diaryAppEdit = false;   // 쓰기·고치기 중인가
+let diaryAppDraft = null;   // 쓰는 중인 내용 { id|null, date, mood, weather }
+
+function diarySorted() {
+  return diaries.slice().sort((a, b) => b.date.localeCompare(a.date) || String(b.updated).localeCompare(String(a.updated)));
+}
+function diaryEnter() {
+  diaryAppEdit = false;
+  if (!diaries.some(d => d.id === diaryAppSel)) diaryAppSel = diaries.length ? diarySorted()[0].id : null;
+  renderDiaryApp();
+}
+function diaryAppPick(id) { diaryAppSel = id; diaryAppEdit = false; renderDiaryApp(); }
+function diaryAppNew() {
+  diaryAppEdit = true;
+  diaryAppDraft = { id: null, date: fmtDate(new Date()), mood: '😊', weather: '☀️' };
+  renderDiaryApp();
+  setTimeout(() => document.getElementById('dyaTitle')?.focus(), 0);
+}
+function diaryAppEditCur() {
+  const d = diaries.find(x => x.id === diaryAppSel);
+  if (!d) return;
+  diaryAppEdit = true;
+  diaryAppDraft = { id: d.id, date: d.date, mood: d.mood, weather: d.weather };
+  renderDiaryApp();
+}
+function diaryAppSetPick(kind, e) {
+  // 쓰던 제목·내용을 잃지 않게 먼저 읽어 둔다
+  diaryAppDraft.title = document.getElementById('dyaTitle').value;
+  diaryAppDraft.content = document.getElementById('dyaText').value;
+  diaryAppDraft.date = document.getElementById('dyaDate').value || diaryAppDraft.date;
+  diaryAppDraft[kind] = e;
+  renderDiaryApp();
+}
+function diaryAppCancel() { diaryAppEdit = false; renderDiaryApp(); }
+function diaryAppSave() {
+  const dr = diaryAppDraft;
+  const title = document.getElementById('dyaTitle').value.trim();
+  const content = document.getElementById('dyaText').value.replace(/\s+$/, '');
+  if (!title && !content.trim()) { diaryAppCancel(); return; }
+  const fields = { date: document.getElementById('dyaDate').value || dr.date, mood: dr.mood, weather: dr.weather, title, content, updated: new Date().toISOString() };
+  const d = dr.id !== null ? diaries.find(x => x.id === dr.id) : null;
+  if (d) { Object.assign(d, fields); diaryAppSel = d.id; }
+  else { const n = { id: diaryNextId++, ...fields }; diaries.push(n); diaryAppSel = n.id; }
+  diaryAppEdit = false;
+  saveDiaries();
+  renderDiaryApp();
+}
+function diaryAppDelete() {
+  const d = diaries.find(x => x.id === diaryAppSel);
+  if (!d || !confirm('이 다이어리를 지울까요?')) return;
+  diaries = diaries.filter(x => x.id !== d.id);
+  diaryAppSel = diaries.length ? diarySorted()[0].id : null;
+  saveDiaries();
+  renderDiaryApp();
+}
+
+function renderDiaryApp() {
+  const main = document.getElementById('dyaMain');
+  if (!main) return;
+  const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
+  document.getElementById('dyaAvatar').textContent = nick.charAt(0).toUpperCase();
+  document.getElementById('dyaName').textContent = nick + '의 다이어리';
+  const today = fmtDate(new Date());
+  document.getElementById('dyaCount').innerHTML = `TODAY <b>${diaries.filter(d => d.date === today).length}</b> | TOTAL <b>${diaries.length}</b>`;
+
+  // 왼쪽: 월별로 묶은 목록
+  const list = document.getElementById('dyaList');
+  if (!diaries.length) list.innerHTML = '<div class="mm-empty">아직 쓴 다이어리가 없어요</div>';
+  else {
+    let month = '', html = '';
+    diarySorted().forEach(d => {
+      const m = d.date.slice(0, 7).replace('-', '년 ') + '월';
+      if (m !== month) { month = m; html += `<div class="dya-month">${escapeLedgerText(m)}</div>`; }
+      html += `<button type="button" class="dya-item${!diaryAppEdit && d.id === diaryAppSel ? ' active' : ''}" onclick="diaryAppPick(${d.id})">
+        <div class="dya-item-t"><span>${d.mood}</span><span>${escapeLedgerText(d.title || d.content.split('\n')[0] || '(제목 없음)')}</span></div>
+        <div class="dya-item-d">${escapeLedgerText(d.date)} ${d.weather}</div></button>`;
+    });
+    list.innerHTML = html;
+  }
+
+  // 오른쪽: 쓰기 화면 또는 읽기 화면
+  if (diaryAppEdit) {
+    const dr = diaryAppDraft;
+    const cur = dr.id !== null ? diaries.find(x => x.id === dr.id) : null;
+    const title = dr.title !== undefined ? dr.title : (cur ? cur.title : '');
+    const content = dr.content !== undefined ? dr.content : (cur ? cur.content : '');
+    const picks = (arr, val, kind) => arr.map(e => `<button type="button" class="${e === val ? 'on' : ''}" onclick="diaryAppSetPick('${kind}','${e}')">${e}</button>`).join('');
+    main.innerHTML = `
+      <div class="dya-tools"><button type="button" onclick="diaryAppSave()">💾 저장</button><button type="button" onclick="diaryAppCancel()">취소</button></div>
+      <div class="dya-form">
+        <div class="row"><label for="dyaDate">날짜</label><input type="date" id="dyaDate" value="${escapeLedgerText(dr.date)}"></div>
+        <div class="row"><label>기분</label><div class="dy-picks">${picks(DIARY_MOODS, dr.mood, 'mood')}</div></div>
+        <div class="row"><label>날씨</label><div class="dy-picks">${picks(DIARY_WEATHERS, dr.weather, 'weather')}</div></div>
+        <div class="row"><label for="dyaTitle">제목</label><input type="text" id="dyaTitle" maxlength="60" autocomplete="off" placeholder="오늘의 제목" value="${escapeLedgerText(title)}"></div>
+        <textarea id="dyaText" spellcheck="false" placeholder="오늘 하루는 어땠나요?" aria-label="내용">${escapeLedgerText(content)}</textarea>
+      </div>`;
+    return;
+  }
+  const d = diaries.find(x => x.id === diaryAppSel);
+  if (!d) { main.innerHTML = '<div class="dya-paper"><div class="dya-empty">첫 다이어리를 써 보세요.<br>왼쪽의 \'새 다이어리 쓰기\'를 눌러요.</div></div>'; return; }
+  main.innerHTML = `
+    <div class="dya-tools"><button type="button" onclick="diaryAppEditCur()">✏️ 고치기</button><button type="button" onclick="diaryAppDelete()">🗑️ 지우기</button></div>
+    <div class="dya-paper">
+      <div class="dya-head"><span class="m">${d.mood}</span><span class="w">${d.weather}</span><span class="dt">${escapeLedgerText(d.date)}</span></div>
+      ${d.title ? `<div class="dya-title">${escapeLedgerText(d.title)}</div>` : ''}
+      <div class="dya-body">${escapeLedgerText(d.content)}</div>
+    </div>`;
 }
 
 /* ══════════════════════════════════════
