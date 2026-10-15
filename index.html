@@ -6913,6 +6913,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
     <!-- 바탕화면 스킨(PC) 전용 바로가기 아이콘 — 다른 스킨에서는 숨겨져 있다 -->
     <div class="desk-extra" aria-label="바로가기">
       <button type="button" class="desk-ico" data-app="bookmark" onclick="desktopOpen('bookmark')"><div class="tab-icon" aria-hidden="true">🔖</div><div class="tab-label">북마크</div></button>
+      <button type="button" class="desk-ico" data-app="diary" onclick="desktopOpen('diary')"><div class="tab-icon" aria-hidden="true">📔</div><div class="tab-label">다이어리</div></button>
       <button type="button" class="desk-ico" data-app="memo" onclick="desktopOpen('memo')"><div class="tab-icon" aria-hidden="true">📝</div><div class="tab-label">메모</div></button>
     </div>
 
@@ -7603,6 +7604,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
     <button type="button" role="menuitem" onclick="desktopOpen('category')">💰 가계부</button>
     <button type="button" role="menuitem" onclick="desktopOpen('bookmark')">🔖 북마크</button>
+    <button type="button" role="menuitem" onclick="desktopOpen('diary')">📔 다이어리</button>
     <button type="button" role="menuitem" onclick="desktopOpen('memo')">📝 메모</button>
     <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
     <hr class="dk-phone-only">
@@ -10285,6 +10287,7 @@ function desktopTaskClick() {
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
 const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark' };
 function desktopOpen(tab, cardId) {
+  if (tab === 'diary') { tab = 'mypage'; cardId = 'mpCardDiary'; }   // 다이어리는 전용 창 없이 마이페이지 카드로 연다
   // 폰에는 메모·북마크·통계 전용 창이 없어서 마이페이지의 그 카드를 펼쳐 보여 준다
   let app = null;
   if (window.innerWidth < 900 && DK_PHONE_CARD[tab]) { app = tab; cardId = DK_PHONE_CARD[tab]; tab = 'mypage'; }
