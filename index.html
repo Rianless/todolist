@@ -6224,6 +6224,7 @@ button:active:not(:disabled) {
 .dya-win { display: flex; flex-direction: column; min-height: 100%; box-sizing: border-box; background: #c0c0c0; box-shadow: inset -1px -1px #404040, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf; padding: 3px; }
 .dya-win-tb { display: flex; align-items: center; gap: 6px; padding: 3px 6px; color: #fff; font-size: 13px; font-weight: 700; background: linear-gradient(90deg, #000080, #1084d0); }
 .dya-win-tb i { margin-left: auto; display: flex; gap: 2px; font-style: normal; }
+.dya-win-tb b.x { cursor: pointer; }
 .dya-win-tb b { width: 16px; height: 14px; line-height: 14px; text-align: center; font-size: 10px; color: #000; background: #c0c0c0; box-shadow: inset -1px -1px #404040, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf; }
 .dya-win-mn { display: flex; gap: 12px; padding: 2px 4px; font-size: 12px; color: #000; }
 .dya-win-ct { flex: 1; background: #fff; box-shadow: inset 1px 1px #404040, inset -1px -1px #fff, inset -2px -2px #dfdfdf, inset 2px 2px #808080; padding: 12px 16px; font-family: 'Courier New', 'Malgun Gothic', 'Noto Sans KR', monospace; }
@@ -11290,6 +11291,13 @@ function diaryEnter() {
   renderDiaryApp();
 }
 function diaryAppPick(id) { diaryAppSel = id; diaryAppEdit = false; diaryDetail = true; renderDiaryApp(); }
+// 메모장 창의 ✕: 열어 둔 일기를 닫고 '왼쪽 목록에서 날짜를 눌러…' 화면으로 돌아간다
+function diaryAppClose() {
+  diaryAppEdit = false;
+  diaryAppSel = null;
+  diaryDetail = false;
+  renderDiaryApp();
+}
 function diaryAppBack() {
   if (diaryAppEdit) diaryAppEdit = false;
   diaryDetail = false;
@@ -11390,7 +11398,7 @@ function renderDiaryApp() {
   }
   const d = diaries.find(x => x.id === diaryAppSel);
   const win = (title, inner) => `<div class="dya-paper"><div class="dya-win">
-      <div class="dya-win-tb" aria-hidden="true"><span>📔 ${escapeLedgerText(title)} - 메모장</span><i><b>_</b><b>□</b><b>✕</b></i></div>
+      <div class="dya-win-tb"><span>📔 ${escapeLedgerText(title)} - 메모장</span><i><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" role="button" tabindex="0" aria-label="닫기" title="닫기" onclick="diaryAppClose()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();diaryAppClose()}">✕</b></i></div>
       <div class="dya-win-mn" aria-hidden="true"><span>파일(F)</span><span>편집(E)</span><span>서식(O)</span><span>도움말(H)</span></div>
       <div class="dya-win-ct">${inner}</div></div></div>`;
   if (!d) { main.innerHTML = win('다이어리', diaries.length ? '<div class="dya-empty">왼쪽 목록에서 날짜를 눌러<br>일기를 열어 보세요.</div>' : '<div class="dya-empty">첫 다이어리를 써 보세요.<br>\'새 다이어리 쓰기\'를 눌러요.</div>'); return; }
