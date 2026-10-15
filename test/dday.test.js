@@ -39,6 +39,24 @@ const list = [
 assert.deepStrictEqual(D.sortDdays(list, '2026-10-15').map(x => x.id), [6, 3, 2, 5, 4, 1]);
 assert.strictEqual(D.sortDdays([{ id: 9, date: 'bad' }], '2026-10-15').length, 0);
 
+// 달력 칸: 그 날짜에 해당하는 D-day
+const on = [
+  { id: 1, title: '여행', date: '2026-12-25' },
+  { id: 2, title: '생일', date: '1992-03-01', yearly: true },
+  { id: 3, title: '윤일', date: '2000-02-29', yearly: true },
+  { id: 4, title: '나쁨', date: 'bad' }
+];
+assert.deepStrictEqual(D.onDate(on, '2026-12-25').map(x => x.title), ['여행']);
+assert.deepStrictEqual(D.onDate(on, '2026-12-24'), []);
+assert.deepStrictEqual(D.onDate(on, '2027-03-01').map(x => [x.title, x.years]), [['생일', 35]]);
+assert.deepStrictEqual(D.onDate(on, '1992-03-01').map(x => [x.title, x.years]), [['생일', 0]]);
+assert.deepStrictEqual(D.onDate(on, '1991-03-01'), []);          // 원래 날짜 이전에는 없다
+assert.deepStrictEqual(D.onDate(on, '2027-12-25'), []);          // 한 번짜리는 그 날만
+assert.deepStrictEqual(D.onDate(on, '2027-02-28').map(x => x.title), ['윤일']);   // 평년엔 2/28
+assert.deepStrictEqual(D.onDate(on, '2028-02-29').map(x => x.title), ['윤일']);
+assert.deepStrictEqual(D.onDate(on, '2028-02-28'), []);
+assert.deepStrictEqual(D.onDate(on, 'x'), []);
+
 // 병합: 서로 다른 기기에서 추가하면 둘 다 남고, 같은 id 충돌은 새 id를 받는다
 const base = { ddays: [], ddayNextId: 1 };
 const local = { ddays: [{ id: 1, title: '내 기기', date: '2026-12-25' }], ddayNextId: 2 };

@@ -6387,6 +6387,19 @@ html[data-skin="w98"] .dd-badge.today { background: #c00000; } html[data-skin="w
 html[data-skin="w98"] .dd-pin, html[data-skin="w98"] .dd-del { background: none !important; box-shadow: none !important; color: #404040 !important; width: auto !important; }
 html[data-skin="w98"] .dd-preview { color: #000080; border-radius: 0; }
 
+/* 달력 칸·하루 패널의 D-day */
+.cal-dday { position: absolute; left: 3px; right: 3px; bottom: 3px; display: flex; align-items: center; gap: 3px; padding: 1px 4px; font-size: 10px; font-weight: 700; line-height: 1.25; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 6px; overflow: hidden; pointer-events: none; }
+.cal-dday i { font-style: normal; }
+.cal-dday .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.cal-dday em { font-style: normal; opacity: .8; }
+@media (max-width: 899px) { .cal-dday { right: auto; padding: 0 3px; font-size: 12px; } .cal-dday .t { display: none; } }
+.agenda-dday { display: flex; align-items: center; gap: 8px; margin: 8px 0; padding: 8px 10px; font-size: 13px; color: var(--text); background: var(--panel2, var(--panel)); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 8px; cursor: pointer; }
+.agenda-dday strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.agenda-dday em { font-style: normal; font-weight: 800; color: var(--accent); }
+html[data-skin="w98"] .cal-dday { color: #000080; background: #dfe3ff; border-radius: 0; }
+html[data-skin="w98"] .agenda-dday { color: #000; background: #fff; border: none; border-radius: 0; box-shadow: var(--w98-sunken); }
+html[data-skin="w98"] .agenda-dday em { color: #000080; }
+
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
 [data-theme="dark"] .modal-sheet, [data-theme="dark"] .add-sheet, [data-theme="dark"] .day-sheet, [data-theme="dark"] .detail-sheet {
@@ -11204,6 +11217,7 @@ function ddayDateText(iso) {
 function saveDdays() {
   try { localStorage.setItem('rianless_ddays', JSON.stringify({ ddays, ddayNextId })); } catch(e) {}
   queueCloudStateSync();
+  if (typeof renderCal === 'function' && currentCalSubTab === 'cal') { try { renderCal(); } catch(e) {} }
 }
 function loadDdays() {
   try {
@@ -13043,6 +13057,17 @@ function renderCal() {
 
     cell.appendChild(num);
 
+    // D-day: 그 날짜가 D-day(또는 매년 기념일)이면 칸 오른쪽 위에 아이콘과 이름을 보여 준다
+    const ddHere = Dday.onDate(ddays, ds);
+    if (ddHere.length) {
+      const dm = document.createElement('span');
+      dm.className = 'cal-dday';
+      dm.title = ddHere.map(x => `${x.emoji || '⭐'} ${x.title}${x.years ? ' ' + x.years + '주년' : ''}`).join('\n');
+      dm.innerHTML = `<i>${escapeLedgerText(ddHere[0].emoji || '⭐')}</i><span class="t">${escapeLedgerText(ddHere[0].title)}</span>${ddHere.length > 1 ? `<em>+${ddHere.length - 1}</em>` : ''}`;
+      cell.appendChild(dm);
+      cell.classList.add('has-dday');
+    }
+
 
 
     // 가계부 pip (수입=초록, 지출=빨강)
@@ -13511,7 +13536,8 @@ function renderCalDayList(ds, dayEvents) {
 
   const count = document.createElement('span');
   count.className = 'agenda-count';
-  count.textContent = `${dayItems.length + dayLedger.length + daySubs.length + dayInvest.length + dayRoutines.length}개`;
+  const dayDdays = Dday.onDate(ddays, ds);
+  count.textContent = `${dayItems.length + dayLedger.length + daySubs.length + dayInvest.length + dayRoutines.length + dayDdays.length}개`;
   header.append(headingWrap, count);
   container.appendChild(header);
 
@@ -13531,6 +13557,17 @@ function renderCalDayList(ds, dayEvents) {
   addRoutine.onclick = () => openRoutineModal(null, ds);
   actions.append(addSchedule, addLedger, addRoutine);
   container.appendChild(actions);
+
+  // D-day: 그 날이 기념일·목표일이면 맨 위에 띄운다 (오늘 기준 D-n 도 같이)
+  dayDdays.forEach(x => {
+    const c = Dday.calc(x, fmtDate(new Date()));
+    const tail = c && c.target === ds ? [c.label, c.sub].filter(Boolean).join(' · ') : (x.years ? x.years + '주년' : '');
+    const row = document.createElement('div');
+    row.className = 'agenda-dday';
+    row.innerHTML = `<span>${escapeLedgerText(x.emoji || '⭐')}</span><strong>${escapeLedgerText(x.title)}</strong><em>${escapeLedgerText(tail)}</em>`;
+    row.onclick = () => desktopOpen('mypage', 'mpCardDday');
+    container.appendChild(row);
+  });
 
   // 그날 지출 합계 (구독 결제 포함) / 수입
   const ledgerExpense = dayLedger.filter(e => e.type === 'expense').reduce((sum, e) => sum + Number(e.amount || 0), 0);
@@ -13560,7 +13597,7 @@ function renderCalDayList(ds, dayEvents) {
     container.appendChild(money);
   }
 
-  if (!dayItems.length && !dayLedger.length && !daySubs.length && !dayInvest.length && !dayRoutines.length) {
+  if (!dayItems.length && !dayLedger.length && !daySubs.length && !dayInvest.length && !dayRoutines.length && !dayDdays.length) {
     const empty = document.createElement('div');
     empty.className = 'agenda-empty';
     empty.innerHTML = '<span>✓</span><strong>여유로운 하루예요</strong><small>일정, 가계부, 구독을 추가해 보세요.</small>';

@@ -52,7 +52,21 @@
       (a.c.kind === 'past' ? b.c.diff - a.c.diff : a.c.diff - b.c.diff) ||
       (a.d.id || 0) - (b.d.id || 0)).map(x => Object.assign({}, x.d, { calc: x.c }));
   }
-  const api = { parse, daysBetween, nextYearly, calc, sortDdays };
+  // 그 날짜(dateStr)에 해당하는 D-day 들: 한 번짜리는 그 날짜, 매년 반복은 같은 월·일(원래 날짜 이후). { …d, years } (years: n주년, 한 번짜리는 0)
+  function onDate(list, dateStr) {
+    const t = parse(dateStr);
+    if (!t) return [];
+    return (list || []).filter(d => {
+      const o = parse(d.date);
+      if (!o) return false;
+      if (!d.yearly) return d.date === dateStr;
+      if (t.y < o.y) return false;
+      const feb29 = o.mo === 2 && o.d === 29;
+      const on = feb29 && !isLeap(t.y) ? (t.mo === 2 && t.d === 28) : (t.mo === o.mo && t.d === o.d);
+      return on;
+    }).map(d => Object.assign({}, d, { years: d.yearly ? t.y - parse(d.date).y : 0 }));
+  }
+  const api = { parse, daysBetween, nextYearly, calc, sortDdays, onDate };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Dday = api;
 })();
