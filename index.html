@@ -6244,6 +6244,7 @@ button:active:not(:disabled) {
   .dya-count b { color: var(--accent); }
   .dya-new, .dya-tools button { padding: 10px 14px; font-size: 14px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
   .dya-new { width: 100%; }
+  #viewDiary .dya-lockrow { display: none; }
   .dya-lockrow button { padding: 10px; font-size: 13px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
   .dya-back { display: inline-block; }
   .dya-tools { display: flex; gap: 8px; flex-wrap: wrap; }
@@ -6272,61 +6273,68 @@ button:active:not(:disabled) {
   .dya-form .dy-picks button { font-size: 20px; padding: 6px 8px; }
 }
 
-/* 다이어리 잠금 화면 (XP 부팅·로그인 풍) */
+/* 다이어리 잠금 화면 (Y2K 감성: 홀로그램 파스텔 · 크롬 글씨 · 젤리 단추 · 반짝이) */
 #dyaLock { display: none; }
 #viewDiary.dy-locked > .dya-side, #viewDiary.dy-locked > .dya-main { display: none !important; }
 #viewDiary.dy-locked > #dyaLock { display: flex; flex: 1; min-width: 0; min-height: 440px; }
 .dya-lockrow { display: flex; gap: 6px; }
 .dya-lockrow button { flex: 1; padding: 4px 8px; font-size: 12px; color: #000; cursor: pointer; }
-#dyaLock .xl-boot { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px; position: relative; background: #000; color: #fff; cursor: pointer; }
-.xl-logo { display: flex; align-items: center; gap: 14px; }
-.xl-flag { display: grid; grid-template-columns: 30px 30px; gap: 4px; transform: rotate(-8deg) skewX(-6deg); }
-.xl-flag i { display: block; width: 30px; height: 26px; border-radius: 4px 10px 4px 10px; }
-.xl-flag i:nth-child(1) { background: #e8541f; } .xl-flag i:nth-child(2) { background: #5fa923; } .xl-flag i:nth-child(3) { background: #2d6fd1; } .xl-flag i:nth-child(4) { background: #f3b412; }
-.xl-word { position: relative; line-height: 1; }
-.xl-word small { display: block; font-size: 13px; margin-bottom: 2px; }
-.xl-word b { font-size: 46px; letter-spacing: -1px; }
-.xl-word em { font-size: 24px; color: #ff6a1a; font-style: italic; font-weight: 700; vertical-align: top; position: relative; top: 4px; }
-.xl-bar { width: 150px; height: 16px; border: 2px solid #b4b4b4; border-radius: 7px; padding: 2px; box-sizing: border-box; overflow: hidden; }
-.xl-bar span { display: flex; gap: 2px; animation: xlRun 1.5s linear infinite; }
-.xl-bar span i { flex: 0 0 9px; height: 9px; border-radius: 1px; background: linear-gradient(#a8c8ff, #2f6be0 55%, #1c4db8); }
-@keyframes xlRun { from { transform: translateX(-36px); } to { transform: translateX(150px); } }
-.xl-foot { position: absolute; left: 18px; right: 18px; bottom: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
-.xl-foot b { font-size: 15px; font-style: italic; }
-.xl-login { flex: 1; display: flex; flex-direction: column; min-width: 0; }
-.xl-top { height: 54px; background: #00309c; border-bottom: 2px solid #8fa8e8; }
-.xl-bottom { height: 54px; background: #00309c; border-top: 2px solid #e98a1d; display: flex; align-items: center; padding: 0 16px; color: #fff; font-size: 12px; }
-.xl-main { flex: 1; display: flex; align-items: center; justify-content: center; gap: 28px; padding: 20px 16px; background: radial-gradient(ellipse at 20% 30%, #7f9fee, #4466cc 60%, #2b4bb0); color: #fff; flex-wrap: wrap; }
-.xl-big { font-size: 54px; font-weight: 700; font-style: italic; line-height: 1; text-shadow: 2px 2px 3px #00226a; }
-.xl-big em { color: #ffa24a; font-size: 30px; vertical-align: top; }
-.xl-lead { margin-top: 10px; font-size: 15px; line-height: 1.5; }
-.xl-div { width: 2px; align-self: stretch; background: linear-gradient(transparent, #fff, transparent); opacity: .7; }
-.xl-card { display: flex; flex-direction: column; gap: 8px; width: 270px; max-width: 100%; }
-.xl-user { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
-.xl-av { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #f7b23b, #e8541f); border: 2px solid #fff; border-radius: 6px; }
-.xl-name { font-size: 20px; font-weight: 700; text-shadow: 1px 1px 2px #00226a; }
-.xl-row { display: flex; gap: 6px; }
-.xl-card input { flex: 1; min-width: 0; padding: 7px 10px; font-size: 14px; color: #000; background: #fff; border: 2px solid #8aa6ee; border-radius: 4px; }
-.xl-go { width: 34px; font-size: 18px; font-weight: 700; color: #fff; background: linear-gradient(#5dc95d, #2d9a2d); border: 2px solid #fff; border-radius: 6px; cursor: pointer; }
+#dyaLock, #dyaLock * { font-family: 'Trebuchet MS', 'Malgun Gothic', 'Noto Sans KR', sans-serif !important; box-sizing: border-box; }
+#dyaLock .xl-boot, #dyaLock .xl-login { flex: 1; position: relative; overflow: hidden; display: flex; flex-direction: column; align-items: center; justify-content: center; background: radial-gradient(ellipse 60% 50% at 20% 15%, #fff8, transparent 60%), radial-gradient(ellipse 50% 40% at 85% 85%, #fff6, transparent 60%), linear-gradient(135deg, #ffd1f1 0%, #d3d6ff 28%, #b9f0ff 52%, #e4ffd2 76%, #ffe8b8 100%); color: #5a3d9a; }
+#dyaLock .xl-boot { gap: 14px; cursor: pointer; }
+.xl-sp { position: absolute; inset: 0; pointer-events: none; }
+.xl-sp span { position: absolute; left: var(--x); top: var(--y); font-size: 20px; color: var(--c); text-shadow: 0 0 6px #fff, 0 0 10px var(--c); animation: xlTwinkle var(--d) ease-in-out infinite; }
+@keyframes xlTwinkle { 0%, 100% { transform: scale(.6) rotate(0); opacity: .4; } 50% { transform: scale(1.3) rotate(20deg); opacity: 1; } }
+.xl-orb { width: 96px; height: 96px; border-radius: 50% !important; position: relative; background: radial-gradient(circle at 32% 26%, #fff 0 9%, #a8fff6 22%, #4fb6ff 58%, #8a5cff 100%); box-shadow: 0 8px 22px #8a5cff66, inset 0 -8px 14px #5a3dd966, inset 0 0 0 3px #ffffffaa; animation: xlBob 3s ease-in-out infinite; }
+.xl-orb::after { content: ''; position: absolute; left: 18%; top: 10%; width: 44%; height: 28%; border-radius: 50% !important; background: linear-gradient(#fffffff0, #ffffff10); transform: rotate(-20deg); }
+@keyframes xlBob { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-8px); } }
+.xl-word { display: flex; align-items: flex-start; gap: 4px; line-height: 1; }
+.xl-word b, .xl-big { font-size: 58px; font-weight: 900; font-style: italic; letter-spacing: -1px; background: linear-gradient(#fff 0%, #dfe7fb 40%, #8796bd 50%, #eef3ff 62%, #fff 100%); -webkit-background-clip: text; background-clip: text; color: transparent; -webkit-text-stroke: 1.5px #7b6bd0; filter: drop-shadow(0 3px 0 #ffffffcc) drop-shadow(0 6px 8px #b69cff99); }
+.xl-big { text-align: center; display: block; }
+.xl-word em, .xl-big em { font-size: 18px; font-weight: 800; font-style: normal; color: #ff5fc8; -webkit-text-fill-color: #ff5fc8; -webkit-text-stroke: 0; text-shadow: 0 0 6px #fff; margin-left: 4px; vertical-align: top; }
+.xl-tube { width: 220px; height: 20px; border-radius: 12px !important; padding: 3px; background: linear-gradient(#ffffffd0, #ffffff60); box-shadow: inset 0 2px 4px #8a7ad866, 0 0 0 2px #fff, 0 4px 10px #b69cff55; overflow: hidden; }
+.xl-tube i { display: block; height: 100%; border-radius: 9px !important; background: repeating-linear-gradient(115deg, #ff8ae0 0 12px, #8ad8ff 12px 24px, #c4a8ff 24px 36px); background-size: 72px 100%; animation: xlFill 1.9s ease-in-out infinite, xlStripe .8s linear infinite; box-shadow: inset 0 3px 3px #ffffff99; }
+@keyframes xlFill { 0% { width: 6%; } 85%, 100% { width: 100%; } }
+@keyframes xlStripe { to { background-position: 72px 0; } }
+.xl-load { font-size: 13px; font-weight: 700; letter-spacing: 2px; color: #7a5cc8; text-shadow: 0 1px 0 #fff; }
+.xl-foot { position: absolute; left: 18px; right: 18px; bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #7a5cc8; }
+.xl-foot b { font-size: 14px; font-style: italic; }
+#dyaLock .xl-login { gap: 0; padding: 18px 12px; }
+.xl-cd { position: absolute; left: 7%; bottom: 14%; font-size: 60px; animation: xlSpin 6s linear infinite; filter: drop-shadow(0 4px 6px #8a5cff55); }
+.xl-bf { position: absolute; right: 9%; top: 14%; font-size: 44px; animation: xlBob 2.4s ease-in-out infinite; }
+@keyframes xlSpin { to { transform: rotate(360deg); } }
+.xl-glass { position: relative; z-index: 2; width: 380px; max-width: 100%; border-radius: 22px !important; background: #ffffff8c; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 2px solid #fff; box-shadow: 0 10px 30px #b69cff66, inset 0 0 18px #ffffffb0; overflow: hidden; }
+.xl-gt { display: flex; align-items: center; padding: 6px 12px; color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-shadow: 0 1px 2px #8a5cff; background: linear-gradient(#ffb4ea, #b69cff 55%, #7ac8ff); }
+.xl-gt i { margin-left: auto; display: flex; gap: 5px; }
+.xl-gt i b { width: 13px; height: 13px; border-radius: 50% !important; background: radial-gradient(circle at 35% 30%, #fff, #bfe8ff 60%, #8ab8ff); box-shadow: 0 0 0 1px #fff; }
+.xl-gb { padding: 16px 22px 14px; display: flex; flex-direction: column; align-items: center; gap: 4px; }
+.xl-big { font-size: 46px; }
+.xl-lead { font-size: 12.5px; line-height: 1.5; text-align: center; color: #6a48b8; margin-bottom: 8px; }
+.xl-card { width: 100%; display: flex; flex-direction: column; gap: 9px; }
+.xl-user { display: flex; flex-direction: column; align-items: center; gap: 4px; margin-bottom: 4px; }
+.xl-av { width: 62px; height: 62px; border-radius: 50% !important; padding: 3px; background: conic-gradient(#ff8ae0, #8ad8ff, #c4ff9a, #ffd86b, #ff8ae0); box-shadow: 0 4px 10px #b69cff66; }
+.xl-av span { width: 100%; height: 100%; border-radius: 50% !important; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 900; color: #7b4fd8; background: radial-gradient(circle at 35% 28%, #fff, #e9e1ff); }
+.xl-name { font-size: 16px; font-weight: 800; color: #6a48b8; }
+.xl-row { display: flex; gap: 8px; align-items: center; }
+#dyaLock .xl-card input { flex: 1; min-width: 0; width: 100%; padding: 9px 16px; font-size: 14px; color: #4a2f8a; background: linear-gradient(#fff, #f4f0ff) !important; border: 2px solid #c9b6ff !important; border-radius: 999px !important; box-shadow: inset 0 2px 4px #b69cff44 !important; outline: none; text-align: center; }
+#dyaLock .xl-card input:focus { border-color: #ff8ae0 !important; box-shadow: 0 0 0 3px #ff8ae055, inset 0 2px 4px #b69cff44 !important; }
+#dyaLock .xl-card input::placeholder { color: #a994d8; }
+#dyaLock .xl-go { flex: 0 0 40px; width: 40px; height: 40px; font-size: 20px; font-weight: 900; color: #fff !important; text-shadow: 0 1px 2px #1f6fb0; border: 2px solid #fff !important; border-radius: 50% !important; cursor: pointer; background: radial-gradient(circle at 35% 25%, #d8fffb 0 12%, #5fd4ff 45%, #3a8cff 100%) !important; box-shadow: 0 4px 10px #3a8cff77, inset 0 -4px 6px #1f5fd066 !important; }
+#dyaLock .xl-go:active { transform: translateY(1px); }
 .xl-btns { display: flex; gap: 8px; }
-.xl-btns button { flex: 1; padding: 7px; font-size: 13px; font-weight: 700; color: #fff; background: rgba(0,0,0,.25); border: 2px solid #fff; border-radius: 6px; cursor: pointer; }
-.xl-link { align-self: flex-start; padding: 0; font-size: 12px; color: #fff; background: none; border: none; text-decoration: underline; cursor: pointer; }
-.xl-err { min-height: 18px; font-size: 12px; color: #fff3a8; text-shadow: 1px 1px 1px #00226a; }
+#dyaLock .xl-btns button { flex: 1; padding: 8px 6px; font-size: 13px; font-weight: 800; color: #fff !important; text-shadow: 0 1px 2px #8a3fc0; border: 2px solid #fff !important; border-radius: 999px !important; cursor: pointer; background: linear-gradient(#ffc4f0, #ff7ad9 55%, #c45cff) !important; box-shadow: 0 4px 8px #c45cff66, inset 0 2px 3px #ffffffaa !important; }
+#dyaLock .xl-btns button:last-child { background: linear-gradient(#e6f4ff, #9ad0ff 55%, #6a9cff) !important; text-shadow: 0 1px 2px #2a5cc0; box-shadow: 0 4px 8px #6a9cff66, inset 0 2px 3px #ffffffaa !important; }
+#dyaLock .xl-link { align-self: center; padding: 0 !important; font-size: 12px; font-weight: 700; color: #d23fa8 !important; background: none !important; border: none !important; box-shadow: none !important; text-decoration: underline; cursor: pointer; }
+.xl-err { min-height: 18px; text-align: center; font-size: 12px; font-weight: 700; color: #d23f7a; }
+.xl-ft { position: relative; z-index: 2; margin-top: 12px; font-size: 11px; letter-spacing: 1px; color: #7a5cc8; }
 .xl-card.shake { animation: xlShake .35s; }
 @keyframes xlShake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
-@media (prefers-reduced-motion: reduce) { .xl-bar span, .xl-card.shake { animation: none; } }
-/* 윈도우 98 스킨의 전역 단추·모서리 규칙을 이 화면에서는 풀어 준다 */
-html[data-skin] #dyaLock .xl-go, html[data-skin] #dyaLock .xl-btns button, html[data-skin] #dyaLock .xl-link { box-shadow: none !important; }
-html[data-skin] #dyaLock .xl-go { background: linear-gradient(#5dc95d, #2d9a2d) !important; color: #fff !important; border: 2px solid #fff !important; }
-html[data-skin] #dyaLock .xl-btns button { background: rgba(0,0,0,.25) !important; color: #fff !important; border: 2px solid #fff !important; }
-html[data-skin] #dyaLock .xl-link { background: none !important; color: #fff !important; border: none !important; padding: 0 !important; }
-html[data-skin] #dyaLock .xl-card input { border-radius: 4px !important; box-shadow: none !important; }
-html[data-skin] #dyaLock .xl-av { border-radius: 6px !important; }
-html[data-skin] #dyaLock .xl-go, html[data-skin] #dyaLock .xl-btns button { border-radius: 6px !important; }
-html[data-skin] #dyaLock .xl-flag i:nth-child(odd) { border-radius: 4px 10px 4px 10px !important; }
-html[data-skin] #dyaLock .xl-flag i:nth-child(even) { border-radius: 4px 10px 4px 10px !important; }
-html[data-skin] #dyaLock .xl-bar { border-radius: 7px !important; }
-html[data-skin] #dyaLock .xl-bar span i { border-radius: 1px !important; }
+/* 윈도우 98 스킨의 '모서리 0' 규칙보다 앞서도록 */
+#dyaLock .xl-orb, #dyaLock .xl-orb::after, #dyaLock .xl-gt i b, #dyaLock .xl-av, #dyaLock .xl-av span { border-radius: 50% !important; }
+#dyaLock .xl-tube { border-radius: 12px !important; }
+#dyaLock .xl-tube i { border-radius: 9px !important; }
+#dyaLock .xl-glass { border-radius: 22px !important; }
+@media (prefers-reduced-motion: reduce) { .xl-sp span, .xl-orb, .xl-tube i, .xl-cd, .xl-bf, .xl-card.shake { animation: none !important; } .xl-tube i { width: 70%; } }
 
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
@@ -11070,7 +11078,9 @@ let diaryLockStage = 'form'; // 'boot' | 'form'
 let diaryLockBootTimer = null;
 let diaryLockErr = '';
 
-function diaryLocked() { return !!diaryLock && !diaryUnlocked; }
+// 대문(잠금)은 PC 에서만 쓴다. 폰에서는 잠그지 않는다.
+function diaryGateOn() { return window.innerWidth >= 900; }
+function diaryLocked() { return !!diaryLock && !diaryUnlocked && diaryGateOn(); }
 
 async function diaryHash(pw, salt) {
   const text = salt + ':' + pw;
@@ -11097,7 +11107,7 @@ function diaryLockOnEnter() {
   clearTimeout(diaryLockBootTimer);
   let asked = false;
   try { asked = !!localStorage.getItem('rianless_diary_lock_asked'); } catch(e) {}
-  diaryLockMode = diaryLocked() ? 'login' : (!diaryLock && !asked ? 'setup' : null);
+  diaryLockMode = !diaryGateOn() ? null : (diaryLocked() ? 'login' : (!diaryLock && !asked ? 'setup' : null));
   diaryLockErr = '';
   if (diaryLockMode) {
     diaryLockStage = 'boot';
@@ -11183,38 +11193,42 @@ async function diaryLockSubmit(ev) {
 function renderDiaryLock() {
   const box = document.getElementById('dyaLock');
   if (!box) return;
+  const sparkles = ['✦', '✧', '♡', '★', '✦', '♡', '✧', '★'].map((c, i) => `<span style="--x:${(i * 37 + 8) % 92}%;--y:${(i * 53 + 10) % 84}%;--d:${2 + (i % 4) * 0.7}s;--c:${['#ff7ad9', '#7ad7ff', '#b69cff', '#ffd86b'][i % 4]}">${c}</span>`).join('');
   if (diaryLockStage === 'boot') {
     box.innerHTML = `<div class="xl-boot" onclick="diaryLockSkipBoot()" tabindex="0" onkeydown="diaryLockSkipBoot()" role="button" aria-label="시작 화면, 누르면 건너뛰어요">
-      <div class="xl-logo"><div class="xl-flag"><i></i><i></i><i></i><i></i></div>
-        <div class="xl-word"><small>Rianless®</small><b>Diary</b><em>98</em></div></div>
-      <div class="xl-bar" aria-hidden="true"><span><i></i><i></i><i></i></span></div>
-      <div class="xl-foot"><span>Copyright © Rianless</span><b>Rianless</b></div></div>`;
+      <div class="xl-sp" aria-hidden="true">${sparkles}</div>
+      <div class="xl-orb" aria-hidden="true"></div>
+      <div class="xl-word"><b>Diary</b><em>2000</em></div>
+      <div class="xl-tube" aria-hidden="true"><i></i></div>
+      <div class="xl-load">loading… ♡</div>
+      <div class="xl-foot"><span>© Rianless ✦ all rights reserved</span><b>✦ Rianless ✦</b></div></div>`;
     return;
   }
   const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
   const field = (id, ph, ac) => `<input type="password" id="${id}" placeholder="${ph}" autocomplete="${ac || 'off'}" spellcheck="false">`;
   let left, fields;
   if (diaryLockMode === 'login') {
-    left = ['비밀번호를 입력해서<br>다이어리를 여세요', ''];
+    left = ['♡ 비밀번호를 입력하면 나만의 다이어리가 열려요 ♡', ''];
     fields = `<div class="xl-row">${field('xlPw', '비밀번호', 'current-password')}<button type="submit" class="xl-go" aria-label="열기">→</button></div>
       ${diaryLock && diaryLock.hint ? '<button type="button" class="xl-link" onclick="diaryLockHint()">비밀번호 힌트 보기</button>' : ''}`;
   } else if (diaryLockMode === 'setup') {
-    left = ['처음 오셨나요?<br>비밀번호를 정하면<br>나만 볼 수 있어요', ''];
+    left = ['✦ 처음이죠? 비밀번호를 정하면 나만 볼 수 있어요 ✦', ''];
     fields = `${field('xlNew', '새 비밀번호 (4자 이상)', 'new-password')}${field('xlNew2', '비밀번호 확인', 'new-password')}
       <input type="text" id="xlHint" placeholder="비밀번호 힌트 (선택)" maxlength="60" autocomplete="off">
       <div class="xl-btns"><button type="submit">시작하기</button><button type="button" onclick="diaryLockLater()">나중에 하기</button></div>`;
   } else {
-    left = ['비밀번호 설정', ''];
+    left = ['✦ 비밀번호 설정 ✦', ''];
     fields = `${diaryLock ? field('xlOld', '현재 비밀번호', 'current-password') : ''}${field('xlNew', diaryLock ? '새 비밀번호 (비우면 삭제)' : '새 비밀번호 (4자 이상)', 'new-password')}${field('xlNew2', '새 비밀번호 확인', 'new-password')}
       <input type="text" id="xlHint" placeholder="비밀번호 힌트 (선택)" maxlength="60" autocomplete="off" value="${escapeLedgerText(diaryLock ? diaryLock.hint || '' : '')}">
       <div class="xl-btns"><button type="submit">저장</button><button type="button" onclick="diaryLockCancel()">취소</button></div>`;
   }
-  box.innerHTML = `<div class="xl-login"><div class="xl-top"></div>
-    <div class="xl-main"><div class="xl-left"><div class="xl-big">Diary<em>98</em></div><div class="xl-lead">${left[0]}</div></div>
-      <div class="xl-div"></div>
-      <form class="xl-card" onsubmit="diaryLockSubmit(event)"><div class="xl-user"><div class="xl-av">${escapeLedgerText(nick.charAt(0).toUpperCase())}</div><div class="xl-name">${escapeLedgerText(nick)}</div></div>
-        ${fields}<div class="xl-err" role="alert">${escapeLedgerText(diaryLockErr)}</div></form></div>
-    <div class="xl-bottom"><span>🔒 Rianless Diary</span></div></div>`;
+  box.innerHTML = `<div class="xl-login"><div class="xl-sp" aria-hidden="true">${sparkles}</div>
+    <div class="xl-cd" aria-hidden="true">💿</div><div class="xl-bf" aria-hidden="true">🦋</div>
+    <div class="xl-glass"><div class="xl-gt"><span>✦ Diary 2000</span><i aria-hidden="true"><b></b><b></b><b></b></i></div>
+      <div class="xl-gb"><div class="xl-big">Diary<em>2000</em></div><div class="xl-lead">${left[0]}</div>
+        <form class="xl-card" onsubmit="diaryLockSubmit(event)"><div class="xl-user"><div class="xl-av"><span>${escapeLedgerText(nick.charAt(0).toUpperCase())}</span></div><div class="xl-name">${escapeLedgerText(nick)}</div></div>
+          ${fields}<div class="xl-err" role="alert">${escapeLedgerText(diaryLockErr)}</div></form></div></div>
+    <div class="xl-ft">✦ Rianless Diary ✦ made with ♡</div></div>`;
   const first = box.querySelector('input');
   if (first) setTimeout(() => first.focus(), 30);
 }
