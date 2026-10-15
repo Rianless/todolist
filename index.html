@@ -6218,7 +6218,7 @@ button:active:not(:disabled) {
 .dy-picks button.on { border-color: var(--accent, #e8590c); box-shadow: 0 0 0 2px rgba(232,89,12,.25); }
 
 /* 다이어리 읽기 화면 (PC·모바일 공용): 윈도우 98 메모장 창을 틸 바탕화면 위에 띄운다 */
-.dya-paper { background: #008080 !important; background-image: none !important; padding: 14px !important; }
+.dya-paper { background: transparent !important; background-image: none !important; box-shadow: none !important; padding: 0 !important; }
 .dya-head, .dya-title { background: transparent !important; }
 .dya-head, .dya-title { background: transparent !important; }
 .dya-win { display: flex; flex-direction: column; min-height: 100%; box-sizing: border-box; background: #c0c0c0; box-shadow: inset -1px -1px #404040, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf; padding: 3px; }
@@ -10477,6 +10477,7 @@ function desktopWin(act) {
     if (h.hasAttribute('data-desktop-max')) h.removeAttribute('data-desktop-max'); else h.setAttribute('data-desktop-max', '1');
   } else if (act === 'min') h.setAttribute('data-desktop-win', 'min');
   else if (act === 'close') h.setAttribute('data-desktop-win', 'closed');
+  if ((act === 'min' || act === 'close') && currentMainTab === 'diary') diaryRelock();   // 창을 내리면 다시 잠근다
   desktopSync();
 }
 
@@ -10664,7 +10665,7 @@ let currentCalSubTab = 'cal';
 function setMainTab(tab, btn) {
 
   if (currentMainTab === 'memo' && tab !== 'memo') { memoFlush(); memoPruneEmpty(null); }
-  if (currentMainTab === 'diary' && tab !== 'diary') diaryAppEdit = false;
+  if (currentMainTab === 'diary' && tab !== 'diary') { diaryAppEdit = false; diaryRelock(); }
   if (currentMainTab === 'bookmark' && tab !== 'bookmark') { editingBookmarkId = null; bookmarkFolderEdit = null; }
   document.documentElement.setAttribute('data-main-tab', tab);
   document.documentElement.removeAttribute('data-desktop-win');
@@ -11139,6 +11140,13 @@ function diaryLockSkipBoot() {
   diaryLockStage = 'form';
   renderDiaryApp();
 }
+// 다이어리 탭을 떠나거나 창을 내리면 다시 잠근다 (비밀번호를 정해 둔 PC 에서만)
+function diaryRelock() {
+  if (!diaryLock || !diaryGateOn()) return;
+  diaryUnlocked = false;
+  diaryLockOnEnter();
+  renderDiaryApp();
+}
 function diaryLockNow() {
   if (!diaryLock) return;
   diaryUnlocked = false;
@@ -11276,9 +11284,9 @@ function renderDiaryLock() {
 function diaryEnter() {
   diaryAppEdit = false;
   diaryLockOnEnter();
-  if (!diaries.some(d => d.id === diaryAppSel)) diaryAppSel = diaries.length ? diarySorted()[0].id : null;
-  // PC: 들어가면 가장 최근 일기가 바로 보인다 / 폰: 날짜 목록이 먼저 나오고, 날짜를 눌러야 내용이 보인다
-  diaryDetail = diaryAppSel !== null && window.innerWidth >= 900;
+  // PC·폰 모두: 들어가면 일기가 자동으로 열리지 않는다. 목록에서 날짜를 눌러야 내용이 보인다.
+  diaryAppSel = null;
+  diaryDetail = false;
   renderDiaryApp();
 }
 function diaryAppPick(id) { diaryAppSel = id; diaryAppEdit = false; diaryDetail = true; renderDiaryApp(); }
@@ -11327,7 +11335,7 @@ function diaryAppDelete() {
   const d = diaries.find(x => x.id === diaryAppSel);
   if (!d || !confirm('이 다이어리를 지울까요?')) return;
   diaries = diaries.filter(x => x.id !== d.id);
-  diaryAppSel = diaries.length ? diarySorted()[0].id : null;
+  diaryAppSel = null;
   diaryDetail = false;
   saveDiaries();
   renderDiaryApp();
@@ -11385,7 +11393,7 @@ function renderDiaryApp() {
       <div class="dya-win-tb" aria-hidden="true"><span>📔 ${escapeLedgerText(title)} - 메모장</span><i><b>_</b><b>□</b><b>✕</b></i></div>
       <div class="dya-win-mn" aria-hidden="true"><span>파일(F)</span><span>편집(E)</span><span>서식(O)</span><span>도움말(H)</span></div>
       <div class="dya-win-ct">${inner}</div></div></div>`;
-  if (!d) { main.innerHTML = win('다이어리', '<div class="dya-empty">첫 다이어리를 써 보세요.<br>\'새 다이어리 쓰기\'를 눌러요.</div>'); return; }
+  if (!d) { main.innerHTML = win('다이어리', diaries.length ? '<div class="dya-empty">왼쪽 목록에서 날짜를 눌러<br>일기를 열어 보세요.</div>' : '<div class="dya-empty">첫 다이어리를 써 보세요.<br>\'새 다이어리 쓰기\'를 눌러요.</div>'); return; }
   main.innerHTML = `
     <div class="dya-tools"><button type="button" class="dya-back" onclick="diaryAppBack()">← 목록</button><button type="button" onclick="diaryAppEditCur()">✏️ 고치기</button><button type="button" onclick="diaryAppDelete()">🗑️ 지우기</button></div>
     ${win(d.title || d.date, `<div class="dya-head"><span class="m">${d.mood}</span><span class="w">${d.weather}</span><span class="dt">${escapeLedgerText(d.date)}</span></div>
