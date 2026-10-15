@@ -6226,7 +6226,10 @@ button:active:not(:disabled) {
 .dya-win-tb i { margin-left: auto; display: flex; gap: 2px; font-style: normal; }
 .dya-win-tb b.x { cursor: pointer; }
 .dya-win-tb b { width: 16px; height: 14px; line-height: 14px; text-align: center; font-size: 10px; color: #000; background: #c0c0c0; box-shadow: inset -1px -1px #404040, inset 1px 1px #fff, inset -2px -2px #808080, inset 2px 2px #dfdfdf; }
-.dya-win-mn { display: flex; gap: 12px; padding: 2px 4px; font-size: 12px; color: #000; }
+.dya-win-mn { display: flex; align-items: center; gap: 12px; padding: 2px 4px; font-size: 12px; color: #000; }
+.dya-mn-sep { color: #808080; }
+.dya-win-mn .dya-mn-act, html[data-skin] .dya-win-mn .dya-mn-act { padding: 0 6px !important; font-size: 12px; line-height: 1.5; color: #000 !important; background: none !important; border: none !important; box-shadow: none !important; cursor: pointer; margin-left: -6px; }
+.dya-win-mn .dya-mn-act:hover, html[data-skin] .dya-win-mn .dya-mn-act:hover, .dya-win-mn .dya-mn-act:focus-visible { background: #000080 !important; color: #fff !important; outline: none; }
 .dya-win-ct { flex: 1; background: #fff; box-shadow: inset 1px 1px #404040, inset -1px -1px #fff, inset -2px -2px #dfdfdf, inset 2px 2px #808080; padding: 12px 16px; font-family: 'Courier New', 'Malgun Gothic', 'Noto Sans KR', monospace; }
 .dya-win-ct .dya-body { font-size: 14px; line-height: 1.6; }
 .dya-win-ct .dya-head { border-bottom: 1px dashed #808080; }
@@ -6249,6 +6252,7 @@ button:active:not(:disabled) {
   .dya-lockrow button { padding: 10px; font-size: 13px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
   .dya-back { display: inline-block; }
   .dya-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+  .dya-win-mn .dya-mn-act, .dya-mn-sep { display: none !important; }
   .dya-list { display: flex; flex-direction: column; gap: 8px; }
   .dya-month { padding: 4px 2px; font-size: 12px; font-weight: 700; color: var(--text3); }
   .dya-item { display: block; width: 100%; text-align: left; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; }
@@ -6786,6 +6790,7 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   .dya-item-d { margin-top: 1px; font-size: 10px; opacity: .65; }
   .dya-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
   .dya-tools { display: flex; gap: 6px; }
+  .dya-tools.rd { display: none; }
   .dya-back { display: none; }
   .dya-tools button { padding: 3px 12px; font-size: 12px; color: #000 !important; }
   .dya-paper { flex: 1; min-height: 0; overflow-y: auto; background: #fffef2; box-shadow: var(--w98-sunken); padding: 18px 24px; color: #000; background-image: repeating-linear-gradient(transparent 0 27px, #e4e0c8 27px 28px); background-attachment: local; }
@@ -11397,16 +11402,16 @@ function renderDiaryApp() {
     return;
   }
   const d = diaries.find(x => x.id === diaryAppSel);
-  const win = (title, inner) => `<div class="dya-paper"><div class="dya-win">
+  const win = (title, inner, acts = '') => `<div class="dya-paper"><div class="dya-win">
       <div class="dya-win-tb"><span>📔 ${escapeLedgerText(title)} - 메모장</span><i><b aria-hidden="true">_</b><b aria-hidden="true">□</b><b class="x" role="button" tabindex="0" aria-label="닫기" title="닫기" onclick="diaryAppClose()" onkeydown="if(event.key===\'Enter\'||event.key===\' \'){event.preventDefault();diaryAppClose()}">✕</b></i></div>
-      <div class="dya-win-mn" aria-hidden="true"><span>파일(F)</span><span>편집(E)</span><span>서식(O)</span><span>도움말(H)</span></div>
+      <div class="dya-win-mn"><span aria-hidden="true">파일(F)</span><span aria-hidden="true">편집(E)</span><span aria-hidden="true">서식(O)</span><span aria-hidden="true">도움말(H)</span>${acts}</div>
       <div class="dya-win-ct">${inner}</div></div></div>`;
   if (!d) { main.innerHTML = win('다이어리', diaries.length ? '<div class="dya-empty">왼쪽 목록에서 날짜를 눌러<br>일기를 열어 보세요.</div>' : '<div class="dya-empty">첫 다이어리를 써 보세요.<br>\'새 다이어리 쓰기\'를 눌러요.</div>'); return; }
   main.innerHTML = `
-    <div class="dya-tools"><button type="button" class="dya-back" onclick="diaryAppBack()">← 목록</button><button type="button" onclick="diaryAppEditCur()">✏️ 고치기</button><button type="button" onclick="diaryAppDelete()">🗑️ 지우기</button></div>
+    <div class="dya-tools rd"><button type="button" class="dya-back" onclick="diaryAppBack()">← 목록</button><button type="button" onclick="diaryAppEditCur()">✏️ 고치기</button><button type="button" onclick="diaryAppDelete()">🗑️ 지우기</button></div>
     ${win(d.title || d.date, `<div class="dya-head"><span class="m">${d.mood}</span><span class="w">${d.weather}</span><span class="dt">${escapeLedgerText(d.date)}</span></div>
       ${d.title ? `<div class="dya-title">${escapeLedgerText(d.title)}</div>` : ''}
-      <div class="dya-body">${escapeLedgerText(d.content)}</div>`)}`;
+      <div class="dya-body">${escapeLedgerText(d.content)}</div>`, `<span class="dya-mn-sep" aria-hidden="true">|</span><button type="button" class="dya-mn-act" onclick="diaryAppEditCur()">✏️ 고치기</button><button type="button" class="dya-mn-act" onclick="diaryAppDelete()">🗑️ 지우기</button>`)}`;
 }
 
 /* ══════════════════════════════════════
