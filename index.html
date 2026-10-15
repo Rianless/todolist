@@ -6300,16 +6300,14 @@ button:active:not(:disabled) {
 .xl-foot { position: absolute; left: 18px; right: 18px; bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #7a5cc8; }
 .xl-foot b { font-size: 14px; font-style: italic; }
 #dyaLock .xl-login { gap: 0; padding: 18px 12px; }
-.xl-betta { position: absolute; z-index: 1; top: 66%; left: -190px; width: 170px; pointer-events: none; animation: xlSwim 26s linear infinite; filter: drop-shadow(0 6px 8px #8a5cff44); }
-.xl-betta svg { display: block; animation: xlBob 2.6s ease-in-out infinite; overflow: visible; }
-.xl-betta .xlb-tail { transform-origin: 70px 64px; animation: xlTail 1.1s ease-in-out infinite; }
-.xl-betta .xlb-fin, .xl-betta .xlb-fin2 { transform-origin: 110px 62px; animation: xlFinWave 1.4s ease-in-out infinite; }
-.xl-betta .xlb-fin2 { animation-delay: -.7s; }
-.xl-betta .xlb-pect { transform-origin: 124px 68px; animation: xlPect .9s ease-in-out infinite; }
+.xl-betta { position: absolute; z-index: 1; top: 68%; left: -170px; width: 160px; height: 104px; pointer-events: none; animation: xlSwim 26s linear infinite; }
+.xl-betta span { position: absolute; left: 0; top: 0; image-rendering: pixelated; animation: xlFrame .7s steps(1) infinite; }
+.xl-betta .xlb-f2 { animation-name: xlFrame2; }
+.xl-betta svg { display: block; }
+.xl-betta { --bob: 0; }
+@keyframes xlFrame { 0% { opacity: 1; } 50% { opacity: 0; } }
+@keyframes xlFrame2 { 0% { opacity: 0; } 50% { opacity: 1; } }
 @keyframes xlSwim { 0% { left: -190px; transform: scaleX(1); } 48% { left: 100%; transform: scaleX(1); } 50% { left: 100%; transform: scaleX(-1); } 98% { left: -190px; transform: scaleX(-1); } 100% { left: -190px; transform: scaleX(1); } }
-@keyframes xlTail { 0%, 100% { transform: rotate(7deg) skewY(4deg); } 50% { transform: rotate(-9deg) skewY(-5deg); } }
-@keyframes xlFinWave { 0%, 100% { transform: skewX(0) scaleY(1); } 50% { transform: skewX(-6deg) scaleY(.92); } }
-@keyframes xlPect { 0%, 100% { transform: rotate(0); } 50% { transform: rotate(14deg); } }
 .xl-glass { position: relative; z-index: 2; width: 380px; max-width: 100%; border-radius: 22px !important; background: #ffffff8c; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 2px solid #fff; box-shadow: 0 10px 30px #b69cff66, inset 0 0 18px #ffffffb0; overflow: hidden; }
 .xl-gt { display: flex; align-items: center; padding: 6px 12px; color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-shadow: 0 1px 2px #8a5cff; background: linear-gradient(#ffb4ea, #b69cff 55%, #7ac8ff); }
 .xl-gt i { margin-left: auto; display: flex; gap: 5px; }
@@ -6341,7 +6339,7 @@ button:active:not(:disabled) {
 #dyaLock .xl-tube { border-radius: 12px !important; }
 #dyaLock .xl-tube i { border-radius: 9px !important; }
 #dyaLock .xl-glass { border-radius: 22px !important; }
-@media (prefers-reduced-motion: reduce) { .xl-sp span, .xl-orb, .xl-tube i, .xl-betta, .xl-betta *, .xl-card.shake { animation: none !important; } .xl-tube i { width: 70%; } .xl-betta { left: 8%; } }
+@media (prefers-reduced-motion: reduce) { .xl-sp span, .xl-orb, .xl-tube i, .xl-betta, .xl-betta *, .xl-card.shake { animation: none !important; } .xl-tube i { width: 70%; } .xl-betta { left: 8%; } .xl-betta .xlb-f2 { display: none; } }
 
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
@@ -11197,22 +11195,57 @@ async function diaryLockSubmit(ev) {
   diaryEnter();
 }
 
-// 베타 물고기(그림): 오른쪽을 보고 있고, 꼬리와 지느러미가 하늘하늘 움직인다
-const XL_BETTA = `<svg viewBox="0 0 210 130" width="170" height="105" focusable="false">
-  <defs>
-    <linearGradient id="xlbBody" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#7ee8ff"/><stop offset=".55" stop-color="#7a8cff"/><stop offset="1" stop-color="#a55cff"/></linearGradient>
-    <linearGradient id="xlbFin" x1="0" y1="0" x2="1" y2="0"><stop offset="0" stop-color="#ff6fd2" stop-opacity=".95"/><stop offset=".6" stop-color="#9a6cff" stop-opacity=".8"/><stop offset="1" stop-color="#6fd0ff" stop-opacity=".7"/></linearGradient>
-  </defs>
-  <g class="xlb-tail"><path d="M70 64 C38 -6 -42 6 -22 56 C-48 112 30 138 70 69 Z" fill="url(#xlbFin)" stroke="#fff" stroke-opacity=".7" stroke-width="1.2"/>
-    <path d="M68 63 C40 30 8 20 -8 44 M68 65 C36 56 4 54 -16 60 M68 66 C40 80 10 100 -6 112" fill="none" stroke="#fff" stroke-opacity=".55" stroke-width="1"/></g>
-  <g class="xlb-fin"><path d="M96 44 C92 4 150 -8 158 30 C138 26 116 34 96 44 Z" fill="url(#xlbFin)" stroke="#fff" stroke-opacity=".7" stroke-width="1.1"/></g>
-  <g class="xlb-fin2"><path d="M92 82 C80 124 138 138 154 92 C130 94 110 92 92 82 Z" fill="url(#xlbFin)" stroke="#fff" stroke-opacity=".7" stroke-width="1.1"/></g>
-  <path d="M70 62 C80 38 130 34 160 54 C172 60 172 66 160 72 C130 90 80 86 70 62 Z" fill="url(#xlbBody)" stroke="#fff" stroke-opacity=".8" stroke-width="1.4"/>
-  <path d="M88 52 C110 42 138 44 152 54" fill="none" stroke="#fff" stroke-opacity=".6" stroke-width="2.2" stroke-linecap="round"/>
-  <g class="xlb-pect"><path d="M122 66 C112 80 120 92 134 88 C130 80 130 72 122 66 Z" fill="url(#xlbFin)" stroke="#fff" stroke-opacity=".7" stroke-width="1"/></g>
-  <circle cx="148" cy="57" r="5.2" fill="#fff"/><circle cx="149.5" cy="57" r="3" fill="#2c1b6b"/><circle cx="150.5" cy="55.6" r="1.1" fill="#fff"/>
-  <path d="M165 63 C167 64 167 66 165 67" fill="none" stroke="#fff" stroke-opacity=".8" stroke-width="1.2" stroke-linecap="round"/>
-</svg>`;
+// 베타 물고기(도트): 오른쪽을 보고 있다. 꼬리·지느러미 물결이 다른 두 장면을 번갈아 보여 준다.
+function xlBuildBetta(frame) {
+  const W = 40, H = 28, CY = 14;
+  const g = Array.from({ length: H }, () => Array(W).fill(''));
+  const put = (x, y, c) => { if (x >= 0 && x < W && y >= 0 && y < H) g[y][x] = c; };
+  const sw = frame ? 1 : -1;                      // 두 장면: 꼬리 끝이 위/아래로 살랑
+  const bodyIn = (x, y) => ((x - 26) / 9.2) ** 2 + ((y - CY) / 4.2) ** 2 <= 1;
+  // 꼬리: 둥근 부채. 몸쪽(16,CY)에서 퍼지는 줄무늬, 끝으로 갈수록 흐름
+  for (let x = 0; x <= 16; x++) for (let y = 0; y < H; y++) {
+    const dx = 16 - x, dy = y - CY;
+    const flow = Math.round(sw * (dx / 16) ** 2 * 3);   // 끝쪽일수록 많이 휜다
+    const yy = y - flow;
+    const r = Math.hypot(dx, yy - CY);
+    const inFan = r <= 15.5 && Math.abs(Math.atan2(yy - CY, dx)) <= 1.2 && dx >= 0;
+    if (!inFan) continue;
+    const ray = Math.floor((Math.atan2(yy - CY, dx) + 1.3) * 3.3) % 2;
+    put(x, y, r > 12 ? (ray ? 'P' : 'p') : (ray ? 'p' : 'v'));
+  }
+  // 등지느러미(위)와 뒷지느러미(아래): 뒤쪽(왼쪽)으로 길게 흐른다
+  for (let x = 14; x <= 29; x++) {
+    const t = (x - 14) / 15;
+    const top = Math.round((1 - Math.abs(t - 0.45) * 1.6) * 7), bot = Math.round((1 - Math.abs(t - 0.5) * 1.4) * 8);
+    const fl = Math.round(sw * (1 - t) * 2);
+    for (let i = 1; i <= Math.max(0, top); i++) put(x - Math.floor(i / 3), CY - 4 - i + (i > 3 ? fl : 0), i > top - 1 ? 'P' : (i % 2 ? 'p' : 'v'));
+    for (let i = 1; i <= Math.max(0, bot); i++) put(x - Math.floor(i / 2), CY + 4 + i - (i > 3 ? fl : 0), i > bot - 1 ? 'P' : (i % 2 ? 'p' : 'v'));
+  }
+  // 윤곽
+  const solid = g.map(r => r.map(c => !!c));
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!solid[y][x] && ((solid[y - 1] || [])[x] || (solid[y + 1] || [])[x] || solid[y][x - 1] || solid[y][x + 1])) put(x, y, 'o');
+  // 몸통
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (bodyIn(x, y)) put(x, y, y <= CY - 2 ? 'B' : (y >= CY + 2 ? 'v' : 'b'));
+  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!bodyIn(x, y) && (bodyIn(x + 1, y) || bodyIn(x - 1, y) || bodyIn(x, y + 1) || bodyIn(x, y - 1))) put(x, y, 'o');
+  for (let x = 20; x <= 30; x += 2) { put(x, CY - 1 + (x % 4 ? 0 : 1), 'w'); }   // 비늘 반짝임
+  for (let y = CY - 3; y <= CY + 3; y++) if (bodyIn(31, y)) put(31, y, 'o');   // 아가미 선
+  put(33, CY - 1, 'w'); put(34, CY - 1, 'e'); put(33, CY, 'e'); put(34, CY, 'e'); put(33, CY - 2, 'o'); put(34, CY - 2, 'o');
+  [[24, CY + 3], [23, CY + 4], [22, CY + 5]].forEach(([x, y]) => put(x, y, 'P'));   // 가슴지느러미
+  const pal = { o: '#3b2a7a', B: '#a8ecff', b: '#5fb4ff', v: '#9a6cff', p: '#ff6ac8', P: '#ffb0ea', w: '#ffffff', e: '#1d1450' };
+  let rects = '';
+  for (let y = 0; y < H; y++) {
+    let x = 0;
+    while (x < W) {
+      const c = g[y][x];
+      if (!c) { x++; continue; }
+      let n = 1; while (x + n < W && g[y][x + n] === c) n++;
+      rects += `<rect x="${x}" y="${y}" width="${n}" height="1" fill="${pal[c]}"/>`;
+      x += n;
+    }
+  }
+  return `<svg viewBox="0 0 ${W} ${H}" width="${W * 4}" height="${H * 4}" shape-rendering="crispEdges" focusable="false">${rects}</svg>`;
+}
+const XL_BETTA = `<span class="xlb-f1">${xlBuildBetta(0)}</span><span class="xlb-f2">${xlBuildBetta(1)}</span>`;
 
 function renderDiaryLock() {
   const box = document.getElementById('dyaLock');
