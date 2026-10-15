@@ -6244,6 +6244,7 @@ button:active:not(:disabled) {
   .dya-count b { color: var(--accent); }
   .dya-new, .dya-tools button { padding: 10px 14px; font-size: 14px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
   .dya-new { width: 100%; }
+  .dya-lockrow button { padding: 10px; font-size: 13px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; }
   .dya-back { display: inline-block; }
   .dya-tools { display: flex; gap: 8px; flex-wrap: wrap; }
   .dya-list { display: flex; flex-direction: column; gap: 8px; }
@@ -6270,6 +6271,62 @@ button:active:not(:disabled) {
   .dya-form textarea { width: 100%; min-height: 260px; resize: vertical; line-height: 1.6; }
   .dya-form .dy-picks button { font-size: 20px; padding: 6px 8px; }
 }
+
+/* 다이어리 잠금 화면 (XP 부팅·로그인 풍) */
+#dyaLock { display: none; }
+#viewDiary.dy-locked > .dya-side, #viewDiary.dy-locked > .dya-main { display: none !important; }
+#viewDiary.dy-locked > #dyaLock { display: flex; flex: 1; min-width: 0; min-height: 440px; }
+.dya-lockrow { display: flex; gap: 6px; }
+.dya-lockrow button { flex: 1; padding: 4px 8px; font-size: 12px; color: #000; cursor: pointer; }
+#dyaLock .xl-boot { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 48px; position: relative; background: #000; color: #fff; cursor: pointer; }
+.xl-logo { display: flex; align-items: center; gap: 14px; }
+.xl-flag { display: grid; grid-template-columns: 30px 30px; gap: 4px; transform: rotate(-8deg) skewX(-6deg); }
+.xl-flag i { display: block; width: 30px; height: 26px; border-radius: 4px 10px 4px 10px; }
+.xl-flag i:nth-child(1) { background: #e8541f; } .xl-flag i:nth-child(2) { background: #5fa923; } .xl-flag i:nth-child(3) { background: #2d6fd1; } .xl-flag i:nth-child(4) { background: #f3b412; }
+.xl-word { position: relative; line-height: 1; }
+.xl-word small { display: block; font-size: 13px; margin-bottom: 2px; }
+.xl-word b { font-size: 46px; letter-spacing: -1px; }
+.xl-word em { font-size: 24px; color: #ff6a1a; font-style: italic; font-weight: 700; vertical-align: top; position: relative; top: 4px; }
+.xl-bar { width: 150px; height: 16px; border: 2px solid #b4b4b4; border-radius: 7px; padding: 2px; box-sizing: border-box; overflow: hidden; }
+.xl-bar span { display: flex; gap: 2px; animation: xlRun 1.5s linear infinite; }
+.xl-bar span i { flex: 0 0 9px; height: 9px; border-radius: 1px; background: linear-gradient(#a8c8ff, #2f6be0 55%, #1c4db8); }
+@keyframes xlRun { from { transform: translateX(-36px); } to { transform: translateX(150px); } }
+.xl-foot { position: absolute; left: 18px; right: 18px; bottom: 14px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; }
+.xl-foot b { font-size: 15px; font-style: italic; }
+.xl-login { flex: 1; display: flex; flex-direction: column; min-width: 0; }
+.xl-top { height: 54px; background: #00309c; border-bottom: 2px solid #8fa8e8; }
+.xl-bottom { height: 54px; background: #00309c; border-top: 2px solid #e98a1d; display: flex; align-items: center; padding: 0 16px; color: #fff; font-size: 12px; }
+.xl-main { flex: 1; display: flex; align-items: center; justify-content: center; gap: 28px; padding: 20px 16px; background: radial-gradient(ellipse at 20% 30%, #7f9fee, #4466cc 60%, #2b4bb0); color: #fff; flex-wrap: wrap; }
+.xl-big { font-size: 54px; font-weight: 700; font-style: italic; line-height: 1; text-shadow: 2px 2px 3px #00226a; }
+.xl-big em { color: #ffa24a; font-size: 30px; vertical-align: top; }
+.xl-lead { margin-top: 10px; font-size: 15px; line-height: 1.5; }
+.xl-div { width: 2px; align-self: stretch; background: linear-gradient(transparent, #fff, transparent); opacity: .7; }
+.xl-card { display: flex; flex-direction: column; gap: 8px; width: 270px; max-width: 100%; }
+.xl-user { display: flex; align-items: center; gap: 12px; margin-bottom: 4px; }
+.xl-av { width: 52px; height: 52px; display: flex; align-items: center; justify-content: center; font-size: 26px; font-weight: 700; color: #fff; background: linear-gradient(135deg, #f7b23b, #e8541f); border: 2px solid #fff; border-radius: 6px; }
+.xl-name { font-size: 20px; font-weight: 700; text-shadow: 1px 1px 2px #00226a; }
+.xl-row { display: flex; gap: 6px; }
+.xl-card input { flex: 1; min-width: 0; padding: 7px 10px; font-size: 14px; color: #000; background: #fff; border: 2px solid #8aa6ee; border-radius: 4px; }
+.xl-go { width: 34px; font-size: 18px; font-weight: 700; color: #fff; background: linear-gradient(#5dc95d, #2d9a2d); border: 2px solid #fff; border-radius: 6px; cursor: pointer; }
+.xl-btns { display: flex; gap: 8px; }
+.xl-btns button { flex: 1; padding: 7px; font-size: 13px; font-weight: 700; color: #fff; background: rgba(0,0,0,.25); border: 2px solid #fff; border-radius: 6px; cursor: pointer; }
+.xl-link { align-self: flex-start; padding: 0; font-size: 12px; color: #fff; background: none; border: none; text-decoration: underline; cursor: pointer; }
+.xl-err { min-height: 18px; font-size: 12px; color: #fff3a8; text-shadow: 1px 1px 1px #00226a; }
+.xl-card.shake { animation: xlShake .35s; }
+@keyframes xlShake { 20%, 60% { transform: translateX(-8px); } 40%, 80% { transform: translateX(8px); } }
+@media (prefers-reduced-motion: reduce) { .xl-bar span, .xl-card.shake { animation: none; } }
+/* 윈도우 98 스킨의 전역 단추·모서리 규칙을 이 화면에서는 풀어 준다 */
+html[data-skin] #dyaLock .xl-go, html[data-skin] #dyaLock .xl-btns button, html[data-skin] #dyaLock .xl-link { box-shadow: none !important; }
+html[data-skin] #dyaLock .xl-go { background: linear-gradient(#5dc95d, #2d9a2d) !important; color: #fff !important; border: 2px solid #fff !important; }
+html[data-skin] #dyaLock .xl-btns button { background: rgba(0,0,0,.25) !important; color: #fff !important; border: 2px solid #fff !important; }
+html[data-skin] #dyaLock .xl-link { background: none !important; color: #fff !important; border: none !important; padding: 0 !important; }
+html[data-skin] #dyaLock .xl-card input { border-radius: 4px !important; box-shadow: none !important; }
+html[data-skin] #dyaLock .xl-av { border-radius: 6px !important; }
+html[data-skin] #dyaLock .xl-go, html[data-skin] #dyaLock .xl-btns button { border-radius: 6px !important; }
+html[data-skin] #dyaLock .xl-flag i:nth-child(odd) { border-radius: 4px 10px 4px 10px !important; }
+html[data-skin] #dyaLock .xl-flag i:nth-child(even) { border-radius: 4px 10px 4px 10px !important; }
+html[data-skin] #dyaLock .xl-bar { border-radius: 7px !important; }
+html[data-skin] #dyaLock .xl-bar span i { border-radius: 1px !important; }
 
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
@@ -7520,7 +7577,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
             <div class="mp-card-inner">
               <div class="dy-counter" id="diaryCounter"></div>
               <div id="diaryList"></div>
-              <button class="ledger-add-btn" style="margin-top:10px;" onclick="openDiaryAdd()">+ 오늘의 다이어리 쓰기</button>
+              <button class="ledger-add-btn" id="diaryAddBtn" style="margin-top:10px;" onclick="openDiaryAdd()">+ 오늘의 다이어리 쓰기</button>
             </div>
           </div>
         </div>
@@ -7632,9 +7689,11 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
           <div><div class="dya-name" id="dyaName"></div><div class="dya-count" id="dyaCount"></div></div>
         </div>
         <button type="button" class="dya-new" onclick="diaryAppNew()">＋ 새 다이어리 쓰기</button>
+        <div class="dya-lockrow"><button type="button" id="dyaLockBtn" onclick="diaryLockNow()">🔒 지금 잠그기</button><button type="button" onclick="diaryOpenManage()">⚙️ 비밀번호</button></div>
         <div class="dya-list" id="dyaList"></div>
       </aside>
       <section class="dya-main" id="dyaMain"></section>
+      <div id="dyaLock" aria-live="polite"></div>
     </div>
 
     <!-- ══ 북마크 뷰 (바탕화면 스킨 PC 전용) ══ -->
@@ -9239,6 +9298,7 @@ function getCloudStatePayload() {
     memoNextId,
     diaries,
     diaryNextId,
+    diaryLock,
     bookmarks,
     bookmarkNextId,
     bookmarkFolders,
@@ -9432,6 +9492,7 @@ function applyCloudState(payload) {
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (Array.isArray(payload.diaries)) diaries = payload.diaries;
   if (Number.isFinite(payload.diaryNextId)) diaryNextId = payload.diaryNextId;
+  if (payload.diaryLock !== undefined) diaryLock = payload.diaryLock && payload.diaryLock.hash ? payload.diaryLock : null;
   if (Array.isArray(payload.bookmarks)) bookmarks = payload.bookmarks;
   if (Number.isFinite(payload.bookmarkNextId)) bookmarkNextId = payload.bookmarkNextId;
   if (Array.isArray(payload.bookmarkFolders)) bookmarkFolders = payload.bookmarkFolders;
@@ -9447,6 +9508,7 @@ function applyCloudState(payload) {
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
   localStorage.setItem('rianless_diaries', JSON.stringify({ diaries, diaryNextId }));
+  try { localStorage.setItem('rianless_diary_lock', JSON.stringify(diaryLock)); } catch(e) {}
   localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId, bookmarkFolders, bookmarkFolderNextId }));
 
   localStorage.setItem('rianless_parcels', JSON.stringify({ parcels, parcelNextId }));
@@ -10894,6 +10956,8 @@ function toggleMemoPin(id) {
 ══════════════════════════════════════ */
 let diaries = [];       // { id, date:'YYYY-MM-DD', mood, weather, title, content, updated }
 let diaryNextId = 1;
+let diaryLock = null;        // { salt, hash, hint } — 비밀번호를 정했을 때만. 비밀번호 자체는 저장하지 않는다
+let diaryUnlocked = false;   // 이번 접속에서 풀었는지 (새로고침하면 다시 잠긴다)
 let editingDiaryId = null;
 let diaryMood = '😊', diaryWeather = '☀️';
 const DIARY_MOODS = ['😊', '😄', '🥰', '😐', '😢', '😡', '😴', '🤒'];
@@ -10910,6 +10974,7 @@ function pickDiaryMood(e) { diaryMood = e; renderDiaryPicks(); }
 function pickDiaryWeather(e) { diaryWeather = e; renderDiaryPicks(); }
 
 function openDiaryAdd(id) {
+  if (diaryLocked()) { showToast('🔒 다이어리가 잠겨 있어요'); return; }
   const d = id !== undefined && id !== null ? diaries.find(x => x.id === id) : null;
   editingDiaryId = d ? d.id : null;
   diaryMood = d ? d.mood : '😊';
@@ -10954,6 +11019,7 @@ function saveDiaries() {
 }
 
 function loadDiaries() {
+  try { const l = JSON.parse(localStorage.getItem('rianless_diary_lock') || 'null'); diaryLock = l && l.hash ? l : null; } catch(e) {}
   try {
     const raw = JSON.parse(localStorage.getItem('rianless_diaries') || 'null');
     if (raw && Array.isArray(raw.diaries)) {
@@ -10966,6 +11032,13 @@ function loadDiaries() {
 function renderDiaryList() {
   const el = document.getElementById('diaryList');
   if (!el) return;
+  const addBtn = document.getElementById('diaryAddBtn');
+  if (addBtn) addBtn.style.display = diaryLocked() ? 'none' : '';
+  if (diaryLocked()) {
+    document.getElementById('diaryCounter').textContent = '';
+    el.innerHTML = '<div class="memo-empty">🔒 잠겨 있어요<br><button type="button" class="ledger-add-btn" style="margin-top:10px" onclick="desktopOpen(\'diary\')">다이어리 탭에서 비밀번호 입력</button></div>';
+    return;
+  }
   const today = fmtDate(new Date());
   const todayCount = diaries.filter(d => d.date === today).length;
   document.getElementById('diaryCounter').innerHTML = `TODAY <b>${todayCount}</b> | TOTAL <b>${diaries.length}</b>`;
@@ -10990,8 +11063,165 @@ let diaryAppDraft = null;   // 쓰는 중인 내용 { id|null, date, mood, weath
 function diarySorted() {
   return diaries.slice().sort((a, b) => b.date.localeCompare(a.date) || String(b.updated).localeCompare(String(a.updated)));
 }
+/* ── 다이어리 잠금: XP 부팅 → 로그인 화면. 비밀번호를 쳐야 다이어리가 열린다 ──
+   비밀번호는 솔트와 함께 SHA-256 으로만 저장·동기화한다. 일기 내용을 암호화하는 것은 아니다. */
+let diaryLockMode = null;    // null | 'login' | 'setup' | 'manage'
+let diaryLockStage = 'form'; // 'boot' | 'form'
+let diaryLockBootTimer = null;
+let diaryLockErr = '';
+
+function diaryLocked() { return !!diaryLock && !diaryUnlocked; }
+
+async function diaryHash(pw, salt) {
+  const text = salt + ':' + pw;
+  if (window.crypto && crypto.subtle) {
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2, '0')).join('');
+  }
+  let h = 5381;   // crypto.subtle 을 못 쓰는 환경(http 등)의 대체: 약하지만 화면 잠금용으로는 충분
+  for (let i = 0; i < text.length; i++) h = ((h << 5) + h + text.charCodeAt(i)) | 0;
+  return 'x' + (h >>> 0).toString(16);
+}
+function diaryNewSalt() {
+  const a = new Uint8Array(8);
+  (window.crypto || {}).getRandomValues ? crypto.getRandomValues(a) : a.forEach((_, i) => a[i] = Math.floor(Math.random() * 256));
+  return Array.from(a).map(b => b.toString(16).padStart(2, '0')).join('');
+}
+function saveDiaryLock() {
+  try { localStorage.setItem('rianless_diary_lock', JSON.stringify(diaryLock)); } catch(e) {}
+  queueCloudStateSync();
+}
+
+// 다이어리 탭에 들어갈 때: 잠겨 있으면 로그인, 처음이면 비밀번호 정하기를 보여 준다
+function diaryLockOnEnter() {
+  clearTimeout(diaryLockBootTimer);
+  let asked = false;
+  try { asked = !!localStorage.getItem('rianless_diary_lock_asked'); } catch(e) {}
+  diaryLockMode = diaryLocked() ? 'login' : (!diaryLock && !asked ? 'setup' : null);
+  diaryLockErr = '';
+  if (diaryLockMode) {
+    diaryLockStage = 'boot';
+    diaryLockBootTimer = setTimeout(() => { diaryLockStage = 'form'; renderDiaryApp(); }, 1900);
+  }
+}
+function diaryLockSkipBoot() {
+  if (diaryLockStage !== 'boot') return;
+  clearTimeout(diaryLockBootTimer);
+  diaryLockStage = 'form';
+  renderDiaryApp();
+}
+function diaryLockNow() {
+  if (!diaryLock) return;
+  diaryUnlocked = false;
+  diaryAppEdit = false;
+  diaryLockOnEnter();
+  renderDiaryApp();
+}
+function diaryOpenManage() {
+  clearTimeout(diaryLockBootTimer);
+  diaryLockMode = 'manage';
+  diaryLockStage = 'form';
+  diaryLockErr = '';
+  renderDiaryApp();
+}
+function diaryLockCancel() {
+  diaryLockMode = null;
+  diaryLockErr = '';
+  renderDiaryApp();
+}
+function diaryLockLater() {
+  try { localStorage.setItem('rianless_diary_lock_asked', '1'); } catch(e) {}
+  diaryLockCancel();
+}
+function diaryLockHint() {
+  diaryLockErr = diaryLock && diaryLock.hint ? '힌트: ' + diaryLock.hint : '정해 둔 힌트가 없어요.';
+  renderDiaryApp();
+}
+function diaryLockFail(msg) {
+  diaryLockErr = msg;
+  renderDiaryApp();
+  const box = document.querySelector('#dyaLock .xl-card');
+  if (box) { box.classList.remove('shake'); void box.offsetWidth; box.classList.add('shake'); }
+}
+
+async function diaryLockSubmit(ev) {
+  ev.preventDefault();
+  const v = id => (document.getElementById(id) || {}).value || '';
+  if (diaryLockMode === 'login') {
+    const pw = v('xlPw');
+    if (await diaryHash(pw, diaryLock.salt) !== diaryLock.hash) return diaryLockFail('비밀번호가 올바르지 않아요.');
+    diaryUnlocked = true;
+    diaryLockMode = null;
+    diaryLockErr = '';
+    diaryEnter();
+    return;
+  }
+  // setup / manage
+  if (diaryLockMode === 'manage' && diaryLock && await diaryHash(v('xlOld'), diaryLock.salt) !== diaryLock.hash) return diaryLockFail('현재 비밀번호가 올바르지 않아요.');
+  const pw = v('xlNew'), pw2 = v('xlNew2'), hint = v('xlHint').trim().slice(0, 60);
+  if (!pw && diaryLockMode === 'manage') {   // 비우면 비밀번호 삭제
+    if (!diaryLock) return diaryLockCancel();
+    diaryLock = null;
+    saveDiaryLock();
+    diaryLockCancel();
+    showToast('비밀번호를 없앴어요');
+    return;
+  }
+  if (pw.length < 4) return diaryLockFail('비밀번호는 4자 이상으로 정해 주세요.');
+  if (pw !== pw2) return diaryLockFail('두 비밀번호가 서로 달라요.');
+  const salt = diaryNewSalt();
+  diaryLock = { salt, hash: await diaryHash(pw, salt), hint };
+  diaryUnlocked = true;
+  try { localStorage.setItem('rianless_diary_lock_asked', '1'); } catch(e) {}
+  saveDiaryLock();
+  diaryLockMode = null;
+  diaryLockErr = '';
+  showToast('🔒 비밀번호를 정했어요');
+  diaryEnter();
+}
+
+function renderDiaryLock() {
+  const box = document.getElementById('dyaLock');
+  if (!box) return;
+  if (diaryLockStage === 'boot') {
+    box.innerHTML = `<div class="xl-boot" onclick="diaryLockSkipBoot()" tabindex="0" onkeydown="diaryLockSkipBoot()" role="button" aria-label="시작 화면, 누르면 건너뛰어요">
+      <div class="xl-logo"><div class="xl-flag"><i></i><i></i><i></i><i></i></div>
+        <div class="xl-word"><small>Rianless®</small><b>Diary</b><em>98</em></div></div>
+      <div class="xl-bar" aria-hidden="true"><span><i></i><i></i><i></i></span></div>
+      <div class="xl-foot"><span>Copyright © Rianless</span><b>Rianless</b></div></div>`;
+    return;
+  }
+  const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
+  const field = (id, ph, ac) => `<input type="password" id="${id}" placeholder="${ph}" autocomplete="${ac || 'off'}" spellcheck="false">`;
+  let left, fields;
+  if (diaryLockMode === 'login') {
+    left = ['비밀번호를 입력해서<br>다이어리를 여세요', ''];
+    fields = `<div class="xl-row">${field('xlPw', '비밀번호', 'current-password')}<button type="submit" class="xl-go" aria-label="열기">→</button></div>
+      ${diaryLock && diaryLock.hint ? '<button type="button" class="xl-link" onclick="diaryLockHint()">비밀번호 힌트 보기</button>' : ''}`;
+  } else if (diaryLockMode === 'setup') {
+    left = ['처음 오셨나요?<br>비밀번호를 정하면<br>나만 볼 수 있어요', ''];
+    fields = `${field('xlNew', '새 비밀번호 (4자 이상)', 'new-password')}${field('xlNew2', '비밀번호 확인', 'new-password')}
+      <input type="text" id="xlHint" placeholder="비밀번호 힌트 (선택)" maxlength="60" autocomplete="off">
+      <div class="xl-btns"><button type="submit">시작하기</button><button type="button" onclick="diaryLockLater()">나중에 하기</button></div>`;
+  } else {
+    left = ['비밀번호 설정', ''];
+    fields = `${diaryLock ? field('xlOld', '현재 비밀번호', 'current-password') : ''}${field('xlNew', diaryLock ? '새 비밀번호 (비우면 삭제)' : '새 비밀번호 (4자 이상)', 'new-password')}${field('xlNew2', '새 비밀번호 확인', 'new-password')}
+      <input type="text" id="xlHint" placeholder="비밀번호 힌트 (선택)" maxlength="60" autocomplete="off" value="${escapeLedgerText(diaryLock ? diaryLock.hint || '' : '')}">
+      <div class="xl-btns"><button type="submit">저장</button><button type="button" onclick="diaryLockCancel()">취소</button></div>`;
+  }
+  box.innerHTML = `<div class="xl-login"><div class="xl-top"></div>
+    <div class="xl-main"><div class="xl-left"><div class="xl-big">Diary<em>98</em></div><div class="xl-lead">${left[0]}</div></div>
+      <div class="xl-div"></div>
+      <form class="xl-card" onsubmit="diaryLockSubmit(event)"><div class="xl-user"><div class="xl-av">${escapeLedgerText(nick.charAt(0).toUpperCase())}</div><div class="xl-name">${escapeLedgerText(nick)}</div></div>
+        ${fields}<div class="xl-err" role="alert">${escapeLedgerText(diaryLockErr)}</div></form></div>
+    <div class="xl-bottom"><span>🔒 Rianless Diary</span></div></div>`;
+  const first = box.querySelector('input');
+  if (first) setTimeout(() => first.focus(), 30);
+}
+
 function diaryEnter() {
   diaryAppEdit = false;
+  diaryLockOnEnter();
   if (!diaries.some(d => d.id === diaryAppSel)) diaryAppSel = diaries.length ? diarySorted()[0].id : null;
   // PC: 들어가면 가장 최근 일기가 바로 보인다 / 폰: 날짜 목록이 먼저 나오고, 날짜를 눌러야 내용이 보인다
   diaryDetail = diaryAppSel !== null && window.innerWidth >= 900;
@@ -11052,6 +11282,10 @@ function diaryAppDelete() {
 function renderDiaryApp() {
   const main = document.getElementById('dyaMain');
   if (!main) return;
+  if (!diaryLockMode && diaryLocked()) diaryLockOnEnter();   // 다른 기기에서 비밀번호가 생겼을 때
+  document.getElementById('viewDiary').classList.toggle('dy-locked', !!diaryLockMode);
+  document.getElementById('dyaLockBtn').style.display = diaryLock ? '' : 'none';
+  if (diaryLockMode) { renderDiaryLock(); return; }
   document.getElementById('viewDiary').classList.toggle('dy-detail', diaryDetail);
   const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
   document.getElementById('dyaAvatar').textContent = nick.charAt(0).toUpperCase();
