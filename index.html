@@ -6249,11 +6249,12 @@ button:active:not(:disabled) {
   .dya-list { display: flex; flex-direction: column; gap: 8px; }
   .dya-month { padding: 4px 2px; font-size: 12px; font-weight: 700; color: var(--text3); }
   .dya-item { display: block; width: 100%; text-align: left; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; }
-  .dya-item-t { display: flex; gap: 6px; font-size: 14px; font-weight: 700; }
+  .dya-item { display: flex; flex-direction: column-reverse; }
+  .dya-item-t { display: flex; gap: 6px; font-size: 13px; color: var(--text2); }
   .dya-item-t span:last-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-  .dya-item-d { margin-top: 3px; font-size: 11px; color: var(--text3); }
+  .dya-item-d { margin-bottom: 4px; font-size: 15px; font-weight: 700; color: var(--text); }
   .mm-empty { padding: 24px 8px; text-align: center; font-size: 13px; color: var(--text3); }
-  .dya-paper { padding: 12px !important; border: 1px solid var(--border); border-radius: 0; }
+  .dya-paper { padding: 0 !important; border: none; background: transparent !important; }
   .dya-head { display: flex; align-items: center; gap: 10px; border-bottom: 1px dashed #808080; padding-bottom: 8px; margin-bottom: 12px; }
   .dya-head .m { font-size: 28px; line-height: 1; }
   .dya-head .w { font-size: 18px; }
@@ -6615,8 +6616,8 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   html[data-desktop][data-skin="w98"] #mainTab-category { top: 96px; }
   html[data-desktop][data-skin="w98"] .desk-ico:nth-child(1) { top: 176px; }
   html[data-desktop][data-skin="w98"] .desk-ico:nth-child(2) { top: 256px; }
-  html[data-desktop][data-skin="w98"] #mainTab-mypage { top: 336px; }
-  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(3) { top: 416px; }
+  html[data-desktop][data-skin="w98"] #mainTab-mypage { top: 416px; }
+  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(3) { top: 336px; }
   html[data-desktop][data-skin="w98"] .tab-item, html[data-desktop][data-skin="w98"] .tab-item.active, html[data-desktop][data-skin="w98"] .tab-item:active, html[data-desktop][data-skin="w98"] .desk-ico, html[data-desktop][data-skin="w98"] .desk-ico:active { display: flex !important; position: fixed !important; z-index: 2; left: 6px; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; width: 108px !important; height: 66px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 3px !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
   html[data-desktop][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-skin="w98"] .desk-ico .tab-icon { font-size: 34px !important; line-height: 40px; height: 40px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.45)); }
   html[data-desktop][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-skin="w98"] .desk-ico .tab-label { font-size: 11px !important; font-weight: 400 !important; padding: 1px 4px; color: #fff !important; }
@@ -6814,9 +6815,9 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-calendar { left: 3%; top: 50px; }
   html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-category { left: 35%; top: 50px; }
   html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="bookmark"] { left: 67%; top: 50px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="memo"] { left: 3%; top: 140px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-mypage { left: 35%; top: 140px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="diary"] { left: 67%; top: 140px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="memo"] { left: 35%; top: 140px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-mypage { left: 67%; top: 140px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="diary"] { left: 3%; top: 140px; }
 
   /* 위젯: 아이콘 아래에 세로로 */
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-direction: column; gap: 10px; position: fixed; z-index: 3; left: 8px; right: 8px; top: 238px; bottom: calc(var(--dk-bar) + 8px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
@@ -10992,7 +10993,8 @@ function diarySorted() {
 function diaryEnter() {
   diaryAppEdit = false;
   if (!diaries.some(d => d.id === diaryAppSel)) diaryAppSel = diaries.length ? diarySorted()[0].id : null;
-  diaryDetail = diaryAppSel !== null;   // 들어가면 가장 최근 일기가 바로 보인다
+  // PC: 들어가면 가장 최근 일기가 바로 보인다 / 폰: 날짜 목록이 먼저 나오고, 날짜를 눌러야 내용이 보인다
+  diaryDetail = diaryAppSel !== null && window.innerWidth >= 900;
   renderDiaryApp();
 }
 function diaryAppPick(id) { diaryAppSel = id; diaryAppEdit = false; diaryDetail = true; renderDiaryApp(); }
