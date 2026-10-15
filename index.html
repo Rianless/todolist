@@ -6217,6 +6217,45 @@ button:active:not(:disabled) {
 .dy-picks button { font-size: 20px; line-height: 1; padding: 6px 8px; border: 1px solid var(--border); border-radius: 8px; background: var(--panel); cursor: pointer; }
 .dy-picks button.on { border-color: var(--accent, #e8590c); box-shadow: 0 0 0 2px rgba(232,89,12,.25); }
 
+/* ----- 다이어리 (모바일): 목록 ↔ 일기장 한 화면씩 ----- */
+@media (max-width: 899px) {
+  html[data-main-tab="diary"] #viewDiary.active { display: flex; flex-direction: column; gap: 10px; padding-bottom: 90px; }
+  #viewDiary .dya-side, #viewDiary .dya-main { display: flex; flex-direction: column; gap: 10px; min-width: 0; }
+  #viewDiary.dy-detail .dya-side { display: none; }
+  #viewDiary:not(.dy-detail) .dya-main { display: none; }
+  .dya-profile { display: flex; align-items: center; gap: 12px; padding: 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--text); }
+  .dya-avatar { flex: 0 0 46px; height: 46px; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: 700; color: #fff; background: var(--accent); border-radius: 50%; }
+  .dya-name { font-size: 15px; font-weight: 700; }
+  .dya-count { font-size: 11px; margin-top: 2px; letter-spacing: 1px; color: var(--text3); }
+  .dya-count b { color: var(--accent); }
+  .dya-new, .dya-tools button { padding: 10px 14px; font-size: 14px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; }
+  .dya-new { width: 100%; }
+  .dya-back { display: inline-block; }
+  .dya-tools { display: flex; gap: 8px; flex-wrap: wrap; }
+  .dya-list { display: flex; flex-direction: column; gap: 8px; }
+  .dya-month { padding: 4px 2px; font-size: 12px; font-weight: 700; color: var(--text3); }
+  .dya-item { display: block; width: 100%; text-align: left; padding: 10px 12px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; color: var(--text); cursor: pointer; }
+  .dya-item-t { display: flex; gap: 6px; font-size: 14px; font-weight: 700; }
+  .dya-item-t span:last-child { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+  .dya-item-d { margin-top: 3px; font-size: 11px; color: var(--text3); }
+  .mm-empty { padding: 24px 8px; text-align: center; font-size: 13px; color: var(--text3); }
+  .dya-paper { padding: 16px 18px; border: 1px solid var(--border); border-radius: 12px; color: #000; background: #fffef2 repeating-linear-gradient(transparent 0 27px, #e4e0c8 27px 28px); }
+  .dya-head { display: flex; align-items: center; gap: 10px; border-bottom: 2px dashed #b8b090; padding-bottom: 8px; margin-bottom: 12px; background: #fffef2; }
+  .dya-head .m { font-size: 28px; line-height: 1; }
+  .dya-head .w { font-size: 18px; }
+  .dya-head .dt { margin-left: auto; font-size: 12px; color: #555; }
+  .dya-title { font-size: 18px; font-weight: 700; margin-bottom: 10px; background: #fffef2; display: inline-block; }
+  .dya-body { font-size: 15px; line-height: 28px; white-space: pre-wrap; word-break: break-word; }
+  .dya-empty { padding: 40px 10px; text-align: center; font-size: 13px; color: #808080; background: #fffef2; }
+  .dya-form { display: flex; flex-direction: column; gap: 12px; padding: 14px; background: var(--panel); border: 1px solid var(--border); border-radius: 12px; color: var(--text); }
+  .dya-form label { font-size: 12px; font-weight: 700; color: var(--text2); }
+  .dya-form .row { display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .dya-form input[type=text], .dya-form input[type=date], .dya-form textarea { padding: 10px; font-size: 15px; color: var(--text); background: var(--bg); border: 1px solid var(--border); border-radius: 8px; box-sizing: border-box; font-family: inherit; }
+  .dya-form input[type=text] { flex: 1; min-width: 0; }
+  .dya-form textarea { width: 100%; min-height: 260px; resize: vertical; line-height: 1.6; }
+  .dya-form .dy-picks button { font-size: 20px; padding: 6px 8px; }
+}
+
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
 [data-theme="dark"] .modal-sheet, [data-theme="dark"] .add-sheet, [data-theme="dark"] .day-sheet, [data-theme="dark"] .detail-sheet {
@@ -6629,8 +6668,8 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
 
 
   /* ----- 다이어리 앱: 왼쪽 미니홈피 프로필 + 목록, 오른쪽 일기장 ----- */
-  html[data-desktop][data-main-tab="diary"][data-skin="w98"] #mainContent { overflow: hidden; }
-  html[data-desktop][data-main-tab="diary"][data-skin="w98"] #viewDiary.active { display: flex !important; flex-direction: row !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
+  html[data-main-tab="diary"] #mainContent { overflow: hidden; }
+  html[data-main-tab="diary"] #viewDiary.active { display: flex !important; flex-direction: row !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
   .dya-side { flex: 0 0 270px; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
   .dya-profile { background: #fff; box-shadow: var(--w98-sunken); padding: 10px; color: #000; display: flex; gap: 10px; align-items: center; }
   .dya-avatar { flex: 0 0 48px; height: 48px; display: flex; align-items: center; justify-content: center; font-size: 24px; font-weight: 700; color: #fff; background: #000080; box-shadow: var(--w98-raised); }
@@ -6647,6 +6686,7 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   .dya-item-d { margin-top: 1px; font-size: 10px; opacity: .65; }
   .dya-main { flex: 1; min-width: 0; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
   .dya-tools { display: flex; gap: 6px; }
+  .dya-back { display: none; }
   .dya-tools button { padding: 3px 12px; font-size: 12px; color: #000 !important; }
   .dya-paper { flex: 1; min-height: 0; overflow-y: auto; background: #fffef2; box-shadow: var(--w98-sunken); padding: 18px 24px; color: #000; background-image: repeating-linear-gradient(transparent 0 27px, #e4e0c8 27px 28px); background-attachment: local; }
   .dya-head { display: flex; align-items: center; gap: 10px; border-bottom: 2px dashed #b8b090; padding-bottom: 8px; margin-bottom: 12px; background: #fffef2; }
@@ -6732,6 +6772,7 @@ html[data-desktop][data-main-tab="mypage"][data-skin="w98"] .pc-topbar-title::be
 html[data-desktop][data-main-tab="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
 html[data-desktop][data-main-tab="bookmark"][data-skin="w98"] .pc-topbar-title::before { content: '🔖 북마크 — 나의 하루'; }
 
+html[data-desktop][data-skin="w98"] #mainTab-diary { display: none !important; }
 html[data-desktop][data-main-tab="diary"][data-skin="w98"] .pc-topbar-title::before { content: '📔 다이어리 — 나의 하루'; }
 html[data-desktop][data-desk-app="diary"][data-skin="w98"] .pc-topbar-title::before { content: '📔 다이어리 — 나의 하루'; }
 html[data-desktop][data-desk-app="memo"][data-skin="w98"] .pc-topbar-title::before { content: '📝 메모장 — 나의 하루'; }
@@ -7568,7 +7609,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
       </section>
     </div>
 
-    <!-- ══ 다이어리 뷰 (바탕화면 스킨 PC 전용) ══ -->
+    <!-- ══ 다이어리 뷰 (PC·모바일 공용 단독 화면) ══ -->
     <div class="view" id="viewDiary">
       <aside class="dya-side">
         <div class="dya-profile">
@@ -7631,6 +7672,11 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
       <div class="tab-label">가계부</div>
 
+    </button>
+
+    <button class="tab-item" id="mainTab-diary" role="tab" aria-selected="false" aria-controls="viewDiary" onclick="setMainTab('diary',this)">
+      <div class="tab-icon" aria-hidden="true">📔</div>
+      <div class="tab-label">다이어리</div>
     </button>
 
     <button class="tab-item" id="mainTab-mypage" role="tab" aria-selected="false" aria-controls="viewMypage" onclick="setMainTab('mypage',this)">
@@ -10005,7 +10051,7 @@ function updateDesktopWidgets() {
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
 function statsGuard() {
   try {
-    if ((currentMainTab === 'memo' || currentMainTab === 'bookmark' || currentMainTab === 'diary') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
+    if ((currentMainTab === 'memo' || currentMainTab === 'bookmark') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
       setMainTab('calendar', document.getElementById('mainTab-calendar'));
     }
   } catch (e) {}
@@ -10339,7 +10385,7 @@ function desktopTaskClick() {
 }
 
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
-const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark', diary: 'mpCardDiary' };
+const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark' };
 function desktopOpen(tab, cardId) {
   // 폰에는 메모·북마크·통계 전용 창이 없어서 마이페이지의 그 카드를 펼쳐 보여 준다
   let app = null;
@@ -10923,6 +10969,7 @@ function renderDiaryList() {
 /* ── 다이어리 앱 (PC 바탕화면 스킨): 들어가면 가장 최근 일기가 바로 펼쳐진다 ── */
 let diaryAppSel = null;     // 지금 읽고 있는 일기 id
 let diaryAppEdit = false;   // 쓰기·고치기 중인가
+let diaryDetail = false;    // 모바일: 일기장(true) / 목록(false)
 let diaryAppDraft = null;   // 쓰는 중인 내용 { id|null, date, mood, weather }
 
 function diarySorted() {
@@ -10931,11 +10978,18 @@ function diarySorted() {
 function diaryEnter() {
   diaryAppEdit = false;
   if (!diaries.some(d => d.id === diaryAppSel)) diaryAppSel = diaries.length ? diarySorted()[0].id : null;
+  diaryDetail = diaryAppSel !== null;   // 들어가면 가장 최근 일기가 바로 보인다
   renderDiaryApp();
 }
-function diaryAppPick(id) { diaryAppSel = id; diaryAppEdit = false; renderDiaryApp(); }
+function diaryAppPick(id) { diaryAppSel = id; diaryAppEdit = false; diaryDetail = true; renderDiaryApp(); }
+function diaryAppBack() {
+  if (diaryAppEdit) diaryAppEdit = false;
+  diaryDetail = false;
+  renderDiaryApp();
+}
 function diaryAppNew() {
   diaryAppEdit = true;
+  diaryDetail = true;
   diaryAppDraft = { id: null, date: fmtDate(new Date()), mood: '😊', weather: '☀️' };
   renderDiaryApp();
   setTimeout(() => document.getElementById('dyaTitle')?.focus(), 0);
@@ -10955,7 +11009,7 @@ function diaryAppSetPick(kind, e) {
   diaryAppDraft[kind] = e;
   renderDiaryApp();
 }
-function diaryAppCancel() { diaryAppEdit = false; renderDiaryApp(); }
+function diaryAppCancel() { diaryAppEdit = false; diaryDetail = diaries.some(d => d.id === diaryAppSel); renderDiaryApp(); }
 function diaryAppSave() {
   const dr = diaryAppDraft;
   const title = document.getElementById('dyaTitle').value.trim();
@@ -10974,6 +11028,7 @@ function diaryAppDelete() {
   if (!d || !confirm('이 다이어리를 지울까요?')) return;
   diaries = diaries.filter(x => x.id !== d.id);
   diaryAppSel = diaries.length ? diarySorted()[0].id : null;
+  diaryDetail = false;
   saveDiaries();
   renderDiaryApp();
 }
@@ -10981,6 +11036,7 @@ function diaryAppDelete() {
 function renderDiaryApp() {
   const main = document.getElementById('dyaMain');
   if (!main) return;
+  document.getElementById('viewDiary').classList.toggle('dy-detail', diaryDetail);
   const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
   document.getElementById('dyaAvatar').textContent = nick.charAt(0).toUpperCase();
   document.getElementById('dyaName').textContent = nick + '의 다이어리';
@@ -11010,7 +11066,7 @@ function renderDiaryApp() {
     const content = dr.content !== undefined ? dr.content : (cur ? cur.content : '');
     const picks = (arr, val, kind) => arr.map(e => `<button type="button" class="${e === val ? 'on' : ''}" onclick="diaryAppSetPick('${kind}','${e}')">${e}</button>`).join('');
     main.innerHTML = `
-      <div class="dya-tools"><button type="button" onclick="diaryAppSave()">💾 저장</button><button type="button" onclick="diaryAppCancel()">취소</button></div>
+      <div class="dya-tools"><button type="button" class="dya-back" onclick="diaryAppBack()">← 목록</button><button type="button" onclick="diaryAppSave()">💾 저장</button><button type="button" onclick="diaryAppCancel()">취소</button></div>
       <div class="dya-form">
         <div class="row"><label for="dyaDate">날짜</label><input type="date" id="dyaDate" value="${escapeLedgerText(dr.date)}"></div>
         <div class="row"><label>기분</label><div class="dy-picks">${picks(DIARY_MOODS, dr.mood, 'mood')}</div></div>
@@ -11021,9 +11077,9 @@ function renderDiaryApp() {
     return;
   }
   const d = diaries.find(x => x.id === diaryAppSel);
-  if (!d) { main.innerHTML = '<div class="dya-paper"><div class="dya-empty">첫 다이어리를 써 보세요.<br>왼쪽의 \'새 다이어리 쓰기\'를 눌러요.</div></div>'; return; }
+  if (!d) { main.innerHTML = '<div class="dya-paper"><div class="dya-empty">첫 다이어리를 써 보세요.<br>\'새 다이어리 쓰기\'를 눌러요.</div></div>'; return; }
   main.innerHTML = `
-    <div class="dya-tools"><button type="button" onclick="diaryAppEditCur()">✏️ 고치기</button><button type="button" onclick="diaryAppDelete()">🗑️ 지우기</button></div>
+    <div class="dya-tools"><button type="button" class="dya-back" onclick="diaryAppBack()">← 목록</button><button type="button" onclick="diaryAppEditCur()">✏️ 고치기</button><button type="button" onclick="diaryAppDelete()">🗑️ 지우기</button></div>
     <div class="dya-paper">
       <div class="dya-head"><span class="m">${d.mood}</span><span class="w">${d.weather}</span><span class="dt">${escapeLedgerText(d.date)}</span></div>
       ${d.title ? `<div class="dya-title">${escapeLedgerText(d.title)}</div>` : ''}
