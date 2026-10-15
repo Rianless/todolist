@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v96-parcel-done-guard';
+const CACHE_NAME = 'todolist-v97-dday';
 const ASSETS = [
   './',
   './index.html',
@@ -7,7 +7,8 @@ const ASSETS = [
   './icon-512.png',
   './state-merge.js',
   './bookmarks.js',
-  './parcels.js'
+  './parcels.js',
+  './dday.js'
 ];
 
 // 설치: 핵심 자산 프리캐시

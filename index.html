@@ -6360,17 +6360,44 @@ button:active:not(:disabled) {
 #dyaLock .xl-glass { border-radius: 22px !important; }
 @media (prefers-reduced-motion: reduce) { .xl-r1, .xl-r2, .xl-r3, .xl-r4, .xl-stream > div, .xl-blink { animation: none !important; } .xl-sp span, .xl-orb, .xl-tube i,  .xl-card.shake { animation: none !important; } .xl-tube i { width: 70%; } }
 
+/* D-day */
+.dd-item { display: flex; align-items: center; gap: 10px; padding: 10px 12px; margin-bottom: 8px; background: var(--panel); border: 1px solid var(--border); border-radius: 10px; cursor: pointer; position: relative; }
+.dd-item:active { opacity: .75; }
+.dd-badge { flex: 0 0 auto; min-width: 74px; padding: 6px 8px; text-align: center; font-size: 15px; font-weight: 800; letter-spacing: .5px; border-radius: 8px; color: #fff; background: var(--accent); }
+.dd-badge.today { background: var(--red); animation: ddPulse 1.6s ease-in-out infinite; }
+.dd-badge.past { background: var(--text3); }
+@keyframes ddPulse { 50% { transform: scale(1.06); } }
+@media (prefers-reduced-motion: reduce) { .dd-badge.today { animation: none; } }
+.dd-main { flex: 1; min-width: 0; }
+.dd-title { font-size: 14px; font-weight: 700; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.dd-date { margin-top: 2px; font-size: 11px; color: var(--text3); }
+.dd-pin, .dd-del { flex: 0 0 auto; background: none; border: none; color: var(--text3); cursor: pointer; font-size: 14px; padding: 4px; }
+.dd-pin { opacity: .55; } .dd-item.pinned .dd-pin { opacity: 1; }
+.dd-check { display: flex; align-items: center; gap: 8px; margin: 8px 0; font-size: 13px; color: var(--text); cursor: pointer; }
+.dd-preview { margin-top: 10px; padding: 10px; text-align: center; font-size: 14px; font-weight: 700; color: var(--accent); border: 1px dashed var(--border2); border-radius: 8px; min-height: 20px; }
+.dday-badge { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; margin-top: 8px; padding: 4px 10px; font-size: 12px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border2); border-radius: 999px; cursor: pointer; }
+.dday-badge b { color: var(--accent); letter-spacing: .5px; }
+.dday-badge .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+html[data-skin="w98"] .dday-badge { color: #000; background: #fff; border: none; border-radius: 0 !important; box-shadow: var(--w98-sunken); }
+html[data-skin="w98"] .dday-badge b { color: #000080; }
+html[data-skin="w98"] .dd-item { border-radius: 0; background: #fff; color: #000; border: none; box-shadow: var(--w98-sunken); }
+html[data-skin="w98"] .dd-title { color: #000; } html[data-skin="w98"] .dd-date { color: #404040; }
+html[data-skin="w98"] .dd-badge { border-radius: 0; background: #000080; box-shadow: var(--w98-raised); }
+html[data-skin="w98"] .dd-badge.today { background: #c00000; } html[data-skin="w98"] .dd-badge.past { background: #808080; }
+html[data-skin="w98"] .dd-pin, html[data-skin="w98"] .dd-del { background: none !important; box-shadow: none !important; color: #404040 !important; width: auto !important; }
+html[data-skin="w98"] .dd-preview { color: #000080; border-radius: 0; }
+
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
 [data-theme="dark"] .modal-sheet, [data-theme="dark"] .add-sheet, [data-theme="dark"] .day-sheet, [data-theme="dark"] .detail-sheet {
   border-radius: var(--ui-r-sheet) !important;
   clip-path: none !important;
 }
-#addModal, #ledgerModal, #accountModal, #transferModal, #routineModal, #investModal, #memoModal, #diaryModal {
+#addModal, #ledgerModal, #accountModal, #transferModal, #routineModal, #investModal, #memoModal, #diaryModal, #ddayModal {
   align-items: center; justify-content: center; padding: 16px;
 }
 #addModal .modal-sheet, #ledgerModal .modal-sheet, #accountModal .modal-sheet, #transferModal .modal-sheet,
-#routineModal .modal-sheet, #investModal .modal-sheet, #memoModal .modal-sheet, #diaryModal .modal-sheet {
+#routineModal .modal-sheet, #investModal .modal-sheet, #memoModal .modal-sheet, #diaryModal .modal-sheet, #ddayModal .modal-sheet {
   width: 100%; max-width: 440px; margin: 0 auto; max-height: calc(100dvh - 32px);
 }
 
@@ -7094,6 +7121,8 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
     </div>
 
+    <button type="button" class="dday-badge" id="ddayBadge" style="display:none" onclick="desktopOpen('mypage','mpCardDday')" title="D-day 목록 열기"></button>
+
     <div class="header-sys-extra" id="sysExtraLine" aria-hidden="true"></div>
 
 
@@ -7597,6 +7626,21 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
           </div>
 
+        </div>
+
+        <!-- ── D-day 카드 ── -->
+        <div class="mp-card" id="mpCardDday">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardDday')">
+            <span class="mp-card-icon">⏳</span>
+            <span class="mp-card-label">D-day</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div id="ddayList"></div>
+              <button class="ledger-add-btn" style="margin-top:10px;" onclick="openDdayAdd()">+ D-day 추가</button>
+            </div>
+          </div>
         </div>
 
         <!-- ── 다이어리 카드 ── -->
@@ -8492,6 +8536,41 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   </div>
 </div>
 
+<!-- DDAY MODAL -->
+<div class="modal-overlay" id="ddayModal">
+  <div class="modal-sheet add-sheet">
+    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
+    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
+    <div class="sheet-scroll">
+      <div class="modal-header">
+        <div class="modal-title" id="ddayModalTitle">D-day 추가</div>
+        <button class="modal-close" onclick="closeDdayModal()">✕</button>
+      </div>
+      <div class="modal-body">
+        <div class="form-group">
+          <label class="form-label">아이콘</label>
+          <div class="dy-picks" id="ddayEmojis"></div>
+        </div>
+        <div class="form-group">
+          <label class="form-label">이름</label>
+          <input type="text" class="form-input" id="ddayTitle" maxlength="30" placeholder="예: 여행, 시험, 우리 100일" autocomplete="off">
+        </div>
+        <div class="form-group">
+          <label class="form-label">날짜</label>
+          <input type="date" class="form-input" id="ddayDate">
+        </div>
+        <label class="dd-check"><input type="checkbox" id="ddayYearly"> 매년 반복 (생일·기념일)</label>
+        <label class="dd-check"><input type="checkbox" id="ddayPinned"> 맨 위 화면에 대표로 보이기</label>
+        <div class="dd-preview" id="ddayPreview"></div>
+      </div>
+      <div class="modal-actions">
+        <button class="btn-cancel" onclick="closeDdayModal()">취소</button>
+        <button class="btn-save" onclick="saveDdayModal()">저장</button>
+      </div>
+    </div>
+  </div>
+</div>
+
 <!-- DIARY MODAL -->
 <div class="modal-overlay" id="diaryModal">
   <div class="modal-sheet add-sheet">
@@ -8833,6 +8912,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 <script src="/state-merge.js"></script>
 <script src="/bookmarks.js"></script>
 <script src="/parcels.js"></script>
+<script src="/dday.js"></script>
 <script>
 
 /* ══════════════════════════════════════
@@ -9332,6 +9412,8 @@ function getCloudStatePayload() {
     diaries,
     diaryNextId,
     diaryLock,
+    ddays,
+    ddayNextId,
     bookmarks,
     bookmarkNextId,
     bookmarkFolders,
@@ -9494,7 +9576,7 @@ async function pullCloudState() {
 }
 
 function hasLocalUserData() {
-  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || diaries.length > 0 || bookmarks.length > 0 || bookmarkFolders.length > 0 || parcels.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || diaries.length > 0 || ddays.length > 0 || bookmarks.length > 0 || bookmarkFolders.length > 0 || parcels.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
 }
 
 function applyCloudState(payload) {
@@ -9525,6 +9607,8 @@ function applyCloudState(payload) {
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (Array.isArray(payload.diaries)) diaries = payload.diaries;
   if (Number.isFinite(payload.diaryNextId)) diaryNextId = payload.diaryNextId;
+  if (Array.isArray(payload.ddays)) ddays = payload.ddays;
+  if (Number.isFinite(payload.ddayNextId)) ddayNextId = payload.ddayNextId;
   if (payload.diaryLock !== undefined) diaryLock = payload.diaryLock && payload.diaryLock.hash ? payload.diaryLock : null;
   if (Array.isArray(payload.bookmarks)) bookmarks = payload.bookmarks;
   if (Number.isFinite(payload.bookmarkNextId)) bookmarkNextId = payload.bookmarkNextId;
@@ -9541,6 +9625,7 @@ function applyCloudState(payload) {
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
   localStorage.setItem('rianless_diaries', JSON.stringify({ diaries, diaryNextId }));
+  localStorage.setItem('rianless_ddays', JSON.stringify({ ddays, ddayNextId }));
   try { localStorage.setItem('rianless_diary_lock', JSON.stringify(diaryLock)); } catch(e) {}
   localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId, bookmarkFolders, bookmarkFolderNextId }));
 
@@ -10642,6 +10727,8 @@ function toggleMpCard(id) {
 
     if (id === 'mpCardDiary') renderDiaryList();
 
+    if (id === 'mpCardDday') renderDdayList();
+
     if (id === 'mpCardStats') renderStatsView();
 
     if (id === 'mpCardBookmark') renderBookmarkList();
@@ -10837,6 +10924,8 @@ function renderMypageView() {
   if (document.getElementById('mpCardCat').classList.contains('open')) renderCatLists();
   if (document.getElementById('mpCardMemo').classList.contains('open')) renderMemoList();
   if (document.getElementById('mpCardDiary').classList.contains('open')) renderDiaryList();
+  if (document.getElementById('mpCardDday').classList.contains('open')) renderDdayList();
+  renderDdayBadge();
   if (currentMainTab === 'memo') renderMemoApp();
   if (currentMainTab === 'bookmark') renderBookmarkApp();
   if (currentMainTab === 'diary') renderDiaryApp();
@@ -11097,6 +11186,134 @@ let diaryAppDraft = null;   // 쓰는 중인 내용 { id|null, date, mood, weath
 function diarySorted() {
   return diaries.slice().sort((a, b) => b.date.localeCompare(a.date) || String(b.updated).localeCompare(String(a.updated)));
 }
+/* ══════════════════════════════════════
+   D-DAY: 남은 날(D-n) · 오늘(D-DAY) · 지난 날(D+n, n일째) · 매년 반복
+══════════════════════════════════════ */
+let ddays = [];       // { id, title, date:'YYYY-MM-DD', emoji, yearly?, pinned? }
+let ddayNextId = 1;
+let editingDdayId = null;
+let ddayEmoji = '⭐';
+const DDAY_EMOJIS = ['⭐', '🎂', '💖', '✈️', '📚', '🎓', '🏁', '🎁'];
+const DOW_DD = ['일', '월', '화', '수', '목', '금', '토'];
+
+function ddayToday() { return fmtDate(new Date()); }
+function ddayDateText(iso) {
+  const p = Dday.parse(iso);
+  return p ? `${iso} (${DOW_DD[new Date(p.t).getUTCDay()]})` : iso;
+}
+function saveDdays() {
+  try { localStorage.setItem('rianless_ddays', JSON.stringify({ ddays, ddayNextId })); } catch(e) {}
+  queueCloudStateSync();
+}
+function loadDdays() {
+  try {
+    const raw = JSON.parse(localStorage.getItem('rianless_ddays') || 'null');
+    if (raw && Array.isArray(raw.ddays)) {
+      ddays = raw.ddays;
+      ddayNextId = Math.max(Number(raw.ddayNextId) || 1, ...ddays.map(d => d.id + 1));
+    }
+  } catch(e) {}
+}
+
+function renderDdayBadge() {
+  const el = document.getElementById('ddayBadge');
+  if (!el) return;
+  const top = Dday.sortDdays(ddays, ddayToday()).find(d => d.pinned);
+  if (!top) { el.style.display = 'none'; return; }
+  el.style.display = '';
+  el.innerHTML = `<span>${escapeLedgerText(top.emoji || '⭐')}</span><span class="t">${escapeLedgerText(top.title)}</span><b>${top.calc.label}</b>`;
+}
+
+function renderDdayList() {
+  const el = document.getElementById('ddayList');
+  if (!el) return;
+  const list = Dday.sortDdays(ddays, ddayToday());
+  if (!list.length) { el.innerHTML = '<div class="memo-empty">기다리는 날, 기념일을 추가해 보세요</div>'; return; }
+  el.innerHTML = list.map(d => {
+    const c = d.calc;
+    const meta = [ddayDateText(c.target), d.yearly ? '매년' : '', c.sub].filter(Boolean).join(' · ');
+    return `<div class="dd-item${d.pinned ? ' pinned' : ''}" onclick="openDdayAdd(${d.id})">
+      <div class="dd-badge ${c.kind}">${c.label}</div>
+      <div class="dd-main"><div class="dd-title">${escapeLedgerText(d.emoji || '⭐')} ${escapeLedgerText(d.title)}</div><div class="dd-date">${escapeLedgerText(meta)}</div></div>
+      <button type="button" class="dd-pin" aria-label="${d.pinned ? '대표 해제' : '대표로 보이기'}" onclick="toggleDdayPin(${d.id});event.stopPropagation()">${d.pinned ? '📌' : '📍'}</button>
+      <button type="button" class="dd-del" aria-label="D-day 삭제" onclick="deleteDday(${d.id});event.stopPropagation()">✕</button>
+    </div>`;
+  }).join('');
+}
+
+function renderDdayEmojis() {
+  document.getElementById('ddayEmojis').innerHTML = DDAY_EMOJIS.map(e => `<button type="button" class="${e === ddayEmoji ? 'on' : ''}" onclick="pickDdayEmoji('${e}')">${e}</button>`).join('');
+}
+function pickDdayEmoji(e) { ddayEmoji = e; renderDdayEmojis(); }
+
+function updateDdayPreview() {
+  const box = document.getElementById('ddayPreview');
+  const c = Dday.calc({ date: document.getElementById('ddayDate').value, yearly: document.getElementById('ddayYearly').checked }, ddayToday());
+  box.textContent = c ? `${c.label}${c.sub ? ' · ' + c.sub : ''}  (${ddayDateText(c.target)})` : '날짜를 골라 주세요';
+}
+
+function openDdayAdd(id) {
+  const d = id !== undefined && id !== null ? ddays.find(x => x.id === id) : null;
+  editingDdayId = d ? d.id : null;
+  ddayEmoji = d ? (d.emoji || '⭐') : '⭐';
+  document.getElementById('ddayModalTitle').textContent = d ? 'D-day 수정' : 'D-day 추가';
+  document.getElementById('ddayTitle').value = d ? d.title : '';
+  document.getElementById('ddayDate').value = d ? d.date : ddayToday();
+  document.getElementById('ddayYearly').checked = !!(d && d.yearly);
+  document.getElementById('ddayPinned').checked = !!(d && d.pinned);
+  ['ddayDate', 'ddayYearly'].forEach(i => { const e = document.getElementById(i); e.oninput = e.onchange = updateDdayPreview; });
+  renderDdayEmojis();
+  updateDdayPreview();
+  history.pushState({modal:'dday'}, '');
+  document.getElementById('ddayModal').classList.add('open');
+  setTimeout(() => document.getElementById('ddayTitle').focus(), 200);
+}
+function closeDdayModal() { document.getElementById('ddayModal').classList.remove('open'); }
+
+function saveDdayModal() {
+  const title = document.getElementById('ddayTitle').value.trim();
+  const date = document.getElementById('ddayDate').value;
+  if (!title) { showToast('이름을 적어 주세요'); document.getElementById('ddayTitle').focus(); return; }
+  if (!Dday.parse(date)) { showToast('날짜를 골라 주세요'); return; }
+  const pinned = document.getElementById('ddayPinned').checked;
+  const fields = { title, date, emoji: ddayEmoji, yearly: document.getElementById('ddayYearly').checked, pinned };
+  if (pinned) ddays.forEach(x => { x.pinned = false; });    // 대표는 하나만
+  const d = editingDdayId !== null ? ddays.find(x => x.id === editingDdayId) : null;
+  if (d) Object.assign(d, fields);
+  else ddays.push({ id: ddayNextId++, ...fields });
+  editingDdayId = null;
+  closeDdayModal();
+  saveDdays();
+  renderDdayList();
+  renderDdayBadge();
+}
+
+function toggleDdayPin(id) {
+  const d = ddays.find(x => x.id === id);
+  if (!d) return;
+  const on = !d.pinned;
+  ddays.forEach(x => { x.pinned = false; });
+  d.pinned = on;
+  saveDdays();
+  renderDdayList();
+  renderDdayBadge();
+}
+function deleteDday(id) {
+  const d = ddays.find(x => x.id === id);
+  if (!d || !confirm(`'${d.title}' D-day를 지울까요?`)) return;
+  ddays = ddays.filter(x => x.id !== id);
+  saveDdays();
+  renderDdayList();
+  renderDdayBadge();
+}
+// 자정이 지나면 날짜가 바뀌므로, 앱으로 돌아올 때 다시 그린다
+document.addEventListener('visibilitychange', () => {
+  if (document.visibilityState !== 'visible') return;
+  renderDdayBadge();
+  const c = document.getElementById('mpCardDday');
+  if (c && c.classList.contains('open')) renderDdayList();
+});
+
 /* ── 다이어리 잠금: XP 부팅 → 로그인 화면. 비밀번호를 쳐야 다이어리가 열린다 ──
    비밀번호는 솔트와 함께 SHA-256 으로만 저장·동기화한다. 일기 내용을 암호화하는 것은 아니다. */
 let diaryLockMode = null;    // null | 'login' | 'setup' | 'manage'
@@ -18705,6 +18922,9 @@ loadData();
 loadMemos();
 
 loadDiaries();
+
+loadDdays();
+renderDdayBadge();
 
 loadBookmarks();
 loadParcels();
