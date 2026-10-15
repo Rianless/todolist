@@ -6300,14 +6300,28 @@ button:active:not(:disabled) {
 .xl-foot { position: absolute; left: 18px; right: 18px; bottom: 12px; display: flex; justify-content: space-between; align-items: center; font-size: 11px; color: #7a5cc8; }
 .xl-foot b { font-size: 14px; font-style: italic; }
 #dyaLock .xl-login { gap: 0; padding: 18px 12px; }
-.xl-betta { position: absolute; z-index: 1; top: 68%; left: -170px; width: 160px; height: 104px; pointer-events: none; animation: xlSwim 26s linear infinite; }
-.xl-betta span { position: absolute; left: 0; top: 0; image-rendering: pixelated; animation: xlFrame .7s steps(1) infinite; }
-.xl-betta .xlb-f2 { animation-name: xlFrame2; }
-.xl-betta svg { display: block; }
-.xl-betta { --bob: 0; }
-@keyframes xlFrame { 0% { opacity: 1; } 50% { opacity: 0; } }
-@keyframes xlFrame2 { 0% { opacity: 0; } 50% { opacity: 1; } }
-@keyframes xlSwim { 0% { left: -190px; transform: scaleX(1); } 48% { left: 100%; transform: scaleX(1); } 50% { left: 100%; transform: scaleX(-1); } 98% { left: -190px; transform: scaleX(-1); } 100% { left: -190px; transform: scaleX(1); } }
+.xl-hud { position: absolute; inset: 0; pointer-events: none; overflow: hidden; }
+.xl-hud, .xl-hud * { font-family: 'Courier New', 'Malgun Gothic', monospace !important; }
+.xl-hex { position: absolute; inset: 0; -webkit-mask-image: radial-gradient(ellipse 55% 60% at 50% 50%, #000 15%, transparent 78%); mask-image: radial-gradient(ellipse 55% 60% at 50% 50%, #000 15%, transparent 78%); }
+.xl-ringbox { position: absolute; left: 50%; top: 50%; width: 640px; height: 640px; margin: -320px 0 0 -320px; opacity: .85; }
+.xl-ringbox svg { display: block; }
+.xl-ringbox g { transform-origin: 320px 320px; }
+.xl-r1 { animation: xlRot 90s linear infinite; }
+.xl-r2 { animation: xlRot 55s linear infinite reverse; }
+.xl-r3 { animation: xlRot 28s linear infinite; }
+.xl-r4 { animation: xlRot 40s linear infinite reverse; }
+@keyframes xlRot { to { transform: rotate(360deg); } }
+.xl-cn { position: absolute; width: 22px; height: 22px; border: 0 solid #6a7cff; opacity: .75; }
+.xl-cn.tl { left: 14px; top: 14px; border-width: 2px 0 0 2px; } .xl-cn.tr { right: 14px; top: 14px; border-width: 2px 2px 0 0; }
+.xl-cn.bl { left: 14px; bottom: 14px; border-width: 0 0 2px 2px; } .xl-cn.br { right: 14px; bottom: 14px; border-width: 0 2px 2px 0; }
+.xl-ro { position: absolute; font-size: 10px; line-height: 1.5; letter-spacing: 1px; color: #5a6cd8; opacity: .85; text-shadow: 0 0 4px #fff; }
+.xl-ro.tl { left: 44px; top: 18px; } .xl-ro.tr { right: 44px; top: 18px; text-align: right; }
+.xl-ro.br { right: 44px; bottom: 18px; text-align: right; } .xl-ro.bl { left: 44px; bottom: 18px; }
+.xl-stream { height: 60px; overflow: hidden; -webkit-mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent); mask-image: linear-gradient(transparent, #000 25%, #000 75%, transparent); }
+.xl-stream > div { animation: xlStream 14s linear infinite; }
+@keyframes xlStream { to { transform: translateY(-50%); } }
+.xl-blink { animation: xlBlink 1.2s steps(1) infinite; }
+@keyframes xlBlink { 50% { opacity: .25; } }
 .xl-glass { position: relative; z-index: 2; width: 380px; max-width: 100%; border-radius: 22px !important; background: #ffffff8c; -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px); border: 2px solid #fff; box-shadow: 0 10px 30px #b69cff66, inset 0 0 18px #ffffffb0; overflow: hidden; }
 .xl-gt { display: flex; align-items: center; padding: 6px 12px; color: #fff; font-size: 13px; font-weight: 800; letter-spacing: 1px; text-shadow: 0 1px 2px #8a5cff; background: linear-gradient(#ffb4ea, #b69cff 55%, #7ac8ff); }
 .xl-gt i { margin-left: auto; display: flex; gap: 5px; }
@@ -6339,7 +6353,7 @@ button:active:not(:disabled) {
 #dyaLock .xl-tube { border-radius: 12px !important; }
 #dyaLock .xl-tube i { border-radius: 9px !important; }
 #dyaLock .xl-glass { border-radius: 22px !important; }
-@media (prefers-reduced-motion: reduce) { .xl-sp span, .xl-orb, .xl-tube i, .xl-betta, .xl-betta *, .xl-card.shake { animation: none !important; } .xl-tube i { width: 70%; } .xl-betta { left: 8%; } .xl-betta .xlb-f2 { display: none; } }
+@media (prefers-reduced-motion: reduce) { .xl-r1, .xl-r2, .xl-r3, .xl-r4, .xl-stream > div, .xl-blink { animation: none !important; } .xl-sp span, .xl-orb, .xl-tube i,  .xl-card.shake { animation: none !important; } .xl-tube i { width: 70%; } }
 
 /* 팝업: 모양 · 너비 · 바깥 여백이 모두 같다 */
 .modal-sheet, .add-sheet, .day-sheet, .detail-sheet, .confirm-sheet, .cheongdo-manager-sheet,
@@ -11195,57 +11209,27 @@ async function diaryLockSubmit(ev) {
   diaryEnter();
 }
 
-// 베타 물고기(도트): 오른쪽을 보고 있다. 꼬리·지느러미 물결이 다른 두 장면을 번갈아 보여 준다.
-function xlBuildBetta(frame) {
-  const W = 40, H = 28, CY = 14;
-  const g = Array.from({ length: H }, () => Array(W).fill(''));
-  const put = (x, y, c) => { if (x >= 0 && x < W && y >= 0 && y < H) g[y][x] = c; };
-  const sw = frame ? 1 : -1;                      // 두 장면: 꼬리 끝이 위/아래로 살랑
-  const bodyIn = (x, y) => ((x - 26) / 9.2) ** 2 + ((y - CY) / 4.2) ** 2 <= 1;
-  // 꼬리: 둥근 부채. 몸쪽(16,CY)에서 퍼지는 줄무늬, 끝으로 갈수록 흐름
-  for (let x = 0; x <= 16; x++) for (let y = 0; y < H; y++) {
-    const dx = 16 - x, dy = y - CY;
-    const flow = Math.round(sw * (dx / 16) ** 2 * 3);   // 끝쪽일수록 많이 휜다
-    const yy = y - flow;
-    const r = Math.hypot(dx, yy - CY);
-    const inFan = r <= 15.5 && Math.abs(Math.atan2(yy - CY, dx)) <= 1.2 && dx >= 0;
-    if (!inFan) continue;
-    const ray = Math.floor((Math.atan2(yy - CY, dx) + 1.3) * 3.3) % 2;
-    put(x, y, r > 12 ? (ray ? 'P' : 'p') : (ray ? 'p' : 'v'));
-  }
-  // 등지느러미(위)와 뒷지느러미(아래): 뒤쪽(왼쪽)으로 길게 흐른다
-  for (let x = 14; x <= 29; x++) {
-    const t = (x - 14) / 15;
-    const top = Math.round((1 - Math.abs(t - 0.45) * 1.6) * 7), bot = Math.round((1 - Math.abs(t - 0.5) * 1.4) * 8);
-    const fl = Math.round(sw * (1 - t) * 2);
-    for (let i = 1; i <= Math.max(0, top); i++) put(x - Math.floor(i / 3), CY - 4 - i + (i > 3 ? fl : 0), i > top - 1 ? 'P' : (i % 2 ? 'p' : 'v'));
-    for (let i = 1; i <= Math.max(0, bot); i++) put(x - Math.floor(i / 2), CY + 4 + i - (i > 3 ? fl : 0), i > bot - 1 ? 'P' : (i % 2 ? 'p' : 'v'));
-  }
-  // 윤곽
-  const solid = g.map(r => r.map(c => !!c));
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!solid[y][x] && ((solid[y - 1] || [])[x] || (solid[y + 1] || [])[x] || solid[y][x - 1] || solid[y][x + 1])) put(x, y, 'o');
-  // 몸통
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (bodyIn(x, y)) put(x, y, y <= CY - 2 ? 'B' : (y >= CY + 2 ? 'v' : 'b'));
-  for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) if (!bodyIn(x, y) && (bodyIn(x + 1, y) || bodyIn(x - 1, y) || bodyIn(x, y + 1) || bodyIn(x, y - 1))) put(x, y, 'o');
-  for (let x = 20; x <= 30; x += 2) { put(x, CY - 1 + (x % 4 ? 0 : 1), 'w'); }   // 비늘 반짝임
-  for (let y = CY - 3; y <= CY + 3; y++) if (bodyIn(31, y)) put(31, y, 'o');   // 아가미 선
-  put(33, CY - 1, 'w'); put(34, CY - 1, 'e'); put(33, CY, 'e'); put(34, CY, 'e'); put(33, CY - 2, 'o'); put(34, CY - 2, 'o');
-  [[24, CY + 3], [23, CY + 4], [22, CY + 5]].forEach(([x, y]) => put(x, y, 'P'));   // 가슴지느러미
-  const pal = { o: '#3b2a7a', B: '#a8ecff', b: '#5fb4ff', v: '#9a6cff', p: '#ff6ac8', P: '#ffb0ea', w: '#ffffff', e: '#1d1450' };
-  let rects = '';
-  for (let y = 0; y < H; y++) {
-    let x = 0;
-    while (x < W) {
-      const c = g[y][x];
-      if (!c) { x++; continue; }
-      let n = 1; while (x + n < W && g[y][x + n] === c) n++;
-      rects += `<rect x="${x}" y="${y}" width="${n}" height="1" fill="${pal[c]}"/>`;
-      x += n;
-    }
-  }
-  return `<svg viewBox="0 0 ${W} ${H}" width="${W * 4}" height="${H * 4}" shape-rendering="crispEdges" focusable="false">${rects}</svg>`;
-}
-const XL_BETTA = `<span class="xlb-f1">${xlBuildBetta(0)}</span><span class="xlb-f2">${xlBuildBetta(1)}</span>`;
+// 배경 기하학 문양 (공각기동대 풍 HUD): 회전하는 숫자 링, 육각 격자, 조준선, 모서리 괄호, 흐르는 16진수
+const XL_HEXLINES = ['7A F3 09 C4 5E 21 B8 D0', '3C 9E 44 A1 FF 06 72 1B', 'E5 08 6D 90 2A C7 31 BE', '5F A4 18 EC 73 0D 9B 46', 'B2 61 D9 07 8E 35 CA 54', '1D F8 40 A6 6B E3 29 90', '84 3A C1 5D 0F B7 E6 72', 'C9 12 7E 48 A3 DB 05 6F'];
+const XL_GEO = `<div class="xl-hud" aria-hidden="true">
+  <svg class="xl-hex" width="100%" height="100%"><defs><pattern id="xlHexP" width="56" height="100" patternUnits="userSpaceOnUse"><path d="M28 66L0 50L0 16L28 0L56 16L56 50L28 66L28 100" fill="none" stroke="#7d8dff" stroke-opacity=".38"/><path d="M28 0L28 34L0 50L0 84L28 100L56 84L56 50L28 34" fill="none" stroke="#7d8dff" stroke-opacity=".38"/></pattern></defs><rect width="100%" height="100%" fill="url(#xlHexP)"/></svg>
+  <div class="xl-ringbox"><svg viewBox="0 0 640 640" width="640" height="640">
+    <defs><path id="xlTxtA" d="M320 320 m-268 0 a268 268 0 1 1 536 0 a268 268 0 1 1 -536 0"/><path id="xlTxtB" d="M320 320 m-206 0 a206 206 0 1 0 412 0 a206 206 0 1 0 -412 0"/></defs>
+    <g class="xl-r1" fill="none" stroke="#6a7cff" stroke-opacity=".6"><circle cx="320" cy="320" r="308" stroke-width="1"/><circle cx="320" cy="320" r="296" stroke-width="9" stroke-dasharray="1.6 9.6" stroke-opacity=".5"/>
+      <text font-size="10" fill="#5a6cf0" fill-opacity=".75" stroke="none" letter-spacing="3.2"><textPath href="#xlTxtA">0123456789ABCDEF·0123456789ABCDEF·0123456789ABCDEF·0123456789ABCDEF·0123456789ABCDEF·</textPath></text></g>
+    <g class="xl-r2" fill="none" stroke="#8a6cff" stroke-opacity=".6"><circle cx="320" cy="320" r="236" stroke-width="2" stroke-dasharray="200 36 56 36 20 36"/><circle cx="320" cy="320" r="226" stroke-width="1"/>
+      <text font-size="9" fill="#7a5cf0" fill-opacity=".7" stroke="none" letter-spacing="3"><textPath href="#xlTxtB">SYS.LOCK//AUTH·REQUIRED·SYS.LOCK//AUTH·REQUIRED·SYS.LOCK//AUTH·REQUIRED·SYS.LOCK//AUTH·</textPath></text></g>
+    <g class="xl-r3" fill="none" stroke="#4fa6ff" stroke-opacity=".7"><circle cx="320" cy="320" r="176" stroke-width="1" stroke-dasharray="3 7"/><circle cx="320" cy="320" r="160" stroke-width="6" stroke-dasharray="110 540" stroke-linecap="butt"/><circle cx="320" cy="320" r="160" stroke-width="6" stroke-dasharray="40 640" stroke-dashoffset="-300"/>
+      <polygon points="320,126 330,144 310,144" fill="#4fa6ff" stroke="none"/></g>
+    <g class="xl-r4" fill="none" stroke="#6a7cff" stroke-opacity=".55"><polygon points="320,214 412,267 412,373 320,426 228,373 228,267" stroke-width="1.2"/><polygon points="320,244 386,282 386,358 320,396 254,358 254,282" stroke-width="1" stroke-dasharray="4 5"/></g>
+    <g stroke="#6a7cff" stroke-opacity=".5" stroke-width="1"><path d="M0 320H150M490 320H640M320 0V150M320 490V640"/><path d="M12 312v16M628 312v16M312 12h16M312 628h16" stroke-width="2"/></g>
+  </svg></div>
+  <i class="xl-cn tl"></i><i class="xl-cn tr"></i><i class="xl-cn bl"></i><i class="xl-cn br"></i>
+  <div class="xl-ro tl">GHOST.SYS // DIARY-2000<br>SECTOR 09 · NODE 0x2A7F</div>
+  <div class="xl-ro tr">AUTH ▸ REQUIRED<br><span class="xl-blink">● ● ○</span></div>
+  <div class="xl-ro bl"><div class="xl-stream"><div>${XL_HEXLINES.concat(XL_HEXLINES).join('<br>')}</div></div></div>
+  <div class="xl-ro br">SYNC ▮▮▮▮▯ 82%<br>LAT 35.6N · LON 139.7E</div>
+</div>`;
 
 function renderDiaryLock() {
   const box = document.getElementById('dyaLock');
@@ -11253,12 +11237,11 @@ function renderDiaryLock() {
   const sparkles = ['✦', '✧', '♡', '★', '✦', '♡', '✧', '★'].map((c, i) => `<span style="--x:${(i * 37 + 8) % 92}%;--y:${(i * 53 + 10) % 84}%;--d:${2 + (i % 4) * 0.7}s;--c:${['#7ad7ff', '#b69cff', '#ffd86b', '#8fe8c8'][i % 4]}">${c}</span>`).join('');
   if (diaryLockStage === 'boot') {
     box.innerHTML = `<div class="xl-boot" onclick="diaryLockSkipBoot()" tabindex="0" onkeydown="diaryLockSkipBoot()" role="button" aria-label="시작 화면, 누르면 건너뛰어요">
-      <div class="xl-sp" aria-hidden="true">${sparkles}</div>
+      ${XL_GEO}<div class="xl-sp" aria-hidden="true">${sparkles}</div>
       <div class="xl-orb" aria-hidden="true"></div>
       <div class="xl-word"><b>Diary</b><em>2000</em></div>
       <div class="xl-tube" aria-hidden="true"><i></i></div>
-      <div class="xl-load">loading… ♡</div>
-      <div class="xl-foot"><span>© Rianless ✦ all rights reserved</span><b>✦ Rianless ✦</b></div></div>`;
+      <div class="xl-load">loading… ♡</div></div>`;
     return;
   }
   const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
@@ -11280,7 +11263,7 @@ function renderDiaryLock() {
       <div class="xl-btns"><button type="submit">저장</button><button type="button" onclick="diaryLockCancel()">취소</button></div>`;
   }
   box.innerHTML = `<div class="xl-login"><div class="xl-sp" aria-hidden="true">${sparkles}</div>
-    <div class="xl-betta" aria-hidden="true">${XL_BETTA}</div>
+    ${XL_GEO}
     <div class="xl-glass"><div class="xl-gt"><span>✦ Diary 2000</span><i aria-hidden="true"><b></b><b></b><b></b></i></div>
       <div class="xl-gb"><div class="xl-big">Diary<em>2000</em></div><div class="xl-lead">${left[0]}</div>
         <form class="xl-card" onsubmit="diaryLockSubmit(event)"><div class="xl-user"><div class="xl-av"><span>${escapeLedgerText(nick.charAt(0).toUpperCase())}</span></div><div class="xl-name">${escapeLedgerText(nick)}</div></div>
