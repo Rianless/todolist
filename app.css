@@ -7079,25 +7079,15 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { left: var(--dk-left); }
 }
 
-/* 위젯 배치 3종 (PC). 시작 메뉴 → '위젯 배치 바꾸기'로 돌려가며 고른다 */
-@media (max-width: 899px) { .dk-pc-only { display: none !important; } }
+/* 바탕화면 위젯: 작은 타일 격자 (PC) */
 @media (min-width: 900px) {
-  /* ① 세로 단: 폭을 420px 안팎으로 제한하고, 화면이 넓으면 단이 늘어난다 */
-  html[data-desktop][data-desktop-win][data-skin="w98"][data-dkw="column"] .dk-widgets { display: block; column-width: 400px; column-gap: 16px; column-fill: balance; }
-  html[data-dkw="column"] .dk-stack, html[data-dkw="tile"] .dk-stack { display: contents; }
-  html[data-dkw="column"][data-skin="w98"] .dk-widget { break-inside: avoid; margin-bottom: 16px; width: 100%; max-width: 460px; }
-
-  /* ② 작은 타일: 위젯마다 작은 카드, 격자로 촘촘히 */
-  html[data-desktop][data-desktop-win][data-skin="w98"][data-dkw="tile"] .dk-widgets { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 320px)); align-items: start; justify-content: start; gap: 14px; }
-  html[data-dkw="tile"][data-skin="w98"] .dk-widget { width: 100%; max-width: 320px; max-height: 330px; font-size: 13px; }
-  html[data-dkw="tile"][data-skin="w98"] .dkw-title { font-size: 13px; }
-  html[data-dkw="tile"][data-skin="w98"] .dkw-body { padding: 6px 10px; }
-  html[data-dkw="tile"][data-skin="w98"] .dkw-bar { height: 12px; }
-
-  /* ③ 대시보드 창: 윈도우 창 하나 안에 위젯을 3열로 */
-  html[data-desktop][data-desktop-win][data-skin="w98"][data-dkw="board"] .dk-widgets { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 10px; align-content: start; align-items: start; right: auto; width: min(1080px, calc(100% - var(--dk-left) - 16px)); top: 48px; bottom: auto; max-height: calc(100% - 92px); padding: 34px 8px 8px; background: #c0c0c0; box-shadow: var(--w98-raised), 3px 3px 0 rgba(0,0,0,.4); pointer-events: auto; box-sizing: border-box; }
-  html[data-dkw="board"][data-skin="w98"] .dk-widgets::before { content: '📊 나의 하루 — 대시보드'; position: absolute; left: 3px; right: 3px; top: 3px; height: 26px; padding: 0 8px; line-height: 26px; font-size: 14px; font-weight: 700; color: #fff; background: linear-gradient(90deg, #000080, #1084d0); }
-  html[data-dkw="board"][data-skin="w98"] .dk-stack { display: flex; flex-direction: column; gap: 10px; width: 100%; pointer-events: auto; }
-  html[data-dkw="board"][data-skin="w98"] .dk-widget { width: 100%; max-width: none; box-shadow: var(--w98-sunken); font-size: 14px; }
-  html[data-dkw="board"][data-skin="w98"] .dkw-title { background: #808080; font-size: 13px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 320px)); align-items: start; justify-content: start; gap: 14px; }
+  html[data-desktop][data-skin="w98"] .dk-stack { display: contents; }
+  html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; max-width: 320px; max-height: 480px; font-size: 13px; }
+  html[data-desktop][data-skin="w98"] .dkw-title { font-size: 13px; }
+  html[data-desktop][data-skin="w98"] .dkw-body { padding: 6px 10px; }
+  html[data-desktop][data-skin="w98"] .dkw-bar { height: 9px; margin: 1px 0 3px; padding: 1px; }
+  html[data-desktop][data-skin="w98"] .dkw-row { padding: 2px 0; }
+  html[data-desktop][data-skin="w98"] .dkw-kv { padding: 2px 0; }
+  html[data-desktop][data-skin="w98"] .dkw-sub { margin: 6px 0 2px; }
 }

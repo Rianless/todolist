@@ -305,7 +305,6 @@ setInterval(() => { if (!document.hidden) updateDesktopTicker(); }, 30000);   //
 
 let currentMainTab = 'calendar';
 
-applyWidgetLayout();
 let currentCalSubTab = 'cal';
 
 
