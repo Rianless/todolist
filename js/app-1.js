@@ -864,6 +864,15 @@ function desktopWeekSubs(subList, todayStr, subDatesFn) {
   return out.sort((x, y) => x.date.localeCompare(y.date) || String(x.name).localeCompare(String(y.name)));
 }
 
+// 이번 달(y년 m월, m 은 0~11)의 구독 결제 전부. 일시정지한 구독은 뺀다.
+function desktopMonthSubs(subList, y, m, subDatesFn) {
+  const out = [];
+  (subList || []).forEach(sub => {
+    if (!sub.date || sub.paused) return;
+    subDatesFn(sub, y, m).forEach(ds => out.push({ name: sub.name, date: ds, amount: Number(sub.amount) || 0 }));
+  });
+  return out.sort((x, y2) => x.date.localeCompare(y2.date) || String(x.name).localeCompare(String(y2.name)));
+}
 /* ══════════════════════════════════════
    통계 계산 (바탕화면 위젯 · 통계 앱 공용, 순수 함수)
 ══════════════════════════════════════ */
@@ -1077,20 +1086,20 @@ function updateDesktopWidgets() {
   const spentToday = ledger.filter(e => e.date === todayStr && e.type === 'expense').reduce((sum, e) => sum + (Number(e.amount) || 0), 0);
   const cats = statsCategoryBreakdown(ledger, subscriptions, y, m, getSubDatesForMonth).slice(0, 3);
   const bal = tot.income - tot.expense;
+  const monthSubs = desktopMonthSubs(subscriptions, y, m, getSubDatesForMonth);
   const moneyHtml = `<div class="dkw-kv"><span>오늘 지출</span><span class="dkw-exp">-${statsWon(spentToday)}</span></div>` +
     `<div class="dkw-kv"><span>${m + 1}월 지출</span><span class="dkw-exp">-${statsWon(tot.expense)}</span></div>` +
     `<div class="dkw-kv"><span>${m + 1}월 수입</span><span class="dkw-inc">+${statsWon(tot.income)}</span></div>` +
     `<div class="dkw-kv"><span>차액</span><b>${bal >= 0 ? '+' : '-'}${statsWon(Math.abs(bal))}</b></div>` +
-    (cats.length ? `<div class="dkw-sub">많이 쓴 곳</div>` + cats.map(c => `<div class="dkw-kv"><span>${esc(c.name)}</span><span>${statsWon(c.amount)} (${c.pct}%)</span></div>`).join('') : '');
+    (cats.length ? `<div class="dkw-sub">많이 쓴 곳</div>` + cats.map(c => `<div class="dkw-kv"><span>${esc(c.name)}</span><span>${statsWon(c.amount)} (${c.pct}%)</span></div>`).join('') : '') +
+    `<div class="dkw-sub">이번달 구독 결제 예정</div>` +
+    (monthSubs.length ? monthSubs.map(x => `<div class="dkw-kv${x.date < todayStr ? ' dkw-past' : ''}"><span>${esc(x.name)} · ${new Date(x.date + 'T00:00:00').getDate()}일</span><span>${statsWon(x.amount)}</span></div>`).join('') + `<div class="dkw-kv"><span>합계</span><b>${statsWon(monthSubs.reduce((sum, x) => sum + x.amount, 0))}</b></div>` : '<div class="dkw-empty">없음</div>');
 
   // ③ 달성률 + 이번 주 구독
   const monthItems = items.filter(i => i.date && i.date.startsWith(todayStr.slice(0, 7)) && real(i));
   const mDone = monthItems.filter(i => i.done).length;
   const pct = monthItems.length ? Math.round(mDone / monthItems.length * 100) : 0;
-  const subs = desktopWeekSubs(subscriptions, todayStr, getSubDatesForMonth);
-  const goalHtml = `<div class="dkw-kv"><span>${m + 1}월 할 일 달성률</span><b>${pct}% (${mDone}/${monthItems.length})</b></div><div class="dkw-bar"><i style="width:${pct}%"></i></div>` +
-    `<div class="dkw-sub">이번 주 구독 결제 예정</div>` +
-    (subs.length ? subs.slice(0, 5).map(x => `<div class="dkw-kv"><span>${esc(x.name)} · ${new Date(x.date + 'T00:00:00').getDate()}일</span><span>${statsWon(x.amount)}</span></div>`).join('') + (subs.length > 5 ? `<div class="dkw-empty">외 ${subs.length - 5}건</div>` : '') : '<div class="dkw-empty">없음</div>');
+  const goalHtml = `<div class="dkw-kv"><span>${m + 1}월 할 일 달성률</span><b>${pct}% (${mDone}/${monthItems.length})</b></div><div class="dkw-bar"><i style="width:${pct}%"></i></div>`;
 
   // ④ D-day + 기다리는 택배
   const dds = Dday.sortDdays(ddays, todayStr).filter(d => d.calc.kind !== 'past').slice(0, 4);
@@ -1118,7 +1127,7 @@ function updateDesktopWidgets() {
     win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>` +
     `<div class="dk-stack">` + win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
     win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) + `</div>` +
-    win('🎯 달성 · 구독', open('통계', "desktopOpen('category','mpCardStats')"), goalHtml);
+    win('🎯 달성', open('통계', "desktopOpen('category','mpCardStats')"), goalHtml);
 }
 
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
