@@ -130,7 +130,7 @@
     if (!b) {
       // 양쪽에서 따로 입양한 경우: 더 많이 키운 쪽을 남기고, 받은 보상 기록은 합친다
       const win = (Number(l.xp) || 0) >= (Number(r.xp) || 0) ? l : r;
-      return Object.assign(clone(win), { awarded: mergeSet([], l.awarded, r.awarded) });
+      return Object.assign(clone(win), { awarded: mergeSet([], l.awarded, r.awarded), items: mergeSet([], l.items, r.items) });
     }
     const delta = k => Math.max(0, (Number(r[k]) || 0) + (Number(l[k]) || 0) - (Number(b[k]) || 0));
     const later = (x, y) => ((x || '') >= (y || '') ? (x || '') : (y || ''));
@@ -140,6 +140,7 @@
       xp: delta('xp'),
       coins: delta('coins'),
       awarded: mergeSet(b.awarded, l.awarded, r.awarded),
+      items: mergeSet(b.items, l.items, r.items),
       last: later(l.last, r.last),
       fed: later(l.fed, r.fed),
       born: [l.born, r.born, b.born].filter(Boolean).sort()[0] || ''

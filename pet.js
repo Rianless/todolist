@@ -63,7 +63,7 @@
 
   function newPet(species, name, today) {
     const sp = speciesOf(species);
-    return { name: String(name || '').trim().slice(0, 10) || sp.name, species: sp.id, xp: 0, coins: 0, awarded: [], last: '', fed: '', born: today };
+    return { name: String(name || '').trim().slice(0, 10) || sp.name, species: sp.id, xp: 0, coins: 0, awarded: [], items: [], last: '', fed: '', born: today };
   }
 
   const keyDate = k => { const m = /@(\d{4}-\d{2}-\d{2})$/.exec(k); return m ? m[1] : null; };
@@ -141,7 +141,43 @@
     return { level: p.level, into: p.into, need: p.need, stage: st, species: sp, emoji: st.id === 'egg' ? '🥚' : sp.emoji, pct: p.need ? Math.round(p.into / p.need * 100) : 100 };
   }
 
-  const api = { SPECIES, REWARD, BONUS, FEED, MAX_LEVEL, STAGES, MOOD, need, progress, stageOf, newPet, award, feed, mood, say, streak, view, speciesOf };
+  // 상점: 도토리로 사서 방(in)이나 마당(out)을 꾸민다. x·y 는 방 안 위치(%), y 는 바닥 쪽이 클수록 앞.
+  const ITEMS = [
+    { id: 'plant', name: '화분', emoji: '🪴', price: 5, room: 'in', x: 84, y: 66 },
+    { id: 'frame', name: '액자', emoji: '🖼️', price: 6, room: 'in', x: 18, y: 26 },
+    { id: 'lamp', name: '조명', emoji: '🏮', price: 8, room: 'in', x: 9, y: 12 },
+    { id: 'books', name: '책 더미', emoji: '📚', price: 10, room: 'in', x: 90, y: 40 },
+    { id: 'bed', name: '쿠션 침대', emoji: '🛏️', price: 15, room: 'in', x: 14, y: 80 },
+    { id: 'teddy', name: '곰인형', emoji: '🧸', price: 12, room: 'in', x: 72, y: 82 },
+    { id: 'piano', name: '피아노', emoji: '🎹', price: 25, room: 'in', x: 88, y: 24 },
+    { id: 'tree', name: '나무', emoji: '🌳', price: 8, room: 'out', x: 12, y: 40 },
+    { id: 'flower', name: '꽃밭', emoji: '🌷', price: 5, room: 'out', x: 80, y: 74 },
+    { id: 'swing', name: '그네', emoji: '🎠', price: 18, room: 'out', x: 86, y: 44 },
+    { id: 'pool', name: '물놀이장', emoji: '⛲', price: 20, room: 'out', x: 22, y: 78 },
+    { id: 'tent', name: '텐트', emoji: '⛺', price: 15, room: 'out', x: 50, y: 34 }
+  ];
+  const itemOf = id => ITEMS.find(i => i.id === id) || null;
+  function buy(pet, id) {
+    const it = itemOf(id);
+    if (!pet || !it) return { ok: false, reason: 'noitem' };
+    if ((pet.items || []).includes(id)) return { ok: false, reason: 'owned' };
+    if ((pet.coins || 0) < it.price) return { ok: false, reason: 'poor' };
+    return { ok: true, pet: Object.assign({}, pet, { coins: pet.coins - it.price, items: [...(pet.items || []), id] }) };
+  }
+
+  // 칭호: 조건을 만족한 것 중 가장 높은 것. 저장하지 않고 그때그때 계산한다. ctx = { level, streak, items }
+  const TITLES = [
+    { id: 'master', name: '갓생 마스터', ok: c => c.level >= 20 },
+    { id: 'clover', name: '행운의 네잎클로버', ok: c => c.streak >= 7 },
+    { id: 'interior', name: '인테리어 장인', ok: c => c.items >= 6 },
+    { id: 'god', name: '갓생 입문자', ok: c => c.level >= 10 },
+    { id: 'steady', name: '작심삼일 탈출', ok: c => c.streak >= 3 },
+    { id: 'grow', name: '무럭무럭', ok: c => c.level >= 5 },
+    { id: 'new', name: '새내기', ok: () => true }
+  ];
+  const titleOf = ctx => TITLES.find(t => t.ok(ctx)).name;
+
+  const api = { ITEMS, itemOf, buy, titleOf, SPECIES, REWARD, BONUS, FEED, MAX_LEVEL, STAGES, MOOD, need, progress, stageOf, newPet, award, feed, mood, say, streak, view, speciesOf };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Pet = api;
 })();

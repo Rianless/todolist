@@ -102,4 +102,24 @@ assert.strictEqual(adopt.species, 'dog'); assert.deepStrictEqual(adopt.awarded.s
 // 도토리가 음수가 되지 않는다
 assert.strictEqual(mergeStates({ pet: { xp: 0, coins: 2 } }, { pet: { xp: 0, coins: 0 } }, { pet: { xp: 0, coins: 0 } }).pet.coins, 0);
 
+// 상점
+p = Object.assign(fresh(), { coins: 10 });
+let bt = P.buy(p, 'plant');
+assert.strictEqual(bt.ok, true); assert.strictEqual(bt.pet.coins, 5); assert.deepStrictEqual(bt.pet.items, ['plant']);
+assert.strictEqual(P.buy(bt.pet, 'plant').reason, 'owned');
+assert.strictEqual(P.buy(bt.pet, 'piano').reason, 'poor');
+assert.strictEqual(P.buy(p, 'zzz').reason, 'noitem'); assert.strictEqual(P.buy(null, 'plant').reason, 'noitem');
+assert.deepStrictEqual(p.items, []);   // 원본 그대로
+assert.strictEqual(new Set(P.ITEMS.map(i => i.id)).size, P.ITEMS.length);
+// 칭호
+assert.strictEqual(P.titleOf({ level: 1, streak: 0, items: 0 }), '새내기');
+assert.strictEqual(P.titleOf({ level: 5, streak: 0, items: 0 }), '무럭무럭');
+assert.strictEqual(P.titleOf({ level: 2, streak: 3, items: 0 }), '작심삼일 탈출');
+assert.strictEqual(P.titleOf({ level: 2, streak: 7, items: 0 }), '행운의 네잎클로버');
+assert.strictEqual(P.titleOf({ level: 25, streak: 7, items: 9 }), '갓생 마스터');
+// 상점 물건은 양쪽에서 산 것이 모두 남는다
+const sb = { pet: Object.assign(fresh(), { items: ['plant'] }) };
+const si = mergeStates(sb, { pet: Object.assign({}, sb.pet, { items: ['plant', 'lamp'] }) }, { pet: Object.assign({}, sb.pet, { items: ['plant', 'tree'] }) }).pet.items;
+assert.deepStrictEqual(si.slice().sort(), ['lamp', 'plant', 'tree']);
+
 console.log('OK (pet)');
