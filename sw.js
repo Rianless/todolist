@@ -1,9 +1,15 @@
-const CACHE_NAME = 'todolist-v98-split';
+const CACHE_NAME = 'todolist-v99-js-split';
 const ASSETS = [
   './',
   './index.html',
   './app.css',
-  './app.js',
+  './js/app-1.js',
+  './js/app-2.js',
+  './js/app-3.js',
+  './js/app-4.js',
+  './js/app-5.js',
+  './js/app-6.js',
+  './js/boot.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
