@@ -1101,7 +1101,8 @@ function updateDesktopWidgets() {
   const trend = statsMonthlyTrend(ledger, subscriptions, y, m, 6, getSubDatesForMonth);
   const prevExp = trend[trend.length - 2].expense;
   const diff = tot.expense - prevExp;
-  const diffText = prevExp ? `${diff >= 0 ? '▲' : '▼'} ${Math.abs(Math.round(diff / prevExp * 100))}%` : '-';
+  const diffPct = prevExp ? Math.abs(Math.round(diff / prevExp * 100)) : 0;
+  const diffText = prevExp ? `${diff >= 0 ? '▲' : '▼'} ${diffPct > 999 ? '999%+' : diffPct + '%'}` : '-';
   const perDay = Math.round(tot.expense / now.getDate());
   const saveRate = tot.income ? Math.round(bal / tot.income * 100) : null;
   const maxExp = Math.max(1, ...trend.map(t => t.expense));

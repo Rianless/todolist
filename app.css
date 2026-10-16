@@ -7046,3 +7046,18 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 /* 바탕화면 위젯 세로 묶음 (오늘 + D-day·택배) */
 html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: column; gap: 16px; width: 300px; pointer-events: none; }
 @media (max-width: 899px) { html[data-desktop][data-skin="w98"] .dk-stack { width: 100%; gap: 10px; } }
+
+/* PC 바탕화면 위젯 키우기 */
+@media (min-width: 900px) {
+  html[data-desktop][data-skin="w98"] .dk-widget { width: 400px; font-size: 15px; }
+  html[data-desktop][data-skin="w98"] .dk-stack { width: 400px; }
+  html[data-desktop][data-skin="w98"] .dkw-title { font-size: 15px; padding: 4px 6px 4px 8px; }
+  html[data-desktop][data-skin="w98"] .dkw-title button { height: 20px !important; font-size: 12px !important; }
+  html[data-desktop][data-skin="w98"] .dkw-body { padding: 10px 14px; }
+  html[data-desktop][data-skin="w98"] .dkw-check { width: 20px; height: 20px; font-size: 14px !important; line-height: 18px; }
+  html[data-desktop][data-skin="w98"] .dkw-time { font-size: 13px; }
+  .dkw-row { gap: 8px; padding: 4px 0; }
+  .dkw-kv { padding: 3px 0; }
+  .dkw-sub { margin: 8px 0 3px; }
+  .dkw-bar { height: 16px; }
+}
