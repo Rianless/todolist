@@ -7042,3 +7042,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 .td-money b.inc { color: var(--green); }
 .td-money b.exp { color: var(--red); }
 .td-dd { flex: none; min-width: 58px; text-align: center; font-size: 12px; font-weight: 800; padding: 3px 6px; border-radius: 8px; background: var(--bg2); color: var(--accent); }
+
+/* 바탕화면 위젯 세로 묶음 (오늘 + D-day·택배) */
+html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: column; gap: 16px; width: 300px; pointer-events: none; }
+@media (max-width: 899px) { html[data-desktop][data-skin="w98"] .dk-stack { width: 100%; gap: 10px; } }
