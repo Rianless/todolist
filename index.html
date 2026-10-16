@@ -27,7 +27,6 @@
 
 <style>
 
-@import url('https://cdn.jsdelivr.net/npm/galmuri@2.40.0/dist/galmuri.css');
 @import url('https://fonts.googleapis.com/css2?family=Share+Tech+Mono&family=Orbitron:wght@400;700;900&family=Rajdhani:wght@300;500;600;700&family=Noto+Sans+KR:wght@300;400;500;700&display=swap');
 
 
@@ -3789,80 +3788,6 @@ body::after {
 .memo-field { min-height: 64px; line-height: 1.5; resize: vertical; font-family: inherit; }
 .memo-item { cursor: pointer; }
 .routine-page { padding: 4px 2px 24px; }
-/* ── 펫 키우기 ── */
-.pet-badge { display: inline-flex; align-items: center; gap: 6px; max-width: 100%; margin-top: 8px; margin-left: 6px; padding: 3px 10px 3px 8px; font-size: 12px; font-weight: 700; color: var(--text); background: var(--panel); border: 1px solid var(--border2); border-radius: 999px; cursor: pointer; position: relative; }
-.pet-badge .pb-e { font-size: 16px; line-height: 1; } .pet-badge .pb-e .px { display: block; }
-.pet-badge .pb-bar { width: 38px; height: 5px; border-radius: 3px; background: var(--border2); overflow: hidden; }
-.pet-badge .pb-bar i { display: block; height: 100%; background: var(--accent); }
-.pet-pop { position: absolute; left: 50%; top: -4px; transform: translateX(-50%); font-size: 12px; font-weight: 800; color: var(--accent); pointer-events: none; animation: petPop 1.1s ease-out forwards; white-space: nowrap; }
-@keyframes petPop { from { opacity: 1; transform: translate(-50%, 0); } to { opacity: 0; transform: translate(-50%, -22px); } }
-.pet-card { --pf: "Galmuri11", "Galmuri9", "Noto Sans KR", sans-serif; margin: 8px 0 12px; padding: 4px; background: #3b3b4f; border: 3px solid #1b1b27; box-shadow: 0 0 0 3px #7b7b94, 4px 4px 0 3px rgba(0,0,0,.35); font-family: var(--pf); color: #f2f2fa; }
-.pet-top { display: flex; align-items: center; gap: 10px; padding: 6px 8px; background: #fff; color: #1b1b27; border-bottom: 3px solid #ddd; font-size: 13px; }
-.pet-top b { font-weight: 400; }
-.pet-top .sp { flex: 1; }
-.px { image-rendering: pixelated; image-rendering: crisp-edges; display: block; }
-.pet-top .px { width: 18px; height: 18px; display: inline-block; vertical-align: -4px; margin-right: 2px; }
-.pr { position: relative; height: 310px; overflow: hidden; background: #f6efe0; }
-.pr-wall { position: absolute; inset: 0 0 38% 0; background: #f4eee2; border-bottom: 6px solid #e4dbc8; }
-.pr-floor { position: absolute; inset: 62% 0 0 0; background: repeating-linear-gradient(90deg, #e8cfa6 0 46px, #dfc397 46px 48px), #e8cfa6; }
-.pr-floor::after { content: ""; position: absolute; inset: 0; background: repeating-linear-gradient(0deg, transparent 0 30px, rgba(150,110,60,.18) 30px 32px); }
-.pr-win { position: absolute; left: 31%; top: 9%; width: 38%; height: 36%; border: 5px solid #e2cfa8; background: linear-gradient(#8fd0f5 0 56%, #8bc34a 56% 100%); }
-.pr-win::before { content: ""; position: absolute; left: 50%; top: 0; bottom: 0; width: 5px; margin-left: -2px; background: #e2cfa8; }
-.pr-win::after { content: ""; position: absolute; left: 0; right: 0; top: 40%; height: 16%; background: repeating-linear-gradient(90deg, #fff 0 5px, transparent 5px 11px); }
-.pr-win i { position: absolute; top: 12%; left: 14%; width: 22px; height: 7px; background: #fff; box-shadow: 7px -5px 0 #fff, 40px 14px 0 #fff, 47px 9px 0 #fff; }
-.pr-tank { position: absolute; left: 4%; top: 30%; width: 17%; height: 15%; min-width: 46px; border: 4px solid #8b6b3f; background: linear-gradient(#7cc7f2, #4aa3dc); overflow: hidden; }
-.pr-tank::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 22%; background: #e8d49a; }
-.pr-tank .px { position: absolute; width: 18px; height: 18px; top: 22%; animation: prFish 7s ease-in-out infinite alternate; }
-@keyframes prFish { from { left: 4%; transform: scaleX(1); } 49% { transform: scaleX(1); } 51% { transform: scaleX(-1); } to { left: 58%; transform: scaleX(-1); } }
-.pr-out .pr-wall { inset: 0 0 46% 0; background: linear-gradient(#9bd7f7 0 70%, #bfe6fa); border: 0; }
-.pr-out .pr-floor { inset: 54% 0 0 0; background: #8bc34a; }
-.pr-out .pr-floor::after { background: radial-gradient(#fff 0 2px, transparent 3px) 14px 10px / 46px 38px, radial-gradient(#ffd54f 0 2px, transparent 3px) 36px 28px / 58px 44px; }
-.pr-out .pr-win { display: none; } .pr-out .pr-tank { display: none; }
-.pr-fence { display: none; position: absolute; left: 0; right: 0; top: 46%; height: 22px; background: repeating-linear-gradient(90deg, #fff8e6 0 12px, transparent 12px 20px); border-top: 4px solid #e8d9b5; border-bottom: 4px solid #e8d9b5; }
-.pr-out .pr-fence { display: block; }
-.pr-cloud { display: none; position: absolute; top: 10%; left: 12%; width: 34px; height: 10px; background: #fff; box-shadow: 10px -7px 0 #fff, 60px 24px 0 #fff, 70px 17px 0 #fff, 150px 6px 0 #fff, 160px -1px 0 #fff; }
-.pr-out .pr-cloud { display: block; }
-.pr-deco { position: absolute; transform: translate(-50%, -50%); width: 34px; height: 34px; }
-.pr-actor { position: absolute; width: 0; height: 0; transition: left 2.6s linear, top 2.6s linear; z-index: 5; }
-.pr-actor-in { z-index: 6; position: absolute; left: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; cursor: pointer; }
-.pr-sprite { animation: petBounce 2.4s steps(4) infinite; transform-origin: 50% 100%; }
-.pr-sprite.sleepy { animation: petSleep 3.2s steps(4) infinite; filter: saturate(.6); }
-.pr-sprite { position: relative; }
-.pr-shadow { position: absolute; left: 50%; bottom: 0; width: 56%; height: 8px; margin-left: -28%; border-radius: 50%; background: rgba(90,60,30,.22); }
-.pr-sprite .pr-img { position: relative; }
-.pr-sprite.flip img { transform: scaleX(-1); }
-.pr-tag { margin-top: 2px; padding: 1px 8px; font-size: 11px; white-space: nowrap; color: #fff; background: rgba(90,90,100,.85); border-radius: 4px; }
-.pr-title { margin-top: 3px; padding: 1px 7px; font-size: 10px; white-space: nowrap; color: #5a3d00; background: #ffe58a; border: 2px solid #e0b64a; border-radius: 4px; }
-.pr-bubble { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 170px; padding: 6px 9px; font-size: 12px; line-height: 1.4; color: #1b1b27; text-align: center; background: #fff; border: 3px solid #1b1b27; box-shadow: 3px 3px 0 rgba(0,0,0,.25); z-index: 8; }
-.pr-zzz { position: absolute; top: -6px; right: -10px; font-size: 14px; animation: petBounce 1.6s steps(3) infinite; }
-@keyframes petBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
-@keyframes petSleep { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg) translateY(1px); } }
-.pet-xp { display: flex; align-items: center; gap: 8px; padding: 8px; font-size: 12px; }
-.pet-xp .bar { flex: 1; height: 14px; background: #fff; border: 3px solid #1b1b27; padding: 1px; }
-.pet-xp .bar i { display: block; height: 100%; width: 0; background: repeating-linear-gradient(90deg, #5ad66f 0 6px, #46b85a 6px 8px); transition: width .5s steps(8); }
-.pet-xp .n { color: #c9c9dc; white-space: nowrap; }
-.pet-menu { display: flex; justify-content: space-around; padding: 6px 2px 8px; border-top: 3px solid #1b1b27; }
-.pet-menu button { display: flex; flex-direction: column; align-items: center; gap: 2px; min-width: 46px; padding: 4px 6px; font: inherit; font-size: 11px; color: #f2f2fa; background: none; border: 3px solid transparent; cursor: pointer; }
-.pet-menu button .px { width: 28px; height: 28px; }
-.pet-menu button.on { border-color: #ffe58a; background: rgba(255,229,138,.15); }
-.pet-menu button:disabled { opacity: .45; cursor: default; }
-.pet-empty-actions { padding: 8px; display: flex; }
-.pet-empty-actions button { flex: 1; padding: 10px; font: inherit; font-size: 14px; color: #1b1b27; background: #ffe58a; border: 3px solid #1b1b27; box-shadow: 3px 3px 0 rgba(0,0,0,.35); cursor: pointer; }
-.pet-picks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
-.pet-picks button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; font-size: 11px; color: var(--text2); border: 1px solid var(--border); border-radius: 10px; background: var(--panel); cursor: pointer; font-family: inherit; }
-.px.smooth { image-rendering: auto; }
-.pet-picks button.on { border-color: var(--accent); color: var(--text); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
-.pet-howto { font-size: 12px; line-height: 1.6; color: var(--text3); }
-.shop-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
-.shop-item { display: flex; flex-direction: column; align-items: center; gap: 3px; padding: 8px 4px; font-size: 12px; color: var(--text); background: var(--panel); border: 1px solid var(--border2); border-radius: 10px; cursor: pointer; font-family: inherit; }
-.shop-item .px { width: 40px; height: 40px; }
-.shop-item small { color: var(--text3); font-size: 11px; }
-.shop-item.owned { opacity: .55; cursor: default; }
-.shop-item.poor small { color: #e5484d; }
-.shop-sec { margin: 10px 0 6px; font-size: 12px; font-weight: 700; color: var(--text2); }
-html[data-skin="w98"] .pet-badge { color: #000; background: #fff; border: none; border-radius: 0 !important; box-shadow: var(--w98-sunken); }
-@media (prefers-reduced-motion: reduce) { .pr-sprite, .pr-sprite.sleepy, .pet-pop, .pr-tank .px, .pr-zzz { animation: none !important; } .pr-actor { transition: none; } }
-
 .routine-stats { margin: 8px 0 12px; padding: 14px 16px; border-radius: 14px; background: var(--panel2); }
 .routine-stats-head { display: flex; align-items: baseline; gap: 10px; }
 .routine-stats-big { font-size: 28px; font-weight: 800; color: var(--accent); }
@@ -6481,11 +6406,11 @@ html[data-skin="w98"] .agenda-dday em { color: #000080; }
   border-radius: var(--ui-r-sheet) !important;
   clip-path: none !important;
 }
-#addModal, #ledgerModal, #accountModal, #transferModal, #routineModal, #investModal, #memoModal, #diaryModal, #ddayModal, #petModal, #petShopModal {
+#addModal, #ledgerModal, #accountModal, #transferModal, #routineModal, #investModal, #memoModal, #diaryModal, #ddayModal {
   align-items: center; justify-content: center; padding: 16px;
 }
 #addModal .modal-sheet, #ledgerModal .modal-sheet, #accountModal .modal-sheet, #transferModal .modal-sheet,
-#routineModal .modal-sheet, #investModal .modal-sheet, #memoModal .modal-sheet, #diaryModal .modal-sheet, #ddayModal .modal-sheet, #petModal .modal-sheet, #petShopModal .modal-sheet {
+#routineModal .modal-sheet, #investModal .modal-sheet, #memoModal .modal-sheet, #diaryModal .modal-sheet, #ddayModal .modal-sheet {
   width: 100%; max-width: 440px; margin: 0 auto; max-height: calc(100dvh - 32px);
 }
 
@@ -7211,8 +7136,6 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 
     <button type="button" class="dday-badge" id="ddayBadge" style="display:none" onclick="desktopOpen('mypage','mpCardDday')" title="D-day 목록 열기"></button>
 
-    <button type="button" class="pet-badge" id="petBadge" onclick="openPetPage()" title="펫 보기"></button>
-
     <div class="header-sys-extra" id="sysExtraLine" aria-hidden="true"></div>
 
 
@@ -7336,7 +7259,6 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
       <!-- ROUTINE VIEW (루틴) -->
       <div class="cal-subview" id="viewRoutine">
         <div class="routine-page">
-          <div id="petCard"></div>
           <div id="routineStats"></div>
           <div id="routineList"></div>
           <div class="ledger-actions">
@@ -8662,50 +8584,6 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   </div>
 </div>
 
-<!-- PET MODAL -->
-<div class="modal-overlay" id="petModal">
-  <div class="modal-sheet add-sheet">
-    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
-    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
-    <div class="sheet-scroll">
-      <div class="modal-header">
-        <div class="modal-title" id="petModalTitle">펫 입양</div>
-        <button class="modal-close" onclick="closePetModal()">✕</button>
-      </div>
-      <div class="modal-body">
-        <div class="form-group">
-          <label class="form-label">어떤 친구와 함께할까요?</label>
-          <div class="pet-picks" id="petSpecies"></div>
-        </div>
-        <div class="form-group">
-          <label class="form-label">이름</label>
-          <input type="text" class="form-input" id="petName" maxlength="10" placeholder="예: 콩이, 나비" autocomplete="off">
-        </div>
-        <div class="pet-howto">일정이나 루틴을 완료하면 경험치(XP)와 🌰 도토리를 받고 펫이 자라요.<br>체크를 풀었다 다시 해도 보상은 한 번만! 며칠 쉬어도 레벨은 내려가지 않아요.</div>
-      </div>
-      <div class="modal-actions">
-        <button class="btn-cancel" onclick="closePetModal()">취소</button>
-        <button class="btn-save" id="petSaveBtn" onclick="savePetModal()">입양하기</button>
-      </div>
-    </div>
-  </div>
-</div>
-
-<!-- PET SHOP MODAL -->
-<div class="modal-overlay" id="petShopModal">
-  <div class="modal-sheet add-sheet">
-    <span class="dc dc-tl"></span><span class="dc dc-tr"></span>
-    <span class="dc dc-bl"></span><span class="dc dc-br"></span>
-    <div class="sheet-scroll">
-      <div class="modal-header">
-        <div class="modal-title">🏪 상점 · 🌰 <span id="petShopCoins">0</span></div>
-        <button class="modal-close" onclick="closePetShop()">✕</button>
-      </div>
-      <div class="modal-body"><div id="petShopList"></div></div>
-    </div>
-  </div>
-</div>
-
 <!-- DIARY MODAL -->
 <div class="modal-overlay" id="diaryModal">
   <div class="modal-sheet add-sheet">
@@ -9048,7 +8926,6 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 <script src="/bookmarks.js"></script>
 <script src="/parcels.js"></script>
 <script src="/dday.js"></script>
-<script src="/pet.js"></script>
 <script>
 
 /* ══════════════════════════════════════
@@ -9550,7 +9427,6 @@ function getCloudStatePayload() {
     diaryLock,
     ddays,
     ddayNextId,
-    pet,
     bookmarks,
     bookmarkNextId,
     bookmarkFolders,
@@ -9713,7 +9589,7 @@ async function pullCloudState() {
 }
 
 function hasLocalUserData() {
-  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || diaries.length > 0 || ddays.length > 0 || !!pet || bookmarks.length > 0 || bookmarkFolders.length > 0 || parcels.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
+  return items.length > 0 || ledger.length > 0 || subscriptions.length > 0 || memos.length > 0 || diaries.length > 0 || ddays.length > 0 || bookmarks.length > 0 || bookmarkFolders.length > 0 || parcels.length > 0 || accounts.length > 0 || investments.length > 0 || routines.length > 0;
 }
 
 function applyCloudState(payload) {
@@ -9746,7 +9622,6 @@ function applyCloudState(payload) {
   if (Number.isFinite(payload.diaryNextId)) diaryNextId = payload.diaryNextId;
   if (Array.isArray(payload.ddays)) ddays = payload.ddays;
   if (Number.isFinite(payload.ddayNextId)) ddayNextId = payload.ddayNextId;
-  if (payload.pet && typeof payload.pet === 'object' && !Array.isArray(payload.pet) && payload.pet.species) pet = payload.pet;
   if (payload.diaryLock !== undefined) diaryLock = payload.diaryLock && payload.diaryLock.hash ? payload.diaryLock : null;
   if (Array.isArray(payload.bookmarks)) bookmarks = payload.bookmarks;
   if (Number.isFinite(payload.bookmarkNextId)) bookmarkNextId = payload.bookmarkNextId;
@@ -9764,7 +9639,6 @@ function applyCloudState(payload) {
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
   localStorage.setItem('rianless_diaries', JSON.stringify({ diaries, diaryNextId }));
   localStorage.setItem('rianless_ddays', JSON.stringify({ ddays, ddayNextId }));
-  try { localStorage.setItem('rianless_pet', JSON.stringify(pet)); } catch(e) {}
   try { localStorage.setItem('rianless_diary_lock', JSON.stringify(diaryLock)); } catch(e) {}
   localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId, bookmarkFolders, bookmarkFolderNextId }));
 
@@ -9775,7 +9649,6 @@ function applyCloudState(payload) {
   renderCal();
   renderCategoryView();
   renderMypageView();
-  renderPet();
 }
 
 async function loadCloudState() {
@@ -11455,290 +11328,6 @@ document.addEventListener('visibilitychange', () => {
   if (c && c.classList.contains('open')) renderDdayList();
 });
 
-/* ══════════════════════════════════════
-   펫 키우기: 일정·루틴을 완료하면 XP 와 도토리를 받아 펫이 자란다 (규칙은 pet.js)
-══════════════════════════════════════ */
-let pet = null;       // { name, species, xp, coins, awarded[], last, fed, born }
-let petSpeciesPick = 'dog';
-
-function petToday() { return fmtDate(new Date()); }
-function savePet() {
-  try { localStorage.setItem('rianless_pet', JSON.stringify(pet)); } catch(e) {}
-  queueCloudStateSync();
-}
-function loadPet() {
-  try {
-    const raw = JSON.parse(localStorage.getItem('rianless_pet') || 'null');
-    if (raw && typeof raw === 'object' && !Array.isArray(raw) && raw.species) pet = raw;
-  } catch(e) {}
-}
-// 한 가지라도 완료한 날들 (연속일 계산용)
-function petActiveDays() {
-  const days = new Set(Object.keys(routineLog).filter(d => (routineLog[d] || []).length));
-  items.forEach(i => { if (i.done && i.date) days.add(i.date); });
-  return days;
-}
-
-// 보상 한 번 지급. 이미 받은 완료면 아무 일도 없다.
-function petGrant(key, reward, bonusText) {
-  if (!pet) return;
-  const r = Pet.award(pet, key, petToday(), reward);
-  if (r.pet === pet) return;
-  pet = r.pet;
-  savePet();
-  renderPet(r.gained);
-  const v = Pet.view(pet);
-  if (r.evolved) showToast(v.stage.id === 'baby' ? `🐣 ${pet.name}, 알에서 깨어났어요!` : `✨ ${pet.name}, '${v.stage.name}' 단계로 자랐어요!`, { type: 'success', duration: 3200 });
-  else if (r.levelUp) showToast(`🎉 ${pet.name} Lv.${v.level} 달성!`, { type: 'success', duration: 2600 });
-  else if (bonusText) showToast(`${bonusText} +${r.gained.xp}XP 🌰+${r.gained.coins}`, { type: 'success', duration: 2600 });
-}
-// 루틴을 오늘 완료로 만들었을 때. 지난 날짜를 나중에 체크하는 건 보상하지 않는다.
-function petRewardRoutine(id, ds) {
-  if (!pet || ds !== petToday()) return;
-  petGrant(`r${id}@${ds}`);
-  const due = routinesForDate(ds);
-  if (due.length > 1 && due.every(r => isRoutineDone(r.id, ds))) petGrant(`b@${ds}`, Pet.BONUS, '오늘 루틴 올 클리어!');
-}
-// 일정을 완료로 만들었을 때. 아직 오지 않은 날짜의 일정은 미리 체크해도 보상하지 않는다.
-function petRewardItem(item) {
-  if (!pet || !item || !item.done) return;
-  if (item.date && item.date > petToday()) return;
-  petGrant(`t${item.id}`);
-}
-
-function renderPet(gained) {
-  petTalk = '';
-  renderPetBadge(gained);
-  renderPetCard();
-}
-function renderPetBadge(gained) {
-  const el = document.getElementById('petBadge');
-  if (!el) return;
-  const v = Pet.view(pet);
-  if (!v) { el.innerHTML = `<span class="pb-e">${petSpriteImg('dog', 'egg', 'open', 'smooth', 1.4)}</span><span>펫 키우기</span>`; return; }
-  el.innerHTML = `<span class="pb-e">${petSpriteImg(pet.species, v.stage.id, 'open', 'smooth', 0.6, true)}</span><span>Lv.${v.level}</span><span class="pb-bar"><i style="width:${v.pct}%"></i></span>`;
-  el.title = `${pet.name} · XP ${v.into}/${v.need}`;
-  if (gained && gained.xp) {
-    const pop = document.createElement('span');
-    pop.className = 'pet-pop';
-    pop.textContent = `+${gained.xp}XP`;
-    el.appendChild(pop);
-    setTimeout(() => pop.remove(), 1200);
-  }
-}
-/* 직접 그린 도트 캐릭터(pet.js 의 sprite)를 16×16 캔버스에 찍어 이미지로 만든다 */
-const petSpriteCache = {};
-function petSpriteUrl(species, stage, eyes, bust) {
-  const key = `${species}|${stage}|${eyes}|${bust ? 1 : 0}`;
-  if (petSpriteCache[key] === undefined) {
-    let url = '';
-    try {
-      const sp = Pet.sprite({ species, stage, eyes });
-      const rows = bust ? sp.rows.slice(0, sp.bust) : sp.rows;
-      const c = document.createElement('canvas');
-      c.width = sp.w; c.height = rows.length;
-      const x = c.getContext('2d');
-      rows.forEach((row, y) => [...row].forEach((ch, i) => {
-        if (ch === '.' || !sp.pal[ch]) return;
-        x.fillStyle = sp.pal[ch];
-        x.fillRect(i, y, 1, 1);
-      }));
-      url = c.toDataURL();
-    } catch (e) {}
-    petSpriteCache[key] = url;
-  }
-  return petSpriteCache[key];
-}
-// scale: 그림 한 칸을 화면 몇 px 로 키울지. bust: 머리~턱만 (배지·선택창용)
-function petSpriteImg(species, stage, eyes, cls, scale, bust) {
-  const u = petSpriteUrl(species, stage, eyes, bust);
-  const sp = Pet.sprite({ species, stage, eyes });
-  const w = Math.round(sp.w * (scale || 1)), h = Math.round((bust ? sp.bust : sp.h) * (scale || 1));
-  return u ? `<img class="px ${cls || ''}" src="${u}" alt="" style="width:${w}px;height:${h}px" draggable="false">` : '';
-}
-
-/* 이모지를 작은 캔버스에 그려 계단 모양으로 키우면 도트 그림처럼 보인다 */
-const petPxCache = {};
-function petPx(emoji, cls) {
-  const size = 22;
-  if (!petPxCache[emoji]) {
-    let url = '';
-    try {
-      const c = document.createElement('canvas');
-      c.width = c.height = size;
-      const x = c.getContext('2d', { willReadFrequently: true });
-      x.textAlign = 'center'; x.textBaseline = 'middle';
-      x.font = `${Math.round(size * 0.78)}px "Apple Color Emoji","Segoe UI Emoji","Noto Color Emoji",sans-serif`;
-      x.fillText(emoji, size / 2, size / 2 + 1);
-      const img = x.getImageData(0, 0, size, size), d = img.data;
-      for (let i = 0; i < d.length; i += 4) {
-        d[i + 3] = d[i + 3] < 110 ? 0 : 255;
-        for (let k = 0; k < 3; k++) d[i + k] = Math.min(255, Math.round(d[i + k] / 48) * 48);
-      }
-      x.putImageData(img, 0, 0);
-      url = c.toDataURL();
-    } catch (e) {}
-    petPxCache[emoji] = url;
-  }
-  return petPxCache[emoji] ? `<img class="px ${cls || ''}" src="${petPxCache[emoji]}" alt="" draggable="false">` : `<span class="px ${cls || ''}">${emoji}</span>`;
-}
-
-let petRoom = 'in';
-try { petRoom = localStorage.getItem('rianless_pet_room') === 'out' ? 'out' : 'in'; } catch(e) {}
-let petWanderTimer = null;
-let petBlinkTimer = null;
-function petBlink() {
-  const im = document.querySelector('#petSprite .pr-img');
-  if (!im || !pet || !im.isConnected) { clearInterval(petBlinkTimer); return; }
-  if (document.querySelector('#petSprite.sleepy')) return;
-  const v = Pet.view(pet), keep = im.src;
-  im.src = petSpriteUrl(pet.species, v.stage.id, 'closed') || keep;
-  setTimeout(() => { if (im.isConnected) im.src = keep; }, 170);
-}
-let petTalk = '';        // 펫을 눌러 바꾼 말풍선 (없으면 오늘의 말)
-const PET_POKE = ['간질간질해요!', '헤헤, 놀아주는 거예요?', '오늘 체크 하나 어때요?', '뿌듯한 하루 만들어요!', '쓰다듬어 줘서 고마워요 💕'];
-
-function renderPetCard() {
-  const el = document.getElementById('petCard');
-  if (!el) return;
-  const today = petToday();
-  const v = Pet.view(pet);
-  const mood = Pet.mood(pet, today);
-  const streak = Pet.streak(petActiveDays(), today);
-  const owned = pet ? (pet.items || []) : [];
-  const decos = Pet.ITEMS.filter(i => i.room === petRoom && owned.includes(i.id))
-    .map(i => `<span class="pr-deco" style="left:${i.x}%;top:${i.y}%;z-index:${Math.round(i.y)}">${petPx(i.emoji)}</span>`).join('');
-  const stageId = v ? v.stage.id : 'egg';
-  const speciesId = pet ? pet.species : 'dog';
-  const sleepy = !!v && mood === 'sleepy';
-  const say = v ? (petTalk || Pet.say(pet, today)) : '나를 입양해 줘! 같이 쑥쑥 크자';
-  const sprite = `<div class="pr-sprite${sleepy ? ' sleepy' : ''}" id="petSprite"><span class="pr-shadow"></span>${petSpriteImg(speciesId, stageId, sleepy ? 'closed' : 'open', 'pr-img', stageId === 'egg' ? 3 : 2)}</div>`;
-  const tag = v ? `<div class="pr-tag">Lv.${v.level} ${escapeLedgerText(pet.name)}</div><div class="pr-title">${escapeLedgerText(Pet.titleOf({ level: v.level, streak, items: owned.length }))}</div>` : '';
-  el.innerHTML = `<div class="pet-card">
-    <div class="pet-top"><span>${petPx('🔥')}<b>갓생 ${streak}일차</b></span><span class="sp"></span><span>${petPx('🌰')}<b>${pet ? (pet.coins || 0).toLocaleString() : 0}</b></span></div>
-    <div class="pr pr-${petRoom}">
-      <div class="pr-wall"></div><div class="pr-floor"></div><div class="pr-cloud"></div><div class="pr-fence"></div>
-      <div class="pr-win"><i></i></div><div class="pr-tank">${petPx('🐟')}</div>
-      ${decos}
-      <div class="pr-actor" id="petActor" style="left:50%;top:80%">
-        <div class="pr-actor-in" onclick="pokePet()"><div class="pr-bubble" id="petBubble">${escapeLedgerText(say)}</div>${sprite}${sleepy ? '<span class="pr-zzz">💤</span>' : ''}${tag}</div>
-      </div>
-    </div>
-    ${v ? `<div class="pet-xp"><span>Lv.${v.level}</span><span class="bar"><i style="width:${v.pct}%"></i></span><span class="n">${v.need ? `${v.into}/${v.need}` : 'MAX'}</span></div>` : ''}
-    ${v ? `<div class="pet-menu">
-      <button type="button" class="${petRoom === 'in' ? 'on' : ''}" onclick="setPetRoom('in')">${petPx('🏠')}집안</button>
-      <button type="button" class="${petRoom === 'out' ? 'on' : ''}" onclick="setPetRoom('out')">${petPx('🌳')}마당</button>
-      <button type="button" onclick="openPetShop()">${petPx('🏪')}상점</button>
-      <button type="button" onclick="feedPet()" ${pet.fed === today || (pet.coins || 0) < Pet.FEED.cost ? 'disabled' : ''}>${petPx('🍖')}${pet.fed === today ? '배불러' : '간식 🌰' + Pet.FEED.cost}</button>
-      <button type="button" onclick="openPetModal()">${petPx('⚙️')}설정</button>
-    </div>` : '<div class="pet-empty-actions"><button type="button" onclick="openPetModal()">🥚 입양하기</button></div>'}
-  </div>`;
-  startPetWander();
-}
-
-// 펫이 방 안을 천천히 돌아다닌다
-function startPetWander() {
-  clearInterval(petWanderTimer);
-  if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) return;
-  let lastX = 50;
-  const step = () => {
-    const a = document.getElementById('petActor');
-    if (!a || !a.isConnected) { clearInterval(petWanderTimer); return; }
-    const x = 34 + Math.random() * 34, y = petRoom === 'in' ? 74 + Math.random() * 16 : 72 + Math.random() * 18;
-    a.style.left = x + '%'; a.style.top = y + '%';
-    const sp = document.getElementById('petSprite');
-    if (sp) sp.classList.toggle('flip', x < lastX);
-    lastX = x;
-  };
-  petWanderTimer = setInterval(step, 4200);
-  setTimeout(step, 600);
-  clearInterval(petBlinkTimer);
-  petBlinkTimer = setInterval(petBlink, 3600);
-}
-function pokePet() {
-  if (!pet) return;
-  petTalk = PET_POKE[Math.floor(Math.random() * PET_POKE.length)];
-  const b = document.getElementById('petBubble');
-  if (b) b.textContent = petTalk;
-}
-function setPetRoom(r) {
-  petRoom = r;
-  try { localStorage.setItem('rianless_pet_room', r); } catch(e) {}
-  renderPetCard();
-}
-
-function renderPetShop() {
-  const box = document.getElementById('petShopList');
-  if (!box || !pet) return;
-  document.getElementById('petShopCoins').textContent = (pet.coins || 0).toLocaleString();
-  const sec = (room, label) => `<div class="shop-sec">${label}</div><div class="shop-list">${Pet.ITEMS.filter(i => i.room === room).map(i => {
-    const has = (pet.items || []).includes(i.id), poor = !has && (pet.coins || 0) < i.price;
-    return `<button type="button" class="shop-item${has ? ' owned' : ''}${poor ? ' poor' : ''}" onclick="buyPetItem('${i.id}')">${petPx(i.emoji)}<span>${i.name}</span><small>${has ? '보유 중' : '🌰 ' + i.price}</small></button>`;
-  }).join('')}</div>`;
-  box.innerHTML = sec('in', '🏠 집안 꾸미기') + sec('out', '🌳 마당 꾸미기');
-}
-function openPetShop() { renderPetShop(); document.getElementById('petShopModal').classList.add('open'); }
-function closePetShop() { document.getElementById('petShopModal').classList.remove('open'); }
-function buyPetItem(id) {
-  const r = Pet.buy(pet, id);
-  if (!r.ok) { if (r.reason === 'poor') showToast('도토리가 부족해요. 일정·루틴을 완료해 모아 보세요', { type: 'info', duration: 2200 }); return; }
-  pet = r.pet;
-  savePet();
-  const it = Pet.itemOf(id);
-  if (it.room !== petRoom) setPetRoom(it.room); else renderPet();
-  renderPetShop();
-  showToast(`${it.name}을(를) ${it.room === 'in' ? '집안' : '마당'}에 놓았어요 ${it.emoji}`, { type: 'success', duration: 2000 });
-}
-
-function feedPet() {
-  const r = Pet.feed(pet, petToday());
-  if (!r.ok) { showToast(r.reason === 'full' ? '오늘은 이미 간식을 먹었어요' : '도토리가 부족해요. 일정·루틴을 완료해 모아 보세요', { type: 'info', duration: 2200 }); return; }
-  pet = r.pet;
-  savePet();
-  renderPet({ xp: Pet.FEED.xp });
-  const v = Pet.view(pet);
-  if (r.evolved) showToast(`✨ ${pet.name}, '${v.stage.name}' 단계로 자랐어요!`, { type: 'success', duration: 3000 });
-  else if (r.levelUp) showToast(`🎉 ${pet.name} Lv.${v.level} 달성!`, { type: 'success', duration: 2600 });
-  else showToast(`${pet.name}, 맛있게 먹었어요 😋`, { type: 'success', duration: 1800 });
-}
-
-// 맨 위 배지에서: 루틴 화면(펫 카드가 있는 곳)으로 이동
-function openPetPage() {
-  setMainTab('calendar', document.getElementById('mainTab-calendar'));
-  setCalSubTab('routine', document.getElementById('cst-routine'));
-  const el = document.getElementById('petCard');
-  if (el && el.scrollIntoView) el.scrollIntoView({ block: 'start', behavior: 'smooth' });
-}
-
-function renderPetSpecies() {
-  document.getElementById('petSpecies').innerHTML = Pet.SPECIES.map(s =>
-    `<button type="button" class="${s.id === petSpeciesPick ? 'on' : ''}" onclick="pickPetSpecies('${s.id}')">${petSpriteImg(s.id, 'baby', 'open', 'smooth', 1.4, true)}${s.name}</button>`).join('');
-}
-function pickPetSpecies(id) { petSpeciesPick = id; renderPetSpecies(); }
-function openPetModal() {
-  petSpeciesPick = pet ? pet.species : 'dog';
-  document.getElementById('petModalTitle').textContent = pet ? '펫 설정' : '펫 입양';
-  document.getElementById('petSaveBtn').textContent = pet ? '저장' : '입양하기';
-  document.getElementById('petName').value = pet ? pet.name : '';
-  renderPetSpecies();
-  document.getElementById('petModal').classList.add('open');
-}
-function closePetModal() { document.getElementById('petModal').classList.remove('open'); }
-function savePetModal() {
-  const name = document.getElementById('petName').value.trim();
-  if (pet) {
-    pet = Object.assign({}, pet, { species: petSpeciesPick, name: name.slice(0, 10) || Pet.speciesOf(petSpeciesPick).name });   // 종류·이름을 바꿔도 레벨은 그대로
-  } else {
-    pet = Pet.newPet(petSpeciesPick, name, petToday());
-    showToast(`${pet.name}, 우리 집에 온 걸 환영해요! 🥚`, { type: 'success', duration: 2400 });
-  }
-  closePetModal();
-  savePet();
-  renderPet();
-}
-// 자정이 지나면 기분·간식 상태가 바뀌므로, 앱으로 돌아올 때 다시 그린다
-document.addEventListener('visibilitychange', () => { if (document.visibilityState === 'visible') renderPet(); });
-
 /* ── 다이어리 잠금: XP 부팅 → 로그인 화면. 비밀번호를 쳐야 다이어리가 열린다 ──
    비밀번호는 솔트와 함께 SHA-256 으로만 저장·동기화한다. 일기 내용을 암호화하는 것은 아니다. */
 let diaryLockMode = null;    // null | 'login' | 'setup' | 'manage'
@@ -13015,7 +12604,7 @@ function _swipeToggleDone(card, item) {
 
   updateProgress();
 
-  if (wasNotDone) { petRewardItem(item); showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1500 }); }
+  if (wasNotDone) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1500 });
 
 }
 
@@ -16175,7 +15764,7 @@ function agendaToggleDone(id) {
     else if (currentCalSubTab === 'list') renderList();
   }
   updateProgress();
-  if (wasNotDone) { petRewardItem(item); showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 }); }
+  if (wasNotDone) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
 }
 
 function detailToggleDone() {
@@ -16203,8 +15792,6 @@ function detailToggleDone() {
   updateProgress();
 
   if (wasNotDone) {
-
-    petRewardItem(item);
 
     showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
 
@@ -18275,7 +17862,6 @@ function toggleRoutine(id, ds) {
   } else {
     setRoutineDone(id, ds, !isRoutineDone(id, ds));
   }
-  if (isRoutineDone(id, ds)) petRewardRoutine(id, ds);
   afterRoutineChange();
 }
 
@@ -18287,7 +17873,6 @@ function toggleRoutineItem(id, itemId, ds) {
   const next = cur.includes(itemId) ? cur.filter(x => x !== itemId) : [...cur, itemId];
   setRoutineChecked(id, ds, next);
   setRoutineDone(id, ds, items.length > 0 && items.every(it => next.includes(it.id)));
-  if (isRoutineDone(id, ds)) petRewardRoutine(id, ds);
   afterRoutineChange();
 }
 
@@ -18394,7 +17979,6 @@ function renderRoutines() {
   if (!el) return;
   el.textContent = '';
   const today = fmtDate(new Date());
-  renderPetCard();
   renderRoutineStats(today);
   if (!routines.length) {
     const empty = document.createElement('div');
@@ -19378,8 +18962,6 @@ loadDiaries();
 
 loadDdays();
 renderDdayBadge();
-loadPet();
-renderPet();
 
 loadBookmarks();
 loadParcels();
