@@ -1,7 +1,9 @@
-const CACHE_NAME = 'todolist-v97-dday';
+const CACHE_NAME = 'todolist-v98-split';
 const ASSETS = [
   './',
   './index.html',
+  './app.css',
+  './app.js',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
@@ -47,8 +49,7 @@ self.addEventListener('fetch', e => {
     e.respondWith(
       fetch(req)
         .then(res => {
-          const clone = res.clone();
-          caches.open(CACHE_NAME).then(cache => cache.put(req, clone));
+          if (res && res.ok) { const clone = res.clone(); caches.open(CACHE_NAME).then(cache => cache.put(req, clone)); }
           return res;
         })
         .catch(() => caches.match(req))
