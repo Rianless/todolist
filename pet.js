@@ -1,0 +1,147 @@
+// 펫 키우기: 일정·루틴을 완료하면 경험치(XP)와 도토리를 받고, 펫이 자란다.
+// 브라우저(window.Pet)와 Node 테스트(module.exports) 양쪽에서 쓴다. 날짜는 모두 'YYYY-MM-DD' 문자열(현지 날짜)이다.
+//
+// 펫 상태 pet = { name, species, xp, coins, awarded: [키...], last, fed, born }
+//   xp/coins : 지금까지 쌓은 경험치 / 쓸 수 있는 도토리 (줄어들지 않는 xp, 간식으로 쓰면 줄어드는 coins)
+//   awarded  : 이미 보상을 받은 완료 기록의 키. 체크했다 풀었다 해도 같은 완료로는 두 번 받지 못한다.
+//   last     : 마지막으로 보상을 받은 날 (기분 계산)
+//   fed      : 마지막으로 간식을 준 날
+(function () {
+  const SPECIES = [
+    { id: 'dog', name: '강아지', emoji: '🐶' },
+    { id: 'cat', name: '고양이', emoji: '🐱' },
+    { id: 'rabbit', name: '토끼', emoji: '🐰' },
+    { id: 'hamster', name: '햄스터', emoji: '🐹' },
+    { id: 'fox', name: '여우', emoji: '🦊' },
+    { id: 'bear', name: '곰', emoji: '🐻' },
+    { id: 'panda', name: '판다', emoji: '🐼' },
+    { id: 'penguin', name: '펭귄', emoji: '🐧' }
+  ];
+  const REWARD = { xp: 10, coins: 1 };            // 일정·루틴 하나를 완료할 때
+  const BONUS = { xp: 30, coins: 3 };             // 오늘 예정된 루틴을 모두 끝냈을 때
+  const FEED = { cost: 2, xp: 3 };                // 간식
+  const MAX_LEVEL = 99;
+  const KEEP_ROUTINE_DAYS = 7;                    // 루틴 완료 기록은 오늘만 보상하므로 오래된 키는 버린다
+  const MAX_AWARDED = 3000;
+  const DAY = 86400000;
+
+  const STAGES = [
+    { from: 1, id: 'egg', name: '알', scale: 1 },
+    { from: 2, id: 'baby', name: '아기', scale: 1 },
+    { from: 5, id: 'kid', name: '어린이', scale: 1.2 },
+    { from: 10, id: 'adult', name: '어른', scale: 1.4 },
+    { from: 20, id: 'legend', name: '전설', scale: 1.6 }
+  ];
+
+  const pad = n => String(n).padStart(2, '0');
+  function parse(s) {
+    const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(String(s == null ? '' : s));
+    if (!m) return null;
+    const t = Date.UTC(+m[1], +m[2] - 1, +m[3]);
+    const c = new Date(t);
+    if (c.getUTCFullYear() !== +m[1] || c.getUTCMonth() !== +m[2] - 1 || c.getUTCDate() !== +m[3]) return null;
+    return t;
+  }
+  const daysBetween = (a, b) => { const x = parse(a), y = parse(b); return x === null || y === null ? null : Math.round((y - x) / DAY); };
+  const shift = (ds, n) => { const t = parse(ds); const d = new Date(t + n * DAY); return `${d.getUTCFullYear()}-${pad(d.getUTCMonth() + 1)}-${pad(d.getUTCDate())}`; };
+
+  const speciesOf = id => SPECIES.find(s => s.id === id) || SPECIES[0];
+
+  // 다음 레벨까지 필요한 경험치: 레벨이 오를수록 조금씩 늘어난다
+  const need = level => 30 + 10 * level;
+  // 총 경험치 → { level, into, need }  (into: 이번 레벨에서 쌓은 양)
+  function progress(totalXp) {
+    let xp = Math.max(0, Math.floor(Number(totalXp) || 0)), level = 1;
+    while (level < MAX_LEVEL && xp >= need(level)) { xp -= need(level); level++; }
+    return { level, into: level >= MAX_LEVEL ? 0 : xp, need: level >= MAX_LEVEL ? 0 : need(level) };
+  }
+  function stageOf(level) {
+    let s = STAGES[0];
+    STAGES.forEach(x => { if (level >= x.from) s = x; });
+    return s;
+  }
+
+  function newPet(species, name, today) {
+    const sp = speciesOf(species);
+    return { name: String(name || '').trim().slice(0, 10) || sp.name, species: sp.id, xp: 0, coins: 0, awarded: [], last: '', fed: '', born: today };
+  }
+
+  const keyDate = k => { const m = /@(\d{4}-\d{2}-\d{2})$/.exec(k); return m ? m[1] : null; };
+
+  // 보상 한 번. key 는 완료 하나를 가리키는 값(루틴: 'r<id>@날짜', 일정: 't<id>', 보너스: 'b@날짜').
+  // 이미 받은 키면 아무것도 바꾸지 않는다. 돌려주는 값: { pet, gained: {xp, coins}, levelUp, evolved }
+  function award(pet, key, today, reward) {
+    if (!pet || !key || (pet.awarded || []).includes(key)) return { pet, gained: { xp: 0, coins: 0 }, levelUp: false, evolved: false };
+    const r = reward || REWARD;
+    const before = progress(pet.xp).level;
+    const cutoff = shift(today, -KEEP_ROUTINE_DAYS);
+    let awarded = (pet.awarded || []).filter(k => { const d = keyDate(k); return !d || d >= cutoff; });
+    awarded.push(key);
+    if (awarded.length > MAX_AWARDED) awarded = awarded.slice(awarded.length - MAX_AWARDED);
+    const next = Object.assign({}, pet, { xp: (pet.xp || 0) + r.xp, coins: (pet.coins || 0) + r.coins, awarded, last: pet.last && pet.last > today ? pet.last : today });
+    const after = progress(next.xp).level;
+    return { pet: next, gained: { xp: r.xp, coins: r.coins }, levelUp: after > before, evolved: stageOf(after).id !== stageOf(before).id };
+  }
+
+  // 간식: 도토리를 쓰고 기분이 좋아진다. 하루 한 번만 준다.
+  function feed(pet, today) {
+    if (!pet) return { ok: false, reason: 'nopet' };
+    if (pet.fed === today) return { ok: false, reason: 'full' };
+    if ((pet.coins || 0) < FEED.cost) return { ok: false, reason: 'poor' };
+    const before = progress(pet.xp).level;
+    const next = Object.assign({}, pet, { coins: pet.coins - FEED.cost, xp: (pet.xp || 0) + FEED.xp, fed: today });
+    const after = progress(next.xp).level;
+    return { ok: true, pet: next, levelUp: after > before, evolved: stageOf(after).id !== stageOf(before).id };
+  }
+
+  // 기분: 오늘 활동 + 간식 → joy, 오늘 활동 → happy, 어제까지 → calm, 이틀 이상 쉬면 → sleepy (경험치는 깎이지 않는다)
+  function mood(pet, today) {
+    if (!pet) return 'calm';
+    const gap = pet.last ? daysBetween(pet.last, today) : null;
+    if (gap !== null && gap <= 0) return pet.fed === today ? 'joy' : 'happy';
+    if (gap === null) return pet.born && pet.born === today ? 'calm' : 'sleepy';
+    return gap === 1 ? 'calm' : 'sleepy';
+  }
+  const MOOD = {
+    joy: { emoji: '😆', label: '신나요' },
+    happy: { emoji: '😊', label: '기분 좋아요' },
+    calm: { emoji: '🙂', label: '평온해요' },
+    sleepy: { emoji: '😴', label: '졸려요' }
+  };
+  const LINES = {
+    joy: ['간식 최고예요! 오늘도 같이 해요', '배도 부르고 기분도 최고!', '주인님이 제일 좋아요 💕'],
+    happy: ['오늘 잘하고 있어요!', '하나씩 해내는 모습이 멋져요', '나도 같이 쑥쑥 크는 중이에요'],
+    calm: ['오늘은 뭐부터 해볼까요?', '체크 하나면 저는 힘이 나요', '천천히 해도 괜찮아요'],
+    sleepy: ['보고 싶었어요… 오랜만이에요', '오늘 하나만 해볼까요?', 'zzz… 같이 다시 시작해요'],
+    egg: ['…톡톡, 곧 나갈 것 같아요', '따뜻한 기운이 느껴져요', '알 속에서 응원하고 있어요']
+  };
+  // 같은 날엔 같은 말을 하도록 날짜로 고른다
+  function say(pet, today) {
+    if (!pet) return '';
+    const lv = progress(pet.xp).level;
+    const list = LINES[lv < 2 ? 'egg' : mood(pet, today)];
+    const sum = String(today).split('').reduce((a, c) => a + c.charCodeAt(0), 0) + (pet.xp || 0) % 7;
+    return list[sum % list.length];
+  }
+
+  // 활동한 날(완료를 하나라도 한 날)들의 집합 → 오늘까지 이어진 연속일. 오늘 아직 안 했으면 어제까지 센다.
+  function streak(activeDays, today) {
+    const set = activeDays instanceof Set ? activeDays : new Set(activeDays || []);
+    let n = 0, ds = set.has(today) ? today : shift(today, -1);
+    while (set.has(ds) && n < 5000) { n++; ds = shift(ds, -1); }
+    return n;
+  }
+
+  // 화면용 한 번에: 레벨·단계·이모지
+  function view(pet) {
+    if (!pet) return null;
+    const p = progress(pet.xp);
+    const st = stageOf(p.level);
+    const sp = speciesOf(pet.species);
+    return { level: p.level, into: p.into, need: p.need, stage: st, species: sp, emoji: st.id === 'egg' ? '🥚' : sp.emoji, pct: p.need ? Math.round(p.into / p.need * 100) : 100 };
+  }
+
+  const api = { SPECIES, REWARD, BONUS, FEED, MAX_LEVEL, STAGES, MOOD, need, progress, stageOf, newPet, award, feed, mood, say, streak, view, speciesOf };
+  if (typeof module !== 'undefined' && module.exports) module.exports = api;
+  else window.Pet = api;
+})();

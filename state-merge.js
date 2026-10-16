@@ -122,6 +122,30 @@
     return out;
   }
 
+  // 펫: 이름·종류는 값 하나씩, 경험치·도토리는 "각 기기가 더한 만큼"을 서버 값에 얹고(양쪽에서 쌓은 게 사라지지 않게),
+  // 이미 보상받은 키는 집합으로 합친다. 마지막 활동일·간식일은 더 늦은 날을 쓴다.
+  function mergePet(base, local, remote) {
+    const l = isPlain(local) ? local : null, r = isPlain(remote) ? remote : null, b = isPlain(base) ? base : null;
+    if (!l || !r) return clone(l || r || undefined);
+    if (!b) {
+      // 양쪽에서 따로 입양한 경우: 더 많이 키운 쪽을 남기고, 받은 보상 기록은 합친다
+      const win = (Number(l.xp) || 0) >= (Number(r.xp) || 0) ? l : r;
+      return Object.assign(clone(win), { awarded: mergeSet([], l.awarded, r.awarded) });
+    }
+    const delta = k => Math.max(0, (Number(r[k]) || 0) + (Number(l[k]) || 0) - (Number(b[k]) || 0));
+    const later = (x, y) => ((x || '') >= (y || '') ? (x || '') : (y || ''));
+    return {
+      name: merge3(b.name, l.name, r.name),
+      species: merge3(b.species, l.species, r.species),
+      xp: delta('xp'),
+      coins: delta('coins'),
+      awarded: mergeSet(b.awarded, l.awarded, r.awarded),
+      last: later(l.last, r.last),
+      fed: later(l.fed, r.fed),
+      born: [l.born, r.born, b.born].filter(Boolean).sort()[0] || ''
+    };
+  }
+
   function mergeLedgerCategories(base, local, remote) {
     const b = isPlain(base) ? base : {}, l = isPlain(local) ? local : {}, r = isPlain(remote) ? remote : {};
     if (!isPlain(local) && !isPlain(remote)) return undefined;
@@ -164,6 +188,9 @@
         out[k] = mergeSet(base[k], local[k], remote[k]);
       } else if (k === 'ledgerCategories') {
         const v = mergeLedgerCategories(base[k], local[k], remote[k]);
+        if (v) out[k] = v;
+      } else if (k === 'pet') {
+        const v = mergePet(base[k], local[k], remote[k]);
         if (v) out[k] = v;
       } else if (k === 'routineLog') {
         out[k] = mergeSetMap(base[k], local[k], remote[k]);

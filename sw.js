@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v97-dday';
+const CACHE_NAME = 'todolist-v98-pet';
 const ASSETS = [
   './',
   './index.html',
@@ -8,7 +8,8 @@ const ASSETS = [
   './state-merge.js',
   './bookmarks.js',
   './parcels.js',
-  './dday.js'
+  './dday.js',
+  './pet.js'
 ];
 
 // 설치: 핵심 자산 프리캐시
