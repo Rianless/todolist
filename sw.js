@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v99-js-split';
+const CACHE_NAME = 'todolist-v100-today';
 const ASSETS = [
   './',
   './index.html',
@@ -9,6 +9,7 @@ const ASSETS = [
   './js/app-4.js',
   './js/app-5.js',
   './js/app-6.js',
+  './js/today.js',
   './js/boot.js',
   './manifest.json',
   './icon-192.png',

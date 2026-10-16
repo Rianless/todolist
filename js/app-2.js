@@ -276,6 +276,7 @@ function setMainTab(tab, btn) {
     if (currentCalSubTab === 'cal') renderCal();
 
     else if (currentCalSubTab === 'week') renderWeek();
+    else if (currentCalSubTab === 'today') renderToday();
 
     else if (currentCalSubTab === 'list') renderList();
 
@@ -306,13 +307,14 @@ function setCalSubTab(sub, btn) {
 
   document.querySelectorAll('.cal-subview').forEach(v => v.classList.remove('active'));
 
-  const map = { cal: 'viewCal', week: 'viewWeek', list: 'viewList', routine: 'viewRoutine' };
+  const map = { today: 'viewToday', cal: 'viewCal', week: 'viewWeek', list: 'viewList', routine: 'viewRoutine' };
 
   const el = document.getElementById(map[sub]);
 
   if (el) el.classList.add('active');
 
-  if (sub === 'cal') renderCal();
+  if (sub === 'today') renderToday();
+  else if (sub === 'cal') renderCal();
 
   else if (sub === 'week') renderWeek();
 

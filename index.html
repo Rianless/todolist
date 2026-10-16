@@ -146,6 +146,8 @@
 
       <div class="cal-subtab-bar">
 
+        <button class="cal-subtab" id="cst-today" onclick="setCalSubTab('today',this)">오늘</button>
+
         <button class="cal-subtab active" id="cst-cal" onclick="setCalSubTab('cal',this)">월</button>
 
         <button class="cal-subtab" id="cst-week" onclick="setCalSubTab('week',this)">주</button>
@@ -237,6 +239,11 @@
       </div>
 
 
+
+      <!-- TODAY VIEW (오늘) -->
+      <div class="cal-subview" id="viewToday">
+        <div class="today-page" id="todayPage"></div>
+      </div>
 
       <!-- ROUTINE VIEW (루틴) -->
       <div class="cal-subview" id="viewRoutine">
@@ -1914,6 +1921,7 @@
 <script src="/js/app-4.js"></script>
 <script src="/js/app-5.js"></script>
 <script src="/js/app-6.js"></script>
+<script src="/js/today.js"></script>
 <script src="/js/boot.js"></script>
 
 <script>

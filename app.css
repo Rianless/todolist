@@ -7015,3 +7015,30 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   html[data-skin="w98"] .lc-row { border-bottom-color: #c0c0c0; }
   html[data-skin="w98"] .lc-detail-head { border-bottom-color: #808080; }
 }
+
+/* ── 오늘 (달력 서브탭) ── */
+.today-page { padding: 12px 16px 96px; display: flex; flex-direction: column; gap: 12px; }
+.td-hero { padding: 4px 2px 2px; }
+.td-hello { font-size: 20px; font-weight: 800; color: var(--text); }
+.td-date { margin-top: 2px; font-size: 13px; color: var(--text2); }
+.td-card { background: var(--card-bg); border: 1px solid var(--border); border-radius: 14px; padding: 12px 14px; }
+.td-head { display: flex; justify-content: space-between; align-items: baseline; font-size: 14px; font-weight: 700; color: var(--text); margin-bottom: 8px; }
+.td-head em { font-style: normal; font-size: 12px; color: var(--text2); font-weight: 600; }
+.td-bar { height: 4px; border-radius: 2px; background: var(--border); overflow: hidden; margin-bottom: 6px; }
+.td-bar i { display: block; height: 100%; background: var(--accent); transition: width .25s; }
+.td-row { display: flex; align-items: center; gap: 10px; padding: 7px 0; }
+.td-row + .td-row { border-top: 1px solid var(--border); }
+.td-row.done .td-title { text-decoration: line-through; color: var(--text3); }
+.td-main { flex: 1; min-width: 0; cursor: pointer; }
+.td-title { font-size: 14px; color: var(--text); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.td-sub { font-size: 11px; color: var(--text2); margin-top: 1px; }
+.td-check { flex: none; width: 22px; height: 22px; border-radius: 50%; border: 2px solid var(--border2); background: transparent; color: var(--bg); font-size: 13px; line-height: 1; display: inline-flex; align-items: center; justify-content: center; padding: 0; cursor: pointer; }
+.td-check.on { background: var(--accent); border-color: var(--accent); }
+.td-check.dim { opacity: .35; cursor: default; }
+.td-empty { padding: 8px 0; font-size: 13px; color: var(--text3); }
+.td-money { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; text-align: center; }
+.td-money small { display: block; font-size: 11px; color: var(--text2); }
+.td-money b { display: block; margin-top: 2px; font-size: 13px; color: var(--text); }
+.td-money b.inc { color: var(--green); }
+.td-money b.exp { color: var(--red); }
+.td-dd { flex: none; min-width: 58px; text-align: center; font-size: 12px; font-weight: 800; padding: 3px 6px; border-radius: 8px; background: var(--bg2); color: var(--accent); }
