@@ -21,7 +21,7 @@ function extractFunction(name) {
 const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFixed', 'investTaxFor', 'calcInvestment',
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
   'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs',
-  'statsMonthTotals', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
+  'statsMonthTotals', 'statsMonthlyTrend', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
   'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText', 'ledgerSubMonthTotal'];
 
 const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
@@ -193,6 +193,9 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   const fn = (sub, y, m) => [`${y}-${String(m + 1).padStart(2, '0')}-15`];
   assert.deepStrictEqual(A.statsMonthTotals(led, subs, 2026, 9, fn), { expense: 20000, income: 100000 });
   assert.deepStrictEqual(A.statsMonthTotals([], [], 2026, 9, fn), { expense: 0, income: 0 });
+  // 월별 추이: 오래된 달부터, 해가 바뀌어도 이어진다
+  assert.deepStrictEqual(A.statsMonthlyTrend(led, subs, 2026, 9, 3, fn).map(t => [t.year, t.month, t.expense, t.income]), [[2026, 8, 2000, 0], [2026, 9, 11999, 0], [2026, 10, 20000, 100000]]);
+  assert.deepStrictEqual(A.statsMonthlyTrend([], [], 2026, 0, 2, fn).map(t => [t.year, t.month]), [[2025, 12], [2026, 1]]);
   assert.deepStrictEqual(A.statsCategoryBreakdown(led, subs, 2026, 9, fn), [
     { name: '식비', amount: 15000, pct: 75 }, { name: '구독', amount: 2000, pct: 10 }, { name: '기타', amount: 3000, pct: 15 }
   ].sort((a, b) => b.amount - a.amount));
