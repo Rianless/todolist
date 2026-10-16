@@ -625,6 +625,7 @@ function saveDdays() {
   try { localStorage.setItem('rianless_ddays', JSON.stringify({ ddays, ddayNextId })); } catch(e) {}
   queueCloudStateSync();
   if (typeof renderCal === 'function' && currentCalSubTab === 'cal') { try { renderCal(); } catch(e) {} }
+  try { updateDesktopWidgets(); } catch(e) {}
 }
 function loadDdays() {
   try {
@@ -1215,6 +1216,7 @@ function renderBookmarkList() {
 function saveParcels() {
   try { localStorage.setItem('rianless_parcels', JSON.stringify({ parcels, parcelNextId })); } catch(e) {}
   queueCloudStateSync();
+  try { updateDesktopWidgets(); } catch(e) {}
 }
 
 function loadParcels() {
