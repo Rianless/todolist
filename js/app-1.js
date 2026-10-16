@@ -1129,8 +1129,10 @@ function updateDesktopWidgets() {
   }).join('') + (waitList.length > 6 ? `<div class="dkw-empty">외 ${waitList.length - 6}건</div>` : '') : '<div class="dkw-empty">기다리는 택배가 없어요</div>';
   const ddayHtml = ddayRows + `<div class="dkw-sub">기다리는 택배 ${waitList.length}건</div>` + parcelRows;
   // ⑤ 가계부 통계: 지난달 대비, 최근 6개월 추이, 카테고리 비중
-  const trend = statsMonthlyTrend(ledger, subscriptions, y, m, 6, getSubDatesForMonth);
-  const prevExp = trend[trend.length - 2].expense;
+  const trendAll = statsMonthlyTrend(ledger, subscriptions, y, m, 6, getSubDatesForMonth);
+  const trend = trendAll.filter(t => `${t.year}-${String(t.month).padStart(2, '0')}` >= LEDGER_START.slice(0, 7));
+  const prevMonth = trend.length > 1 ? trend[trend.length - 2] : null;
+  const prevExp = prevMonth ? prevMonth.expense : 0;
   const diff = tot.expense - prevExp;
   const diffPct = prevExp ? Math.abs(Math.round(diff / prevExp * 100)) : 0;
   const diffText = prevExp ? `${diff >= 0 ? '▲' : '▼'} ${diffPct > 999 ? '999%+' : diffPct + '%'}` : '-';
