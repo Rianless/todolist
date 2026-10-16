@@ -177,7 +177,116 @@
   ];
   const titleOf = ctx => TITLES.find(t => t.ok(ctx)).name;
 
-  const api = { ITEMS, itemOf, buy, titleOf, SPECIES, REWARD, BONUS, FEED, MAX_LEVEL, STAGES, MOOD, need, progress, stageOf, newPet, award, feed, mood, say, streak, view, speciesOf };
+
+  // ── 도트 스프라이트 (16×16) ──
+  // 동글동글한 "모찌" 몸에 종류마다 귀·무늬·코를 얹는다. 글자 하나가 색 하나 (. 은 투명).
+  //   o 윤곽선  b 몸  l 배·주둥이  a 귀·무늬  e 눈  w 눈 반짝임  p 볼터치  m 입  r 빨강  y 노랑  q 줄무늬
+  const BASE = [
+    '................',
+    '................',
+    '................',
+    '....oooooooo....',
+    '..oobbbbbbbboo..',
+    '.obbbbbbbbbbbbo.',
+    '.obbbbbbbbbbbbo.',
+    'obbbewbbbbewbbbo',
+    'obbbeebbbbeebbbo',
+    'obpbbbbmmbbbbpbo',
+    'obbbbllllllbbbbo',
+    '.obbbllllllbbbo.',
+    '.oobbbllllbbboo.',
+    '..ooobbbbbbooo..',
+    '..obbo....obbo..',
+    '..oooo....oooo..'
+  ];
+  const EGG = [
+    '................',
+    '................',
+    '......oooo......',
+    '....oobbbboo....',
+    '...obbbbbbbbo...',
+    '..obbbbbbsbbbo..',
+    '..obhbbbbbbbbo..',
+    '.obbhbbbbbsbbbo.',
+    '.obbbebbbbebbbo.',
+    '.obbsbpmmbpbbbo.',
+    '.obbbbbbbbsbbbo.',
+    '.obbbbbbbbbbbbo.',
+    '..obbbbbbbbbbo..',
+    '...obbbbbbbbo...',
+    '....oooooooo....',
+    '................'
+  ];
+  const COMMON = { o: '#4a3038', e: '#2b1f2a', w: '#ffffff', p: '#ff9fb0', m: '#8a3a4a', r: '#ff5b6e', y: '#ffd54a', q: '#d9822b', h: '#ffffff', s: '#ffd27a' };
+  const earsRound = pm => { pm(2, 3, 'o'); pm(2, 4, 'o'); pm(3, 2, 'o'); pm(3, 3, 'a'); pm(3, 4, 'a'); pm(3, 5, 'o'); };
+  const earsPoint = pm => { pm(1, 3, 'o'); pm(2, 2, 'o'); pm(2, 3, 'a'); pm(2, 4, 'o'); pm(3, 2, 'o'); pm(3, 3, 'a'); pm(3, 4, 'a'); pm(3, 5, 'o'); };
+  const nose = put => { put(9, 7, 'o'); put(9, 8, 'o'); };
+  const LOOK = {
+    dog: { pal: { b: '#f1d6a8', l: '#fff3dc', a: '#b9783f' }, fx(put, pm) {
+      for (let r = 4; r <= 8; r++) { pm(r, 1, 'a'); if (r >= 5 && r <= 7) pm(r, 2, 'a'); if (r < 7) pm(r, 0, 'o'); }
+      nose(put); put(10, 8, 'p');
+    } },
+    cat: { pal: { b: '#f5a64a', l: '#fff0d6', a: '#f7b3b3' }, fx(put, pm) {
+      earsPoint(pm); put(4, 7, 'q'); put(4, 8, 'q'); put(5, 6, 'q'); put(5, 9, 'q');
+    } },
+    rabbit: { pal: { b: '#f4eff7', l: '#ffffff', a: '#ffb6c8' }, fx(put, pm) {
+      pm(0, 4, 'o'); pm(1, 3, 'o'); pm(1, 4, 'a'); pm(1, 5, 'o'); pm(2, 3, 'o'); pm(2, 4, 'a'); pm(2, 5, 'o');
+      put(9, 7, 'a'); put(9, 8, 'a');
+    } },
+    hamster: { pal: { b: '#f0c27a', l: '#fff3dc', a: '#d99a4e' }, fx(put, pm) {
+      earsRound(pm);
+      for (let c = 6; c <= 9; c++) { put(4, c, 'a'); put(5, c, 'a'); }
+      pm(9, 3, 'p'); pm(10, 2, 'p'); pm(10, 3, 'p');
+    } },
+    fox: { pal: { b: '#ee7d33', l: '#ffffff', a: '#3b2a2a' }, fx(put, pm) {
+      earsPoint(pm); nose(put);
+    } },
+    bear: { pal: { b: '#b27a50', l: '#e3c29a', a: '#6b4128' }, fx(put, pm) {
+      earsRound(pm);
+      for (let c = 6; c <= 9; c++) { put(9, c, 'l'); put(10, c, 'l'); }
+      nose(put);
+    } },
+    panda: { pal: { b: '#ffffff', l: '#ffffff', a: '#2b2b33' }, eyebg: 'a', closedEye: 'w', fx(put, pm) {
+      earsRound(pm);
+      pm(6, 4, 'a'); pm(6, 5, 'a'); pm(9, 4, 'a'); pm(9, 5, 'a');
+      for (let r = 7; r <= 8; r++) for (let c = 3; c <= 6; c++) pm(r, c, 'a');
+      pm(7, 5, 'w'); pm(8, 5, 'w');
+      nose(put);
+    } },
+    penguin: { pal: { b: '#3d4f78', l: '#ffffff', a: '#ffae3c' }, fx(put, pm) {
+      for (let r = 9; r <= 13; r++) for (let c = r === 9 ? 5 : 4; c <= (r === 9 ? 10 : 11); c++) put(r, c, 'l');
+      put(9, 7, 'a'); put(9, 8, 'a'); put(10, 7, 'a'); put(10, 8, 'a');
+      pm(14, 3, 'a'); pm(14, 4, 'a');
+    } }
+  };
+  const STAGE_ACC = {
+    kid: put => { put(3, 11, 'r'); put(4, 10, 'r'); put(4, 12, 'r'); put(5, 11, 'r'); put(4, 11, 'y'); },
+    adult: put => { for (let c = 4; c <= 11; c++) put(12, c, 'r'); put(13, 10, 'r'); put(14, 10, 'r'); },
+    legend: put => { for (let c = 4; c <= 11; c++) put(12, c, 'r'); put(13, 10, 'r'); put(14, 10, 'r'); put(1, 6, 'y'); put(1, 9, 'y'); for (let c = 6; c <= 9; c++) put(2, c, 'y'); }
+  };
+  // opt: { species, stage: 'egg'|'baby'|'kid'|'adult'|'legend', eyes: 'open'|'closed' } → { rows: [16개 문자열], pal }
+  function sprite(opt) {
+    const o = opt || {};
+    const closed = o.eyes === 'closed';
+    if (o.stage === 'egg') {
+      const rows = EGG.map(r => r.split(''));
+      if (closed) { rows[8][6] = 'e'; rows[8][9] = 'e'; }   // 눈을 가늘게 (가로줄)
+      return { rows: rows.map(r => r.join('')), pal: Object.assign({}, COMMON, { b: '#fff4dc' }) };
+    }
+    const look = LOOK[speciesOf(o.species).id];
+    const g = BASE.map(r => r.split(''));
+    const put = (r, c, ch) => { if (r >= 0 && r < 16 && c >= 0 && c < 16) g[r][c] = ch; };
+    const pm = (r, c, ch) => { put(r, c, ch); put(r, 15 - c, ch); };
+    look.fx(put, pm);
+    if (STAGE_ACC[o.stage]) STAGE_ACC[o.stage](put, pm);
+    if (closed) {
+      [4, 5, 10, 11].forEach(c => { put(7, c, look.eyebg || 'b'); put(8, c, look.closedEye || 'e'); });
+      if (look.eyebg) { put(8, 4, 'a'); put(8, 11, 'a'); }
+    }
+    return { rows: g.map(r => r.join('')), pal: Object.assign({}, COMMON, look.pal) };
+  }
+
+  const api = { sprite, ITEMS, itemOf, buy, titleOf, SPECIES, REWARD, BONUS, FEED, MAX_LEVEL, STAGES, MOOD, need, progress, stageOf, newPet, award, feed, mood, say, streak, view, speciesOf };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Pet = api;
 })();

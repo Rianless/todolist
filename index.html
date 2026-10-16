@@ -3827,13 +3827,14 @@ body::after {
 .pr-actor-in { z-index: 6; position: absolute; left: 0; bottom: 0; transform: translateX(-50%); display: flex; flex-direction: column; align-items: center; cursor: pointer; }
 .pr-sprite { animation: petBounce 2.4s steps(4) infinite; transform-origin: 50% 100%; }
 .pr-sprite.sleepy { animation: petSleep 3.2s steps(4) infinite; filter: saturate(.6); }
-.pr-sprite img { width: 60px; height: 60px; }
+.pr-sprite { position: relative; }
+.pr-shadow { position: absolute; left: 50%; bottom: 0; width: 56%; height: 8px; margin-left: -28%; border-radius: 50%; background: rgba(90,60,30,.22); }
+.pr-sprite .pr-img { position: relative; }
 .pr-sprite.flip img { transform: scaleX(-1); }
 .pr-tag { margin-top: 2px; padding: 1px 8px; font-size: 11px; white-space: nowrap; color: #fff; background: rgba(90,90,100,.85); border-radius: 4px; }
 .pr-title { margin-top: 3px; padding: 1px 7px; font-size: 10px; white-space: nowrap; color: #5a3d00; background: #ffe58a; border: 2px solid #e0b64a; border-radius: 4px; }
 .pr-bubble { position: absolute; bottom: calc(100% + 4px); left: 50%; transform: translateX(-50%); width: max-content; max-width: 170px; padding: 6px 9px; font-size: 12px; line-height: 1.4; color: #1b1b27; text-align: center; background: #fff; border: 3px solid #1b1b27; box-shadow: 3px 3px 0 rgba(0,0,0,.25); z-index: 8; }
 .pr-zzz { position: absolute; top: -6px; right: -10px; font-size: 14px; animation: petBounce 1.6s steps(3) infinite; }
-.pr-crown { position: absolute; top: -10px; left: 50%; margin-left: -9px; width: 18px; height: 18px; }
 @keyframes petBounce { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
 @keyframes petSleep { 0%, 100% { transform: rotate(-3deg); } 50% { transform: rotate(3deg) translateY(1px); } }
 .pet-xp { display: flex; align-items: center; gap: 8px; padding: 8px; font-size: 12px; }
@@ -3849,7 +3850,7 @@ body::after {
 .pet-empty-actions button { flex: 1; padding: 10px; font: inherit; font-size: 14px; color: #1b1b27; background: #ffe58a; border: 3px solid #1b1b27; box-shadow: 3px 3px 0 rgba(0,0,0,.35); cursor: pointer; }
 .pet-picks { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
 .pet-picks button { display: flex; flex-direction: column; align-items: center; gap: 2px; padding: 8px 2px; font-size: 11px; color: var(--text2); border: 1px solid var(--border); border-radius: 10px; background: var(--panel); cursor: pointer; font-family: inherit; }
-.pet-picks button .px { width: 36px; height: 36px; }
+.pet-picks button .px { width: 44px; height: 44px; }
 .pet-picks button.on { border-color: var(--accent); color: var(--text); box-shadow: 0 0 0 2px color-mix(in srgb, var(--accent) 30%, transparent); }
 .pet-howto { font-size: 12px; line-height: 1.6; color: var(--text3); }
 .shop-list { display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px; }
@@ -11514,8 +11515,8 @@ function renderPetBadge(gained) {
   const el = document.getElementById('petBadge');
   if (!el) return;
   const v = Pet.view(pet);
-  if (!v) { el.innerHTML = `<span class="pb-e">${petPx('🥚')}</span><span>펫 키우기</span>`; return; }
-  el.innerHTML = `<span class="pb-e">${petPx(v.emoji)}</span><span>Lv.${v.level}</span><span class="pb-bar"><i style="width:${v.pct}%"></i></span>`;
+  if (!v) { el.innerHTML = `<span class="pb-e">${petSpriteImg('dog', 'egg', 'open')}</span><span>펫 키우기</span>`; return; }
+  el.innerHTML = `<span class="pb-e">${petSpriteImg(pet.species, v.stage.id, 'open')}</span><span>Lv.${v.level}</span><span class="pb-bar"><i style="width:${v.pct}%"></i></span>`;
   el.title = `${pet.name} · XP ${v.into}/${v.need}`;
   if (gained && gained.xp) {
     const pop = document.createElement('span');
@@ -11525,6 +11526,34 @@ function renderPetBadge(gained) {
     setTimeout(() => pop.remove(), 1200);
   }
 }
+/* 직접 그린 도트 캐릭터(pet.js 의 sprite)를 16×16 캔버스에 찍어 이미지로 만든다 */
+const petSpriteCache = {};
+function petSpriteUrl(species, stage, eyes) {
+  const key = `${species}|${stage}|${eyes}`;
+  if (petSpriteCache[key] === undefined) {
+    let url = '';
+    try {
+      const sp = Pet.sprite({ species, stage, eyes });
+      const c = document.createElement('canvas');
+      c.width = c.height = 16;
+      const x = c.getContext('2d');
+      sp.rows.forEach((row, y) => [...row].forEach((ch, i) => {
+        if (ch === '.' || !sp.pal[ch]) return;
+        x.fillStyle = sp.pal[ch];
+        x.fillRect(i, y, 1, 1);
+      }));
+      url = c.toDataURL();
+    } catch (e) {}
+    petSpriteCache[key] = url;
+  }
+  return petSpriteCache[key];
+}
+function petSpriteImg(species, stage, eyes, cls, px) {
+  const u = petSpriteUrl(species, stage, eyes);
+  const st = px ? ` style="width:${px}px;height:${px}px"` : '';
+  return u ? `<img class="px ${cls || ''}" src="${u}" alt=""${st} draggable="false">` : `<span class="px ${cls || ''}">${(Pet.speciesOf(species) || {}).emoji || '🥚'}</span>`;
+}
+
 /* 이모지를 작은 캔버스에 그려 계단 모양으로 키우면 도트 그림처럼 보인다 */
 const petPxCache = {};
 function petPx(emoji, cls) {
@@ -11554,6 +11583,15 @@ function petPx(emoji, cls) {
 let petRoom = 'in';
 try { petRoom = localStorage.getItem('rianless_pet_room') === 'out' ? 'out' : 'in'; } catch(e) {}
 let petWanderTimer = null;
+let petBlinkTimer = null;
+function petBlink() {
+  const im = document.querySelector('#petSprite .pr-img');
+  if (!im || !pet || !im.isConnected) { clearInterval(petBlinkTimer); return; }
+  if (document.querySelector('#petSprite.sleepy')) return;
+  const v = Pet.view(pet), keep = im.src;
+  im.src = petSpriteUrl(pet.species, v.stage.id, 'closed') || keep;
+  setTimeout(() => { if (im.isConnected) im.src = keep; }, 170);
+}
 let petTalk = '';        // 펫을 눌러 바꾼 말풍선 (없으면 오늘의 말)
 const PET_POKE = ['간질간질해요!', '헤헤, 놀아주는 거예요?', '오늘 체크 하나 어때요?', '뿌듯한 하루 만들어요!', '쓰다듬어 줘서 고마워요 💕'];
 
@@ -11567,9 +11605,12 @@ function renderPetCard() {
   const owned = pet ? (pet.items || []) : [];
   const decos = Pet.ITEMS.filter(i => i.room === petRoom && owned.includes(i.id))
     .map(i => `<span class="pr-deco" style="left:${i.x}%;top:${i.y}%;z-index:${Math.round(i.y)}">${petPx(i.emoji)}</span>`).join('');
-  const emoji = v ? v.emoji : '🥚';
+  const stageId = v ? v.stage.id : 'egg';
+  const speciesId = pet ? pet.species : 'dog';
+  const sleepy = !!v && mood === 'sleepy';
   const say = v ? (petTalk || Pet.say(pet, today)) : '나를 입양해 줘! 같이 쑥쑥 크자';
-  const sprite = `<div class="pr-sprite${mood === 'sleepy' && v ? ' sleepy' : ''}" id="petSprite">${petPx(emoji)}${v && v.stage.id === 'legend' ? petPx('👑', 'pr-crown') : ''}</div>`;
+  const spx = Math.round(56 * (v ? v.stage.scale : 1));
+  const sprite = `<div class="pr-sprite${sleepy ? ' sleepy' : ''}" id="petSprite"><span class="pr-shadow"></span>${petSpriteImg(speciesId, stageId, sleepy ? 'closed' : 'open', 'pr-img', spx)}</div>`;
   const tag = v ? `<div class="pr-tag">Lv.${v.level} ${escapeLedgerText(pet.name)}</div><div class="pr-title">${escapeLedgerText(Pet.titleOf({ level: v.level, streak, items: owned.length }))}</div>` : '';
   el.innerHTML = `<div class="pet-card">
     <div class="pet-top"><span>${petPx('🔥')}<b>갓생 ${streak}일차</b></span><span class="sp"></span><span>${petPx('🌰')}<b>${pet ? (pet.coins || 0).toLocaleString() : 0}</b></span></div>
@@ -11578,7 +11619,7 @@ function renderPetCard() {
       <div class="pr-win"><i></i></div><div class="pr-tank">${petPx('🐟')}</div>
       ${decos}
       <div class="pr-actor" id="petActor" style="left:50%;top:76%">
-        <div class="pr-actor-in" onclick="pokePet()"><div class="pr-bubble" id="petBubble">${escapeLedgerText(say)}</div>${sprite}${mood === 'sleepy' && v ? '<span class="pr-zzz">💤</span>' : ''}${tag}</div>
+        <div class="pr-actor-in" onclick="pokePet()"><div class="pr-bubble" id="petBubble">${escapeLedgerText(say)}</div>${sprite}${sleepy ? '<span class="pr-zzz">💤</span>' : ''}${tag}</div>
       </div>
     </div>
     ${v ? `<div class="pet-xp"><span>Lv.${v.level}</span><span class="bar"><i style="width:${v.pct}%"></i></span><span class="n">${v.need ? `${v.into}/${v.need}` : 'MAX'}</span></div>` : ''}
@@ -11609,6 +11650,8 @@ function startPetWander() {
   };
   petWanderTimer = setInterval(step, 4200);
   setTimeout(step, 600);
+  clearInterval(petBlinkTimer);
+  petBlinkTimer = setInterval(petBlink, 3600);
 }
 function pokePet() {
   if (!pet) return;
@@ -11667,7 +11710,7 @@ function openPetPage() {
 
 function renderPetSpecies() {
   document.getElementById('petSpecies').innerHTML = Pet.SPECIES.map(s =>
-    `<button type="button" class="${s.id === petSpeciesPick ? 'on' : ''}" onclick="pickPetSpecies('${s.id}')">${petPx(s.emoji)}${s.name}</button>`).join('');
+    `<button type="button" class="${s.id === petSpeciesPick ? 'on' : ''}" onclick="pickPetSpecies('${s.id}')">${petSpriteImg(s.id, 'baby', 'open')}${s.name}</button>`).join('');
 }
 function pickPetSpecies(id) { petSpeciesPick = id; renderPetSpecies(); }
 function openPetModal() {

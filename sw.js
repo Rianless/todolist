@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v99-pet-room';
+const CACHE_NAME = 'todolist-v100-pet-sprite';
 const ASSETS = [
   './',
   './index.html',
