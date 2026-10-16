@@ -10210,6 +10210,34 @@ function renderStatsView() {
 /* ══════════════════════════════════════
    바탕화면 위젯 (창을 최소화·닫았을 때 바탕화면에 보이는 작은 창)
 ══════════════════════════════════════ */
+// 바탕화면 위젯의 체크 버튼: 데이터를 바꾸고 위젯부터 바로 갱신한다.
+// (달력·루틴 화면 갱신에서 오류가 나도 위젯의 체크 표시는 항상 바뀌게 따로 보호한다)
+function dkToggleItem(id) {
+  const item = items.find(i => String(i.id) === String(id));
+  if (!item) return;
+  item.done = !item.done;
+  try { saveData(); } catch (e) { console.error('[dkToggleItem] 저장 실패:', e); }
+  updateDesktopWidgets();
+  try { agendaRefreshAfterToggle(); } catch (e) { console.error('[dkToggleItem] 화면 갱신 실패:', e); }
+  if (item.done) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
+}
+
+function dkToggleRoutine(id, ds) {
+  const r = routines.find(x => String(x.id) === String(id));
+  if (!r) return;
+  try { toggleRoutine(r.id, ds); } catch (e) { console.error('[dkToggleRoutine] 실패:', e); }
+  updateDesktopWidgets();
+}
+
+function agendaRefreshAfterToggle() {
+  if (currentMainTab === 'calendar') {
+    if (currentCalSubTab === 'cal') renderCal();
+    else if (currentCalSubTab === 'week') renderWeek();
+    else if (currentCalSubTab === 'list') renderList();
+  }
+  updateProgress();
+}
+
 function updateDesktopWidgets() {
   const box = document.getElementById('desktopWidgets');
   if (!box) return;
@@ -10226,9 +10254,9 @@ function updateDesktopWidgets() {
   const row = (done, onclick, text, time) => `<div class="dkw-row${done ? ' done' : ''}"><button type="button" class="dkw-check" onclick="${onclick}" aria-label="완료 표시">${done ? '✓' : ''}</button><span class="dkw-text" title="${esc(text)}">${esc(text)}</span>${time ? `<span class="dkw-time">${esc(time)}</span>` : ''}</div>`;
   let todayHtml = '';
   todayHtml += `<div class="dkw-sub">할 일 ${todayItems.filter(i => i.done).length}/${todayItems.length}</div>`;
-  todayHtml += todayItems.length ? todayItems.slice(0, MAX).map(i => row(i.done, `agendaToggleDone(${i.id})`, i.title, i.time)).join('') + (todayItems.length > MAX ? `<div class="dkw-empty">외 ${todayItems.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 할 일이 없어요</div>';
+  todayHtml += todayItems.length ? todayItems.slice(0, MAX).map(i => row(i.done, `dkToggleItem('${String(i.id).replace(/[^\w-]/g, '')}')`, i.title, i.time)).join('') + (todayItems.length > MAX ? `<div class="dkw-empty">외 ${todayItems.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 할 일이 없어요</div>';
   todayHtml += `<div class="dkw-sub">루틴 ${rts.filter(r => isRoutineDone(r.id, todayStr)).length}/${rts.length}</div>`;
-  todayHtml += rts.length ? rts.slice(0, MAX).map(r => row(isRoutineDone(r.id, todayStr), `toggleRoutine(${r.id},'${todayStr}')`, r.name, r.time)).join('') + (rts.length > MAX ? `<div class="dkw-empty">외 ${rts.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 루틴이 없어요</div>';
+  todayHtml += rts.length ? rts.slice(0, MAX).map(r => row(isRoutineDone(r.id, todayStr), `dkToggleRoutine('${String(r.id).replace(/[^\w-]/g, '')}','${todayStr}')`, r.name, r.time)).join('') + (rts.length > MAX ? `<div class="dkw-empty">외 ${rts.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 루틴이 없어요</div>';
 
   // ② 이번 달 가계부
   const y = now.getFullYear(), m = now.getMonth();
