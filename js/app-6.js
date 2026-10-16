@@ -262,6 +262,7 @@ function afterRoutineChange() {
   if (currentMainTab === 'calendar') {
     if (currentCalSubTab === 'cal') renderCal();
     else if (currentCalSubTab === 'week') renderWeek();
+    else if (currentCalSubTab === 'today') renderToday();
   }
 }
 

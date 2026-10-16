@@ -2029,6 +2029,7 @@ function agendaToggleDone(id) {
   if (currentMainTab === 'calendar') {
     if (currentCalSubTab === 'cal') renderCal();
     else if (currentCalSubTab === 'list') renderList();
+    else if (currentCalSubTab === 'today') renderToday();
   }
   updateProgress();
   if (wasNotDone) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
