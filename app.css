@@ -7049,8 +7049,10 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
 
 /* PC 바탕화면 위젯 키우기 */
 @media (min-width: 900px) {
-  html[data-desktop][data-skin="w98"] .dk-widget { width: 400px; font-size: 15px; }
-  html[data-desktop][data-skin="w98"] .dk-stack { width: 400px; }
+  html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; box-sizing: border-box; font-size: 15px; }
+  html[data-desktop][data-skin="w98"] .dk-stack { width: 100%; }
+  /* 위젯 묶음이 빈 화면 폭을 나눠 채우게: 한 칸 최소 400px, 남는 폭은 균등 분배 */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: grid; grid-template-columns: repeat(auto-fit, minmax(400px, 1fr)); align-items: start; align-content: start; }
   html[data-desktop][data-skin="w98"] .dkw-title { font-size: 15px; padding: 4px 6px 4px 8px; }
   html[data-desktop][data-skin="w98"] .dkw-title button { height: 20px !important; font-size: 12px !important; }
   html[data-desktop][data-skin="w98"] .dkw-body { padding: 10px 14px; }
