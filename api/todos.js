@@ -1,9 +1,10 @@
 const { buildTodoFilters } = require('./_todoFilters');
 
-module.exports = async (req, res) => {
+async function handler(req, res) {
   res.setHeader('Access-Control-Allow-Origin', '*');
   res.setHeader('Access-Control-Allow-Methods', 'GET, POST, PATCH, PUT, DELETE, OPTIONS');
   res.setHeader('Access-Control-Allow-Headers', 'Content-Type');
+  res.setHeader('Cache-Control', 'no-store');
   if (req.method === 'OPTIONS') return res.status(200).end();
 
   const SUPABASE_URL = process.env.SUPABASE_URL;
@@ -60,4 +61,13 @@ module.exports = async (req, res) => {
   }
 
   res.status(405).json({ error: 'Method not allowed' });
+}
+
+module.exports = async (req, res) => {
+  try {
+    return await handler(req, res);
+  } catch (error) {
+    console.error('[todos API]', error);
+    return res.status(502).json({ error: '데이터 저장소 연결에 실패했습니다.' });
+  }
 };

@@ -1,14 +1,47 @@
 {
   "headers": [
     {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/(icon-192|icon-512).png",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },
+    {
       "source": "/manifest.json",
-      "headers": [{ "key": "Content-Type", "value": "application/manifest+json" }]
+      "headers": [
+    {
+      "source": "/sw.js",
+      "headers": [{ "key": "Cache-Control", "value": "no-cache" }]
+    },
+    {
+      "source": "/(icon-192|icon-512).png",
+      "headers": [{ "key": "Cache-Control", "value": "public, max-age=604800" }]
+    },
+    {
+      "source": "/(.*)",
+      "headers": [
+        { "key": "X-Content-Type-Options", "value": "nosniff" },
+        { "key": "Referrer-Policy", "value": "strict-origin-when-cross-origin" }
+      ]
+    },{ "key": "Content-Type", "value": "application/manifest+json" }]
     }
   ],
   "rewrites": [
     { "source": "/api/(.*)", "destination": "/api/$1" },
     { "source": "/sw.js", "destination": "/sw.js" },
     { "source": "/state-merge.js", "destination": "/state-merge.js" },
+    { "source": "/bookmarks.js", "destination": "/bookmarks.js" },
+    { "source": "/app.js", "destination": "/app.js" },
+    { "source": "/app.css", "destination": "/app.css" },
     { "source": "/parcels.js", "destination": "/parcels.js" },
     { "source": "/dday.js", "destination": "/dday.js" },
     { "source": "/manifest.json", "destination": "/manifest.json" },
