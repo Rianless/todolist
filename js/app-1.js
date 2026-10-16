@@ -1099,7 +1099,25 @@ function updateDesktopWidgets() {
   const monthItems = items.filter(i => i.date && i.date.startsWith(todayStr.slice(0, 7)) && real(i));
   const mDone = monthItems.filter(i => i.done).length;
   const pct = monthItems.length ? Math.round(mDone / monthItems.length * 100) : 0;
-  const goalHtml = `<div class="dkw-kv"><span>${m + 1}월 할 일 달성률</span><b>${pct}% (${mDone}/${monthItems.length})</b></div><div class="dkw-bar"><i style="width:${pct}%"></i></div>`;
+  // ③ 달력 미니 위젯 (월 이동 가능) + 그 달 할 일 달성률
+  const cd = new Date(y, m + dkCalOffset, 1), cy = cd.getFullYear(), cm = cd.getMonth();
+  const cPrefix = `${cy}-${String(cm + 1).padStart(2, '0')}`;
+  const cMonthItems = items.filter(i => i.date && i.date.startsWith(cPrefix) && real(i));
+  const cDone = cMonthItems.filter(i => i.done).length;
+  const cPct = cMonthItems.length ? Math.round(cDone / cMonthItems.length * 100) : 0;
+  const cMap = monthItemMap(cy, cm);
+  const cLast = new Date(cy, cm + 1, 0).getDate();
+  let cells = ['일', '월', '화', '수', '목', '금', '토'].map((d, i) => `<span class="dkc-dow${i === 0 ? ' sun' : i === 6 ? ' sat' : ''}">${d}</span>`).join('');
+  for (let k = 0; k < cd.getDay(); k++) cells += '<span></span>';
+  for (let d = 1; d <= cLast; d++) {
+    const ds = `${cPrefix}-${String(d).padStart(2, '0')}`;
+    const dow = (cd.getDay() + d - 1) % 7;
+    const has = (cMap[ds] || []).length;
+    cells += `<button type="button" class="dkc-day${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}${ds === todayStr ? ' today' : ''}${has ? ' has' : ''}" onclick="dkCalPick('${ds}')" aria-label="${cm + 1}월 ${d}일">${d}</button>`;
+  }
+  const goalHtml = `<div class="dkc-nav"><button type="button" onclick="dkCalMove(-1)" aria-label="이전 달">◀</button><b>${cy}년 ${cm + 1}월</b><button type="button" onclick="dkCalMove(1)" aria-label="다음 달">▶</button></div>` +
+    `<div class="dkc-grid">${cells}</div>` +
+    `<div class="dkw-kv dkc-goal"><span>${cm + 1}월 할 일 달성률</span><b>${cPct}% (${cDone}/${cMonthItems.length})</b></div><div class="dkw-bar"><i style="width:${cPct}%"></i></div>`;
 
   // ④ D-day + 기다리는 택배
   const dds = Dday.sortDdays(ddays, todayStr).filter(d => d.calc.kind !== 'past').slice(0, 4);
@@ -1124,10 +1142,10 @@ function updateDesktopWidgets() {
     (catsAll.length ? `<div class="dkw-sub">카테고리 비중</div>` + catsAll.map(c => `<div class="dkw-kv"><span>${esc(c.name)}</span><span>${c.pct}%</span></div><div class="dkw-bar"><i style="width:${c.pct}%"></i></div>`).join('') : '');
   // 오늘 위젯 바로 밑에 D-day · 택배 위젯을 붙인다 (한 칸에 세로로 쌓음)
   box.innerHTML = `<div class="dk-stack">` + win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
+    win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml) +
     win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>` +
     `<div class="dk-stack">` + win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
-    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) + `</div>` +
-    win('🎯 달성', open('통계', "desktopOpen('category','mpCardStats')"), goalHtml);
+    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) + `</div>`;
 }
 
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.

@@ -72,3 +72,25 @@ function renderToday() {
 
 function todayToggleItem(id) { agendaToggleDone(id); }
 function todayToggleRoutine(id) { toggleRoutine(id, fmtDate(new Date())); }
+
+// 한 달(y년 m월, m 은 0~11)의 날짜별 일정 지도: 일반 + 여러 날 + 반복 (구독 결제 같은 가상 일정은 뺀다)
+function monthItemMap(y, m) {
+  const start = new Date(y, m, 1), end = new Date(y, m + 1, 0);
+  const dmap = {};
+  items.forEach(item => {
+    if (!item.date) return;
+    (dmap[item.date] = dmap[item.date] || []).push(item);
+    addSpanInstances(dmap, item, start, end);
+    generateRepeatInstances(item, start, end).forEach(inst => (dmap[inst.date] = dmap[inst.date] || []).push(inst));
+  });
+  return dmap;
+}
+
+// 바탕화면 달력 위젯: 보고 있는 달(이번 달 기준 +n)과 날짜 누르기
+let dkCalOffset = 0;
+function dkCalMove(delta) { dkCalOffset += delta; updateDesktopWidgets(); }
+function dkCalPick(ds) {
+  const [y, mo] = ds.split('-').map(Number);
+  calY = y; calM = mo - 1; calSelectedDate = ds;
+  desktopOpen('calendar');
+}
