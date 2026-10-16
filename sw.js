@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v102-parcel-edit';
+const CACHE_NAME = 'todolist-v103-today-phone';
 const ASSETS = [
   './',
   './index.html',
