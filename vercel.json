@@ -40,7 +40,7 @@
     { "source": "/sw.js", "destination": "/sw.js" },
     { "source": "/state-merge.js", "destination": "/state-merge.js" },
     { "source": "/bookmarks.js", "destination": "/bookmarks.js" },
-    { "source": "/app.js", "destination": "/app.js" },
+    { "source": "/js/(.*)", "destination": "/js/$1" },
     { "source": "/app.css", "destination": "/app.css" },
     { "source": "/parcels.js", "destination": "/parcels.js" },
     { "source": "/dday.js", "destination": "/dday.js" },

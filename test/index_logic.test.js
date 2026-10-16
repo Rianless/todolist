@@ -1,10 +1,10 @@
-// index.html·app.js 안의 계산 함수(적금·예금 이자, 통장 연동, 루틴 통계)를 그대로 뽑아 검증한다.
+// index.html·js/*.js 안의 계산 함수(적금·예금 이자, 통장 연동, 루틴 통계)를 그대로 뽑아 검증한다.
 const fs = require('fs');
 const path = require('path');
 const vm = require('vm');
 const assert = require('assert');
 
-const html = ['index.html', 'app.js'].map(f => fs.readFileSync(path.join(__dirname, '..', f), 'utf8')).join('\n');
+const html = ['index.html', ...fs.readdirSync(path.join(__dirname, '..', 'js')).sort().map(f => 'js/' + f)].map(f => fs.readFileSync(path.join(__dirname, '..', f), 'utf8')).join('\n');
 
 function extractFunction(name) {
   const start = html.indexOf(`function ${name}(`);
