@@ -426,6 +426,7 @@ const parcelTapGuarded = () => Date.now() < parcelTapGuardUntil;
 const armParcelTapGuard = () => { parcelTapGuardUntil = Date.now() + 900; };
 
 let attachingParcelId = null;
+let editingParcelId = null;
 window.addEventListener('load', () => setTimeout(handleParcelShare, 400));
 window.addEventListener('load', () => setTimeout(offerLedgerCleanup, 4000));
 
