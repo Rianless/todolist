@@ -1052,7 +1052,7 @@ function updateDesktopWidgets() {
   const MAX = 7;
 
   // ① 오늘 할 일 + 루틴 (체크 가능)
-  const todayItems = items.filter(i => i.date === todayStr && real(i)).sort((a, b) => String(a.time || '99').localeCompare(String(b.time || '99')));
+  const todayItems = itemsOnDate(todayStr).filter(i => real(i) && items.some(x => x.id === i.id)).sort((a, b) => String(a.time || '99').localeCompare(String(b.time || '99')));
   const rts = routinesForDate(todayStr);
   const row = (done, onclick, text, time) => `<div class="dkw-row${done ? ' done' : ''}"><button type="button" class="dkw-check" onclick="${onclick}" aria-label="완료 표시">${done ? '✓' : ''}</button><span class="dkw-text" title="${esc(text)}">${esc(text)}</span>${time ? `<span class="dkw-time">${esc(time)}</span>` : ''}</div>`;
   let todayHtml = '';
@@ -1082,9 +1082,15 @@ function updateDesktopWidgets() {
     `<div class="dkw-sub">이번 주 구독 결제 예정</div>` +
     (subs.length ? subs.slice(0, 5).map(x => `<div class="dkw-kv"><span>${esc(x.name)} · ${new Date(x.date + 'T00:00:00').getDate()}일</span><span>${statsWon(x.amount)}</span></div>`).join('') + (subs.length > 5 ? `<div class="dkw-empty">외 ${subs.length - 5}건</div>` : '') : '<div class="dkw-empty">없음</div>');
 
+  // ④ D-day + 기다리는 택배
+  const dds = Dday.sortDdays(ddays, todayStr).filter(d => d.calc.kind !== 'past').slice(0, 4);
+  const waiting = parcels.filter(x => !x.done).length;
+  const ddayHtml = (dds.length ? dds.map(d => `<div class="dkw-kv"><span>${esc(d.emoji || '⭐')} ${esc(d.title)}</span><b>${esc(d.calc.label)}</b></div>`).join('') : '<div class="dkw-empty">다가오는 D-day가 없어요</div>') +
+    `<div class="dkw-sub">택배</div><div class="dkw-kv"><span>📦 기다리는 택배</span><b>${waiting}건</b></div>`;
   box.innerHTML = win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
     win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
-    win('🎯 달성 · 구독', open('통계', "desktopOpen('category','mpCardStats')"), goalHtml);
+    win('🎯 달성 · 구독', open('통계', "desktopOpen('category','mpCardStats')"), goalHtml) +
+    win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml);
 }
 
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
