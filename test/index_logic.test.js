@@ -20,7 +20,7 @@ function extractFunction(name) {
 
 const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFixed', 'investTaxFor', 'calcInvestment',
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
-  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs',
+  'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs', 'desktopMonthSubs',
   'statsMonthTotals', 'statsMonthlyTrend', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
   'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText', 'ledgerSubMonthTotal'];
 
@@ -178,6 +178,9 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   // 2026-10-29(목) → 토요일 10-31: 이번 달만. 2026-09-30(수) → 토요일 10-03: 9월 30일과 10월 1~3일 모두
   assert.deepStrictEqual(week([s('말일', 30), s('초하루', 2)], '2026-09-30').map(x => x.date), ['2026-09-30', '2026-10-02']);
   assert.deepStrictEqual(week([s('x', 31)], '2026-10-29').map(x => x.date), ['2026-10-31']);
+  // 이번 달 전체: 지난 결제도 포함, 멈춘 구독은 제외, 날짜순
+  const monthAll = (subs, y, m) => JSON.parse(JSON.stringify(ctx.api.desktopMonthSubs(subs, y, m, (sub, yy, mm) => sub.fn(sub, yy, mm))));
+  assert.deepStrictEqual(monthAll([s('늦음', 25), s('이름', 3), s('멈춤', 9, { paused: true })], 2026, 9).map(x => [x.name, x.date]), [['이름', '2026-10-03'], ['늦음', '2026-10-25']]);
 }
 
 // ── 통계: 월 합계(구독 포함·이체 제외), 카테고리 지출, 루틴 히트맵·달성률

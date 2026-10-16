@@ -7083,7 +7083,7 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
 @media (min-width: 900px) {
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 320px)); align-items: start; justify-content: start; gap: 14px; }
   html[data-desktop][data-skin="w98"] .dk-stack { display: contents; }
-  html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; max-width: 320px; max-height: 480px; font-size: 13px; }
+  html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; max-width: 320px; font-size: 13px; }
   html[data-desktop][data-skin="w98"] .dkw-title { font-size: 13px; }
   html[data-desktop][data-skin="w98"] .dkw-body { padding: 6px 10px; }
   html[data-desktop][data-skin="w98"] .dkw-bar { height: 9px; margin: 1px 0 3px; padding: 1px; }
@@ -7091,3 +7091,5 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
   html[data-desktop][data-skin="w98"] .dkw-kv { padding: 2px 0; }
   html[data-desktop][data-skin="w98"] .dkw-sub { margin: 6px 0 2px; }
 }
+
+.dkw-past { color: #808080; text-decoration: line-through; }
