@@ -1112,11 +1112,12 @@ function updateDesktopWidgets() {
     `<div class="dkw-sub">최근 6개월 지출</div>` +
     trend.map(t => `<div class="dkw-kv"><span>${t.month}월</span><span>${statsWon(t.expense)}</span></div><div class="dkw-bar"><i style="width:${Math.round(t.expense / maxExp * 100)}%"></i></div>`).join('') +
     (catsAll.length ? `<div class="dkw-sub">카테고리 비중</div>` + catsAll.map(c => `<div class="dkw-kv"><span>${esc(c.name)}</span><span>${c.pct}%</span></div><div class="dkw-bar"><i style="width:${c.pct}%"></i></div>`).join('') : '');
-  box.innerHTML = win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
+  // 오늘 위젯 바로 밑에 D-day · 택배 위젯을 붙인다 (한 칸에 세로로 쌓음)
+  box.innerHTML = `<div class="dk-stack">` + win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
+    win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>` +
     win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
     win('🎯 달성 · 구독', open('통계', "desktopOpen('category','mpCardStats')"), goalHtml) +
-    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) +
-    win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml);
+    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml);
 }
 
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
