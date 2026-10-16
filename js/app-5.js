@@ -897,6 +897,47 @@ function saveLedger() {
 
 
 
+// 가계부는 이 날짜부터만 쓴다. 그 전 내역이 남아 있으면 백업을 내려받은 뒤 지울지 한 번 묻는다.
+const LEDGER_START = '2026-10-01';
+function ledgerBeforeStart() {
+  return { entries: ledger.filter(e => e.date && e.date < LEDGER_START), moves: transfers.filter(t => t.date && t.date < LEDGER_START) };
+}
+function offerLedgerCleanup() {
+  let dismissed = false;
+  try { dismissed = localStorage.getItem('rianless_ledger_cut') === 'dismissed'; } catch (e) {}
+  if (dismissed) return false;
+  const { entries, moves } = ledgerBeforeStart();
+  if (!entries.length && !moves.length) return false;
+  const msg = `가계부를 ${LEDGER_START.slice(0, 4)}년 ${+LEDGER_START.slice(5, 7)}월부터 쓰도록 정리할게요.\n\n${LEDGER_START} 이전 내역 ${entries.length}건` + (moves.length ? `, 이체 ${moves.length}건` : '') + '을 삭제합니다.\n삭제 전에 백업 파일(JSON)을 내려받아요. 삭제하면 앱에서는 되돌릴 수 없어요.\n\n삭제할까요?';
+  if (!confirm(msg)) {
+    try { localStorage.setItem('rianless_ledger_cut', 'dismissed'); } catch (e) {}
+    return false;
+  }
+  try {
+    const blob = new Blob([JSON.stringify({ before: LEDGER_START, ledger: entries, transfers: moves }, null, 2)], { type: 'application/json' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = `ledger-backup-before-${LEDGER_START}.json`;
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(() => URL.revokeObjectURL(a.href), 4000);
+  } catch (e) {
+    console.error('[ledger cleanup] 백업 실패', e);
+    alert('백업 파일을 만들지 못해서 삭제하지 않았어요.');
+    return false;
+  }
+  const gone = new Set(entries.map(e => e.id));
+  ledger = ledger.filter(e => !gone.has(e.id));
+  transfers = transfers.filter(t => !(t.date && t.date < LEDGER_START));
+  let touchedParcels = false;
+  parcels.forEach(p => { if (gone.has(p.ledgerId)) { delete p.ledgerId; touchedParcels = true; } });
+  if (touchedParcels) saveParcels();
+  saveData();
+  try { renderCategoryView(); } catch (e) {}
+  try { updateDesktopWidgets(); } catch (e) {}
+  showToast(`${LEDGER_START} 이전 내역 ${entries.length}건을 삭제했어요`, { type: 'info', duration: 2500 });
+  return true;
+}
+
 function deleteLedgerEntry(id) {
 
   const deleted = ledger.find(e => e.id === id);

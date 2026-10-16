@@ -427,6 +427,7 @@ const armParcelTapGuard = () => { parcelTapGuardUntil = Date.now() + 900; };
 
 let attachingParcelId = null;
 window.addEventListener('load', () => setTimeout(handleParcelShare, 400));
+window.addEventListener('load', () => setTimeout(offerLedgerCleanup, 4000));
 
 // ── 공유 메뉴에 이 앱이 나오게 하는 안내 ──
 // 안드로이드 공유 목록에는 크롬에서 "앱으로 설치"한 앱만 나온다 (홈 화면 바로가기나 브라우저 탭으로는 안 나온다)
