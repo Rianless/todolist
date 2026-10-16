@@ -900,6 +900,16 @@ function statsCategoryBreakdown(ledgerList, subList, y, m, subDatesFn) {
     .sort((a, b) => b.amount - a.amount || a.name.localeCompare(b.name));
 }
 
+// 최근 n개월(m 달 포함, 오래된 달부터)의 월별 수입·지출. m 은 0~11.
+function statsMonthlyTrend(ledgerList, subList, y, m, n, subDatesFn) {
+  const out = [];
+  for (let i = n - 1; i >= 0; i--) {
+    const dt = new Date(y, m - i, 1);
+    const t = statsMonthTotals(ledgerList, subList, dt.getFullYear(), dt.getMonth(), subDatesFn);
+    out.push({ year: dt.getFullYear(), month: dt.getMonth() + 1, income: t.income, expense: t.expense });
+  }
+  return out;
+}
 // 루틴 달성 히트맵: endStr 이 든 주까지 weeks 주, 일요일부터 칸 하나씩.
 // level 0 = 그날 루틴 없음, 1 = 하나도 못 함, 2 = 절반 미만, 3 = 절반 이상, 4 = 모두 완료, -1 = 아직 안 온 날
 function routineHeat(routineList, log, occursFn, endStr, weeks) {
@@ -1087,9 +1097,25 @@ function updateDesktopWidgets() {
   const waiting = parcels.filter(x => !x.done).length;
   const ddayHtml = (dds.length ? dds.map(d => `<div class="dkw-kv"><span>${esc(d.emoji || '⭐')} ${esc(d.title)}</span><b>${esc(d.calc.label)}</b></div>`).join('') : '<div class="dkw-empty">다가오는 D-day가 없어요</div>') +
     `<div class="dkw-sub">택배</div><div class="dkw-kv"><span>📦 기다리는 택배</span><b>${waiting}건</b></div>`;
+  // ⑤ 가계부 통계: 지난달 대비, 최근 6개월 추이, 카테고리 비중
+  const trend = statsMonthlyTrend(ledger, subscriptions, y, m, 6, getSubDatesForMonth);
+  const prevExp = trend[trend.length - 2].expense;
+  const diff = tot.expense - prevExp;
+  const diffText = prevExp ? `${diff >= 0 ? '▲' : '▼'} ${Math.abs(Math.round(diff / prevExp * 100))}%` : '-';
+  const perDay = Math.round(tot.expense / now.getDate());
+  const saveRate = tot.income ? Math.round(bal / tot.income * 100) : null;
+  const maxExp = Math.max(1, ...trend.map(t => t.expense));
+  const catsAll = statsCategoryBreakdown(ledger, subscriptions, y, m, getSubDatesForMonth).slice(0, 5);
+  const statHtml = `<div class="dkw-kv"><span>지난달 대비 지출</span><b class="${diff > 0 ? 'dkw-exp' : 'dkw-inc'}">${diffText}</b></div>` +
+    `<div class="dkw-kv"><span>하루 평균 지출</span><span>${statsWon(perDay)}</span></div>` +
+    `<div class="dkw-kv"><span>저축률</span><span>${saveRate === null ? '-' : saveRate + '%'}</span></div>` +
+    `<div class="dkw-sub">최근 6개월 지출</div>` +
+    trend.map(t => `<div class="dkw-kv"><span>${t.month}월</span><span>${statsWon(t.expense)}</span></div><div class="dkw-bar"><i style="width:${Math.round(t.expense / maxExp * 100)}%"></i></div>`).join('') +
+    (catsAll.length ? `<div class="dkw-sub">카테고리 비중</div>` + catsAll.map(c => `<div class="dkw-kv"><span>${esc(c.name)}</span><span>${c.pct}%</span></div><div class="dkw-bar"><i style="width:${c.pct}%"></i></div>`).join('') : '');
   box.innerHTML = win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
     win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
     win('🎯 달성 · 구독', open('통계', "desktopOpen('category','mpCardStats')"), goalHtml) +
+    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) +
     win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml);
 }
 
