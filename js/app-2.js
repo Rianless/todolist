@@ -96,6 +96,23 @@ function toggleStartMenu(e) {
   if (menu) menu.classList.toggle('open');
 }
 
+// 바탕화면 위젯 배치: column(폭 제한 + 세로 단) · tile(작은 타일) · board(한 개의 대시보드 창)
+const DKW_LAYOUTS = [['column', '세로 단'], ['tile', '작은 타일'], ['board', '대시보드 창']];
+function applyWidgetLayout() {
+  let v = 'column';
+  try { v = localStorage.getItem('rianless_dkw_layout') || 'column'; } catch (e) {}
+  if (!DKW_LAYOUTS.some(l => l[0] === v)) v = 'column';
+  document.documentElement.setAttribute('data-dkw', v);
+  return v;
+}
+function cycleWidgetLayout() {
+  const cur = applyWidgetLayout();
+  const next = DKW_LAYOUTS[(DKW_LAYOUTS.findIndex(l => l[0] === cur) + 1) % DKW_LAYOUTS.length];
+  try { localStorage.setItem('rianless_dkw_layout', next[0]); } catch (e) {}
+  applyWidgetLayout();
+  showToast('위젯 배치: ' + next[1], { type: 'info', duration: 1500 });
+}
+
 function closeStartMenu() {
   const menu = document.getElementById('desktopStartMenu');
   if (menu) menu.classList.remove('open');
