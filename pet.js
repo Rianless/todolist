@@ -178,27 +178,13 @@
   const titleOf = ctx => TITLES.find(t => t.ok(ctx)).name;
 
 
-  // ── 도트 스프라이트 (16×16) ──
-  // 동글동글한 "모찌" 몸에 종류마다 귀·무늬·코를 얹는다. 글자 하나가 색 하나 (. 은 투명).
-  //   o 윤곽선  b 몸  l 배·주둥이  a 귀·무늬  e 눈  w 눈 반짝임  p 볼터치  m 입  r 빨강  y 노랑  q 줄무늬
-  const BASE = [
-    '................',
-    '................',
-    '................',
-    '....oooooooo....',
-    '..oobbbbbbbboo..',
-    '.obbbbbbbbbbbbo.',
-    '.obbbbbbbbbbbbo.',
-    'obbbewbbbbewbbbo',
-    'obbbeebbbbeebbbo',
-    'obpbbbbmmbbbbpbo',
-    'obbbbllllllbbbbo',
-    '.obbbllllllbbbo.',
-    '.oobbbllllbbboo.',
-    '..ooobbbbbbooo..',
-    '..obbo....obbo..',
-    '..oooo....oooo..'
-  ];
+  // ── 도트 스프라이트: 메이플스토리 플레이어 아바타 구조 ──
+  // 36×54 캔버스 (윤곽선 여유 포함). 머리+헤어가 키의 약 60%, 몸통 약 17%, 다리 약 20% 인 2등신.
+  // 머리가 몸통에 바로 붙고(목 없음), 눈은 얼굴 아래쪽에 넓고 납작하게, 코는 없이 작은 입과 홍조만 둔다.
+  // 레이어: Hair · Hat · Face Accessory · Top · Bottom · Shoes · Cape · Weapon. 색은 플랫(명암 한 단계), 윤곽선 1px.
+  //   o 윤곽선 s 피부 p 홍조 m 입 e 눈 i 눈동자 w 흰색 h/H/d 머리(기본·밝음·어두움) t/T 윗옷 u/U 바지 f 신발
+  //   a/A 모자(귀) c/C 망토 g 금색 x 나무 y 노랑
+  const OX = 2, OY = 12, W = 36, H = OY + 40 + 2, BUST = OY + 26;
   const EGG = [
     '................',
     '................',
@@ -217,73 +203,117 @@
     '....oooooooo....',
     '................'
   ];
-  const COMMON = { o: '#4a3038', e: '#2b1f2a', w: '#ffffff', p: '#ff9fb0', m: '#8a3a4a', r: '#ff5b6e', y: '#ffd54a', q: '#d9822b', h: '#ffffff', s: '#ffd27a' };
-  const earsRound = pm => { pm(2, 3, 'o'); pm(2, 4, 'o'); pm(3, 2, 'o'); pm(3, 3, 'a'); pm(3, 4, 'a'); pm(3, 5, 'o'); };
-  const earsPoint = pm => { pm(1, 3, 'o'); pm(2, 2, 'o'); pm(2, 3, 'a'); pm(2, 4, 'o'); pm(3, 2, 'o'); pm(3, 3, 'a'); pm(3, 4, 'a'); pm(3, 5, 'o'); };
-  const nose = put => { put(9, 7, 'o'); put(9, 8, 'o'); };
+  const COMMON = { o: '#3a2a35', s: '#ffe3cf', p: '#ff9fa8', m: '#c9556a', e: '#3a2a35', w: '#ffffff', g: '#ffd54a', x: '#a9743c', y: '#ffd54a', r: '#ff5b6e', q: '#d9822b', h: '#ffffff', b: '#fff4dc' };
+  // 종류별 아바타: hair=[기본,밝음,어두움] top/bottom=[기본,어두움] ear=[겉,안] eye=눈동자
   const LOOK = {
-    dog: { pal: { b: '#f1d6a8', l: '#fff3dc', a: '#b9783f' }, fx(put, pm) {
-      for (let r = 4; r <= 8; r++) { pm(r, 1, 'a'); if (r >= 5 && r <= 7) pm(r, 2, 'a'); if (r < 7) pm(r, 0, 'o'); }
-      nose(put); put(10, 8, 'p');
-    } },
-    cat: { pal: { b: '#f5a64a', l: '#fff0d6', a: '#f7b3b3' }, fx(put, pm) {
-      earsPoint(pm); put(4, 7, 'q'); put(4, 8, 'q'); put(5, 6, 'q'); put(5, 9, 'q');
-    } },
-    rabbit: { pal: { b: '#f4eff7', l: '#ffffff', a: '#ffb6c8' }, fx(put, pm) {
-      pm(0, 4, 'o'); pm(1, 3, 'o'); pm(1, 4, 'a'); pm(1, 5, 'o'); pm(2, 3, 'o'); pm(2, 4, 'a'); pm(2, 5, 'o');
-      put(9, 7, 'a'); put(9, 8, 'a');
-    } },
-    hamster: { pal: { b: '#f0c27a', l: '#fff3dc', a: '#d99a4e' }, fx(put, pm) {
-      earsRound(pm);
-      for (let c = 6; c <= 9; c++) { put(4, c, 'a'); put(5, c, 'a'); }
-      pm(9, 3, 'p'); pm(10, 2, 'p'); pm(10, 3, 'p');
-    } },
-    fox: { pal: { b: '#ee7d33', l: '#ffffff', a: '#3b2a2a' }, fx(put, pm) {
-      earsPoint(pm); nose(put);
-    } },
-    bear: { pal: { b: '#b27a50', l: '#e3c29a', a: '#6b4128' }, fx(put, pm) {
-      earsRound(pm);
-      for (let c = 6; c <= 9; c++) { put(9, c, 'l'); put(10, c, 'l'); }
-      nose(put);
-    } },
-    panda: { pal: { b: '#ffffff', l: '#ffffff', a: '#2b2b33' }, eyebg: 'a', closedEye: 'w', fx(put, pm) {
-      earsRound(pm);
-      pm(6, 4, 'a'); pm(6, 5, 'a'); pm(9, 4, 'a'); pm(9, 5, 'a');
-      for (let r = 7; r <= 8; r++) for (let c = 3; c <= 6; c++) pm(r, c, 'a');
-      pm(7, 5, 'w'); pm(8, 5, 'w');
-      nose(put);
-    } },
-    penguin: { pal: { b: '#3d4f78', l: '#ffffff', a: '#ffae3c' }, fx(put, pm) {
-      for (let r = 9; r <= 13; r++) for (let c = r === 9 ? 5 : 4; c <= (r === 9 ? 10 : 11); c++) put(r, c, 'l');
-      put(9, 7, 'a'); put(9, 8, 'a'); put(10, 7, 'a'); put(10, 8, 'a');
-      pm(14, 3, 'a'); pm(14, 4, 'a');
-    } }
+    dog:     { name: 'dog',     hair: ['#8a5a34', '#b57a4a', '#6a4226'], top: ['#7cc387', '#5aa468'], bottom: ['#b9783f', '#8e5a2f'], shoe: '#6a4226', ear: ['#6a4226', '#a8703f'], eye: '#7a4a2a', hat: 'floppy' },
+    cat:     { name: 'cat',     hair: ['#f2994a', '#ffc078', '#c9772e'], top: ['#fff0d6', '#e8cd8a'], bottom: ['#3d4f78', '#2a3858'], shoe: '#ffffff', ear: ['#f2994a', '#f7b3b3'], eye: '#c9772e', hat: 'point' },
+    rabbit:  { name: 'rabbit',  hair: ['#f3eaf7', '#ffffff', '#d9cde3'], top: ['#ffc4d6', '#f09cb7'], bottom: ['#ffffff', '#ddd6e8'], shoe: '#f09cb7', ear: ['#f3eaf7', '#ffb6c8'], eye: '#d9638a', hat: 'long' },
+    hamster: { name: 'hamster', hair: ['#e9b96e', '#ffd99a', '#c4934a'], top: ['#ffd27a', '#e8b24d'], bottom: ['#b9783f', '#8e5a2f'], shoe: '#8a5a34', ear: ['#e9b96e', '#f7b3b3'], eye: '#7a4a2a', hat: 'round' },
+    fox:     { name: 'fox',     hair: ['#e8662c', '#ff9255', '#b84a1c'], top: ['#4aa39a', '#357d76'], bottom: ['#3b2a2a', '#2a1c1c'], shoe: '#3b2a2a', ear: ['#e8662c', '#3b2a2a'], eye: '#c9772e', hat: 'tall' },
+    bear:    { name: 'bear',    hair: ['#a06a42', '#c48a5c', '#7a4a2c'], top: ['#e07a5f', '#bf5b43'], bottom: ['#6b4128', '#4a2e1a'], shoe: '#4a2e1a', ear: ['#a06a42', '#e3c29a'], eye: '#5a3720', hat: 'round' },
+    panda:   { name: 'panda',   hair: ['#2e2e38', '#565668', '#1f1f28'], top: ['#ffffff', '#d4d4de'], bottom: ['#2e2e38', '#1f1f28'], shoe: '#2e2e38', ear: ['#2e2e38', '#565668'], eye: '#4a4a5a', hat: 'round' },
+    penguin: { name: 'penguin', hair: ['#3b4d7a', '#5f78b0', '#2a3858'], top: ['#ffffff', '#d4d9e6'], bottom: ['#ffae3c', '#d98a1f'], shoe: '#ffae3c', ear: ['#5f78b0', '#ffae3c'], eye: '#3b6fb0', hat: 'cap' }
   };
-  const STAGE_ACC = {
-    kid: put => { put(3, 11, 'r'); put(4, 10, 'r'); put(4, 12, 'r'); put(5, 11, 'r'); put(4, 11, 'y'); },
-    adult: put => { for (let c = 4; c <= 11; c++) put(12, c, 'r'); put(13, 10, 'r'); put(14, 10, 'r'); },
-    legend: put => { for (let c = 4; c <= 11; c++) put(12, c, 'r'); put(13, 10, 'r'); put(14, 10, 'r'); put(1, 6, 'y'); put(1, 9, 'y'); for (let c = 6; c <= 9; c++) put(2, c, 'y'); }
-  };
-  // opt: { species, stage: 'egg'|'baby'|'kid'|'adult'|'legend', eyes: 'open'|'closed' } → { rows: [16개 문자열], pal }
+  // 그리는 순서(아래→위). 아래층 픽셀이 위층 픽셀과 닿으면 그 자리를 윤곽선으로 바꾼다.
+  const Z = ['cape', 'legs', 'shoes', 'torso', 'arms', 'face', 'hair', 'hat', 'acc', 'weapon'];
+
+  // 색(#rrggbb)으로 그린 H×W 격자를 돌려준다. 빈칸은 null.
+  function drawAvatar(look, stage, closed) {
+    const col = Array.from({ length: H }, () => Array(W).fill(null));
+    const grp = Array.from({ length: H }, () => Array(W).fill(''));
+    const put = (x, y, c, g) => { const X = x + OX, Y = y + OY; if (X >= 0 && X < W && Y >= 0 && Y < H) { col[Y][X] = c; grp[Y][X] = g; } };
+    const rect = (x0, y0, x1, y1, c, g) => { for (let y = y0; y <= y1; y++) for (let x = x0; x <= x1; x++) put(x, y, c, g); };
+    const ell = (cx, cy, rx, ry, c, g, only) => {
+      for (let y = Math.floor(cy - ry); y <= Math.ceil(cy + ry); y++) for (let x = Math.floor(cx - rx); x <= Math.ceil(cx + rx); x++) {
+        const dx = (x + 0.5 - cx) / rx, dy = (y + 0.5 - cy) / ry;
+        if (dx * dx + dy * dy <= 1 && (!only || only(x, y))) put(x, y, c, g);
+      }
+    };
+    const rows = (list, c, g, right) => list.forEach(([y, x0, x1]) => { for (let x = x0; x <= x1; x++) put(right ? 31 - x : x, y, c, g); });
+    const both = fn => { fn(false); fn(true); };
+    const [h, hh, hd] = look.hair, [ear, earIn] = look.ear, S = COMMON.s, D = COMMON.o;
+
+    // Cape: 몸 뒤. 어른부터는 금색(전설)
+    if (stage !== 'baby') { const [c, cd] = stage === 'legend' ? ['#ffd54a', '#d9a82a'] : ['#ff5b6e', '#d63e55']; rect(9, 26, 22, 33, c, 'cape'); rect(9, 32, 22, 33, cd, 'cape'); }
+    // Bottom + Shoes (다리 20%)
+    [12, 17].forEach(x0 => { rect(x0, 32, x0 + 2, 37, look.bottom[0], 'legs'); rect(x0, 36, x0 + 2, 37, look.bottom[1], 'legs'); });
+    rect(11, 38, 14, 39, look.shoe, 'shoes'); rect(17, 38, 20, 39, look.shoe, 'shoes');
+    // Top: 작은 몸통. 턱 바로 아래에서 시작 (목 없음)
+    rect(12, 25, 19, 31, look.top[0], 'torso'); rect(12, 30, 19, 31, look.top[1], 'torso');
+    if (look.hat === 'cap') rect(14, 26, 17, 29, '#ffffff', 'torso');   // 펭귄: 흰 배
+    // 짧은 팔, 손은 피부색
+    [10, 20].forEach(x0 => { rect(x0, 26, x0 + 1, 28, look.top[0], 'arms'); rect(x0, 29, x0 + 1, 30, S, 'arms'); });
+    // Hair(뒤): 두상보다 훨씬 큰 볼륨, 양옆으로 턱까지 내려온다
+    ell(16, 12.5, 14, 12.5, h, 'hair');
+    // 얼굴: 넓고 낮은 타원
+    ell(16, 17.5, 10.5, 8, S, 'face');
+    // Hair(앞머리): 이마를 덮고 양옆으로 흐른다. 아래 가장자리는 어두운 색
+    const bangs = [17, 16, 15, 14, 14, 13, 12, 12, 13, 14, 15, 15, 14, 13, 12, 12, 13, 13, 14, 15, 16];
+    bangs.forEach((bot, i) => { const x = 6 + i; for (let y = 8; y < bot; y++) put(x, y, y === bot - 1 ? hd : h, 'hair'); });
+    for (let y = 13; y <= 20; y++) { put(5, y, hd, 'hair'); put(26, y, hd, 'hair'); if (y < 18) { put(6, y, h, 'hair'); put(25, y, h, 'hair'); } }
+    // 머리 명암: 아래쪽(옆머리 끝)은 어둡게, 위쪽은 밝은 하이라이트
+    for (let y = 18; y < 26; y++) for (let x = 0; x < 32; x++) if (grp[y + OY][x + OX] === 'hair' && col[y + OY][x + OX] === h) put(x, y, hd, 'hair');
+    for (let x = 7; x <= 19; x++) { let top = -1; for (let y = 0; y < 8; y++) if (grp[y + OY][x + OX] === 'hair') { top = y; break; } if (top >= 0) { put(x, top + 1, hh, 'hair'); if (x <= 12) put(x, top + 2, hh, 'hair'); } }
+    // 눈: 얼굴 아래쪽, 간격 넓고 가로로 납작, 큰 눈동자 + 하이라이트
+    const eye = x0 => {
+      if (closed) { rect(x0, 19, x0 + 4, 19, D, 'face'); return; }
+      rect(x0, 18, x0 + 4, 18, D, 'face');                         // 윗 속눈썹선
+      rect(x0, 19, x0 + 4, 20, look.eye, 'face');                  // 큰 눈동자(색)
+      put(x0, 20, S, 'face'); put(x0 + 4, 20, S, 'face');           // 아래 모서리는 둥글게
+      rect(x0 + 2, 19, x0 + 3, 20, D, 'face');                      // 짙은 동공
+      put(x0 + 1, 19, '#ffffff', 'face'); put(x0 + 3, 19, '#ffffff', 'face');   // 하이라이트
+    };
+    eye(8); eye(19);
+    [6, 7, 24, 25].forEach(x => put(x, 21, COMMON.p, 'face'));    // 부드러운 홍조 (코는 그리지 않는다)
+    put(15, 22, COMMON.m, 'face'); put(16, 22, COMMON.m, 'face');   // 아주 작은 입
+    // Hat: 동물 귀
+    if (look.hat === 'point') both(r => { rows([[-3, 7, 8], [-2, 6, 9], [-1, 5, 10], [0, 5, 11], [1, 5, 12], [2, 5, 12]], ear, 'hat', r); rows([[-1, 7, 8], [0, 7, 9], [1, 7, 10]], earIn, 'hat', r); });
+    else if (look.hat === 'tall') both(r => { rows([[-7, 8, 8], [-6, 7, 9], [-5, 7, 9], [-4, 6, 10], [-3, 6, 10], [-2, 6, 11], [-1, 5, 11], [0, 5, 12], [1, 5, 12], [2, 5, 12]], ear, 'hat', r); rows([[-7, 8, 8], [-6, 7, 9], [-5, 7, 9]], '#3b2a2a', 'hat', r); rows([[-2, 8, 9], [-1, 8, 9], [0, 8, 10]], '#fff0d6', 'hat', r); });
+    else if (look.hat === 'round') both(r => { ell(r ? 24.5 : 7.5, 1.5, 4, 4, ear, 'hat'); ell(r ? 24.5 : 7.5, 2, 2, 2, earIn, 'hat'); });
+    else if (look.hat === 'long') both(r => { ell(r ? 21 : 10, -4, 3, 7, ear, 'hat'); ell(r ? 21 : 10, -3.5, 1.5, 5, earIn, 'hat'); });
+    else if (look.hat === 'floppy') both(r => { ell(r ? 28 : 4, 10.5, 2.4, 7.5, ear, 'hat'); });
+    else if (look.hat === 'cap') { ell(16, 8, 12.5, 7, ear, 'hat', (x, y) => y <= 5); rect(4, 6, 27, 7, earIn, 'hat'); }
+    // Face Accessory: 어른부터 동그란 안경
+    if (stage === 'adult' || stage === 'legend') {
+      [7, 18].forEach(x0 => { rect(x0, 17, x0 + 6, 17, COMMON.g, 'acc'); rect(x0, 21, x0 + 6, 21, COMMON.g, 'acc'); rect(x0, 18, x0, 20, COMMON.g, 'acc'); rect(x0 + 6, 18, x0 + 6, 20, COMMON.g, 'acc'); });
+      rect(14, 18, 17, 18, COMMON.g, 'acc');
+    }
+    if (stage === 'legend') { rect(12, -5, 19, -2, COMMON.g, 'acc'); [12, 15, 16, 19].forEach(x => put(x, -6, COMMON.g, 'acc')); put(15, -4, '#ff5b6e', 'acc'); put(16, -4, '#ff5b6e', 'acc'); }
+    // Weapon: 오른손에 지팡이
+    if (stage === 'adult' || stage === 'legend') {
+      rect(24, 28, 25, 39, COMMON.x, 'weapon'); rect(22, 23, 27, 26, COMMON.g, 'weapon'); put(23, 24, '#ffffff', 'weapon'); put(23, 23, '#ffffff', 'weapon');
+      rect(21, 29, 24, 30, S, 'weapon');
+    }
+    // 윤곽선 1px: 바깥 + 층이 겹치는 경계(아래층 쪽)
+    const rank = g => Z.indexOf(g), out = col.map(r => r.slice());
+    const nb = [[1, 0], [-1, 0], [0, 1], [0, -1]];
+    for (let y = 0; y < H; y++) for (let x = 0; x < W; x++) {
+      const near = f => nb.some(([dx, dy]) => y + dy >= 0 && y + dy < H && x + dx >= 0 && x + dx < W && f(y + dy, x + dx));
+      if (col[y][x] === null) { if (near((yy, xx) => col[yy][xx] !== null)) out[y][x] = D; }
+      else if (grp[y][x] !== 'cape' && near((yy, xx) => grp[yy][xx] && rank(grp[yy][xx]) > rank(grp[y][x]) && grp[yy][xx] !== 'acc')) out[y][x] = D;
+    }
+    return out;
+  }
+  // opt: { species, stage: 'egg'|'baby'|'kid'|'adult'|'legend', eyes: 'open'|'closed' }
+  //   → { rows, pal, w, h, bust }   rows 의 글자 하나가 색 하나('.' 은 투명). bust: 머리~턱까지만 쓰는 작은 그림용 줄 수
   function sprite(opt) {
     const o = opt || {};
     const closed = o.eyes === 'closed';
     if (o.stage === 'egg') {
       const rows = EGG.map(r => r.split(''));
       if (closed) { rows[8][6] = 'e'; rows[8][9] = 'e'; }   // 눈을 가늘게 (가로줄)
-      return { rows: rows.map(r => r.join('')), pal: Object.assign({}, COMMON, { b: '#fff4dc' }) };
+      return { rows: rows.map(r => r.join('')), pal: Object.assign({}, COMMON, { b: '#fff4dc' }), w: 16, h: 16, bust: 16 };
     }
     const look = LOOK[speciesOf(o.species).id];
-    const g = BASE.map(r => r.split(''));
-    const put = (r, c, ch) => { if (r >= 0 && r < 16 && c >= 0 && c < 16) g[r][c] = ch; };
-    const pm = (r, c, ch) => { put(r, c, ch); put(r, 15 - c, ch); };
-    look.fx(put, pm);
-    if (STAGE_ACC[o.stage]) STAGE_ACC[o.stage](put, pm);
-    if (closed) {
-      [4, 5, 10, 11].forEach(c => { put(7, c, look.eyebg || 'b'); put(8, c, look.closedEye || 'e'); });
-      if (look.eyebg) { put(8, 4, 'a'); put(8, 11, 'a'); }
-    }
-    return { rows: g.map(r => r.join('')), pal: Object.assign({}, COMMON, look.pal) };
+    const grid = drawAvatar(look, o.stage || 'baby', closed);
+    const letters = 'abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789', pal = {}, idx = {};
+    const rows = grid.map(r => r.map(c => {
+      if (c === null) return '.';
+      if (idx[c] === undefined) { idx[c] = letters[Object.keys(idx).length]; pal[idx[c]] = c; }
+      return idx[c];
+    }).join(''));
+    return { rows, pal, w: W, h: H, bust: BUST };
   }
 
   const api = { sprite, ITEMS, itemOf, buy, titleOf, SPECIES, REWARD, BONUS, FEED, MAX_LEVEL, STAGES, MOOD, need, progress, stageOf, newPet, award, feed, mood, say, streak, view, speciesOf };

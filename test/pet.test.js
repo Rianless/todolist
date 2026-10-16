@@ -125,9 +125,9 @@ assert.deepStrictEqual(si.slice().sort(), ['lamp', 'plant', 'tree']);
 // 도트 스프라이트: 모든 종류·단계·눈 모양이 16×16 이고 팔레트에 없는 글자가 없다
 P.SPECIES.forEach(sp => ['egg', 'baby', 'kid', 'adult', 'legend'].forEach(stage => ['open', 'closed'].forEach(eyes => {
   const sx = P.sprite({ species: sp.id, stage, eyes });
-  assert.strictEqual(sx.rows.length, 16, sp.id + stage);
+  assert.strictEqual(sx.rows.length, sx.h, sp.id + stage);
   sx.rows.forEach(r => {
-    assert.strictEqual(r.length, 16, `${sp.id}/${stage}/${eyes}: ${r}`);
+    assert.strictEqual(r.length, sx.w, `${sp.id}/${stage}/${eyes}: ${r}`);
     [...r].forEach(ch => assert.ok(ch === '.' || sx.pal[ch], `${sp.id}/${stage}: 모르는 글자 ${ch}`));
   });
   assert.ok(sx.rows.join('').replace(/\./g, '').length > 60);   // 비어 있지 않다
