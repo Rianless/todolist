@@ -7063,3 +7063,18 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
   .dkw-sub { margin: 8px 0 3px; }
   .dkw-bar { height: 16px; }
 }
+
+/* PC 바탕화면: 앱 아이콘 키우기 (위젯·창은 --dk-left 만큼 오른쪽으로 밀려 가로가 그만큼 줄어든다) */
+@media (min-width: 900px) {
+  html[data-desktop][data-skin="w98"]:not([data-desktop-max]) { --dk-left: 168px; }
+  html[data-desktop][data-skin="w98"] .tab-item, html[data-desktop][data-skin="w98"] .tab-item.active, html[data-desktop][data-skin="w98"] .tab-item:active, html[data-desktop][data-skin="w98"] .desk-ico, html[data-desktop][data-skin="w98"] .desk-ico:active { left: 8px; width: 148px !important; height: 100px !important; gap: 5px !important; }
+  html[data-desktop][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-skin="w98"] .desk-ico .tab-icon { font-size: 54px !important; line-height: 62px; height: 62px; }
+  html[data-desktop][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-skin="w98"] .desk-ico .tab-label { font-size: 15px !important; padding: 1px 6px; }
+  html[data-desktop][data-skin="w98"] #mainTab-calendar { top: 16px; }
+  html[data-desktop][data-skin="w98"] #mainTab-category { top: 132px; }
+  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(1) { top: 248px; }
+  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(2) { top: 364px; }
+  html[data-desktop][data-skin="w98"] .desk-ico:nth-child(3) { top: 480px; }
+  html[data-desktop][data-skin="w98"] #mainTab-mypage { top: 596px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { left: var(--dk-left); }
+}
