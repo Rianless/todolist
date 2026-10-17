@@ -1067,7 +1067,7 @@ function renderCal() {
 
     if(!dmap[item.date]) dmap[item.date]=[];
 
-    dmap[item.date].push(item);
+    dmap[item.date].push(effectiveItem(item, item.date));
 
     // generate repeat instances for this month
 

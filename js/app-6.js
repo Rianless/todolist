@@ -1064,7 +1064,8 @@ function toggleItemDoneOn(item, ds) {
 const OCCURRENCE_FIELDS = ['title', 'category', 'time', 'memo', 'content', 'checklist', 'priority', 'secret', 'hideTitle', 'photo'];
 
 function effectiveItem(item, ds) {
-  if (!item || !isRepeatingItem(item) || !ds || ds === item.date) return item;
+  if (!item || !isRepeatingItem(item) || !ds) return item;
+  if (ds === item.date) { const own = (item.overrides || {})[ds]; return own ? {...item, ...own} : item; }
   return {...item, ...((item.overrides || {})[ds] || {}), date: ds, done: isItemDoneOn(item, ds)};
 }
 
