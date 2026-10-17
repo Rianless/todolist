@@ -767,6 +767,8 @@ async function loadItemsFromAPI() {
 
           overrides: existingItem?.overrides || {},
 
+          excludedDates: existingItem?.excludedDates || [],
+
           checklist: normalizeChecklist(row.checklist || existingItem?.checklist)
 
         };

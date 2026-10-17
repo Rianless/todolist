@@ -2137,9 +2137,55 @@ function detailEdit() { openEdit(detailId, detailDate); }
 
 
 
+// 반복된 날짜 하나만 지우고, 되돌리기를 보여 준다
+function removeOccurrenceWithUndo(id, ds) {
+  const item = items.find(i => i.id === id);
+  if (!item) return;
+  const snapshot = JSON.parse(JSON.stringify(item));
+  if (!excludeOccurrence(item, ds)) return;
+  saveData();
+  renderAfterOccurrenceChange();
+  showToast('이 날짜 일정이 삭제되었습니다', {
+    type: 'success',
+    duration: 5000,
+    action: {
+      label: '되돌리기',
+      onClick: () => {
+        const idx = items.findIndex(i => i.id === id);
+        if (idx > -1) items[idx] = snapshot;
+        saveData();
+        renderAfterOccurrenceChange();
+        showToast('복구되었습니다', { type: 'info', duration: 1800 });
+      }
+    }
+  });
+}
+
+function renderAfterOccurrenceChange() {
+  if (currentMainTab === 'calendar') {
+    if (currentCalSubTab === 'cal') renderCal();
+    else if (currentCalSubTab === 'week') renderWeek();
+    else if (currentCalSubTab === 'list') renderList();
+    else if (currentCalSubTab === 'today') renderToday();
+  }
+  updateProgress();
+}
+
 async function detailDelete() {
 
-  const ok = await customConfirm('이 일정을 삭제할까요?', {
+  const target = items.find(i => i.id === detailId);
+  const onlyThisDay = !!(target && isRepeatingItem(target) && detailDate && detailDate !== target.date);
+
+  if (onlyThisDay) {
+    const label = detailDate.slice(5).replace('-', '/');
+    const okDay = await customConfirm(`${label} 일정만 삭제할까요? (다른 날짜의 반복 일정은 그대로 남아요)`, { danger: true, icon: '🗑', okLabel: '이 날짜만 삭제' });
+    if (!okDay) return;
+    removeOccurrenceWithUndo(target.id, detailDate);
+    closeDetail();
+    return;
+  }
+
+  const ok = await customConfirm(isRepeatingItem(target) ? '반복 일정 전체를 삭제할까요?' : '이 일정을 삭제할까요?', {
 
     danger: true,
 

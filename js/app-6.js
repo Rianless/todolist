@@ -1068,6 +1068,13 @@ function effectiveItem(item, ds) {
   return {...item, ...((item.overrides || {})[ds] || {}), date: ds, done: isItemDoneOn(item, ds)};
 }
 
+// 반복된 날짜(원래 날짜가 아닌 날) 하나만 지운다. 지울 수 있으면 true
+function excludeOccurrence(item, ds) {
+  if (!isRepeatingItem(item) || !ds || ds === item.date) return false;
+  item.excludedDates = [...new Set([...(item.excludedDates || []), ds])].sort();
+  return true;
+}
+
 // 반복 값: none | daily | weekly | monthly | weekdays:1,3,5 (요일 선택, 0=일 ~ 6=토)
 function repeatWeekdays(repeat) {
   if (typeof repeat !== 'string' || !repeat.startsWith('weekdays:')) return null;
@@ -1110,7 +1117,7 @@ function generateRepeatInstances(item, rangeStart, rangeEnd) {
 
       const ds = fmtDate(cur);
 
-      if (ds !== item.date && (!weekdays || weekdays.includes(cur.getDay()))) instances.push({...effectiveItem(item, ds), _isRepeat: true});
+      if (ds !== item.date && !(item.excludedDates || []).includes(ds) && (!weekdays || weekdays.includes(cur.getDay()))) instances.push({...effectiveItem(item, ds), _isRepeat: true});
 
     }
 
