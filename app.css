@@ -6909,20 +6909,26 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   html[data-desktop][data-skin="w98"] .tab-bar, html[data-desktop][data-skin="w98"] .desk-extra { display: contents !important; }
   html[data-desktop]:not([data-desktop-win])[data-skin="w98"] .tab-item, html[data-desktop]:not([data-desktop-win])[data-skin="w98"] .desk-ico { display: none !important; }
 
-  /* 바탕화면 아이콘: 3열 × 2줄 */
-  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico { display: flex !important; position: fixed !important; z-index: 2; width: 30% !important; height: 84px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 4px !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-icon { font-size: 38px !important; line-height: 46px; height: 46px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.45)); }
-  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-label { font-size: 12px !important; font-weight: 400 !important; padding: 1px 4px; color: #fff !important; }
+  /* 바탕화면 아이콘: 아래 가운데 독(6칸 한 줄) */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico { display: flex !important; position: fixed !important; z-index: 4; bottom: calc(var(--dk-bar) + 8px); width: 15.5% !important; height: 70px !important; min-height: 0 !important; padding: 2px 0 !important; gap: 3px !important; flex-direction: column !important; align-items: center !important; justify-content: flex-start !important; background: transparent !important; box-shadow: none !important; border: none !important; color: #fff !important; text-shadow: 1px 1px 0 #000; cursor: pointer; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-icon { font-size: 32px !important; line-height: 38px; height: 38px; filter: drop-shadow(1px 1px 0 rgba(0,0,0,.45)); }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-label { font-size: 11px !important; font-weight: 400 !important; padding: 1px 3px; color: #fff !important; white-space: nowrap; }
   html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item:active .tab-label, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico:active .tab-label { background: #000080; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-calendar { left: 3%; top: 50px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-category { left: 35%; top: 50px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="bookmark"] { left: 67%; top: 50px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="memo"] { left: 35%; top: 140px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-mypage { left: 67%; top: 140px; }
-  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="diary"] { left: 3%; top: 140px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-calendar { left: 3.5%; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-category { left: 19%; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="bookmark"] { left: 34.5%; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="diary"] { left: 50%; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="memo"] { left: 65.5%; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-mypage { left: 81%; }
 
-  /* 위젯: 아이콘 아래에 세로로 */
-  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-direction: column; gap: 10px; position: fixed; z-index: 3; left: 8px; right: 8px; top: 238px; bottom: calc(var(--dk-bar) + 8px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  /* 맨 위 달성률 막대: 가로 가득 */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .progress-bar-wrap { display: flex !important; align-items: center; gap: 8px; position: fixed !important; z-index: 4; left: 6px; right: 6px; top: 40px; height: 28px; margin: 0 !important; padding: 0 8px !important; box-sizing: border-box; background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border: none !important; border-radius: 0 !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .prog-label { flex: none; font-size: 12px !important; font-weight: 700; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .prog-track { flex: 1; min-width: 0; height: 16px !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .prog-pct { flex: none; min-width: 36px; text-align: right; font-size: 12px !important; font-weight: 700; }
+
+  /* 위젯: 위(달성률 막대 아래)부터 독 위까지 가로·세로로 채운다 */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-direction: column; gap: 10px; position: fixed; z-index: 3; left: 8px; right: 8px; top: 76px; bottom: calc(var(--dk-bar) + 86px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
   html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; flex: none; max-height: none; box-sizing: border-box; }
   html[data-desktop][data-skin="w98"] .dkw-check { width: 22px; height: 22px; font-size: 14px !important; }
 
