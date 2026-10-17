@@ -1134,6 +1134,7 @@ function deleteBookmark(id) {
 function saveBookmarks() {
   try { localStorage.setItem('rianless_bookmarks', JSON.stringify({ bookmarks, bookmarkNextId, bookmarkFolders, bookmarkFolderNextId })); } catch(e) {}
   queueCloudStateSync();
+  try { updateDesktopWidgets(); } catch (e) {}
 }
 
 function loadBookmarks() {

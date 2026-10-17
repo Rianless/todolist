@@ -1159,12 +1159,17 @@ function updateDesktopWidgets() {
   const wMoney = win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml);
   const wStat = win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml);
   const wDday = win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml);
+  // ⑦ 북마크: 저장한 링크 전체 (북마크 앱과 같은 최신순), 누르면 새 탭으로 열림
+  const bmRows = [...bookmarks].reverse().map(b => `<button type="button" class="dkw-bm" onclick="openBookmark(${b.id})" title="${esc(b.url)}">` +
+    `<span class="dkw-bm-icon"><span>${esc(Bookmarks.labelOf(b).slice(0, 1).toUpperCase())}</span><img loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'"></span>` +
+    `<span class="dkw-text">${esc(Bookmarks.labelOf(b))}</span></button>`).join('');
+  const wBookmark = win(`🔖 북마크`, open('열기', "desktopOpen('bookmark')"), `<div class="dkw-bm-list">${bmRows || '<div class="dkw-empty">저장한 링크가 없어요</div>'}</div>`);
   const stack = (...ws) => `<div class="dk-stack">${ws.join('')}</div>`;
   box.innerHTML = window.innerWidth < 900
     // 폰: 오늘 · 달력 · 메모 · 이번 달 가계부 · D-day·택배 (가계부 통계는 뺀다)
     ? stack(wToday) + stack(wCal) + stack(wMemo) + stack(wMoney) + stack(wDday)
-    // PC: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배
-    : stack(wToday, wMemo) + stack(wCal) + stack(wMoney, wStat) + stack(wDday);
+    // PC: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배 · 북마크
+    : stack(wToday, wMemo) + stack(wCal) + stack(wMoney, wStat) + stack(wDday) + stack(wBookmark);
   const ta = box.querySelector('.mf-input');
   if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
   const list = box.querySelector('.mf-scroll');
