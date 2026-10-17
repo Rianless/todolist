@@ -1153,13 +1153,18 @@ function updateDesktopWidgets() {
   const allMemos = memoSort(memos);
   const keepList = box.querySelector('.mf-scroll'), listTop = keepList ? keepList.scrollTop : 0;
   const memoWidget = memoComposerHtml() + `<div class="mf-scroll">` + (allMemos.length ? allMemos.map(x => memoPostHtml(x)).join('') : '<div class="dkw-empty">아직 메모가 없어요</div>') + `</div>`;
-  // 위젯 순서: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배
-  box.innerHTML = `<div class="dk-stack">` + win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
-    win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget) + `</div>` +
-    `<div class="dk-stack">` + win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml) + `</div>` +
-    `<div class="dk-stack">` + win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
-    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) + `</div>` +
-    `<div class="dk-stack">` + win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>`;
+  const wToday = win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml);
+  const wMemo = win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget);
+  const wCal = win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml);
+  const wMoney = win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml);
+  const wStat = win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml);
+  const wDday = win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml);
+  const stack = (...ws) => `<div class="dk-stack">${ws.join('')}</div>`;
+  box.innerHTML = window.innerWidth < 900
+    // 폰: 오늘 · 달력 · 메모 · 이번 달 가계부 · D-day·택배 (가계부 통계는 뺀다)
+    ? stack(wToday) + stack(wCal) + stack(wMemo) + stack(wMoney) + stack(wDday)
+    // PC: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배
+    : stack(wToday, wMemo) + stack(wCal) + stack(wMoney, wStat) + stack(wDday);
   const ta = box.querySelector('.mf-input');
   if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
   const list = box.querySelector('.mf-scroll');

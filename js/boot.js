@@ -263,6 +263,12 @@ setInterval(() => { if (document.hidden) return; if (cloudDirty && !cloudSyncPro
 const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 가계부 — 나의 하루', mypage: '👤 마이페이지 — 나의 하루', memo: '📝 메모장 — 나의 하루', bookmark: '🔖 북마크 — 나의 하루', diary: '📔 다이어리 — 나의 하루' };
 let statsY = new Date().getFullYear(), statsM = new Date().getMonth();
 window.addEventListener('resize', statsGuard);
+// 폰 ↔ PC 폭이 바뀌면 위젯 구성이 달라지므로 다시 그린다
+let dkWasPhone = window.innerWidth < 900;
+window.addEventListener('resize', () => {
+  const phone = window.innerWidth < 900;
+  if (phone !== dkWasPhone) { dkWasPhone = phone; try { updateDesktopWidgets(); } catch (e) {} }
+});
 
 const MEMO_MAX = 500;       // 메모 한 개의 최대 글자 수
 let memoSearchText = '';
