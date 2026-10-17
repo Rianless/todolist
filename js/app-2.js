@@ -494,7 +494,7 @@ function renderMemoList() {
   const box = document.getElementById('memoCardSearch');
   if (box) box.style.display = memos.length >= 3 ? '' : 'none';
   if (!memos.length) {
-    el.innerHTML = '<div class="memo-empty">아직 메모가 없어요. 위에 적고 SEND 를 눌러 보세요</div>';
+    el.innerHTML = '<div class="memo-empty">메모가 없습니다</div>';
     return;
   }
   const q = memos.length >= 3 ? memoCardSearchText : '';
@@ -504,7 +504,13 @@ function renderMemoList() {
     return;
   }
   // 고정한 메모가 맨 위, 그다음 최근에 고친 순 (PC 메모장과 같은 순서)
-  el.innerHTML = list.map(m => memoPostHtml(m, q)).join('');
+  el.innerHTML = list.map(m => `
+    <div class="memo-item${m.pinned ? ' pinned' : ''}" onclick="openMemoAdd(${m.id})">
+      <div class="memo-item-date">${m.pinned ? '📌 ' : ''}${m.date}</div>
+      <div class="memo-item-content">${escapeLedgerText(m.content)}</div>
+      <button class="memo-item-pin" aria-label="${m.pinned ? '고정 해제' : '맨 위에 고정'}" onclick="toggleMemoPin(${m.id});event.stopPropagation()">${m.pinned ? '📌' : '📍'}</button>
+      <button class="memo-item-del" aria-label="메모 삭제" onclick="deleteMemo(${m.id});event.stopPropagation()">✕</button>
+    </div>`).join('');
 }
 
 function toggleMemoPin(id) {
