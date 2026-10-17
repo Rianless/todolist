@@ -1150,8 +1150,9 @@ function updateDesktopWidgets() {
   // ⑥ 메모: 입력칸 + 최근 메모 (다시 그려도 쓰던 글은 그대로 둔다)
   const keep = box.querySelector('.mf-input');
   const draft = keep ? keep.value : '', hadFocus = !!keep && document.activeElement === keep;
-  const recentMemos = memoSort(memos).slice(0, 3);
-  const memoWidget = memoComposerHtml() + (recentMemos.length ? recentMemos.map(x => memoPostHtml(x)).join('') : '<div class="dkw-empty">아직 메모가 없어요</div>');
+  const allMemos = memoSort(memos);
+  const keepList = box.querySelector('.mf-scroll'), listTop = keepList ? keepList.scrollTop : 0;
+  const memoWidget = memoComposerHtml() + `<div class="mf-scroll">` + (allMemos.length ? allMemos.map(x => memoPostHtml(x)).join('') : '<div class="dkw-empty">아직 메모가 없어요</div>') + `</div>`;
   // 위젯 순서: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배
   box.innerHTML = `<div class="dk-stack">` + win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
     win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget) + `</div>` +
@@ -1161,6 +1162,8 @@ function updateDesktopWidgets() {
     `<div class="dk-stack">` + win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>`;
   const ta = box.querySelector('.mf-input');
   if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
+  const list = box.querySelector('.mf-scroll');
+  if (list) list.scrollTop = listTop;
 }
 
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
@@ -1265,6 +1268,8 @@ function memoSend(el) {
   el.value = '';
   memoFeedInput(el);
   const home = el.closest('#todayPage') ? '#todayPage' : el.closest('#desktopWidgets') ? '#desktopWidgets' : null;
+  const list = document.querySelector('#desktopWidgets .mf-scroll');
+  if (list) list.scrollTop = 0;   // 새 글이 맨 위에 쌓이니 목록도 맨 위로
   saveMemos();
   renderMemoAll();
   const next = home ? document.querySelector(home + ' .mf-input') : el;
