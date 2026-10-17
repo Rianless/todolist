@@ -128,3 +128,43 @@ function dkCalPick(ds) {
   calY = y; calM = mo - 1; calSelectedDate = ds;
   desktopOpen('calendar');
 }
+
+// PC 바탕화면 달력 위젯: 날짜 칸에 마우스를 올리면 그날 일정·루틴을 말풍선으로 보여 준다
+let dkDayTipDs = null;
+function dkDayTipHtml(ds) {
+  const esc = escapeLedgerText, MAX = 8;
+  const d = new Date(ds + 'T00:00:00');
+  const todos = itemsOnDate(ds).slice().sort((a, b) => String(a.time || '99').localeCompare(String(b.time || '99')));
+  const rts = routinesForDate(ds);
+  const row = (done, text, time) => `<div class="dkt-row${done ? ' done' : ''}"><span class="dkt-mark">${done ? '✓' : '·'}</span><span class="dkt-text">${esc(text)}</span>${time ? `<span class="dkt-time">${esc(time)}</span>` : ''}</div>`;
+  const section = (label, list, fn) => list.length ? `<div class="dkt-sub">${label} ${list.length}</div>` + list.slice(0, MAX).map(fn).join('') + (list.length > MAX ? `<div class="dkt-more">외 ${list.length - MAX}건</div>` : '') : '';
+  const body = section('일정', todos, i => row(i.done, i.title, i.time)) + section('루틴', rts, r => row(isRoutineDone(r.id, ds), r.name, r.time));
+  return `<div class="dkt-head">${d.getMonth() + 1}월 ${d.getDate()}일 ${DOW_KO[d.getDay()]}요일</div>` + (body || '<div class="dkt-empty">일정·루틴이 없어요</div>');
+}
+function dkShowDayTip(btn) {
+  let tip = document.getElementById('dkDayTip');
+  if (!tip) { tip = document.createElement('div'); tip.id = 'dkDayTip'; tip.setAttribute('role', 'tooltip'); document.body.appendChild(tip); }
+  dkDayTipDs = btn.dataset.ds;
+  tip.innerHTML = dkDayTipHtml(dkDayTipDs);
+  tip.style.display = 'block';
+  // 날짜 칸 아래에 띄우되 화면 밖으로 나가면 위·안쪽으로 당긴다
+  const r = btn.getBoundingClientRect(), t = tip.getBoundingClientRect();
+  const left = Math.max(8, Math.min(r.left + r.width / 2 - t.width / 2, window.innerWidth - t.width - 8));
+  const top = r.bottom + 6 + t.height > window.innerHeight - 8 ? Math.max(8, r.top - 6 - t.height) : r.bottom + 6;
+  tip.style.left = left + 'px'; tip.style.top = top + 'px';
+}
+function dkHideDayTip() {
+  dkDayTipDs = null;
+  const tip = document.getElementById('dkDayTip');
+  if (tip) tip.style.display = 'none';
+}
+document.addEventListener('mouseover', e => {
+  const btn = e.target.closest && e.target.closest('#desktopWidgets .dkc-day');
+  if (!btn || window.innerWidth < 900) return;
+  if (btn.dataset.ds !== dkDayTipDs) dkShowDayTip(btn);
+});
+document.addEventListener('mouseout', e => {
+  const btn = e.target.closest && e.target.closest('#desktopWidgets .dkc-day');
+  if (btn && !btn.contains(e.relatedTarget)) dkHideDayTip();
+});
+window.addEventListener('scroll', dkHideDayTip, true);
