@@ -1063,6 +1063,7 @@ function agendaRefreshAfterToggle() {
 function updateDesktopWidgets() {
   const box = document.getElementById('desktopWidgets');
   if (!box) return;
+  if (typeof dkHideDayTip === 'function') dkHideDayTip();   // 다시 그리면 마우스 아래 날짜 칸이 사라지니 말풍선도 닫는다
   const now = new Date(), todayStr = fmtDate(now);
   const real = i => !i.isSub && !i.isInvest;
   const esc = escapeLedgerText;
@@ -1113,7 +1114,7 @@ function updateDesktopWidgets() {
     const ds = `${cPrefix}-${String(d).padStart(2, '0')}`;
     const dow = (cd.getDay() + d - 1) % 7;
     const has = (cMap[ds] || []).length;
-    cells += `<button type="button" class="dkc-day${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}${ds === todayStr ? ' today' : ''}${has ? ' has' : ''}" onclick="dkCalPick('${ds}')" aria-label="${cm + 1}월 ${d}일">${d}</button>`;
+    cells += `<button type="button" class="dkc-day${dow === 0 ? ' sun' : dow === 6 ? ' sat' : ''}${ds === todayStr ? ' today' : ''}${has ? ' has' : ''}" data-ds="${ds}" onclick="dkCalPick('${ds}')" aria-label="${cm + 1}월 ${d}일">${d}</button>`;
   }
   const goalHtml = `<div class="dkc-nav"><button type="button" onclick="dkCalMove(-1)" aria-label="이전 달">◀</button><b>${cy}년 ${cm + 1}월</b><button type="button" onclick="dkCalMove(1)" aria-label="다음 달">▶</button></div>` +
     `<div class="dkc-grid">${cells}</div>` +

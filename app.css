@@ -7175,3 +7175,14 @@ html[data-desktop][data-skin="w98"] .dkw-body .mf-input { min-height: 48px; }
 .dkw-bm-icon { position: relative; flex: 0 0 18px; width: 18px; height: 18px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; background: #808080; }
 .dkw-bm-icon img { position: absolute; inset: 0; width: 18px; height: 18px; }
 html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !important; box-shadow: none !important; }
+
+/* ══ PC 달력 위젯: 날짜 말풍선 ══ */
+#dkDayTip { display: none; position: fixed; z-index: 60; min-width: 180px; max-width: 280px; padding: 6px 8px; font-size: 12px; line-height: 1.4; color: #000; background: #ffffe1; border: 1px solid #000; box-shadow: 3px 3px 0 rgba(0,0,0,.35); pointer-events: none; }
+#dkDayTip .dkt-head { font-weight: 700; margin-bottom: 3px; padding-bottom: 3px; border-bottom: 1px dotted #808080; }
+#dkDayTip .dkt-sub { margin: 5px 0 1px; font-weight: 700; color: #000080; }
+#dkDayTip .dkt-row { display: flex; gap: 5px; padding: 1px 0; }
+#dkDayTip .dkt-row.done .dkt-text { text-decoration: line-through; color: #808080; }
+#dkDayTip .dkt-mark { flex: 0 0 10px; text-align: center; }
+#dkDayTip .dkt-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#dkDayTip .dkt-time { flex: 0 0 auto; color: #808080; }
+#dkDayTip .dkt-more, #dkDayTip .dkt-empty { color: #808080; }
