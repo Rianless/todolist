@@ -75,9 +75,16 @@ function renderToday() {
     return `<div class="td-row"><div class="td-main"><div class="td-title">📦 ${esc(Parcels.labelOf(p))}</div>${meta ? `<div class="td-sub">${esc(meta)}</div>` : ''}</div></div>`;
   }).join('') + (waitList.length > 6 ? `<div class="td-empty">외 ${waitList.length - 6}건</div>` : '') : '<div class="td-empty">기다리는 택배가 없어요</div>';
 
+  const recent = memoSort(memos).slice(0, 3);
+  const memoHtml = recent.length ? recent.map(m => memoPostHtml(m)).join('') : '<div class="td-empty">아직 메모가 없어요. 위에 적고 SEND 를 눌러 보세요</div>';
+  const keep = el.querySelector('.mf-input');
+  const draft = keep ? keep.value : '', hadFocus = !!keep && document.activeElement === keep;
+
   const pct = (a, b) => b ? Math.round(a / b * 100) : 0;
   el.innerHTML = `
     <div class="td-hero"><div class="td-hello">${hello} 👋</div><div class="td-date">${now.getMonth() + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일</div></div>
+    <section class="td-card td-memo"><div class="td-head"><span>📝 메모</span><button type="button" class="td-more" onclick="desktopOpen('mypage','mpCardMemo')">마이페이지 메모 ›</button></div>
+      ${memoComposerHtml()}${memoHtml}</section>
     <section class="td-card"><div class="td-head"><span>오늘 일정</span><em>${doneCnt}/${todos.length}</em></div>
       <div class="td-bar"><i style="width:${pct(doneCnt, todos.length)}%"></i></div>${todoHtml}</section>
     <section class="td-card"><div class="td-head"><span>오늘 루틴</span><em>${rDone}/${rs.length}</em></div>
@@ -89,6 +96,9 @@ function renderToday() {
     <section class="td-card"><div class="td-head"><span>가계부 통계</span></div>${statHtml}</section>
     <section class="td-card"><div class="td-head"><span>다가오는 D-day</span></div>${ddHtml}</section>
     <section class="td-card"><div class="td-head"><span>📦 기다리는 택배</span><em>${waitList.length}건</em></div>${parcelHtml}</section>`;
+  // 다시 그려도 쓰던 글은 그대로 둔다
+  const ta = el.querySelector('.mf-input');
+  if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
 }
 
 function todayToggleItem(id) { agendaToggleDone(id); }

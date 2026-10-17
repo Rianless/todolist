@@ -680,13 +680,7 @@
             <div class="mp-card-inner">
 
               <input type="search" class="form-input" id="memoCardSearch" placeholder="🔍 메모 검색" aria-label="메모 검색" autocomplete="off" style="display:none;margin-bottom:8px;" oninput="memoCardSearchText=this.value;renderMemoList()">
-              <div class="mf-compose">
-  <div class="mf-avatar" aria-hidden="true">R</div>
-  <div class="mf-compose-main">
-    <textarea class="mf-input" maxlength="500" rows="3" placeholder="무슨 일이 일어나고 있나요?" aria-label="메모 입력" oninput="memoFeedInput(this)" onkeydown="memoFeedKey(event, this)"></textarea>
-    <div class="mf-compose-bar"><span class="mf-count">0/500</span><button type="button" class="mf-send" disabled onclick="memoSend(this.closest('.mf-compose').querySelector('.mf-input'))">SEND</button></div>
-  </div>
-</div>
+              <button class="ledger-add-btn" type="button" style="margin-bottom:10px;" onclick="openHomeMemo()">🏠 홈에서 메모 쓰기</button>
               <div id="memoList"></div>
 
             </div>

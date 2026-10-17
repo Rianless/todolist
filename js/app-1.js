@@ -1222,7 +1222,21 @@ function memoPostHtml(m, query) {
 // 화면에 떠 있는 메모 목록(바탕화면 메모장·마이페이지 카드)을 모두 다시 그린다
 function renderMemoAll() {
   renderMemoApp();
+  if (currentMainTab === 'calendar' && currentCalSubTab === 'today') renderToday();
   if (typeof renderMemoList === 'function') renderMemoList();
+}
+function memoComposerHtml() {
+  const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
+  return `<div class="mf-compose"><div class="mf-avatar" aria-hidden="true">${escapeLedgerText(nick.charAt(0).toUpperCase())}</div>` +
+    `<div class="mf-compose-main"><textarea class="mf-input" maxlength="${MEMO_MAX}" rows="3" placeholder="무슨 일이 일어나고 있나요?" aria-label="메모 입력" oninput="memoFeedInput(this)" onkeydown="memoFeedKey(event, this)"></textarea>` +
+    `<div class="mf-compose-bar"><span class="mf-count">0/${MEMO_MAX}</span><button type="button" class="mf-send" disabled onclick="memoSend(this.closest('.mf-compose').querySelector('.mf-input'))">SEND</button></div></div></div>`;
+}
+// 홈(달력 > 오늘)의 메모 입력칸으로 간다
+function openHomeMemo() {
+  setMainTab('calendar', document.getElementById('mainTab-calendar'));
+  setCalSubTab('today', document.getElementById('cst-today'));
+  const ta = document.querySelector('#todayPage .mf-input');
+  if (ta) { ta.scrollIntoView({ block: 'center' }); ta.focus(); }
 }
 function memoComposerOf(el) { return el.closest('.mf-compose'); }
 function memoFeedInput(el) {
@@ -1240,9 +1254,11 @@ function memoSend(el) {
   memos.push({ id: memoNextId++, content: text.slice(0, MEMO_MAX), date: fmtDate(now), updated: now.toISOString() });
   el.value = '';
   memoFeedInput(el);
+  const onHome = !!el.closest('#todayPage');
   saveMemos();
   renderMemoAll();
-  el.focus();
+  const next = onHome ? document.querySelector('#todayPage .mf-input') : el;
+  if (next) next.focus();
 }
 function memoRemove(id) {
   const m = memos.find(x => x.id === id);

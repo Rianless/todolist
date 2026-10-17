@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v104-memo-feed';
+const CACHE_NAME = 'todolist-v105-home-memo';
 const ASSETS = [
   './',
   './index.html',
