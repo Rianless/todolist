@@ -740,23 +740,17 @@
 
     <!-- ══ 메모장 뷰 (바탕화면 스킨 PC 전용) ══ -->
     <div class="view" id="viewMemo">
-      <aside class="mm-side">
-        <div class="mm-side-top">
-          <button type="button" class="mm-new" onclick="memoNew()">＋ 새 메모</button>
-          <input type="search" id="memoSearch" class="mm-search" placeholder="🔍 메모 검색" oninput="memoSearchInput(this.value)" aria-label="메모 검색" autocomplete="off">
-        </div>
-        <div class="mm-list" id="memoAppList"></div>
+      <section class="mf-wrap">
+        <div class="mf-compose">
+  <div class="mf-avatar" aria-hidden="true">R</div>
+  <div class="mf-compose-main">
+    <textarea class="mf-input" maxlength="500" rows="3" placeholder="무슨 일이 일어나고 있나요?" aria-label="메모 입력" oninput="memoFeedInput(this)" onkeydown="memoFeedKey(event, this)"></textarea>
+    <div class="mf-compose-bar"><span class="mf-count">0/500</span><button type="button" class="mf-send" disabled onclick="memoSend(this.closest('.mf-compose').querySelector('.mf-input'))">SEND</button></div>
+  </div>
+</div>
+        <input type="search" id="memoSearch" class="mf-search" placeholder="🔍 메모 검색" oninput="memoSearchInput(this.value)" aria-label="메모 검색" autocomplete="off">
+        <div class="mf-feed" id="memoAppList"></div>
         <div class="mm-count" id="memoAppCount"></div>
-      </aside>
-      <section class="mm-main">
-        <div class="mm-tabs" id="memoTabs" role="tablist"></div>
-        <div class="mm-tools">
-          <button type="button" id="memoPinBtn" onclick="memoTogglePin()" title="맨 위에 고정">📌 고정</button>
-          <button type="button" id="memoDelBtn" onclick="memoDeleteActive()" title="이 메모 지우기">🗑️ 지우기</button>
-          <span class="mm-tools-hint">입력하면 자동으로 저장돼요</span>
-        </div>
-        <textarea id="memoEditor" class="mm-editor" spellcheck="false" oninput="memoInput()" placeholder="왼쪽에서 메모를 고르거나 '새 메모'를 눌러 시작하세요." aria-label="메모 내용"></textarea>
-        <div class="mm-status" id="memoStatus"></div>
       </section>
     </div>
 

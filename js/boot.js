@@ -264,11 +264,8 @@ const DK_TITLES = { calendar: '📅 달력 — 나의 하루', category: '💰 �
 let statsY = new Date().getFullYear(), statsM = new Date().getMonth();
 window.addEventListener('resize', statsGuard);
 
-let memoTabs = [];          // 열어 둔 탭(메모 id)
-let memoActive = null;      // 지금 편집 중인 메모 id
+const MEMO_MAX = 500;       // 메모 한 개의 최대 글자 수
 let memoSearchText = '';
-let memoSaveTimer = null;
-window.addEventListener('pagehide', memoFlush);
 
 /* ══════════════════════════════════════
    북마크 앱 (PC 바탕화면 스킨): 주소창 + 폴더 + 북마크 모음 + 검색 + 끌어다 놓기
