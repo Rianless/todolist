@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v108-widget-order';
+const CACHE_NAME = 'todolist-v109-memo-widget-scroll';
 const ASSETS = [
   './',
   './index.html',

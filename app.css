@@ -7142,3 +7142,6 @@ html[data-skin="w98"] .td-more { color: #000080 !important; background: none !im
 html[data-desktop][data-skin="w98"] .dkw-body .mf-compose { padding: 8px; }
 html[data-desktop][data-skin="w98"] .dkw-body .mf-post { padding: 8px 4px; }
 html[data-desktop][data-skin="w98"] .dkw-body .mf-input { min-height: 48px; }
+
+/* 홈 메모 위젯: 입력칸은 두고 메모 목록만 스크롤 */
+.dkw-body .mf-scroll { max-height: 320px; overflow-y: auto; }
