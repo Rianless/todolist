@@ -1043,6 +1043,23 @@ function moveItemDate(item, newDate) {
   item.date = newDate;
 }
 
+// 반복 일정의 완료는 날짜별로 따로 기록한다: 원래 날짜는 item.done, 반복된 날짜는 item.doneDates
+function isRepeatingItem(item) { return !!(item && item.repeat && item.repeat !== 'none'); }
+
+function isItemDoneOn(item, ds) {
+  if (!isRepeatingItem(item) || !ds || ds === item.date) return !!item.done;
+  return (item.doneDates || []).includes(ds);
+}
+
+function toggleItemDoneOn(item, ds) {
+  if (!isRepeatingItem(item) || !ds || ds === item.date) { item.done = !item.done; return item.done; }
+  const set = new Set(item.doneDates || []);
+  const nowDone = !set.has(ds);
+  if (nowDone) set.add(ds); else set.delete(ds);
+  item.doneDates = [...set].sort();
+  return nowDone;
+}
+
 // 반복 값: none | daily | weekly | monthly | weekdays:1,3,5 (요일 선택, 0=일 ~ 6=토)
 function repeatWeekdays(repeat) {
   if (typeof repeat !== 'string' || !repeat.startsWith('weekdays:')) return null;
@@ -1085,7 +1102,7 @@ function generateRepeatInstances(item, rangeStart, rangeEnd) {
 
       const ds = fmtDate(cur);
 
-      if (ds !== item.date && (!weekdays || weekdays.includes(cur.getDay()))) instances.push({...item, date: ds, _isRepeat: true});
+      if (ds !== item.date && (!weekdays || weekdays.includes(cur.getDay()))) instances.push({...item, date: ds, done: isItemDoneOn(item, ds), _isRepeat: true});
 
     }
 

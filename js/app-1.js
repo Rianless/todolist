@@ -763,6 +763,8 @@ async function loadItemsFromAPI() {
           repeatEnd: (row.repeat && row.repeat !== 'none') ? (row.repeat_end || null) : null,
           endDate: (!row.repeat || row.repeat === 'none') ? (row.repeat_end || null) : null,
 
+          doneDates: existingItem?.doneDates || [],
+
           checklist: normalizeChecklist(row.checklist || existingItem?.checklist)
 
         };
@@ -1034,14 +1036,14 @@ function renderStatsView() {
 ══════════════════════════════════════ */
 // 바탕화면 위젯의 체크 버튼: 데이터를 바꾸고 위젯부터 바로 갱신한다.
 // (달력·루틴 화면 갱신에서 오류가 나도 위젯의 체크 표시는 항상 바뀌게 따로 보호한다)
-function dkToggleItem(id) {
+function dkToggleItem(id, ds) {
   const item = items.find(i => String(i.id) === String(id));
   if (!item) return;
-  item.done = !item.done;
+  toggleItemDoneOn(item, ds);
   try { saveData(); } catch (e) { console.error('[dkToggleItem] 저장 실패:', e); }
   updateDesktopWidgets();
   try { agendaRefreshAfterToggle(); } catch (e) { console.error('[dkToggleItem] 화면 갱신 실패:', e); }
-  if (item.done) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
+  if (isItemDoneOn(item, ds)) showToast('완료 처리했습니다 ✓', { type: 'success', duration: 1800 });
 }
 
 function dkToggleRoutine(id, ds) {
@@ -1077,7 +1079,7 @@ function updateDesktopWidgets() {
   const row = (done, onclick, text, time) => `<div class="dkw-row${done ? ' done' : ''}"><button type="button" class="dkw-check" onclick="${onclick}" aria-label="완료 표시">${done ? '✓' : ''}</button><span class="dkw-text" title="${esc(text)}">${esc(text)}</span>${time ? `<span class="dkw-time">${esc(time)}</span>` : ''}</div>`;
   let todayHtml = '';
   todayHtml += `<div class="dkw-sub">할 일 ${todayItems.filter(i => i.done).length}/${todayItems.length}</div>`;
-  todayHtml += todayItems.length ? todayItems.slice(0, MAX).map(i => row(i.done, `dkToggleItem('${String(i.id).replace(/[^\w-]/g, '')}')`, i.title, i.time)).join('') + (todayItems.length > MAX ? `<div class="dkw-empty">외 ${todayItems.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 할 일이 없어요</div>';
+  todayHtml += todayItems.length ? todayItems.slice(0, MAX).map(i => row(i.done, `dkToggleItem('${String(i.id).replace(/[^\w-]/g, '')}','${todayStr}')`, i.title, i.time)).join('') + (todayItems.length > MAX ? `<div class="dkw-empty">외 ${todayItems.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 할 일이 없어요</div>';
   todayHtml += `<div class="dkw-sub">루틴 ${rts.filter(r => isRoutineDone(r.id, todayStr)).length}/${rts.length}</div>`;
   todayHtml += rts.length ? rts.slice(0, MAX).map(r => row(isRoutineDone(r.id, todayStr), `dkToggleRoutine('${String(r.id).replace(/[^\w-]/g, '')}','${todayStr}')`, r.name, r.time)).join('') + (rts.length > MAX ? `<div class="dkw-empty">외 ${rts.length - MAX}건</div>` : '') : '<div class="dkw-empty">오늘 루틴이 없어요</div>';
 
