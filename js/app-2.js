@@ -225,6 +225,7 @@ function toggleMpCard(id) {
 
 function setMainTab(tab, btn) {
 
+  if (currentMainTab === 'memo' && tab !== 'memo') { memoFlush(); memoPruneEmpty(null); }
   if (currentMainTab === 'diary' && tab !== 'diary') { diaryAppEdit = false; diaryRelock(); }
   if (currentMainTab === 'bookmark' && tab !== 'bookmark') { editingBookmarkId = null; bookmarkFolderEdit = null; }
   document.documentElement.setAttribute('data-main-tab', tab);
@@ -285,7 +286,7 @@ function setMainTab(tab, btn) {
 
   if (tab === 'mypage') renderMypageView();
 
-  if (tab === 'memo') renderMemoApp();
+  if (tab === 'memo') memoEnter();
 
   if (tab === 'bookmark') renderBookmarkApp();
   if (tab === 'diary') diaryEnter();
