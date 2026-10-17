@@ -1147,11 +1147,18 @@ function updateDesktopWidgets() {
     trend.map(t => `<div class="dkw-kv"><span>${t.month}월</span><span>${statsWon(t.expense)}</span></div><div class="dkw-bar"><i style="width:${Math.round(t.expense / maxExp * 100)}%"></i></div>`).join('') +
     (catsAll.length ? `<div class="dkw-sub">카테고리 비중</div>` + catsAll.map(c => `<div class="dkw-kv"><span>${esc(c.name)}</span><span>${c.pct}%</span></div><div class="dkw-bar"><i style="width:${c.pct}%"></i></div>`).join('') : '');
   // 오늘 위젯 바로 밑에 D-day · 택배 위젯을 붙인다 (한 칸에 세로로 쌓음)
+  // ⑥ 메모: 입력칸 + 최근 메모 (다시 그려도 쓰던 글은 그대로 둔다)
+  const keep = box.querySelector('.mf-input');
+  const draft = keep ? keep.value : '', hadFocus = !!keep && document.activeElement === keep;
+  const recentMemos = memoSort(memos).slice(0, 3);
+  const memoWidget = memoComposerHtml() + (recentMemos.length ? recentMemos.map(x => memoPostHtml(x)).join('') : '<div class="dkw-empty">아직 메모가 없어요</div>');
   box.innerHTML = `<div class="dk-stack">` + win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
     win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml) +
     win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>` +
-    `<div class="dk-stack">` + win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
+    `<div class="dk-stack">` + win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget) + win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
     win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) + `</div>`;
+  const ta = box.querySelector('.mf-input');
+  if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
 }
 
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
@@ -1222,6 +1229,7 @@ function memoPostHtml(m, query) {
 // 화면에 떠 있는 메모 목록(바탕화면 메모장·마이페이지 카드)을 모두 다시 그린다
 function renderMemoAll() {
   renderMemoApp();
+  updateDesktopWidgets();
   if (currentMainTab === 'calendar' && currentCalSubTab === 'today') renderToday();
   if (typeof renderMemoList === 'function') renderMemoList();
 }
@@ -1254,10 +1262,10 @@ function memoSend(el) {
   memos.push({ id: memoNextId++, content: text.slice(0, MEMO_MAX), date: fmtDate(now), updated: now.toISOString() });
   el.value = '';
   memoFeedInput(el);
-  const onHome = !!el.closest('#todayPage');
+  const home = el.closest('#todayPage') ? '#todayPage' : el.closest('#desktopWidgets') ? '#desktopWidgets' : null;
   saveMemos();
   renderMemoAll();
-  const next = onHome ? document.querySelector('#todayPage .mf-input') : el;
+  const next = home ? document.querySelector(home + ' .mf-input') : el;
   if (next) next.focus();
 }
 function memoRemove(id) {

@@ -7137,3 +7137,8 @@ html[data-skin="w98"] .mf-content a { color: #0000ee; }
 .td-memo .mf-compose { margin-bottom: 8px; }
 .td-more { padding: 0; font-size: 12px; font-weight: 600; color: var(--accent); background: none; border: none; box-shadow: none; cursor: pointer; }
 html[data-skin="w98"] .td-more { color: #000080 !important; background: none !important; box-shadow: none !important; text-decoration: underline; }
+
+/* ══ PC 홈(바탕화면 위젯)의 메모 위젯 ══ */
+html[data-desktop][data-skin="w98"] .dkw-body .mf-compose { padding: 8px; }
+html[data-desktop][data-skin="w98"] .dkw-body .mf-post { padding: 8px 4px; }
+html[data-desktop][data-skin="w98"] .dkw-body .mf-input { min-height: 48px; }

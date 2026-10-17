@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v106-memo-card-restore';
+const CACHE_NAME = 'todolist-v107-pc-home-memo';
 const ASSETS = [
   './',
   './index.html',
