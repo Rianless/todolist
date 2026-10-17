@@ -174,6 +174,8 @@ function calGoToday() {
 
   calY = t.getFullYear(); calM = t.getMonth();
 
+  calSelectedDate = fmtDate(t);
+
   renderCal();
 
 }
