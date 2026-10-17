@@ -1362,6 +1362,8 @@ function openAdd(presetDate=null) {
 
   document.getElementById('f_repeatEnd').value='';
   document.getElementById('repeatEndWrap').style.display='none';
+  document.getElementById('repeatDaysWrap').style.display='none';
+  document.querySelectorAll('#f_repeatDays button').forEach(b => b.classList.remove('on'));
   document.getElementById('f_endDate').value='';
   document.getElementById('f_endDate').disabled=false;
 
@@ -1430,9 +1432,13 @@ function openEdit(id) {
 
   document.getElementById('f_cat').value = item.category;
 
-  const repeatV = item.repeat||'none';
+  const rawRepeat = item.repeat||'none';
+  const repeatDays = repeatWeekdays(rawRepeat);
+  const repeatV = repeatDays ? 'weekdays' : rawRepeat;
 
   document.getElementById('f_repeat').value = repeatV;
+  document.getElementById('repeatDaysWrap').style.display = repeatDays ? '' : 'none';
+  document.querySelectorAll('#f_repeatDays button').forEach(b => b.classList.toggle('on', !!repeatDays && repeatDays.includes(Number(b.dataset.d))));
 
   document.getElementById('f_repeatEnd').value = item.repeatEnd||'';
 
@@ -1738,7 +1744,16 @@ async function saveItem() {
   const existing = editingId !== null ? items.find(i=>i.id===editingId) : null;
   const wasEditing = editingId !== null;
 
-  const repeatVal = document.getElementById('f_repeat').value;
+  let repeatVal = document.getElementById('f_repeat').value;
+  if (repeatVal === 'weekdays') {
+    const picked = [...document.querySelectorAll('#f_repeatDays button.on')].map(b => b.dataset.d);
+    if (!picked.length) {
+      const box = document.getElementById('f_repeatDays');
+      box.classList.add('form-error'); setTimeout(()=>box.classList.remove('form-error'),1500);
+      return;
+    }
+    repeatVal = 'weekdays:' + picked.join(',');
+  }
 
   const obj = {
 
@@ -1863,7 +1878,7 @@ function openDetail(id, skipHistory = false) {
     ${item.instructor?`<div class="detail-row"><span class="dr-key">강사</span><span class="dr-val">${item.instructor}</span></div>`:''}
 
     ${isMultiDay(item)?`<div class="detail-row"><span class="dr-key">기간</span><span class="dr-val">${item.date} ~ ${item.endDate} · ${spanLabel(item)}</span></div>`:''}
-    ${item.repeat&&item.repeat!=='none'?`<div class="detail-row"><span class="dr-key">반복</span><span class="dr-val">${{daily:'매일',weekly:'매주',monthly:'매월'}[item.repeat]||''}${item.repeatEnd?' · ~'+item.repeatEnd:''}</span></div>`:''}
+    ${item.repeat&&item.repeat!=='none'?`<div class="detail-row"><span class="dr-key">반복</span><span class="dr-val">${repeatLabel(item.repeat)}${item.repeatEnd?' · ~'+item.repeatEnd:''}</span></div>`:''}
 
     <div class="detail-row"><span class="dr-key">중요도</span><span class="dr-val">${prioLabels[item.priority||'none']}</span></div>
 

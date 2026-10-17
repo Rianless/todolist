@@ -1018,6 +1018,8 @@
 
               <option value="monthly">매월</option>
 
+              <option value="weekdays">요일 선택</option>
+
             </select>
 
           </div>
@@ -1025,6 +1027,18 @@
           <div>
             <label class="form-label">카테고리</label>
             <select class="form-select" id="f_cat"></select>
+          </div>
+        </div>
+        <div class="form-group" id="repeatDaysWrap" style="display:none;">
+          <label class="form-label">반복 요일</label>
+          <div class="routine-days" id="f_repeatDays">
+            <button type="button" data-d="1" onclick="this.classList.toggle('on')">월</button>
+            <button type="button" data-d="2" onclick="this.classList.toggle('on')">화</button>
+            <button type="button" data-d="3" onclick="this.classList.toggle('on')">수</button>
+            <button type="button" data-d="4" onclick="this.classList.toggle('on')">목</button>
+            <button type="button" data-d="5" onclick="this.classList.toggle('on')">금</button>
+            <button type="button" data-d="6" onclick="this.classList.toggle('on')">토</button>
+            <button type="button" data-d="0" onclick="this.classList.toggle('on')">일</button>
           </div>
         </div>
         <div class="form-group" id="repeatEndWrap" style="display:none;">

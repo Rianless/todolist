@@ -1043,6 +1043,18 @@ function moveItemDate(item, newDate) {
   item.date = newDate;
 }
 
+// 반복 값: none | daily | weekly | monthly | weekdays:1,3,5 (요일 선택, 0=일 ~ 6=토)
+function repeatWeekdays(repeat) {
+  if (typeof repeat !== 'string' || !repeat.startsWith('weekdays:')) return null;
+  return repeat.slice(9).split(',').map(Number).filter(d => d >= 0 && d <= 6);
+}
+
+function repeatLabel(repeat) {
+  const days = repeatWeekdays(repeat);
+  if (days) return '매주 ' + [1,2,3,4,5,6,0].filter(d => days.includes(d)).map(d => '일월화수목금토'[d]).join('·');
+  return { daily: '매일', weekly: '매주', monthly: '매월' }[repeat] || '';
+}
+
 function generateRepeatInstances(item, rangeStart, rangeEnd) {
 
   const instances = [];
@@ -1053,13 +1065,15 @@ function generateRepeatInstances(item, rangeStart, rangeEnd) {
 
   const endDate = item.repeatEnd ? new Date(item.repeatEnd + 'T00:00:00') : new Date(rangeEnd.getFullYear()+2,0,1);
 
+  const weekdays = repeatWeekdays(item.repeat);
+
   let cur = new Date(base);
 
   // advance to first occurrence after base
 
   while (cur <= rangeEnd) {
 
-    if (item.repeat === 'daily')   cur.setDate(cur.getDate() + 1);
+    if (item.repeat === 'daily' || weekdays)   cur.setDate(cur.getDate() + 1);
 
     else if (item.repeat === 'weekly')  cur.setDate(cur.getDate() + 7);
 
@@ -1071,7 +1085,7 @@ function generateRepeatInstances(item, rangeStart, rangeEnd) {
 
       const ds = fmtDate(cur);
 
-      if (ds !== item.date) instances.push({...item, date: ds, _isRepeat: true});
+      if (ds !== item.date && (!weekdays || weekdays.includes(cur.getDay()))) instances.push({...item, date: ds, _isRepeat: true});
 
     }
 
@@ -1110,6 +1124,7 @@ function onRepeatChange() {
   const v = document.getElementById('f_repeat').value;
 
   document.getElementById('repeatEndWrap').style.display = v==='none' ? 'none' : '';
+  document.getElementById('repeatDaysWrap').style.display = v==='weekdays' ? '' : 'none';
   // 반복 일정과 여러 날 일정은 함께 쓰지 않는다
   const endDateInput = document.getElementById('f_endDate');
   if (endDateInput) { if (v!=='none') endDateInput.value=''; endDateInput.disabled = v!=='none'; }
