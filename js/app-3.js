@@ -734,6 +734,15 @@ function _swipeToggleDone(card, shown) {
 
 async function _swipeDelete(card, item) {
 
+  const base = items.find(i => i.id === item.id);
+  if (base && isRepeatingItem(base) && item.date && item.date !== base.date) {
+    const okDay = await customConfirm(`"${item.title}" ${item.date.slice(5).replace('-', '/')} 일정만 삭제할까요? (다른 날짜의 반복 일정은 그대로 남아요)`, { danger: true, icon: '🗑', okLabel: '이 날짜만 삭제' });
+    card.style.transform = '';
+    card.classList.remove('swipe-delete');
+    if (okDay) removeOccurrenceWithUndo(base.id, item.date);
+    return;
+  }
+
   const ok = await customConfirm(`"${item.title}"을(를) 삭제할까요?`, {
 
     danger: true, icon: '🗑', okLabel: '삭제'
