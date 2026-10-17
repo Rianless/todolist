@@ -4957,6 +4957,13 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
     min-height: 0;
   }
 
+  /* 오늘 / 루틴 뷰 — 내용이 넘치면 스크롤 */
+  #viewToday.cal-subview.active,
+  #viewRoutine.cal-subview.active {
+    overflow-y: auto;
+    overflow-x: hidden;
+  }
+
   /* 주 뷰 스크롤 */
   #viewWeek {
     overflow-y: auto;
