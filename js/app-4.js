@@ -415,7 +415,7 @@ function makeCardForDayModal(item, ds, evts) {
 
     _lastSecretCard = isItemSecret ? card : null;
 
-    openDetail(item.id);
+    openDetail(item.id, false, item.date);
 
   });
 
@@ -1841,9 +1841,13 @@ async function saveItem() {
 
 ══════════════════════════════════════ */
 
-function openDetail(id, skipHistory = false) {
+let detailDate = null;   // 반복 일정에서 상세를 연 날짜 (완료를 날짜별로 따로 다루기 위해)
+
+function openDetail(id, skipHistory = false, ds = null) {
 
   detailId = id;
+
+  detailDate = ds;
 
   const item = items.find(i=>i.id===id);
 
@@ -1882,7 +1886,7 @@ function openDetail(id, skipHistory = false) {
 
     <div class="detail-row"><span class="dr-key">중요도</span><span class="dr-val">${prioLabels[item.priority||'none']}</span></div>
 
-    <div class="detail-row"><span class="dr-key">완료</span><span class="dr-val">${item.done?'✅ 완료':'⬜ 미완료'}</span></div>`;
+    <div class="detail-row"><span class="dr-key">완료</span><span class="dr-val">${isItemDoneOn(item, detailDate)?'✅ 완료':'⬜ 미완료'}</span></div>`;
 
 
 
@@ -1958,9 +1962,11 @@ function openDetail(id, skipHistory = false) {
 
   const doneBtn = document.getElementById('detailDoneBtn');
 
-  doneBtn.textContent = item.done ? '미완료' : '완료';
+  const doneNow = isItemDoneOn(item, detailDate);
 
-  doneBtn.className = `detail-btn done-btn${item.done?' checked':''}`;
+  doneBtn.textContent = doneNow ? '미완료' : '완료';
+
+  doneBtn.className = `detail-btn done-btn${doneNow?' checked':''}`;
 
 
 
@@ -2037,11 +2043,11 @@ function closeDetail() {
 
 
 // 하루 패널의 완료 체크: 상세를 열지 않고 바로 완료/취소 (detailToggleDone 과 같은 처리)
-function agendaToggleDone(id) {
+function agendaToggleDone(id, ds) {
   const item = items.find(i => i.id === id);
   if (!item) return;
-  const wasNotDone = !item.done;
-  item.done = !item.done;
+  const wasNotDone = !isItemDoneOn(item, ds);
+  toggleItemDoneOn(item, ds);
   saveData();
   if (currentMainTab === 'calendar') {
     if (currentCalSubTab === 'cal') renderCal();
@@ -2058,13 +2064,13 @@ function detailToggleDone() {
 
   if (!item) return;
 
-  const wasNotDone = !item.done;
+  const wasNotDone = !isItemDoneOn(item, detailDate);
 
-  item.done = !item.done;
+  toggleItemDoneOn(item, detailDate);
 
   saveData();
 
-  openDetail(detailId);
+  openDetail(detailId, false, detailDate);
 
   if (currentMainTab === 'calendar') {
 

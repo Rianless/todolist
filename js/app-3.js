@@ -547,7 +547,7 @@ function makeCard(item) {
 
     _lastSecretCard = isItemSecret ? card : null;
 
-    openDetail(item.id);
+    openDetail(item.id, false, item.date);
 
   });
 
@@ -703,11 +703,14 @@ function _attachSwipe(card, item) {
 
 
 
-function _swipeToggleDone(card, item) {
+function _swipeToggleDone(card, shown) {
 
-  const wasNotDone = !item.done;
+  // 반복된 날짜의 카드는 복사본이라, 실제 일정을 찾아 그 날짜의 완료만 바꾼다
+  const item = items.find(i => i.id === shown.id) || shown;
 
-  item.done = !item.done;
+  const wasNotDone = !isItemDoneOn(item, shown.date);
+
+  toggleItemDoneOn(item, shown.date);
 
   if (wasNotDone) {
 
@@ -717,7 +720,7 @@ function _swipeToggleDone(card, item) {
 
   }
 
-  card.classList.toggle('done', item.done);
+  card.classList.toggle('done', wasNotDone);
 
   saveData();
 
@@ -1744,14 +1747,14 @@ function renderCalDayList(ds, dayEvents) {
     check.setAttribute('aria-label', `${item.hideTitle ? '비공개 일정' : item.title} ${item.done ? '완료 취소' : '완료 처리'}`);
     check.tabIndex = 0;
     check.textContent = item.done ? '✓' : '';
-    check.addEventListener('click', e => { e.stopPropagation(); agendaToggleDone(item.id); });
+    check.addEventListener('click', e => { e.stopPropagation(); agendaToggleDone(item.id, ds); });
     check.addEventListener('keydown', e => {
-      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); agendaToggleDone(item.id); }
+      if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); e.stopPropagation(); agendaToggleDone(item.id, ds); }
     });
     row.append(time, body, check);
-    row.onclick = () => openDetail(item.id);
+    row.onclick = () => openDetail(item.id, false, ds);
     row.onkeydown = e => {
-      if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); openDetail(item.id); }
+      if ((e.key === 'Enter' || e.key === ' ') && e.target === row) { e.preventDefault(); openDetail(item.id, false, ds); }
     };
     list.appendChild(row);
   });

@@ -31,9 +31,9 @@ function renderToday() {
   const todoHtml = todos.length ? todos.map(i => {
     const real = typeof i.id === 'number' && items.some(x => x.id === i.id);
     const box = real
-      ? `<button type="button" class="td-check${i.done ? ' on' : ''}" aria-label="완료 체크" onclick="todayToggleItem(${i.id})">${i.done ? '✓' : ''}</button>`
+      ? `<button type="button" class="td-check${i.done ? ' on' : ''}" aria-label="완료 체크" onclick="todayToggleItem(${i.id}, '${ds}')">${i.done ? '✓' : ''}</button>`
       : '<span class="td-check dim"></span>';
-    const open = real ? ` onclick="openDetail(${i.id})"` : '';
+    const open = real ? ` onclick="openDetail(${i.id}, false, '${ds}')"` : '';
     return `<div class="td-row${i.done ? ' done' : ''}">${box}<div class="td-main"${open}><div class="td-title">${esc(i.title)}</div>${i.time ? `<div class="td-sub">${esc(i.time)}</div>` : ''}</div></div>`;
   }).join('') : '<div class="td-empty">오늘 일정이 없어요</div>';
 
@@ -104,7 +104,7 @@ function renderToday() {
   if (list) list.scrollTop = listTop;
 }
 
-function todayToggleItem(id) { agendaToggleDone(id); }
+function todayToggleItem(id, ds) { agendaToggleDone(id, ds); }
 function todayToggleRoutine(id) { toggleRoutine(id, fmtDate(new Date())); }
 
 // 한 달(y년 m월, m 은 0~11)의 날짜별 일정 지도: 일반 + 여러 날 + 반복 (구독 결제 같은 가상 일정은 뺀다)
