@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v119-repeat-done-per-day';
+const CACHE_NAME = 'todolist-v120-repeat-per-day-edit';
 const ASSETS = [
   './',
   './index.html',

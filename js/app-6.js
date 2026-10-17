@@ -1060,6 +1060,14 @@ function toggleItemDoneOn(item, ds) {
   return nowDone;
 }
 
+// 반복된 날짜(원래 날짜가 아닌 날)만 따로 고친 내용은 item.overrides[날짜] 에 둔다
+const OCCURRENCE_FIELDS = ['title', 'category', 'time', 'memo', 'content', 'checklist', 'priority', 'secret', 'hideTitle', 'photo'];
+
+function effectiveItem(item, ds) {
+  if (!item || !isRepeatingItem(item) || !ds || ds === item.date) return item;
+  return {...item, ...((item.overrides || {})[ds] || {}), date: ds, done: isItemDoneOn(item, ds)};
+}
+
 // 반복 값: none | daily | weekly | monthly | weekdays:1,3,5 (요일 선택, 0=일 ~ 6=토)
 function repeatWeekdays(repeat) {
   if (typeof repeat !== 'string' || !repeat.startsWith('weekdays:')) return null;
@@ -1102,7 +1110,7 @@ function generateRepeatInstances(item, rangeStart, rangeEnd) {
 
       const ds = fmtDate(cur);
 
-      if (ds !== item.date && (!weekdays || weekdays.includes(cur.getDay()))) instances.push({...item, date: ds, done: isItemDoneOn(item, ds), _isRepeat: true});
+      if (ds !== item.date && (!weekdays || weekdays.includes(cur.getDay()))) instances.push({...effectiveItem(item, ds), _isRepeat: true});
 
     }
 

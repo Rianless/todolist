@@ -765,6 +765,8 @@ async function loadItemsFromAPI() {
 
           doneDates: existingItem?.doneDates || [],
 
+          overrides: existingItem?.overrides || {},
+
           checklist: normalizeChecklist(row.checklist || existingItem?.checklist)
 
         };

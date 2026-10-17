@@ -1323,9 +1323,13 @@ function buildCatSelect() {
 
 
 
+let editingDate = null;   // 반복된 날짜 하나만 고치는 중이면 그 날짜
+
 function openAdd(presetDate=null) {
 
   editingId = null;
+
+  setOccurrenceLock(null);
 
   isSecret = false;
 
@@ -1387,11 +1391,24 @@ function openAdd(presetDate=null) {
 
 
 
-function openEdit(id) {
+// 반복된 날짜만 고치는 중이면 날짜·반복 칸은 잠근다
+function setOccurrenceLock(ds) {
+  editingDate = ds || null;
+  ['f_date','f_repeat','f_repeatEnd'].forEach(k => { const el = document.getElementById(k); if (el) el.disabled = !!ds; });
+  const days = document.getElementById('f_repeatDays');
+  if (days) days.style.pointerEvents = ds ? 'none' : '';
+  if (ds) document.getElementById('f_endDate').disabled = true;
+}
 
-  const item = items.find(i=>i.id===id);
+function openEdit(id, ds = null) {
 
-  if (!item) return;
+  const base = items.find(i=>i.id===id);
+
+  if (!base) return;
+
+  const occurrenceDate = (isRepeatingItem(base) && ds && ds !== base.date) ? ds : null;
+
+  const item = effectiveItem(base, occurrenceDate);
 
   editingId = id;
 
@@ -1403,7 +1420,7 @@ function openEdit(id) {
 
   editingChecklist = normalizeChecklist(item.checklist);
 
-  document.getElementById('addModalTitle').textContent = '일정 수정';
+  document.getElementById('addModalTitle').textContent = occurrenceDate ? `일정 수정 · ${occurrenceDate.slice(5).replace('-','/')} 하루만` : '일정 수정';
 
   buildCatSelect();
 
@@ -1459,6 +1476,8 @@ function openEdit(id) {
   closeDetail();
 
   history.replaceState({modal:'edit'}, '');
+
+  setOccurrenceLock(occurrenceDate);
 
   document.getElementById('addModal').classList.add('open');
 
@@ -1782,7 +1801,19 @@ async function saveItem() {
 
 
 
-  if (editingId !== null) {
+  if (editingId !== null && editingDate) {
+
+    const idx = items.findIndex(i=>i.id===editingId);
+
+    if (idx > -1) {
+
+      const part = {};
+      OCCURRENCE_FIELDS.forEach(k => { part[k] = obj[k]; });
+      items[idx] = {...items[idx], overrides: {...(items[idx].overrides || {}), [editingDate]: part}, _unlocked: false};
+
+    }
+
+  } else if (editingId !== null) {
 
     const idx = items.findIndex(i=>i.id===editingId);
 
@@ -1849,7 +1880,7 @@ function openDetail(id, skipHistory = false, ds = null) {
 
   detailDate = ds;
 
-  const item = items.find(i=>i.id===id);
+  const item = effectiveItem(items.find(i=>i.id===id), ds);
 
   if (!item) return;
 
@@ -2023,15 +2054,25 @@ function renderDetailChecklist(item) {
 
 function toggleChecklistItem(itemId, checklistId, event) {
   event?.stopPropagation();
-  const item = items.find(entry => entry.id === itemId);
-  if (!item) return;
-  item.checklist = normalizeChecklist(item.checklist);
+  const base = items.find(entry => entry.id === itemId);
+  if (!base) return;
+  const occurrence = isRepeatingItem(base) && detailDate && detailDate !== base.date;
+  let item = base;
+  if (occurrence) {
+    // 반복된 날짜는 그 날짜만의 체크리스트 사본에서 바꾼다
+    const eff = effectiveItem(base, detailDate);
+    base.overrides = {...(base.overrides || {})};
+    base.overrides[detailDate] = {...(base.overrides[detailDate] || {}), checklist: normalizeChecklist(eff.checklist).map(e => ({...e}))};
+    item = {checklist: base.overrides[detailDate].checklist};
+  } else {
+    item.checklist = normalizeChecklist(item.checklist);
+  }
   const checklistItem = item.checklist.find(entry => entry.id === checklistId);
   if (!checklistItem) return;
 
   checklistItem.done = !checklistItem.done;
   saveData();
-  renderDetailChecklist(item);
+  renderDetailChecklist(occurrence ? effectiveItem(base, detailDate) : item);
 }
 
 
@@ -2092,7 +2133,7 @@ function detailToggleDone() {
 
 
 
-function detailEdit() { openEdit(detailId); }
+function detailEdit() { openEdit(detailId, detailDate); }
 
 
 
