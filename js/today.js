@@ -75,8 +75,9 @@ function renderToday() {
     return `<div class="td-row"><div class="td-main"><div class="td-title">📦 ${esc(Parcels.labelOf(p))}</div>${meta ? `<div class="td-sub">${esc(meta)}</div>` : ''}</div></div>`;
   }).join('') + (waitList.length > 6 ? `<div class="td-empty">외 ${waitList.length - 6}건</div>` : '') : '<div class="td-empty">기다리는 택배가 없어요</div>';
 
-  const recent = memoSort(memos).slice(0, 3);
-  const memoHtml = recent.length ? recent.map(m => memoPostHtml(m)).join('') : '<div class="td-empty">아직 메모가 없어요. 위에 적고 SEND 를 눌러 보세요</div>';
+  const all = memoSort(memos);
+  const memoHtml = `<div class="mf-scroll">` + (all.length ? all.map(m => memoPostHtml(m)).join('') : '<div class="td-empty">아직 메모가 없어요. 위에 적고 SEND 를 눌러 보세요</div>') + `</div>`;
+  const keepList = el.querySelector('.mf-scroll'), listTop = keepList ? keepList.scrollTop : 0;
   const keep = el.querySelector('.mf-input');
   const draft = keep ? keep.value : '', hadFocus = !!keep && document.activeElement === keep;
 
@@ -99,6 +100,8 @@ function renderToday() {
   // 다시 그려도 쓰던 글은 그대로 둔다
   const ta = el.querySelector('.mf-input');
   if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
+  const list = el.querySelector('.mf-scroll');
+  if (list) list.scrollTop = listTop;
 }
 
 function todayToggleItem(id) { agendaToggleDone(id); }

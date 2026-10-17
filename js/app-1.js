@@ -1268,7 +1268,7 @@ function memoSend(el) {
   el.value = '';
   memoFeedInput(el);
   const home = el.closest('#todayPage') ? '#todayPage' : el.closest('#desktopWidgets') ? '#desktopWidgets' : null;
-  const list = document.querySelector('#desktopWidgets .mf-scroll');
+  const list = document.querySelector(`${home || '#desktopWidgets'} .mf-scroll`);
   if (list) list.scrollTop = 0;   // 새 글이 맨 위에 쌓이니 목록도 맨 위로
   saveMemos();
   renderMemoAll();
