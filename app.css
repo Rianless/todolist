@@ -7081,7 +7081,7 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
 /* 바탕화면 위젯: 작은 타일 격자 (PC) */
 @media (min-width: 900px) {
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: grid; grid-template-columns: repeat(auto-fill, minmax(270px, 320px)); align-items: start; justify-content: start; gap: 14px; }
-  html[data-desktop][data-skin="w98"] .dk-stack { display: contents; }
+  html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: column; gap: 14px; width: 100%; max-width: 320px; }
   html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; max-width: 320px; font-size: 13px; }
   html[data-desktop][data-skin="w98"] .dkw-title { font-size: 13px; }
   html[data-desktop][data-skin="w98"] .dkw-body { padding: 6px 10px; }

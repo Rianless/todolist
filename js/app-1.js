@@ -1152,11 +1152,13 @@ function updateDesktopWidgets() {
   const draft = keep ? keep.value : '', hadFocus = !!keep && document.activeElement === keep;
   const recentMemos = memoSort(memos).slice(0, 3);
   const memoWidget = memoComposerHtml() + (recentMemos.length ? recentMemos.map(x => memoPostHtml(x)).join('') : '<div class="dkw-empty">아직 메모가 없어요</div>');
+  // 위젯 순서: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배
   box.innerHTML = `<div class="dk-stack">` + win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml) +
-    win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml) +
-    win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>` +
-    `<div class="dk-stack">` + win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget) + win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
-    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) + `</div>`;
+    win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget) + `</div>` +
+    `<div class="dk-stack">` + win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml) + `</div>` +
+    `<div class="dk-stack">` + win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml) +
+    win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml) + `</div>` +
+    `<div class="dk-stack">` + win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml) + `</div>`;
   const ta = box.querySelector('.mf-input');
   if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
 }
