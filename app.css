@@ -7098,6 +7098,25 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
   html[data-desktop][data-skin="w98"] .dkw-sub { margin: 6px 0 2px; }
 }
 
+/* PC 바탕화면(창 없음): 아이콘은 아래 가운데 독, 달성률 막대와 위젯은 위쪽 가로로 가득 */
+@media (min-width: 900px) {
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico { top: auto !important; bottom: 42px; width: 110px !important; height: 86px !important; gap: 4px !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-icon { font-size: 44px !important; line-height: 50px; height: 50px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico .tab-label { font-size: 13px !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-calendar { left: calc(50% + -295px - 55px) !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-category { left: calc(50% + -177px - 55px) !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="bookmark"] { left: calc(50% + -59px - 55px) !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="diary"] { left: calc(50% + 59px - 55px) !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="memo"] { left: calc(50% + 177px - 55px) !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] #mainTab-mypage { left: calc(50% + 295px - 55px) !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-ticker { left: 16px; right: 16px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .progress-bar-wrap { right: 16px; left: 16px; top: 40px; bottom: auto; width: auto; height: 28px; padding: 0 10px !important; gap: 10px; background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .prog-label, html[data-desktop][data-desktop-win][data-skin="w98"] .prog-pct { font-size: 13px !important; font-weight: 700; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .prog-track { flex: 1; min-width: 0; height: 16px !important; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: grid; grid-template-columns: repeat(auto-fit, minmax(300px, 1fr)); justify-content: stretch; left: 16px; right: 16px; top: 78px; bottom: 138px; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widget { max-width: none; }
+}
+
 .dkw-past { color: #808080; text-decoration: line-through; }
 
 /* 바탕화면 달력 미니 위젯 */
