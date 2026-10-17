@@ -8,7 +8,7 @@ function itemsOnDate(ds) {
   const dmap = {};
   items.forEach(item => {
     if (!item.date) return;
-    (dmap[item.date] = dmap[item.date] || []).push(item);
+    (dmap[item.date] = dmap[item.date] || []).push(effectiveItem(item, item.date));
     addSpanInstances(dmap, item, d, d);
     generateRepeatInstances(item, d, d).forEach(inst => (dmap[inst.date] = dmap[inst.date] || []).push(inst));
   });
@@ -113,7 +113,7 @@ function monthItemMap(y, m) {
   const dmap = {};
   items.forEach(item => {
     if (!item.date) return;
-    (dmap[item.date] = dmap[item.date] || []).push(item);
+    (dmap[item.date] = dmap[item.date] || []).push(effectiveItem(item, item.date));
     addSpanInstances(dmap, item, start, end);
     generateRepeatInstances(item, start, end).forEach(inst => (dmap[inst.date] = dmap[inst.date] || []).push(inst));
   });

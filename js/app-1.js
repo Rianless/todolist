@@ -96,6 +96,10 @@ function customConfirm(msg, opts = {}) {
 
     okBtn.className = 'btn-save confirm-ok' + (opts.danger ? ' danger' : '');
 
+    const extraBtn = overlay.querySelector('.confirm-extra');
+
+    if (extraBtn) { extraBtn.hidden = !opts.extraLabel; extraBtn.textContent = opts.extraLabel || ''; }
+
     const close = (result) => {
 
       overlay.classList.remove('open');
@@ -104,6 +108,8 @@ function customConfirm(msg, opts = {}) {
 
       cancelBtn.onclick = null;
 
+      if (extraBtn) extraBtn.onclick = null;
+
       setTimeout(() => resolve(result), 0);
 
     };
@@ -111,6 +117,8 @@ function customConfirm(msg, opts = {}) {
     okBtn.onclick = () => close(true);
 
     cancelBtn.onclick = () => close(false);
+
+    if (extraBtn) extraBtn.onclick = () => close('extra');
 
     overlay.classList.add('open');
 

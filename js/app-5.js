@@ -299,7 +299,7 @@ function renderWeek() {
 
     if (!dmap[it.date]) dmap[it.date] = [];
 
-    dmap[it.date].push(it);
+    dmap[it.date].push(effectiveItem(it, it.date));
     addSpanInstances(dmap, it, base, endOfWeek);
     if (it.repeat && it.repeat !== 'none') {
 

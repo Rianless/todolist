@@ -1323,11 +1323,14 @@ function buildCatSelect() {
 
 
 
+let editBaseDay = null;   // 반복 일정의 원래 날짜에서 수정 중이면 그 날짜
 let editingDate = null;   // 반복된 날짜 하나만 고치는 중이면 그 날짜
 
 function openAdd(presetDate=null) {
 
   editingId = null;
+
+  editBaseDay = null;
 
   setOccurrenceLock(null);
 
@@ -1408,7 +1411,12 @@ function openEdit(id, ds = null) {
 
   const occurrenceDate = (isRepeatingItem(base) && ds && ds !== base.date) ? ds : null;
 
-  const item = effectiveItem(base, occurrenceDate);
+  // 반복 일정의 원래 날짜에서 열면, 저장할 때 "이 날짜만 / 반복 전체"를 고른다
+  if (!ds && isRepeatingItem(base)) ds = base.date;
+
+  editBaseDay = (isRepeatingItem(base) && ds && ds === base.date) ? ds : null;
+
+  const item = effectiveItem(base, occurrenceDate || editBaseDay);
 
   editingId = id;
 
@@ -1801,7 +1809,17 @@ async function saveItem() {
 
 
 
-  if (editingId !== null && editingDate) {
+  let saveDay = editingDate;
+  if (editingId !== null && !editingDate && editBaseDay) {
+    const label = editBaseDay.slice(5).replace('-', '/');
+    const choice = await customConfirm(`반복 일정이에요. ${label} 하루만 수정할까요, 반복 전체를 수정할까요?`, {
+      icon: '🔁', okLabel: `${label}만`, extraLabel: '반복 전체', cancelLabel: '취소'
+    });
+    if (choice === false) return;
+    if (choice === true) saveDay = editBaseDay;
+  }
+
+  if (editingId !== null && saveDay) {
 
     const idx = items.findIndex(i=>i.id===editingId);
 
@@ -1809,7 +1827,7 @@ async function saveItem() {
 
       const part = {};
       OCCURRENCE_FIELDS.forEach(k => { part[k] = obj[k]; });
-      items[idx] = {...items[idx], overrides: {...(items[idx].overrides || {}), [editingDate]: part}, _unlocked: false};
+      items[idx] = {...items[idx], overrides: {...(items[idx].overrides || {}), [saveDay]: part}, _unlocked: false};
 
     }
 
@@ -1820,6 +1838,9 @@ async function saveItem() {
     if (idx > -1) {
 
       items[idx] = {...items[idx], ...obj, done: items[idx].done, _unlocked: false};
+
+      // 반복 전체로 저장하면, 이 날짜에 따로 고쳐 둔 내용은 전체와 같아지도록 지운다
+      if (editBaseDay && items[idx].overrides) { const o = {...items[idx].overrides}; delete o[editBaseDay]; items[idx].overrides = o; }
 
     }
 
