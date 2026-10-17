@@ -7167,3 +7167,11 @@ html[data-desktop][data-skin="w98"] .dkw-body .mf-input { min-height: 48px; }
 
 /* 홈 메모 위젯: 입력칸은 두고 메모 목록만 스크롤 */
 .dkw-body .mf-scroll, .td-memo .mf-scroll { max-height: 320px; overflow-y: auto; }
+
+/* ══ PC 홈 북마크 위젯 ══ */
+.dkw-bm-list { max-height: 420px; overflow-y: auto; }
+.dkw-bm { display: flex; align-items: center; gap: 8px; width: 100%; padding: 4px 2px; text-align: left; font: inherit; color: inherit; background: none; border: none; box-shadow: none; cursor: pointer; }
+.dkw-bm:hover .dkw-text { text-decoration: underline; color: #000080; }
+.dkw-bm-icon { position: relative; flex: 0 0 18px; width: 18px; height: 18px; display: grid; place-items: center; font-size: 11px; font-weight: 700; color: #fff; background: #808080; }
+.dkw-bm-icon img { position: absolute; inset: 0; width: 18px; height: 18px; }
+html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !important; box-shadow: none !important; }
