@@ -5,13 +5,13 @@ const ORDER = 'order=date.asc,start_time.asc,created_at.asc';
 
 // 하루 조회: 그날 시작하는 일정 + 이전에 시작해 그날까지 이어지는 여러 날 일정
 assert.deepStrictEqual(buildTodoFilters({ date: '2026-10-04' }), [
-  'or=(date.eq.2026-10-04,and(repeat.eq.none,date.lt.2026-10-04,repeat_end.gte.2026-10-04))',
+  'or=(date.eq.2026-10-04,and(repeat.eq.none,date.lt.2026-10-04,repeat_end.gte.2026-10-04),and(repeat.neq.none,date.lt.2026-10-04))',
   ORDER
 ]);
 
 // 기간 조회
 assert.deepStrictEqual(buildTodoFilters({ from: '2026-09-27', to: '2026-10-31' }), [
-  'or=(date.gte.2026-09-27,and(repeat.eq.none,repeat_end.gte.2026-09-27))',
+  'or=(date.gte.2026-09-27,and(repeat.eq.none,repeat_end.gte.2026-09-27),repeat.neq.none)',
   'date=lte.2026-10-31',
   ORDER
 ]);

@@ -24,6 +24,7 @@ import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.data.applyItemOrder
 import com.todoapp.widget.data.formatCompactWon
 import com.todoapp.widget.data.monthWeekCount
+import com.todoapp.widget.data.repeatOccursOn
 import com.todoapp.widget.data.spanDayKeys
 import com.todoapp.widget.ui.AddEditActivity
 import com.todoapp.widget.ui.TodoDetailPopupActivity
@@ -986,14 +987,26 @@ class TodoWidgetProvider : AppWidgetProvider() {
             conn.disconnect()
             val arr = JSONArray(response)
             val list = mutableListOf<DateTodo>()
+            val repeatInfo by lazy { runCatching { CloudStateClient.fetchRepeatInfo() }.getOrDefault(emptyMap()) }
             for (i in 0 until arr.length()) {
                 val item = arr.getJSONObject(i)
+                // 반복 일정: 이 날짜에 나타나는 것만 남기고, 날짜별 완료 · 삭제 · 제목을 반영한다
+                val repeat = item.optString("repeat", "none")
+                var done = item.optBoolean("done")
+                var title = item.optString("title", "제목 없는 일정")
+                if (repeat.isNotEmpty() && repeat != "none" && item.optString("date") != dateValue) {
+                    if (!repeatOccursOn(repeat, item.optString("date"), item.optString("repeat_end"), dateValue)) continue
+                    val info = repeatInfo[item.optInt("id")]
+                    if (info != null && dateValue in info.excluded) continue
+                    done = info != null && dateValue in info.doneDates
+                    info?.titles?.get(dateValue)?.let { title = it }
+                }
                 list.add(
                     DateTodo(
                         id = item.optInt("id"),
-                        title = item.optString("title", "제목 없는 일정"),
+                        title = title,
                         categoryColor = item.optString("category_color", "#000080"),
-                        done = item.optBoolean("done")
+                        done = done
                     )
                 )
             }
@@ -1017,14 +1030,33 @@ class TodoWidgetProvider : AppWidgetProvider() {
             conn.disconnect()
             val arr = JSONArray(response)
             val list = mutableListOf<MiniTodo>()
+            val repeatInfo by lazy { runCatching { CloudStateClient.fetchRepeatInfo() }.getOrDefault(emptyMap()) }
             for (i in 0 until arr.length()) {
                 val o = arr.getJSONObject(i)
+                val repeat = o.optString("repeat", "none")
+                val color = o.optString("category_color", "#636366")
+                if (repeat.isNotEmpty() && repeat != "none") {
+                    // 반복 일정: 시작일 행 하나를 범위 안의 모든 반복 날짜로 펼친다 (날짜별 완료 · 삭제 반영)
+                    val base = o.optString("date")
+                    val info = repeatInfo[o.optInt("id")]
+                    var day = weekStart
+                    while (!day.isAfter(weekEnd)) {
+                        val key = day.format(DateTimeFormatter.ISO_LOCAL_DATE)
+                        if (key == base) {
+                            list.add(MiniTodo(key, color, o.optBoolean("done")))
+                        } else if (repeatOccursOn(repeat, base, o.optString("repeat_end"), key) && (info == null || key !in info.excluded)) {
+                            list.add(MiniTodo(key, color, info != null && key in info.doneDates))
+                        }
+                        day = day.plusDays(1)
+                    }
+                    continue
+                }
                 list.add(
                     MiniTodo(
                         date = o.optString("date"),
-                        categoryColor = o.optString("category_color", "#636366"),
+                        categoryColor = color,
                         done = o.optBoolean("done"),
-                        endDate = if (o.optString("repeat", "none").let { it.isEmpty() || it == "none" }) o.optString("repeat_end") else ""
+                        endDate = o.optString("repeat_end")
                     )
                 )
             }

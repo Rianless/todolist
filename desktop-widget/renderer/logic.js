@@ -53,16 +53,18 @@
   // index.html 의 generateRepeatInstances 와 같은 반복 규칙 (하루치 판정)
   function repeatOccursOn(item, ds) {
     if (!item.date || !item.repeat || item.repeat === 'none') return false;
-    if (!['daily', 'weekly', 'monthly'].includes(item.repeat)) return false;
+    const weekdays = typeof item.repeat === 'string' && item.repeat.startsWith('weekdays:')
+      ? item.repeat.slice(9).split(',').map(Number).filter(d => d >= 0 && d <= 6) : null;
+    if (!weekdays && !['daily', 'weekly', 'monthly'].includes(item.repeat)) return false;
     const target = parseDate(ds);
     const endDate = item.repeatEnd ? parseDate(item.repeatEnd) : new Date(target.getFullYear() + 2, 0, 1);
     const cur = parseDate(item.date);
     while (cur <= target) {
-      if (item.repeat === 'daily') cur.setDate(cur.getDate() + 1);
+      if (item.repeat === 'daily' || weekdays) cur.setDate(cur.getDate() + 1);
       else if (item.repeat === 'weekly') cur.setDate(cur.getDate() + 7);
       else cur.setMonth(cur.getMonth() + 1);
       if (cur > endDate) break;
-      if (fmtDate(cur) === ds && ds !== item.date) return true;
+      if (fmtDate(cur) === ds && ds !== item.date && (!weekdays || weekdays.includes(cur.getDay()))) return true;
     }
     return false;
   }
