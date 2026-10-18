@@ -12,7 +12,7 @@
   var DEFAULTS = { alertMin: 10, greet: 1, briefing: 1, chatter: 45, evening: 20 };
 
   var man = null, lines = null, ids = [], cur = null, last = '', timer = 0, bubbleTimer = 0;
-  var blinkTimer = 0, lastDone = null, lastSayAt = Date.now(), nextChatter = 0;
+  var briefPages = [], tabs, blinkTimer = 0, lastDone = null, lastSayAt = Date.now(), nextChatter = 0;
   var box, vid, img, ui, bubble, chips, panel, btnChar, btnHide, btnCfg, tab, focusBtn;
 
   /* ── 저장소 · 도우미 ── */
@@ -93,6 +93,7 @@
       '#mascot .mc-ui{position:absolute;right:0;bottom:100%;width:min(330px,calc(100vw - 20px));margin-bottom:6px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}' +
       '#mascot .mc-bubble{max-height:50vh;overflow-y:auto;display:none;pointer-events:auto;max-width:100%;background:#fff;color:#222;border:2px solid #222;border-radius:12px;' +
       'padding:8px 10px;font-size:13px;line-height:1.45;white-space:pre-line;word-break:keep-all;box-shadow:2px 2px 0 rgba(0,0,0,.35);cursor:pointer}' +
+      '#mascot .mc-tabs{display:none;pointer-events:auto;gap:4px;justify-content:flex-end}' +
       '#mascot .mc-chips{display:none;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end;gap:4px}' +
       '#mascot.open .mc-chips{display:flex}' +
       '#mascot .mc-chip{font-size:12px;padding:4px 8px;border-radius:12px;border:1px solid #222;background:#fff;color:#222;cursor:pointer;line-height:1.2}' +
@@ -116,7 +117,7 @@
     box = document.createElement('div');
     box.id = 'mascot';
     box.innerHTML =
-      '<div class="mc-ui"><div class="mc-panel"></div><div class="mc-bubble" role="status"></div><div class="mc-chips"></div></div>' +
+      '<div class="mc-ui"><div class="mc-panel"></div><div class="mc-bubble" role="status"></div><div class="mc-tabs"></div><div class="mc-chips"></div></div>' +
       '<div class="mc-stage"><img alt=""><video muted playsinline preload="auto"></video></div>' +
       '<button type="button" class="mc-btn mc-char" title="캐릭터 바꾸기" aria-label="캐릭터 바꾸기">⇄</button>' +
       '<button type="button" class="mc-btn mc-cfg" title="알림 설정" aria-label="알림 설정">⚙</button>' +
@@ -125,6 +126,7 @@
     vid = box.querySelector('video');
     ui = box.querySelector('.mc-ui');
     bubble = box.querySelector('.mc-bubble');
+    tabs = box.querySelector('.mc-tabs');
     chips = box.querySelector('.mc-chips');
     panel = box.querySelector('.mc-panel');
     btnCfg = box.querySelector('.mc-cfg');
@@ -169,13 +171,14 @@
     o = o || {};
     if (!text || isHidden()) return;
     lastSayAt = Date.now();
+    if (!o.keepTabs) tabs.style.display = 'none';
     bubble.textContent = text;
     bubble.style.display = 'block';
     clearTimeout(bubbleTimer);
     bubbleTimer = setTimeout(hideBubble, o.ms || 8000);
     if (o.slot) playSlot(o.slot);
   }
-  function hideBubble() { bubble.style.display = 'none'; clearTimeout(bubbleTimer); }
+  function hideBubble() { bubble.style.display = 'none'; tabs.style.display = 'none'; clearTimeout(bubbleTimer); }
 
   /* ── 영상 ── */
   function isHidden() { return get(KEY_HIDE) === '1'; }
@@ -438,7 +441,7 @@
     } else out.push('📅 오늘 일정은 비어 있어');
     if (rts.length) out.push('🔁 루틴 ' + rts.length + '개 (끝낸 것 ' + rts.filter(function (x) { return x.done; }).length + ')');
 
-    extraLines(now).forEach(function (l) { out.push(l); });
+    var extra = extraLines(now);
 
     var carry = carryOver(now);
     if (carry) out.push('⏳ ' + phrase('today_carry', { n: carry }));
@@ -449,20 +452,39 @@
     out.push(tmr ? '🌙 내일 첫 일정 ' + hhmm(tmr.time) + ' ' + clean(tmr.title) : '🌙 내일은 시간이 정해진 일정이 없어');
 
     out.push(pick(L().cheer));
-    say(out.join('\n'), { slot: 'cheer', ms: 25000 });
+    // 한 번에 다 보여 주지 않고 쪽으로 나눈다: 오늘 / 돈 / 챙길 것
+    briefPages = [{ label: '오늘', text: out.join('\n') }];
+    if (extra.money.length) briefPages.push({ label: '돈', text: extra.money.join('\n') });
+    if (extra.misc.length) briefPages.push({ label: 'D-day·택배', text: extra.misc.join('\n') });
+    showBrief(0, true);
     box.classList.remove('cfg');
+  }
+
+  function showBrief(i, first) {
+    say(briefPages[i].text, { slot: first ? 'cheer' : null, ms: 30000, keepTabs: true });
+    tabs.innerHTML = '';
+    if (briefPages.length < 2) return;
+    briefPages.forEach(function (pg, n) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mc-chip' + (n === i ? ' on' : '');
+      b.textContent = pg.label;
+      b.addEventListener('click', function () { showBrief(n, false); });
+      tabs.appendChild(b);
+    });
+    tabs.style.display = 'flex';
   }
 
   // 가계부·구독 결제·D-day·택배 (이 앱 데이터만 읽는다. 없으면 그 줄은 빼고, 오류가 나도 브리핑은 계속)
   function won(n) { return Number(n).toLocaleString('ko-KR') + '원'; }
 
   function extraLines(now) {
-    var out = [], today = ds(now), y = now.getFullYear(), m = now.getMonth();
+    var money = [], misc = [], today = ds(now), y = now.getFullYear(), m = now.getMonth();
     try {
       var tot = statsMonthTotals(ledger, subscriptions, y, m, getSubDatesForMonth);
       if (tot.expense || tot.income) {
         var cats = statsCategoryBreakdown(ledger, subscriptions, y, m, getSubDatesForMonth);
-        out.push('💰 ' + (m + 1) + '월 지출 ' + won(tot.expense) + (tot.income ? ' · 수입 ' + won(tot.income) : '') +
+        money.push('💰 ' + (m + 1) + '월 지출 ' + won(tot.expense) + (tot.income ? ' · 수입 ' + won(tot.income) : '') +
           (cats.length ? ' · 최다 ' + cats[0].name + ' ' + cats[0].pct + '%' : ''));
       }
     } catch (e) {}
@@ -476,20 +498,20 @@
       });
       soon.sort(function (a, b) { return a.days - b.days; });
       if (soon.length) {
-        out.push('💳 곧 결제 ' + soon.slice(0, 3).map(function (r) {
+        money.push('💳 곧 결제 ' + soon.slice(0, 3).map(function (r) {
           return clean(r.x.name) + ' ' + won(r.x.amount) + ' (' + (r.days ? r.days + '일 뒤' : '오늘') + ')';
         }).join(', ') + (soon.length > 3 ? ' 외 ' + (soon.length - 3) + '건' : ''));
       }
     } catch (e) {}
     try {
       var dds = Dday.sortDdays(ddays, today).filter(function (d) { return d.calc.kind !== 'past'; }).slice(0, 2);
-      if (dds.length) out.push('🎯 ' + dds.map(function (d) { return (d.emoji || '⭐') + ' ' + clean(d.title) + ' ' + d.calc.label; }).join(' · '));
+      if (dds.length) misc.push('🎯 ' + dds.map(function (d) { return (d.emoji || '⭐') + ' ' + clean(d.title) + ' ' + d.calc.label; }).join(' · '));
     } catch (e) {}
     try {
       var wait = Parcels.sortParcels(parcels).filter(function (p) { return !p.done; });
-      if (wait.length) out.push('📦 기다리는 택배 ' + wait.length + '건: ' + wait.slice(0, 3).map(function (p) { return clean(Parcels.labelOf(p)); }).join(', ') + (wait.length > 3 ? ' …' : ''));
+      if (wait.length) misc.push('📦 기다리는 택배 ' + wait.length + '건: ' + wait.slice(0, 3).map(function (p) { return clean(Parcels.labelOf(p)); }).join(', ') + (wait.length > 3 ? ' …' : ''));
     } catch (e) {}
-    return out;
+    return { money: money, misc: misc };
   }
 
   // 어제 끝내지 못한 일정 수

@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v134-wider-bubble';
+const CACHE_NAME = 'todolist-v135-briefing-pages';
 const ASSETS = [
   './',
   './index.html',
