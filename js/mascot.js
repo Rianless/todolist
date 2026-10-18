@@ -79,7 +79,10 @@
       '#mascot .mc-chip.on{background:#222;color:#fff}' +
       '#mascotTab{position:fixed;right:8px;bottom:8px;z-index:900;width:28px;height:28px;border-radius:50%;border:1px solid rgba(0,0,0,.4);' +
       'background:#fff;font-size:14px;line-height:26px;padding:0;cursor:pointer;display:none}' +
-      '@media(max-width:899px){#mascotTab{bottom:72px}}';
+      '@media(max-width:899px){#mascotTab{bottom:72px}}' +
+      // 바탕화면 모드는 맨 아래 작업표시줄(시계)이 있어서 그 위로 올린다
+      'html[data-desktop][data-skin="w98"] #mascot{bottom:calc(var(--dk-bar,34px) + 8px)}' +
+      'html[data-desktop][data-skin="w98"] #mascotTab{bottom:calc(var(--dk-bar,34px) + 8px)}';
     document.head.appendChild(s);
   }
 
