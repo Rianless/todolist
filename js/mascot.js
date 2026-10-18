@@ -318,7 +318,7 @@
 
   // 일정·루틴이 ALERT_MIN분 안에 시작하면 한 번만 알린다
   function checkAlerts() {
-    var now = new Date(), nm = nowMin(), today = ds(now), list = alerted();
+    var now = new Date(), nm = nowMin(), today = ds(now), list = alerted(), fired = false;
     list = list.filter(function (k) { return k.indexOf(today) === 0; });
     tasksOn(now).forEach(function (x) {
       if (x.done) return;
@@ -329,9 +329,11 @@
       var key = today + '|' + x.kind + '|' + x.title + '|' + x.time;
       if (list.indexOf(key) >= 0) return;
       list.push(key);
+      fired = true;
       say(phrase('meeting_alert', { mins: diff, title: clean(x.title), time: hhmm(x.time), where: whereText(x.where) }), { slot: 'plan', ms: 15000 });
     });
     set(KEY_ALERT, JSON.stringify(list));
+    return fired;
   }
 
   // 오늘 할 일을 끝내는 순간 칭찬 (처음 한 번 읽을 때는 말하지 않는다)
@@ -364,7 +366,7 @@
 
   function tick() {
     if (!man || isHidden() || document.hidden) return;
-    try { checkAlerts(); greet(); checkEveningLeft(); } catch (e) {}
+    try { if (!checkAlerts()) { greet(); checkEveningLeft(); } } catch (e) {}
     refreshFocusBtn();
   }
 
