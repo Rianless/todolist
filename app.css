@@ -6952,8 +6952,10 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   html[data-desktop][data-desktop-win][data-skin="w98"] .desk-ico[data-app="diary"] { left: 3%; top: 140px; }
 
   /* 위젯: 아이콘 아래에 세로로 */
-  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: flex; flex-direction: column; gap: 10px; position: fixed; z-index: 3; left: 8px; right: 8px; top: 238px; bottom: calc(var(--dk-bar) + 8px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
-  html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; flex: none; max-height: none; box-sizing: border-box; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); align-items: start; align-content: start; gap: 8px; position: fixed; z-index: 3; left: 8px; right: 8px; top: 238px; bottom: calc(var(--dk-bar) + 8px); overflow-y: auto; -webkit-overflow-scrolling: touch; }
+  html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; min-width: 0; flex: none; max-height: none; box-sizing: border-box; font-size: 11px; overflow: hidden; }
+  html[data-desktop][data-skin="w98"] .dkw-body { padding: 5px 6px; overflow-wrap: anywhere; }
+  html[data-desktop][data-skin="w98"] .dk-stack { min-width: 0; }
   html[data-desktop][data-skin="w98"] .dkw-check { width: 22px; height: 22px; font-size: 14px !important; }
 
   /* 창: 화면 전체 (제목 막대 + 내용) */
