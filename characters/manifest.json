@@ -38,7 +38,9 @@
    "study": [
     "studying"
    ]
-  }
+  },
+  "idle": true,
+  "blink": true
  },
  "hachi": {
   "name": "하치와레",
@@ -76,7 +78,9 @@
    "study": [
     "study"
    ]
-  }
+  },
+  "idle": true,
+  "blink": true
  },
  "rakko": {
   "name": "랏코",
@@ -114,7 +118,9 @@
    "study": [
     "study"
    ]
-  }
+  },
+  "idle": true,
+  "blink": true
  },
  "momonga": {
   "name": "모몽가",
@@ -148,7 +154,9 @@
    "study": [
     "study"
    ]
-  }
+  },
+  "idle": true,
+  "blink": true
  },
  "usagi": {
   "name": "우사기",
@@ -190,7 +198,9 @@
    "study": [
     "study"
    ]
-  }
+  },
+  "idle": true,
+  "blink": false
  },
  "kani": {
   "name": "카니",
@@ -232,7 +242,9 @@
    "study": [
     "study"
    ]
-  }
+  },
+  "idle": true,
+  "blink": true
  },
  "chiikawa": {
   "name": "치이카와",
@@ -284,7 +296,9 @@
    "study": [
     "study"
    ]
-  }
+  },
+  "idle": true,
+  "blink": true
  },
  "kuri": {
   "name": "쿠리만쥬",
@@ -318,6 +332,8 @@
    "study": [
     "study"
    ]
-  }
+  },
+  "idle": true,
+  "blink": true
  }
 }

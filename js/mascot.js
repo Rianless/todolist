@@ -12,7 +12,7 @@
   var DEFAULTS = { alertMin: 10, greet: 1, briefing: 1, chatter: 45, evening: 20 };
 
   var man = null, lines = null, ids = [], cur = null, last = '', timer = 0, bubbleTimer = 0;
-  var lastDone = null, lastSayAt = Date.now(), nextChatter = 0;
+  var blinkTimer = 0, lastDone = null, lastSayAt = Date.now(), nextChatter = 0;
   var box, vid, img, ui, bubble, chips, panel, btnChar, btnHide, btnCfg, tab, focusBtn;
 
   /* ── 저장소 · 도우미 ── */
@@ -79,6 +79,7 @@
       'background:#fff;color:#333;font-size:11px;line-height:18px;padding:0;text-align:center;cursor:pointer;opacity:0;' +
       'transition:opacity .15s;pointer-events:auto}' +
       '#mascot:hover .mc-btn,#mascot.touch .mc-btn{opacity:.9}' +
+      '#mascot.idle video{display:none}' +
       '#mascot .mc-char{right:22px}#mascot .mc-hide{right:0}#mascot .mc-cfg{right:44px}' +
       '#mascot .mc-panel{display:none;pointer-events:auto;width:100%;box-sizing:border-box;background:#fff;color:#222;border:2px solid #222;border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:2px 2px 0 rgba(0,0,0,.35)}' +
       '#mascot.cfg .mc-panel{display:block}' +
@@ -151,12 +152,8 @@
     btnCfg.addEventListener('click', function () { box.classList.toggle('cfg'); if (box.classList.contains('cfg')) renderPanel(); });
     tab.addEventListener('click', function () { setHidden(false); });
     box.addEventListener('touchstart', function () { box.classList.add('touch'); }, { passive: true });
-    vid.addEventListener('ended', function () {
-      if (vid.loop) return;
-      clearTimeout(timer);
-      timer = setTimeout(playNext, rnd(IDLE_MS[0], IDLE_MS[1]));
-    });
-    vid.addEventListener('error', rest);
+    vid.addEventListener('ended', function () { if (!vid.loop) idle(); });
+    vid.addEventListener('error', function () { idle(); });
     document.addEventListener('visibilitychange', function () {
       if (document.hidden) { clearTimeout(timer); vid.pause(); } else if (!isHidden()) playNext();
     });
@@ -184,7 +181,7 @@
     box.style.display = h ? 'none' : '';
     tab.style.display = h ? 'block' : 'none';
     clearTimeout(timer);
-    if (h) vid.pause(); else playNext();
+    if (h) { vid.pause(); clearTimeout(blinkTimer); } else idle();
   }
 
   function setChar(id) {
@@ -195,8 +192,28 @@
     playNext();
   }
 
-  function rest() {
+  // 대기 그림: 영상 사이에 눈 뜬 그림이 서 있고 가끔 눈을 깜빡인다. still 이면 가만히 둔다
+  function idle(still) {
+    if (!man || !cur || isHidden()) return;
     clearTimeout(timer);
+    clearTimeout(blinkTimer);
+    vid.pause();
+    box.classList.add('idle');
+    box.classList.remove('scene');
+    var m = man[cur];
+    img.src = url('eyes_open', 'png');
+    if (still) return;
+    if (m.blink) {
+      var closed = new Image();
+      closed.src = url('eyes_closed', 'png');
+      (function blink() {
+        blinkTimer = setTimeout(function () {
+          if (!box.classList.contains('idle')) return;
+          img.src = url('eyes_closed', 'png');
+          setTimeout(function () { if (!box.classList.contains('idle')) return; img.src = url('eyes_open', 'png'); blink(); }, 140);
+        }, rnd(2500, 5000));
+      })();
+    }
     timer = setTimeout(playNext, rnd(IDLE_MS[0], IDLE_MS[1]));
   }
 
@@ -209,15 +226,17 @@
   function playFile(f, loop) {
     if (!man || !cur || isHidden()) return;
     clearTimeout(timer);
+    clearTimeout(blinkTimer);
+    box.classList.remove('idle');
     var c = clipByFile(f);
     last = c.file;
     box.classList.toggle('scene', !!c.scene);
     img.src = url(c.file, 'png');
-    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { vid.removeAttribute('src'); return; }
+    if (window.matchMedia && matchMedia('(prefers-reduced-motion: reduce)').matches) { idle(true); return; }
     vid.loop = !!loop;
     vid.src = url(c.file, 'webm');
     var p = vid.play();
-    if (p && p.catch) p.catch(rest);
+    if (p && p.catch) p.catch(function () { idle(); });
   }
 
   // 칸(plan 일정 알림 · dance 춤 · cheer 응원 · study 집중 · lunch 점심)에 맞는 영상 하나
