@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v127-mascot';
+const CACHE_NAME = 'todolist-v128-mascot-talk';
 const ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS = [
   './js/boot.js',
   './js/mascot.js',
   './characters/manifest.json',
+  './characters/lines.json',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',
