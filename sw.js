@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v122-repeat-base-choice';
+const CACHE_NAME = 'todolist-v123-mobile-widget-2col';
 const ASSETS = [
   './',
   './index.html',
