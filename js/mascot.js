@@ -277,12 +277,29 @@
     else if (a === 'focus') toggleFocus(open);
   }
 
+  // 오늘 할 일 칩: 캐릭터 한마디 + 오늘 일정(시간순)과 루틴 목록
   function sayToday(t, open) {
     var total = t.length, done = total - open.length;
     var v = { total: total, done: done, open: open.length, next: open.length ? clean(open[0].title) : '' };
     if (!total) return say(canned('today:e'));
-    if (!open.length) return say(canned('today:a', v), { slot: 'cheer' });
-    say(canned(done ? 'today:p' : 'today:n', v));
+    var head = canned(!open.length ? 'today:a' : done ? 'today:p' : 'today:n', v);
+    var evs = t.filter(function (x) { return x.kind === 'item'; }).sort(function (a, b) {
+      var sa = startMin(a.time), sb = startMin(b.time);
+      return (sa == null ? 9999 : sa) - (sb == null ? 9999 : sb);
+    });
+    var rts = t.filter(function (x) { return x.kind === 'routine'; });
+    var MAX = 8, out = [head];
+    function list(label, arr) {
+      if (!arr.length) return;
+      out.push('', label + ' ' + arr.filter(function (x) { return x.done; }).length + '/' + arr.length);
+      arr.slice(0, MAX).forEach(function (x) {
+        out.push((x.done ? '✓ ' : '· ') + (hhmm(x.time) ? hhmm(x.time) + ' ' : '') + clean(x.title));
+      });
+      if (arr.length > MAX) out.push('· 외 ' + (arr.length - MAX) + '건');
+    }
+    list('📅 일정', evs);
+    list('🔁 루틴', rts);
+    say(out.join('\n'), { slot: open.length ? null : 'cheer', ms: 20000 });
   }
 
   function sayTodo(open) {
