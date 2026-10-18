@@ -233,8 +233,18 @@ function routineOccursOn(r, ds) {
   return (r.days || []).includes(new Date(ds + 'T00:00:00').getDay());
 }
 
+// 그 날짜만 따로 고친 메모·체크리스트가 있으면 그것으로 바꿔 끼운 루틴을 돌려준다
+function routineOverride(id, ds) {
+  const o = routineOverrides[ds] && routineOverrides[ds][id];
+  return o && typeof o === 'object' ? o : null;
+}
+function routineEffective(r, ds) {
+  const o = r && routineOverride(r.id, ds);
+  return o ? { ...r, memo: o.memo || '', checklist: Array.isArray(o.checklist) ? o.checklist : [], overridden: true } : r;
+}
+
 function routinesForDate(ds) {
-  return routines.filter(r => routineOccursOn(r, ds))
+  return routines.filter(r => routineOccursOn(r, ds)).map(r => routineEffective(r, ds))
     .sort((a, b) => String(a.time || '99:99').localeCompare(String(b.time || '99:99')) || a.id - b.id);
 }
 
@@ -268,7 +278,7 @@ function afterRoutineChange() {
 
 // 체크리스트가 있는 루틴은 전체 체크/해제, 없으면 완료 토글
 function toggleRoutine(id, ds) {
-  const r = routines.find(x => x.id === id);
+  const r = routineEffective(routines.find(x => x.id === id), ds);
   const items = routineItems(r);
   if (items.length) {
     const all = items.every(it => routineCheckedIds(id, ds).includes(it.id));
@@ -282,7 +292,7 @@ function toggleRoutine(id, ds) {
 
 // 항목을 모두 체크하면 루틴이 자동으로 완료된다
 function toggleRoutineItem(id, itemId, ds) {
-  const r = routines.find(x => x.id === id);
+  const r = routineEffective(routines.find(x => x.id === id), ds);
   const items = routineItems(r);
   const cur = routineCheckedIds(id, ds);
   const next = cur.includes(itemId) ? cur.filter(x => x !== itemId) : [...cur, itemId];
@@ -525,27 +535,104 @@ function addRoutineCheck() {
   renderRoutineCheckEditor(id);
 }
 
-function openRoutineModal(id, date) {
+// 날짜 칸에서 열면(dayOnly) 그 날짜의 메모·체크리스트만 고치는 화면으로 연다
+function openRoutineModal(id, date, dayOnly) {
   const r = id !== undefined && id !== null ? routines.find(x => x.id === id) : null;
   editingRoutineId = r ? r.id : null;
-  document.getElementById('routineModalTitle').textContent = r ? '루틴 수정' : '루틴 추가';
+  routineScopeDate = r && date ? date : '';
+  routineEditDate = r && date && dayOnly ? date : '';
+  document.getElementById('r_scopeGroup').hidden = !(r && date);
+  if (routineEditDate) { fillRoutineModal(r, date, true); return; }
+  fillRoutineModal(r, date, false);
+}
+
+function fillRoutineModal(r, date, dayMode) {
+  const eff = dayMode ? routineEffective(r, date) : r;
+  const dayLabel = dayMode ? `${Number(date.slice(5, 7))}/${Number(date.slice(8, 10))}` : '';
+  document.getElementById('routineModalTitle').textContent = dayMode ? `${dayLabel} 루틴 내용` : (r ? '루틴 수정' : '루틴 추가');
+  document.getElementById('r_scopeDay').classList.toggle('on', dayMode);
+  document.getElementById('r_scopeAll').classList.toggle('on', !dayMode);
+  ['r_nameGroup', 'r_modeGroup', 'r_repeatBox', 'r_timeStartGroup', 'r_endGroup'].forEach(i => { document.getElementById(i).hidden = dayMode; });
+  document.getElementById('r_resetDay').style.display = dayMode && routineOverride(r.id, date) ? '' : 'none';
+  document.getElementById('r_dayHint').hidden = !dayMode;
   document.getElementById('r_name').value = r ? r.name : '';
   document.getElementById('r_time').value = r ? (r.time || '') : '';
   document.getElementById('r_start').value = r ? (r.startDate || '') : (date || fmtDate(new Date()));
   document.getElementById('r_end').value = r && !r.once ? (r.endDate || '') : '';
-  setRoutineMode(!!(r && r.once));
-  document.getElementById('r_memo').value = r ? (r.memo || '') : '';
-  routineEditList = r ? routineItems(r).map(x => ({ ...x })) : [];
+  if (!dayMode) setRoutineMode(!!(r && r.once));
+  document.getElementById('r_memo').value = eff ? (eff.memo || '') : '';
+  routineEditList = eff ? routineItems(eff).map(x => ({ ...x })) : [];
   renderRoutineCheckEditor();
-  setRoutineExtras(!!(r && r.memo), routineEditList.length > 0);
+  setRoutineExtras(!!(eff && eff.memo), routineEditList.length > 0);
   syncRoutineDayButtons(r ? r.days : ROUTINE_PRESETS.all);
-  document.getElementById('r_delete').style.display = r ? '' : 'none';
-  history.pushState({modal:'routine'}, '');
-  document.getElementById('routineModal').classList.add('open');
-  setTimeout(() => document.getElementById('r_name').focus(), 200);
+  document.getElementById('r_delete').style.display = r && !dayMode ? '' : 'none';
+  const modal = document.getElementById('routineModal');
+  if (!modal.classList.contains('open')) {
+    history.pushState({modal:'routine'}, '');
+    modal.classList.add('open');
+    setTimeout(() => document.getElementById(dayMode ? 'r_memo' : 'r_name').focus(), 200);
+  }
 }
 
-function closeRoutineModal() { document.getElementById('routineModal').classList.remove('open'); }
+// 위쪽 "이 날짜만 / 모든 날" 전환. 고치던 내용은 버리고 선택한 쪽 내용으로 다시 채운다.
+function setRoutineScope(dayMode) {
+  const r = routines.find(x => x.id === editingRoutineId);
+  const ds = routineScopeDate;
+  if (!r || !ds || dayMode === !!routineEditDate) return;
+  routineEditDate = dayMode ? ds : '';
+  fillRoutineModal(r, ds, dayMode);
+}
+
+// 그 날짜 내용을 바꾼 뒤 체크 상태를 새 항목 목록에 맞춰 정리한다
+function reconcileRoutineChecks(id, ds, items) {
+  if (!items.length) return;
+  const valid = routineCheckedIds(id, ds).filter(x => items.some(it => it.id === x));
+  setRoutineChecked(id, ds, valid);
+  setRoutineDone(id, ds, items.every(it => valid.includes(it.id)));
+}
+
+function saveRoutineDay() {
+  const r = routines.find(x => x.id === editingRoutineId);
+  const ds = routineEditDate;
+  if (!r || !ds) return;
+  const memo = routineExtraOn('memo') ? document.getElementById('r_memo').value.trim() : '';
+  const checklist = routineExtraOn('check') ? routineEditList.map(x => ({ id: x.id, text: x.text.trim() })).filter(x => x.text) : [];
+  const sameAsBase = memo === (r.memo || '') && checklist.length === routineItems(r).length && checklist.every((x, i) => x.text === routineItems(r)[i].text);
+  if (sameAsBase) clearRoutineOverride(r.id, ds);
+  else (routineOverrides[ds] = routineOverrides[ds] || {})[r.id] = { memo, checklist };
+  reconcileRoutineChecks(r.id, ds, sameAsBase ? routineItems(r) : checklist);
+  finishRoutineDayEdit('이 날짜의 루틴 내용을 저장했습니다');
+}
+
+function clearRoutineOverride(id, ds) {
+  if (!routineOverrides[ds]) return;
+  delete routineOverrides[ds][id];
+  if (!Object.keys(routineOverrides[ds]).length) delete routineOverrides[ds];
+}
+
+function resetRoutineDay() {
+  const r = routines.find(x => x.id === editingRoutineId);
+  const ds = routineEditDate;
+  if (!r || !ds) return;
+  clearRoutineOverride(r.id, ds);
+  reconcileRoutineChecks(r.id, ds, routineItems(r));
+  finishRoutineDayEdit('기본 루틴 내용으로 되돌렸습니다');
+}
+
+function finishRoutineDayEdit(msg) {
+  editingRoutineId = null;
+  routineEditDate = '';
+  closeRoutineModal();
+  saveData();
+  afterRoutineChange();
+  showToast(msg, { type: 'success', duration: 1800 });
+}
+
+function closeRoutineModal() {
+  document.getElementById('routineModal').classList.remove('open');
+  routineEditDate = '';
+  routineScopeDate = '';
+}
 
 function refreshRoutineViews() {
   renderRoutines();
@@ -556,6 +643,7 @@ function refreshRoutineViews() {
 }
 
 function saveRoutine() {
+  if (routineEditDate) { saveRoutineDay(); return; }
   const nameInput = document.getElementById('r_name');
   const name = nameInput.value.trim();
   const startDate = document.getElementById('r_start').value || fmtDate(new Date());
@@ -605,6 +693,7 @@ async function deleteRoutine() {
     delete routineChecks[ds][r.id];
     if (!Object.keys(routineChecks[ds]).length) delete routineChecks[ds];
   });
+  Object.keys(routineOverrides).forEach(ds => clearRoutineOverride(r.id, ds));
   editingRoutineId = null;
   closeRoutineModal();
   saveData();

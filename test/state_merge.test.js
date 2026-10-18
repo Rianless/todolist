@@ -108,4 +108,13 @@ const copy = o => JSON.parse(JSON.stringify(o));
   assert.deepStrictEqual(m.ledger.map(x => x.id).sort(), [1, 2]);
 }
 
+// 날짜별 루틴 내용: 날짜·루틴 단위로 합쳐진다
+{
+  const b = { routineOverrides: { '2026-10-08': { 1: { memo: 'a', checklist: [] } } } };
+  const local = copy(b); local.routineOverrides['2026-10-09'] = { 1: { memo: 'L', checklist: [] } };
+  const remote = copy(b); remote.routineOverrides['2026-10-10'] = { 1: { memo: 'R', checklist: [] } };
+  const m = mergeStates(b, local, remote);
+  assert.deepStrictEqual(Object.keys(m.routineOverrides).sort(), ['2026-10-08', '2026-10-09', '2026-10-10']);
+}
+
 console.log('OK (state merge)');
