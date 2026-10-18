@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v132-mascot-picker';
+const CACHE_NAME = 'todolist-v134-wider-bubble';
 const ASSETS = [
   './',
   './index.html',
