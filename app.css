@@ -6956,7 +6956,11 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   html[data-desktop][data-skin="w98"] .dk-widget { width: 100%; min-width: 0; flex: none; max-height: none; box-sizing: border-box; font-size: 11px; overflow: hidden; }
   html[data-desktop][data-skin="w98"] .dkw-body { padding: 5px 6px; overflow-wrap: anywhere; }
   html[data-desktop][data-skin="w98"] .dk-stack { min-width: 0; }
-  html[data-desktop][data-skin="w98"] .dk-stack:has(.mf-scroll) { grid-column: 1 / -1; }
+  html[data-desktop][data-skin="w98"] .dk-widget .mf-compose { padding: 6px; gap: 6px; }
+  html[data-desktop][data-skin="w98"] .dk-widget .mf-avatar { display: none; }
+  html[data-desktop][data-skin="w98"] .dk-widget .mf-compose-bar { gap: 6px; }
+  html[data-desktop][data-skin="w98"] .dk-widget .mf-send { padding: 3px 8px; white-space: nowrap; }
+  html[data-desktop][data-skin="w98"] .dk-widget .mf-count { white-space: nowrap; }
   html[data-desktop][data-skin="w98"] .dkw-check { width: 22px; height: 22px; font-size: 14px !important; }
 
   /* 창: 화면 전체 (제목 막대 + 내용) */
