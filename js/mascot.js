@@ -84,6 +84,10 @@
       '#mascot .mc-panel{display:none;pointer-events:auto;width:100%;box-sizing:border-box;background:#fff;color:#222;border:2px solid #222;border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:2px 2px 0 rgba(0,0,0,.35)}' +
       '#mascot.cfg .mc-panel{display:block}' +
       '#mascot .mc-panel h4{margin:0 0 6px;font-size:13px}' +
+      '#mascot .mc-grid{display:grid;grid-template-columns:repeat(4,1fr);gap:4px}' +
+      '#mascot .mc-pick{display:flex;flex-direction:column;align-items:center;gap:1px;padding:2px 0;border:2px solid transparent !important;border-radius:8px;background:#fff !important;box-shadow:none !important;color:#222;cursor:pointer;font-size:10px;line-height:1.2;min-height:0}' +
+      '#mascot .mc-pick img{position:static;width:42px;height:42px;object-fit:contain}' +
+      '#mascot .mc-pick.on{border-color:#c00 !important;background:#ffe9e9 !important;font-weight:700}' +
       '#mascot .mc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0}' +
       '#mascot .mc-row select{font-size:12px;padding:1px 2px;max-width:110px}' +
       '#mascot .mc-ui{position:absolute;right:0;bottom:100%;width:236px;margin-bottom:6px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}' +
@@ -496,7 +500,35 @@
   ];
 
   function renderPanel() {
-    panel.innerHTML = '<h4>캐릭터 알림 설정</h4>';
+    panel.innerHTML = '<h4>캐릭터</h4>';
+    var grid = document.createElement('div');
+    grid.className = 'mc-grid';
+    ids.forEach(function (id) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'mc-pick' + (id === cur ? ' on' : '');
+      b.title = man[id].name;
+      b.setAttribute('aria-label', man[id].name);
+      b.setAttribute('aria-pressed', id === cur ? 'true' : 'false');
+      var im = document.createElement('img');
+      im.alt = '';
+      im.loading = 'lazy';
+      im.src = '/characters/' + id + '/eyes_open.png';
+      var nm = document.createElement('span');
+      nm.textContent = man[id].name;
+      b.appendChild(im);
+      b.appendChild(nm);
+      b.addEventListener('click', function () {
+        if (id !== cur) setChar(id);
+        renderPanel();
+      });
+      grid.appendChild(b);
+    });
+    panel.appendChild(grid);
+    var h = document.createElement('h4');
+    h.textContent = '캐릭터 알림 설정';
+    h.style.marginTop = '8px';
+    panel.appendChild(h);
     OPTS.forEach(function (o) {
       var row = document.createElement('div');
       row.className = 'mc-row';
