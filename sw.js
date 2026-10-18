@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v126-routine-per-day';
+const CACHE_NAME = 'todolist-v127-mascot';
 const ASSETS = [
   './',
   './index.html',
@@ -11,6 +11,8 @@ const ASSETS = [
   './js/app-6.js',
   './js/today.js',
   './js/boot.js',
+  './js/mascot.js',
+  './characters/manifest.json',
   './manifest.json',
   './icon-192.png',
   './icon-512.png',

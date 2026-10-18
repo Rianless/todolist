@@ -1,0 +1,217 @@
+{
+ "shisa": {
+  "name": "시사",
+  "clips": [
+   {
+    "file": "dance",
+    "scene": false,
+    "slot": "dance"
+   },
+   {
+    "file": "dance2",
+    "scene": true,
+    "slot": "dance"
+   },
+   {
+    "file": "studying",
+    "scene": false,
+    "slot": "study"
+   },
+   {
+    "file": "lunch",
+    "scene": true,
+    "slot": "lunch"
+   }
+  ]
+ },
+ "hachi": {
+  "name": "하치와레",
+  "clips": [
+   {
+    "file": "plan",
+    "scene": false,
+    "slot": "plan"
+   },
+   {
+    "file": "cheer",
+    "scene": true,
+    "slot": "cheer"
+   },
+   {
+    "file": "study",
+    "scene": false,
+    "slot": "study"
+   },
+   {
+    "file": "lunch",
+    "scene": true,
+    "slot": "lunch"
+   }
+  ]
+ },
+ "rakko": {
+  "name": "랏코",
+  "clips": [
+   {
+    "file": "plan",
+    "scene": true,
+    "slot": "plan"
+   },
+   {
+    "file": "dance",
+    "scene": true,
+    "slot": "dance"
+   },
+   {
+    "file": "study",
+    "scene": true,
+    "slot": "study"
+   },
+   {
+    "file": "lunch",
+    "scene": true,
+    "slot": "lunch"
+   }
+  ]
+ },
+ "momonga": {
+  "name": "모몽가",
+  "clips": [
+   {
+    "file": "plan",
+    "scene": true,
+    "slot": "plan"
+   },
+   {
+    "file": "dance",
+    "scene": true,
+    "slot": "dance"
+   },
+   {
+    "file": "study",
+    "scene": true,
+    "slot": "study"
+   }
+  ]
+ },
+ "usagi": {
+  "name": "우사기",
+  "clips": [
+   {
+    "file": "plan",
+    "scene": false,
+    "slot": "plan"
+   },
+   {
+    "file": "dance",
+    "scene": false,
+    "slot": "dance"
+   },
+   {
+    "file": "cheer",
+    "scene": false,
+    "slot": "cheer"
+   },
+   {
+    "file": "study",
+    "scene": false,
+    "slot": "study"
+   },
+   {
+    "file": "lunch",
+    "scene": false,
+    "slot": "lunch"
+   }
+  ]
+ },
+ "kani": {
+  "name": "카니",
+  "clips": [
+   {
+    "file": "plan",
+    "scene": true,
+    "slot": "plan"
+   },
+   {
+    "file": "dance",
+    "scene": true,
+    "slot": "dance"
+   },
+   {
+    "file": "cheer",
+    "scene": true,
+    "slot": "cheer"
+   },
+   {
+    "file": "lunch",
+    "scene": true,
+    "slot": "lunch"
+   },
+   {
+    "file": "study",
+    "scene": true,
+    "slot": "study"
+   }
+  ]
+ },
+ "chiikawa": {
+  "name": "치이카와",
+  "clips": [
+   {
+    "file": "dance",
+    "scene": true,
+    "slot": "dance"
+   },
+   {
+    "file": "dance2",
+    "scene": true,
+    "slot": "dance"
+   },
+   {
+    "file": "cheer",
+    "scene": true,
+    "slot": "cheer"
+   },
+   {
+    "file": "plan",
+    "scene": true,
+    "slot": "plan"
+   },
+   {
+    "file": "plan2",
+    "scene": true,
+    "slot": "plan"
+   },
+   {
+    "file": "study",
+    "scene": false,
+    "slot": "study"
+   },
+   {
+    "file": "lunch",
+    "scene": true,
+    "slot": "lunch"
+   }
+  ]
+ },
+ "kuri": {
+  "name": "쿠리만쥬",
+  "clips": [
+   {
+    "file": "cheer",
+    "scene": true,
+    "slot": "cheer"
+   },
+   {
+    "file": "study",
+    "scene": true,
+    "slot": "study"
+   },
+   {
+    "file": "lunch",
+    "scene": true,
+    "slot": "lunch"
+   }
+  ]
+ }
+}
