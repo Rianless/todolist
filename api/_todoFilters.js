@@ -18,11 +18,12 @@ function buildTodoFilters(query, { legacy = false } = {}) {
   const to = cleanDate(query.to);
 
   if (query.date) {
-    if (date) filters.push(`or=(date.eq.${date},and(repeat.eq.none,date.lt.${date},repeat_end.gte.${date}))`);
+    // 반복 일정(repeat 가 none 이 아닌 행)은 시작일 행 하나로 저장되니, 이미 시작한 반복 일정도 함께 돌려준다 (어느 날에 나타나는지는 받는 쪽이 계산)
+    if (date) filters.push(`or=(date.eq.${date},and(repeat.eq.none,date.lt.${date},repeat_end.gte.${date}),and(repeat.neq.none,date.lt.${date}))`);
     else filters.push(`date=eq.${encodeURIComponent(query.date)}`);
   } else {
     if (query.from) {
-      if (from) filters.push(`or=(date.gte.${from},and(repeat.eq.none,repeat_end.gte.${from}))`);
+      if (from) filters.push(`or=(date.gte.${from},and(repeat.eq.none,repeat_end.gte.${from}),repeat.neq.none)`);
       else filters.push(`date=gte.${encodeURIComponent(query.from)}`);
     }
     if (query.to) filters.push(`date=lte.${encodeURIComponent(query.to)}`);

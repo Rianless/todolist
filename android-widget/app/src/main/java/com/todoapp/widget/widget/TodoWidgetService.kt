@@ -10,6 +10,7 @@ import com.todoapp.widget.R
 import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.data.DayExtra
 import com.todoapp.widget.data.applyItemOrder
+import com.todoapp.widget.data.repeatOccursOn
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
 import java.net.HttpURLConnection
@@ -63,19 +64,33 @@ class TodoWidgetFactory(
 
                 val arr = JSONArray(response)
                 val list = mutableListOf<TodoItem>()
+                val repeatInfo by lazy { runCatching { CloudStateClient.fetchRepeatInfo() }.getOrDefault(emptyMap()) }
                 for (i in 0 until arr.length()) {
                     val obj = arr.getJSONObject(i)
+                    // 반복 일정: 이 날짜에 나타나는 것만 남기고, 날짜별 완료 · 삭제 · 제목을 반영한다
+                    val repeat = obj.optString("repeat", "none")
+                    val isRepeating = repeat.isNotEmpty() && repeat != "none"
+                    val baseDate = obj.optString("date")
+                    var occurrenceDone = obj.optBoolean("done")
+                    var occurrenceTitle = obj.optString("title")
+                    if (isRepeating && baseDate != selectedDate) {
+                        if (!repeatOccursOn(repeat, baseDate, obj.optString("repeat_end"), selectedDate)) continue
+                        val info = repeatInfo[obj.optInt("id")]
+                        if (info != null && selectedDate in info.excluded) continue
+                        occurrenceDone = info != null && selectedDate in info.doneDates
+                        info?.titles?.get(selectedDate)?.let { occurrenceTitle = it }
+                    }
                     list.add(
                         TodoItem(
                             id = obj.optInt("id"),
-                            title = obj.optString("title"),
+                            title = occurrenceTitle,
                             date = obj.optString("date"),
                             startTime = obj.optString("start_time"),
                             endTime = obj.optString("end_time"),
                             allDay = obj.optBoolean("all_day"),
                             category = obj.optString("category"),
                             categoryColor = obj.optString("category_color", "#636366"),
-                            done = obj.optBoolean("done")
+                            done = occurrenceDone
                         )
                     )
                 }

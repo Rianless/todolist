@@ -49,6 +49,33 @@ object CloudStateClient {
     private const val STATE_API_URL = "https://todolist-liart-mu.vercel.app/api/state"
     private const val TODOS_API_URL = "https://todolist-liart-mu.vercel.app/api/todos"
 
+    /**
+     * 반복 일정의 날짜별 상태(지운 날짜 · 완료한 날짜 · 그 날만 바꾼 제목). 일정 id → 상태.
+     * 웹앱 /api/state 의 items 에서 읽고, 네트워크 오류 시 빈 맵을 돌려준다.
+     */
+    fun fetchRepeatInfo(): Map<Int, RepeatInfo> {
+        val items = fetchState()?.optJSONArray("items") ?: return emptyMap()
+        val result = mutableMapOf<Int, RepeatInfo>()
+        for (index in 0 until items.length()) {
+            val item = items.optJSONObject(index) ?: continue
+            val repeat = item.optString("repeat", "none")
+            if (repeat.isEmpty() || repeat == "none") continue
+            fun strings(key: String): Set<String> {
+                val array = item.optJSONArray(key) ?: return emptySet()
+                return (0 until array.length()).map { array.optString(it) }.toSet()
+            }
+            val titles = mutableMapOf<String, String>()
+            item.optJSONObject("overrides")?.let { overrides ->
+                overrides.keys().forEach { day ->
+                    val title = overrides.optJSONObject(day)?.optString("title").orEmpty()
+                    if (title.isNotBlank()) titles[day] = title
+                }
+            }
+            result[item.optInt("id")] = RepeatInfo(strings("excludedDates"), strings("doneDates"), titles)
+        }
+        return result
+    }
+
     /** 웹앱에서 사용자가 정한 그날 일정 순서(일정 id 목록). 정한 적이 없으면 빈 목록. */
     fun fetchItemOrder(date: LocalDate): List<String> {
         val state = fetchState() ?: return emptyList()
