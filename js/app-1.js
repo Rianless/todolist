@@ -1181,8 +1181,8 @@ function updateDesktopWidgets() {
   const wBookmark = win(`🔖 북마크`, open('열기', "desktopOpen('bookmark')"), `<div class="dkw-bm-list">${bmRows || '<div class="dkw-empty">저장한 링크가 없어요</div>'}</div>`);
   const stack = (...ws) => `<div class="dk-stack">${ws.join('')}</div>`;
   box.innerHTML = window.innerWidth < 900
-    // 폰: 오늘(+메모) · 달력 · 이번 달 가계부 · D-day·택배 (가계부 통계는 뺀다)
-    ? stack(wToday, wMemo) + stack(wCal) + stack(wMoney) + stack(wDday)
+    // 폰: 2열 — 왼쪽 오늘 · 메모 · 이번 달 가계부 / 오른쪽 달력 · D-day·택배 (가계부 통계는 뺀다)
+    ? stack(wToday, wMemo, wMoney) + stack(wCal, wDday)
     // PC: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배 · 북마크
     : stack(wToday, wMemo) + stack(wCal) + stack(wMoney, wStat) + stack(wDday) + stack(wBookmark);
   const ta = box.querySelector('.mf-input');
