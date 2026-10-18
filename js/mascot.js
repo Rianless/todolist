@@ -438,6 +438,8 @@
     } else out.push('📅 오늘 일정은 비어 있어');
     if (rts.length) out.push('🔁 루틴 ' + rts.length + '개 (끝낸 것 ' + rts.filter(function (x) { return x.done; }).length + ')');
 
+    extraLines(now).forEach(function (l) { out.push(l); });
+
     var carry = carryOver(now);
     if (carry) out.push('⏳ ' + phrase('today_carry', { n: carry }));
 
@@ -449,6 +451,45 @@
     out.push(pick(L().cheer));
     say(out.join('\n'), { slot: 'cheer', ms: 25000 });
     box.classList.remove('cfg');
+  }
+
+  // 가계부·구독 결제·D-day·택배 (이 앱 데이터만 읽는다. 없으면 그 줄은 빼고, 오류가 나도 브리핑은 계속)
+  function won(n) { return Number(n).toLocaleString('ko-KR') + '원'; }
+
+  function extraLines(now) {
+    var out = [], today = ds(now), y = now.getFullYear(), m = now.getMonth();
+    try {
+      var tot = statsMonthTotals(ledger, subscriptions, y, m, getSubDatesForMonth);
+      if (tot.expense || tot.income) {
+        var cats = statsCategoryBreakdown(ledger, subscriptions, y, m, getSubDatesForMonth);
+        out.push('💰 ' + (m + 1) + '월 지출 ' + won(tot.expense) + (tot.income ? ' · 수입 ' + won(tot.income) : '') +
+          (cats.length ? ' · 최다 ' + cats[0].name + ' ' + cats[0].pct + '%' : ''));
+      }
+    } catch (e) {}
+    try {
+      var soon = [];
+      [0, 1].forEach(function (off) {
+        desktopMonthSubs(subscriptions, y, m + off, getSubDatesForMonth).forEach(function (x) {
+          var days = Math.round((new Date(x.date + 'T00:00:00') - new Date(today + 'T00:00:00')) / 86400000);
+          if (days >= 0 && days <= 7) soon.push({ x: x, days: days });
+        });
+      });
+      soon.sort(function (a, b) { return a.days - b.days; });
+      if (soon.length) {
+        out.push('💳 곧 결제 ' + soon.slice(0, 3).map(function (r) {
+          return clean(r.x.name) + ' ' + won(r.x.amount) + ' (' + (r.days ? r.days + '일 뒤' : '오늘') + ')';
+        }).join(', ') + (soon.length > 3 ? ' 외 ' + (soon.length - 3) + '건' : ''));
+      }
+    } catch (e) {}
+    try {
+      var dds = Dday.sortDdays(ddays, today).filter(function (d) { return d.calc.kind !== 'past'; }).slice(0, 2);
+      if (dds.length) out.push('🎯 ' + dds.map(function (d) { return (d.emoji || '⭐') + ' ' + clean(d.title) + ' ' + d.calc.label; }).join(' · '));
+    } catch (e) {}
+    try {
+      var wait = Parcels.sortParcels(parcels).filter(function (p) { return !p.done; });
+      if (wait.length) out.push('📦 기다리는 택배 ' + wait.length + '건: ' + wait.slice(0, 3).map(function (p) { return clean(Parcels.labelOf(p)); }).join(', ') + (wait.length > 3 ? ' …' : ''));
+    } catch (e) {}
+    return out;
   }
 
   // 어제 끝내지 못한 일정 수
