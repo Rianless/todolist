@@ -1586,14 +1586,14 @@ function buildRoutineRow(r, ds) {
   const streak = routineStreak(r, fmtDate(new Date()));
   const items = routineItems(r);
   const checked = items.filter(it => routineCheckedIds(r.id, ds).includes(it.id)).length;
-  meta.textContent = ['루틴', r.once ? '하루만' : '', r.time, items.length ? `${checked}/${items.length}` : '', !r.once && streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
+  meta.textContent = ['루틴', r.once ? '하루만' : '', r.overridden ? '이 날만 다름' : '', r.time, items.length ? `${checked}/${items.length}` : '', !r.once && streak ? `🔥 ${streak}일 연속` : ''].filter(Boolean).join(' · ');
   body.append(title, meta);
   const edit = document.createElement('button');
   edit.type = 'button';
   edit.className = 'routine-edit';
   edit.textContent = '수정';
   edit.setAttribute('aria-label', `${r.name} 수정`);
-  edit.onclick = ev => { ev.stopPropagation(); openRoutineModal(r.id); };
+  edit.onclick = ev => { ev.stopPropagation(); openRoutineModal(r.id, ds, true); };
   row.append(check, body, edit);
   if (r.memo || items.length) {
     const detail = document.createElement('div');

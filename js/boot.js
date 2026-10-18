@@ -191,6 +191,7 @@ let routines = [];          // { id, name, days:[0-6], time, startDate, endDate,
 let routineNextId = 1;
 let routineLog = {};        // { 'YYYY-MM-DD': [완료한 루틴 id, ...] }
 let routineChecks = {};     // { 'YYYY-MM-DD': { 루틴 id: [체크한 항목 id, ...] } }
+let routineOverrides = {};  // { 'YYYY-MM-DD': { 루틴 id: { memo, checklist } } } 그 날짜만 다른 내용
 let investTaxRate = 15.4;   // 이자소득세율(%) 기본값. 항목마다 따로 정할 수도 있다
 let itemOrder = {};        // { 'YYYY-MM-DD': [일정 id, ...] } 사용자가 정한 하루 일정 순서
 const LEDGER_NO_CATEGORY = '__none';
@@ -563,6 +564,8 @@ const ROUTINE_PRESETS = { all: [0, 1, 2, 3, 4, 5, 6], weekday: [1, 2, 3, 4, 5], 
 let editingRoutineId = null;
 let routineOnce = false;   // 반복 없이 하루만 하는 루틴을 입력 중인가
 let routineEditList = [];
+let routineScopeDate = '';  // 모달을 연 날짜 (날짜별 수정 전환용)
+let routineEditDate = '';   // 값이 있으면 루틴 전체가 아니라 그 날짜 내용만 고치는 중
 
 const pctText = (done, due) => (due ? `${Math.round(done / due * 100)}%` : '—');
 

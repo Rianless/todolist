@@ -1638,11 +1638,18 @@
         <button class="modal-close" onclick="closeRoutineModal()">✕</button>
       </div>
       <div class="modal-body">
-        <div class="form-group">
+        <div class="form-group" id="r_scopeGroup" hidden>
+          <div class="extra-toggle-row">
+            <button type="button" id="r_scopeDay" onclick="setRoutineScope(true)">📅 이 날짜만</button>
+            <button type="button" id="r_scopeAll" class="on" onclick="setRoutineScope(false)">🔁 모든 날</button>
+          </div>
+          <div class="form-hint" id="r_dayHint" hidden>이 날짜의 메모·체크리스트만 바뀌고, 다른 날은 그대로예요.</div>
+        </div>
+        <div class="form-group" id="r_nameGroup">
           <label class="form-label">루틴 이름 *</label>
           <input class="form-input" id="r_name" type="text" maxlength="30" placeholder="예: 운동 30분, 영양제 먹기">
         </div>
-        <div class="form-group">
+        <div class="form-group" id="r_modeGroup">
           <label class="form-label">반복</label>
           <div class="extra-toggle-row" id="r_modeRow">
             <button type="button" id="r_modeRepeat" class="on" onclick="setRoutineMode(false)">🔁 반복</button>
@@ -1666,7 +1673,7 @@
             <button type="button" onclick="setRoutineDays('weekend')">주말</button>
           </div>
         </div>
-        <div class="form-group form-row-2">
+        <div class="form-group form-row-2" id="r_timeStartGroup">
           <div>
             <label class="form-label">시간 (선택)</label>
             <input class="form-input" id="r_time" type="time">
@@ -1696,6 +1703,7 @@
           <div class="checklist-editor-list" id="r_checklist"></div>
           <button class="checklist-add-btn" type="button" onclick="addRoutineCheck()">+ 체크 항목 추가</button>
         </div>
+        <button type="button" class="account-delete-btn" id="r_resetDay" onclick="resetRoutineDay()" style="display:none">이 날짜 내용 지우고 기본으로</button>
         <button type="button" class="account-delete-btn" id="r_delete" onclick="deleteRoutine()">이 루틴 삭제</button>
       </div>
       <div class="modal-actions">

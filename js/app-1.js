@@ -212,6 +212,7 @@ function saveData() {
       routineNextId,
       routineLog,
       routineChecks,
+      routineOverrides,
       itemOrder,
       nextId,
       ledgerNextId,
@@ -255,6 +256,7 @@ function getCloudStatePayload() {
     routineNextId,
     routineLog,
     routineChecks,
+    routineOverrides,
     itemOrder,
     nextId,
     ledgerNextId,
@@ -436,6 +438,7 @@ function applyCloudState(payload) {
   if (Array.isArray(payload.routines)) routines = payload.routines;
   if (payload.routineLog && typeof payload.routineLog === 'object' && !Array.isArray(payload.routineLog)) routineLog = payload.routineLog;
   if (payload.routineChecks && typeof payload.routineChecks === 'object' && !Array.isArray(payload.routineChecks)) routineChecks = payload.routineChecks;
+  if (payload.routineOverrides && typeof payload.routineOverrides === 'object' && !Array.isArray(payload.routineOverrides)) routineOverrides = payload.routineOverrides;
   if (Number.isFinite(payload.routineNextId)) routineNextId = payload.routineNextId;
   if (Number.isFinite(payload.memoNextId)) memoNextId = payload.memoNextId;
   if (Array.isArray(payload.diaries)) diaries = payload.diaries;
@@ -453,7 +456,7 @@ function applyCloudState(payload) {
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, routines, routineNextId, routineLog, routineChecks, itemOrder, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, routines, routineNextId, routineLog, routineChecks, routineOverrides, itemOrder, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -658,6 +661,8 @@ function loadData() {
       if (Array.isArray(payload.routines)) routines = payload.routines;
       if (payload.routineLog && typeof payload.routineLog === 'object' && !Array.isArray(payload.routineLog)) routineLog = payload.routineLog;
       if (payload.routineChecks && typeof payload.routineChecks === 'object' && !Array.isArray(payload.routineChecks)) routineChecks = payload.routineChecks;
+      if (payload.routineOverrides && typeof payload.routineOverrides === 'object' && !Array.isArray(payload.routineOverrides)) routineOverrides = payload.routineOverrides;
+  if (payload.routineOverrides && typeof payload.routineOverrides === 'object' && !Array.isArray(payload.routineOverrides)) routineOverrides = payload.routineOverrides;
       if (payload.routineNextId) routineNextId = payload.routineNextId;
       if (payload.accountNextId)  accountNextId  = payload.accountNextId;
       if (payload.transferNextId) transferNextId = payload.transferNextId;

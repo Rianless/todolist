@@ -7202,3 +7202,5 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
 #dkDayTip .dkt-text { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #dkDayTip .dkt-time { flex: 0 0 auto; color: #808080; }
 #dkDayTip .dkt-more, #dkDayTip .dkt-empty { color: #808080; }
+
+.form-hint { margin-top: 8px; font-size: 12px; color: var(--text-dim, #8a8f98); line-height: 1.4; }

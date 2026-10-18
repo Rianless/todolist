@@ -122,6 +122,17 @@
     return out;
   }
 
+  // { 날짜: { 루틴id: 값 } } — 날짜·루틴별로 값 하나씩
+  function mergeNestedScalarMap(base, local, remote) {
+    const b = isPlain(base) ? base : {}, l = isPlain(local) ? local : {}, r = isPlain(remote) ? remote : {};
+    const out = {};
+    new Set([...Object.keys(b), ...Object.keys(l), ...Object.keys(r)]).forEach(date => {
+      const inner = mergeScalarMap(b[date], l[date], r[date]);
+      if (Object.keys(inner).length) out[date] = inner;
+    });
+    return out;
+  }
+
   function mergeLedgerCategories(base, local, remote) {
     const b = isPlain(base) ? base : {}, l = isPlain(local) ? local : {}, r = isPlain(remote) ? remote : {};
     if (!isPlain(local) && !isPlain(remote)) return undefined;
@@ -169,6 +180,8 @@
         out[k] = mergeSetMap(base[k], local[k], remote[k]);
       } else if (k === 'routineChecks') {
         out[k] = mergeNestedSetMap(base[k], local[k], remote[k]);
+      } else if (k === 'routineOverrides') {
+        out[k] = mergeNestedScalarMap(base[k], local[k], remote[k]);
       } else if (k === 'itemOrder') {
         out[k] = mergeScalarMap(base[k], local[k], remote[k]);
       } else if (COUNTERS.includes(k)) {
