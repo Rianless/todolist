@@ -7,17 +7,27 @@
   var KEY_FOCUS = 'rianless_mascot_focus';  // 집중 중이면 { start, title }
   var KEY_DONE = 'rianless_mascot_praise';  // 오늘 칭찬한 것 "날짜|all" "날짜|half" "날짜|left"
   var KEY_ALERT = 'rianless_mascot_alert';  // 오늘 알린 일정 "날짜|키" 목록
+  var KEY_CFG = 'rianless_mascot_cfg';     // 알림 설정
   var IDLE_MS = [4000, 9000];
-  var ALERT_MIN = 10;
+  var DEFAULTS = { alertMin: 10, greet: 1, briefing: 1, chatter: 45, evening: 20 };
 
   var man = null, lines = null, ids = [], cur = null, last = '', timer = 0, bubbleTimer = 0;
-  var lastDone = null;
-  var box, vid, img, ui, bubble, chips, btnChar, btnHide, tab, focusBtn;
+  var lastDone = null, lastSayAt = Date.now(), nextChatter = 0;
+  var box, vid, img, ui, bubble, chips, panel, btnChar, btnHide, btnCfg, tab, focusBtn;
 
   /* ── 저장소 · 도우미 ── */
   function get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } }
   function set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} }
   function getJSON(k, d) { try { return JSON.parse(get(k)) || d; } catch (e) { return d; } }
+  function cfg(k) {
+    var c = getJSON(KEY_CFG, {});
+    return c[k] != null ? +c[k] : DEFAULTS[k];
+  }
+  function setCfg(k, v) {
+    var c = getJSON(KEY_CFG, {});
+    c[k] = +v;
+    set(KEY_CFG, JSON.stringify(c));
+  }
   function rnd(a, b) { return a + Math.random() * (b - a); }
   function pick(a) { return a && a.length ? a[Math.floor(Math.random() * a.length)] : ''; }
   function fill(s, v) { return String(s || '').replace(/\{(\w+)\}/g, function (m, k) { return v && v[k] != null ? v[k] : ''; }); }
@@ -69,9 +79,14 @@
       'background:#fff;color:#333;font-size:11px;line-height:18px;padding:0;text-align:center;cursor:pointer;opacity:0;' +
       'transition:opacity .15s;pointer-events:auto}' +
       '#mascot:hover .mc-btn,#mascot.touch .mc-btn{opacity:.9}' +
-      '#mascot .mc-char{right:22px}#mascot .mc-hide{right:0}' +
+      '#mascot .mc-char{right:22px}#mascot .mc-hide{right:0}#mascot .mc-cfg{right:44px}' +
+      '#mascot .mc-panel{display:none;pointer-events:auto;width:100%;box-sizing:border-box;background:#fff;color:#222;border:2px solid #222;border-radius:10px;padding:8px 10px;font-size:12px;box-shadow:2px 2px 0 rgba(0,0,0,.35)}' +
+      '#mascot.cfg .mc-panel{display:block}' +
+      '#mascot .mc-panel h4{margin:0 0 6px;font-size:13px}' +
+      '#mascot .mc-row{display:flex;align-items:center;justify-content:space-between;gap:8px;margin:4px 0}' +
+      '#mascot .mc-row select{font-size:12px;padding:1px 2px;max-width:110px}' +
       '#mascot .mc-ui{position:absolute;right:0;bottom:100%;width:236px;margin-bottom:6px;display:flex;flex-direction:column;align-items:flex-end;gap:6px}' +
-      '#mascot .mc-bubble{display:none;pointer-events:auto;max-width:100%;background:#fff;color:#222;border:2px solid #222;border-radius:12px;' +
+      '#mascot .mc-bubble{max-height:40vh;overflow-y:auto;display:none;pointer-events:auto;max-width:100%;background:#fff;color:#222;border:2px solid #222;border-radius:12px;' +
       'padding:8px 10px;font-size:13px;line-height:1.45;white-space:pre-line;word-break:keep-all;box-shadow:2px 2px 0 rgba(0,0,0,.35);cursor:pointer}' +
       '#mascot .mc-chips{display:none;pointer-events:auto;flex-wrap:wrap;justify-content:flex-end;gap:4px}' +
       '#mascot.open .mc-chips{display:flex}' +
@@ -88,7 +103,7 @@
 
   var CHIPS = [
     ['cheer', '응원해 줘'], ['dance', '춤춰 줘'], ['today', '오늘 할 일'], ['todo', '다음 할 일'],
-    ['event', '다음 일정'], ['focus', '집중 시작'], ['tired', '힘들어'], ['rest', '쉴래']
+    ['brief', '일정 브리핑'], ['event', '다음 일정'], ['focus', '집중 시작'], ['tired', '힘들어'], ['rest', '쉴래']
   ];
 
   function build() {
@@ -96,15 +111,18 @@
     box = document.createElement('div');
     box.id = 'mascot';
     box.innerHTML =
-      '<div class="mc-ui"><div class="mc-bubble" role="status"></div><div class="mc-chips"></div></div>' +
+      '<div class="mc-ui"><div class="mc-panel"></div><div class="mc-bubble" role="status"></div><div class="mc-chips"></div></div>' +
       '<div class="mc-stage"><img alt=""><video muted playsinline preload="auto"></video></div>' +
       '<button type="button" class="mc-btn mc-char" title="캐릭터 바꾸기" aria-label="캐릭터 바꾸기">⇄</button>' +
+      '<button type="button" class="mc-btn mc-cfg" title="알림 설정" aria-label="알림 설정">⚙</button>' +
       '<button type="button" class="mc-btn mc-hide" title="숨기기" aria-label="캐릭터 숨기기">✕</button>';
     img = box.querySelector('img');
     vid = box.querySelector('video');
     ui = box.querySelector('.mc-ui');
     bubble = box.querySelector('.mc-bubble');
     chips = box.querySelector('.mc-chips');
+    panel = box.querySelector('.mc-panel');
+    btnCfg = box.querySelector('.mc-cfg');
     btnChar = box.querySelector('.mc-char');
     btnHide = box.querySelector('.mc-hide');
     CHIPS.forEach(function (c) {
@@ -130,6 +148,7 @@
     bubble.addEventListener('click', hideBubble);
     btnChar.addEventListener('click', function () { setChar(ids[(ids.indexOf(cur) + 1) % ids.length]); });
     btnHide.addEventListener('click', function () { setHidden(true); });
+    btnCfg.addEventListener('click', function () { box.classList.toggle('cfg'); if (box.classList.contains('cfg')) renderPanel(); });
     tab.addEventListener('click', function () { setHidden(false); });
     box.addEventListener('touchstart', function () { box.classList.add('touch'); }, { passive: true });
     vid.addEventListener('ended', function () {
@@ -148,6 +167,7 @@
   function say(text, o) {
     o = o || {};
     if (!text || isHidden()) return;
+    lastSayAt = Date.now();
     bubble.textContent = text;
     bubble.style.display = 'block';
     clearTimeout(bubbleTimer);
@@ -227,6 +247,7 @@
     else if (a === 'today') sayToday(t, open);
     else if (a === 'todo') sayTodo(open);
     else if (a === 'event') sayEvent();
+    else if (a === 'brief') briefing(true);
     else if (a === 'focus') toggleFocus(open);
   }
 
@@ -306,9 +327,12 @@
   }
 
   function greet() {
+    if (!cfg('greet') && !(cfg('briefing') && dayPart() === 'morning')) return;
     var part = dayPart(), key = ds(new Date()) + '|' + part;
     if (get(KEY_PART) === key) return;
     set(KEY_PART, key);
+    if (part === 'morning' && cfg('briefing')) return briefing(false);
+    if (!cfg('greet')) return;
     var t = tasksOn(new Date()), open = t.filter(function (x) { return !x.done; });
     var txt = local(part);
     if (part === 'morning' || part === 'afternoon') {
@@ -321,6 +345,7 @@
 
   // 일정·루틴이 ALERT_MIN분 안에 시작하면 한 번만 알린다
   function checkAlerts() {
+    if (!cfg('alertMin')) return false;
     var now = new Date(), nm = nowMin(), today = ds(now), list = alerted(), fired = false;
     list = list.filter(function (k) { return k.indexOf(today) === 0; });
     tasksOn(now).forEach(function (x) {
@@ -328,7 +353,7 @@
       var s = startMin(x.time);
       if (s == null) return;
       var diff = s - nm;
-      if (diff < 0 || diff > ALERT_MIN) return;
+      if (diff < 0 || diff > cfg('alertMin')) return;
       var key = today + '|' + x.kind + '|' + x.title + '|' + x.time;
       if (list.indexOf(key) >= 0) return;
       list.push(key);
@@ -357,7 +382,7 @@
   // 저녁 8시에 남은 할 일 알려 주기
   function checkEveningLeft() {
     var now = new Date();
-    if (now.getHours() < 20) return;
+    if (!cfg('evening') || now.getHours() < cfg('evening')) return;
     var today = ds(now), flags = getJSON(KEY_DONE, []).filter(function (k) { return k.indexOf(today) === 0; });
     var flag = today + '|left';
     if (flags.indexOf(flag) >= 0) return;
@@ -367,9 +392,119 @@
     if (open.length) say(phrase('today_left', { open: open.length }), { ms: 10000 });
   }
 
+
+  /* ── 일정 브리핑: 오늘 일정·루틴·진행도·어제 남은 일·내일 첫 일정을 한 번에 ── */
+  function briefing(manual) {
+    var now = new Date(), nm = nowMin();
+    var t = tasksOn(now);
+    var evs = t.filter(function (x) { return x.kind === 'item'; });
+    var rts = t.filter(function (x) { return x.kind === 'routine'; });
+    var timed = evs.filter(function (x) { return startMin(x.time) != null; })
+      .sort(function (a, b) { return startMin(a.time) - startMin(b.time); });
+    var untimed = evs.filter(function (x) { return startMin(x.time) == null; });
+    var out = [manual ? canned('hello:' + dayPartKey()) : local('morning')];
+
+    if (evs.length) {
+      out.push('📅 오늘 일정 ' + evs.length + '건 (끝낸 것 ' + evs.filter(function (x) { return x.done; }).length + ')');
+      timed.slice(0, 5).forEach(function (x) {
+        var past = !x.done && endMin(x.time) != null ? endMin(x.time) <= nm : false;
+        out.push((x.done ? '✓ ' : '· ') + hhmm(x.time) + ' ' + clean(x.title) + (past && !x.done ? ' (지남)' : ''));
+      });
+      if (timed.length > 5) out.push('· 외 ' + (timed.length - 5) + '건');
+      if (untimed.length) out.push('· 시간 없는 일정 ' + untimed.length + '건: ' + untimed.slice(0, 3).map(function (x) { return clean(x.title); }).join(', ') + (untimed.length > 3 ? ' …' : ''));
+    } else out.push('📅 오늘 일정은 비어 있어');
+    if (rts.length) out.push('🔁 루틴 ' + rts.length + '개 (끝낸 것 ' + rts.filter(function (x) { return x.done; }).length + ')');
+
+    var carry = carryOver(now);
+    if (carry) out.push('⏳ ' + phrase('today_carry', { n: carry }));
+
+    var tm = new Date(now.getFullYear(), now.getMonth(), now.getDate() + 1);
+    var tmr = tasksOn(tm).filter(function (x) { return x.kind === 'item' && startMin(x.time) != null; })
+      .sort(function (a, b) { return startMin(a.time) - startMin(b.time); })[0];
+    out.push(tmr ? '🌙 내일 첫 일정 ' + hhmm(tmr.time) + ' ' + clean(tmr.title) : '🌙 내일은 시간이 정해진 일정이 없어');
+
+    out.push(pick(L().cheer));
+    say(out.join('\n'), { slot: 'cheer', ms: 25000 });
+    box.classList.remove('cfg');
+  }
+
+  // 어제 끝내지 못한 일정 수
+  function carryOver(now) {
+    var y = new Date(now.getFullYear(), now.getMonth(), now.getDate() - 1);
+    return tasksOn(y).filter(function (x) { return x.kind === 'item' && !x.done; }).length;
+  }
+
+  /* ── 스스로 하는 말: 한동안 조용하면 가끔 한마디 ── */
+  function schedChatter() {
+    var m = cfg('chatter');
+    nextChatter = m ? Date.now() + m * 60000 * rnd(0.8, 1.4) : 0;
+  }
+
+  function chatter() {
+    if (!nextChatter || Date.now() < nextChatter) return;
+    // 방금 말했거나 말풍선이 떠 있거나 패널이 열려 있으면 미룬다
+    if (Date.now() - lastSayAt < 5 * 60000 || bubble.style.display === 'block' || box.classList.contains('open') || box.classList.contains('cfg')) {
+      nextChatter = Date.now() + 5 * 60000;
+      return;
+    }
+    var f = focus();
+    if (f) {
+      if (mins(f) >= 25) say(canned('rest'), { slot: 'cheer', ms: 10000 });
+      schedChatter();
+      return;
+    }
+    var t = tasksOn(new Date()), open = t.filter(function (x) { return !x.done; });
+    var opts = [
+      function () { say(pick(L().cheer), { slot: 'cheer' }); },
+      function () { say(canned('rest')); },
+      function () { say(canned('cheer')); }
+    ];
+    if (open.length) {
+      opts.push(function () { sayTodo(open); });
+      opts.push(function () { say(phrase('today_left', { open: open.length })); });
+    }
+    pick(opts)();
+    schedChatter();
+  }
+
+  /* ── 알림 설정 패널 ── */
+  var OPTS = [
+    ['alertMin', '일정 알림', [[0, '끔'], [5, '5분 전'], [10, '10분 전'], [15, '15분 전'], [30, '30분 전']]],
+    ['greet', '시간대 인사', [[1, '켬'], [0, '끔']]],
+    ['briefing', '아침 브리핑', [[1, '켬'], [0, '끔']]],
+    ['chatter', '스스로 말하기', [[0, '끔'], [20, '자주'], [45, '가끔'], [90, '드물게']]],
+    ['evening', '남은 할 일 알림', [[0, '끔'], [18, '18시'], [19, '19시'], [20, '20시'], [21, '21시']]]
+  ];
+
+  function renderPanel() {
+    panel.innerHTML = '<h4>캐릭터 알림 설정</h4>';
+    OPTS.forEach(function (o) {
+      var row = document.createElement('div');
+      row.className = 'mc-row';
+      var lab = document.createElement('span');
+      lab.textContent = o[1];
+      var sel = document.createElement('select');
+      sel.setAttribute('aria-label', o[1]);
+      o[2].forEach(function (c) {
+        var op = document.createElement('option');
+        op.value = c[0];
+        op.textContent = c[1];
+        if (cfg(o[0]) === c[0]) op.selected = true;
+        sel.appendChild(op);
+      });
+      sel.addEventListener('change', function () {
+        setCfg(o[0], sel.value);
+        if (o[0] === 'chatter') schedChatter();
+      });
+      row.appendChild(lab);
+      row.appendChild(sel);
+      panel.appendChild(row);
+    });
+  }
+
   function tick() {
     if (!man || isHidden() || document.hidden) return;
-    try { if (!checkAlerts()) { greet(); checkEveningLeft(); } } catch (e) {}
+    try { if (!checkAlerts()) { greet(); checkEveningLeft(); } chatter(); } catch (e) {}
     refreshFocusBtn();
   }
 
@@ -388,6 +523,7 @@
       // 앱 데이터(items·routines)가 불러와진 뒤에 첫 인사
       setTimeout(function () { try { checkProgress(); tick(); } catch (e) {} }, 4000);
       setInterval(function () { try { if (!isHidden() && !document.hidden) checkProgress(); } catch (e) {} }, 3000);
+      schedChatter();
       setInterval(tick, 20000);
     }).catch(function () {});
   }
