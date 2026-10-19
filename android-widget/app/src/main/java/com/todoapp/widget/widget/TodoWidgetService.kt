@@ -52,6 +52,11 @@ class TodoWidgetFactory(
     override fun onCreate() {}
 
     override fun onDataSetChanged() {
+        // 팝업에서 방금 바꾼 직후에는 서버를 기다리지 않고 마지막 목록에 변경을 얹어 바로 그린다
+        WidgetLocalEdits.snapshot(selectedDate)?.let {
+            todos = WidgetLocalEdits.apply(it)
+            return
+        }
         runBlocking {
             runCatching {
                 // 선택된 날짜만 가져오기
@@ -106,6 +111,9 @@ class TodoWidgetFactory(
                 }.getOrDefault(emptyList())
                 todos = applyItemOrder(todos, order) { it.id.toString() }
             }
+
+            WidgetLocalEdits.remember(selectedDate, todos)
+            todos = WidgetLocalEdits.apply(todos)
 
             // 웹앱과 같이 가계부 · 구독도 함께 표시
             extras = runCatching {
@@ -182,6 +190,15 @@ class TodoWidgetFactory(
         val fillIntent = Intent().apply {
             putExtra(TodoWidgetProvider.EXTRA_TODO_ID, todo.id)
             putExtra(TodoWidgetProvider.EXTRA_DATE, selectedDate)
+            // 팝업이 서버를 기다리지 않고 바로 열리도록 목록에 있는 내용을 함께 넘긴다
+            putExtra(TodoWidgetProvider.EXTRA_TITLE, todo.title)
+            putExtra(TodoWidgetProvider.EXTRA_TODO_DATE, todo.date)
+            putExtra(TodoWidgetProvider.EXTRA_START, todo.startTime)
+            putExtra(TodoWidgetProvider.EXTRA_END, todo.endTime)
+            putExtra(TodoWidgetProvider.EXTRA_ALL_DAY, todo.allDay)
+            putExtra(TodoWidgetProvider.EXTRA_CATEGORY, todo.category)
+            putExtra(TodoWidgetProvider.EXTRA_COLOR, todo.categoryColor)
+            putExtra(TodoWidgetProvider.EXTRA_DONE, todo.done)
         }
         views.setOnClickFillInIntent(R.id.widget_item_root, fillIntent)
 

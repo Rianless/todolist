@@ -195,10 +195,16 @@ class AddEditActivity : AppCompatActivity() {
                         conn.setRequestProperty("Content-Type", "application/json")
                         conn.setRequestProperty("Prefer", "return=representation")
                         conn.doOutput = true
+                        // 웹앱 상태 저장(읽기→쓰기)을 일정 저장과 동시에 시작해 저장 시간을 줄인다
+                        var stateSaved = false
+                        val stateThread = Thread {
+                            stateSaved = runCatching { CloudStateClient.saveTodo(todoId, body, checklistSnapshot) }.getOrDefault(false)
+                        }.also { it.start() }
                         conn.outputStream.write(body.toString().toByteArray())
                         conn.inputStream.close()
                         conn.disconnect()
-                        savedId = todoId
+                        stateThread.join()
+                        return@runCatching todoId to stateSaved
                     } else {
                         // 추가
                         val listConn = URL(API_URL).openConnection() as HttpURLConnection

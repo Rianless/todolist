@@ -89,8 +89,12 @@ object CloudStateClient {
      * 더 못 옮기면 [MoveResult.EDGE], 네트워크 오류면 [MoveResult.FAILED].
      */
     fun moveTodoInDay(date: LocalDate, todoId: Int, delta: Int): MoveResult {
-        val state = fetchState() ?: return MoveResult.FAILED
-        val visible = fetchDayTodoIds(date) ?: return MoveResult.FAILED
+        var visibleIds: List<String>? = null
+        val idsThread = Thread { visibleIds = fetchDayTodoIds(date) }.also { it.start() }
+        val state = fetchState(fresh = true)
+        idsThread.join()
+        state ?: return MoveResult.FAILED
+        val visible = visibleIds ?: return MoveResult.FAILED
         val saved = state.optJSONObject("itemOrder")?.optJSONArray(date.toString())
             ?.let { array -> (0 until array.length()).map { array.opt(it).toString() } }
             ?: emptyList()
@@ -214,7 +218,7 @@ object CloudStateClient {
         apiBody: JSONObject,
         checklist: List<ChecklistItem>
     ): Boolean {
-        val state = fetchState() ?: return false
+        val state = fetchState(fresh = true) ?: return false
         val items = state.optJSONArray("items") ?: JSONArray().also { state.put("items", it) }
         val target = findTodo(items, todoId) ?: JSONObject()
             .put("id", todoId)
@@ -251,21 +255,21 @@ object CloudStateClient {
     }
 
     fun saveChecklist(todoId: Int, checklist: List<ChecklistItem>): Boolean {
-        val state = fetchState() ?: return false
+        val state = fetchState(fresh = true) ?: return false
         val target = findTodo(state.optJSONArray("items"), todoId) ?: return false
         target.put("checklist", checklistToJson(checklist))
         return postState(state)
     }
 
     fun updateDone(todoId: Int, done: Boolean): Boolean {
-        val state = fetchState() ?: return false
+        val state = fetchState(fresh = true) ?: return false
         val target = findTodo(state.optJSONArray("items"), todoId) ?: return false
         target.put("done", done)
         return postState(state)
     }
 
     fun deleteTodo(todoId: Int): Boolean {
-        val state = fetchState() ?: return false
+        val state = fetchState(fresh = true) ?: return false
         val items = state.optJSONArray("items") ?: return false
         val updated = JSONArray()
         for (index in 0 until items.length()) {
@@ -282,8 +286,15 @@ object CloudStateClient {
         return parseBookmarkData(state)
     }
 
-    private fun fetchState(): JSONObject? {
-        return runCatching {
+    /** 위젯 목록·팝업이 연달아 읽을 때 같은 서버 응답을 잠깐 재사용한다. 쓰기 전에는 fresh = true 로 새로 읽는다. */
+    private const val STATE_CACHE_MS = 4000L
+    @Volatile private var cachedState: JSONObject? = null
+    @Volatile private var cachedAt = 0L
+
+    private fun fetchState(fresh: Boolean = false): JSONObject? {
+        val cached = cachedState
+        if (!fresh && cached != null && System.currentTimeMillis() - cachedAt < STATE_CACHE_MS) return cached
+        val loaded = runCatching {
             val connection = URL(STATE_API_URL).openConnection() as HttpURLConnection
             connection.connectTimeout = 8000
             connection.readTimeout = 8000
@@ -291,6 +302,9 @@ object CloudStateClient {
             connection.disconnect()
             JSONObject(response).optJSONObject("data")
         }.getOrNull()
+        cachedState = loaded
+        cachedAt = System.currentTimeMillis()
+        return loaded
     }
 
     private fun postState(state: JSONObject): Boolean {
@@ -305,6 +319,7 @@ object CloudStateClient {
             val success = connection.responseCode in 200..299
             if (success) connection.inputStream.close() else connection.errorStream?.close()
             connection.disconnect()
+            if (success) { cachedState = state; cachedAt = System.currentTimeMillis() } else cachedState = null
             success
         }.getOrDefault(false)
     }

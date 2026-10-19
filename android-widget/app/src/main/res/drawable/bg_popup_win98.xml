@@ -1,0 +1,5 @@
+<?xml version="1.0" encoding="utf-8"?>
+<!-- 위젯과 같은 Windows 98 둥근 창 (위젯 배경 재사용) -->
+<layer-list xmlns:android="http://schemas.android.com/apk/res/android">
+    <item android:drawable="@drawable/widget_background" />
+</layer-list>

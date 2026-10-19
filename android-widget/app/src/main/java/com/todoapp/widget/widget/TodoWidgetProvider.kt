@@ -64,6 +64,13 @@ class TodoWidgetProvider : AppWidgetProvider() {
         const val EXTRA_TODO_ID = "extra_todo_id"
         const val EXTRA_DONE = "extra_done"
         const val EXTRA_DATE = "extra_date"
+        const val EXTRA_TITLE = "extra_title"
+        const val EXTRA_TODO_DATE = "extra_todo_date"
+        const val EXTRA_START = "extra_start"
+        const val EXTRA_END = "extra_end"
+        const val EXTRA_ALL_DAY = "extra_all_day"
+        const val EXTRA_CATEGORY = "extra_category"
+        const val EXTRA_COLOR = "extra_color"
 
         const val PREFS = "widget_prefs"
         const val KEY_WEEK_OFFSET = "week_offset"
