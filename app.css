@@ -7240,4 +7240,11 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
   html[data-desktop][data-skin="w98"] .dkw-bar { height: 14px; }
   /* 가계부(+통계)는 내용이 길어 2행을 통째로 쓴다 → 빈 칸 없이 꽉 참 */
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(3) { grid-column: 3; grid-row: 1 / span 2; }
+  /* 1열: 오늘 · 메모(가장 크게) · D-day·택배(작게)를 세로로 쌓아 2행을 통째로 사용 */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(1) { grid-column: 1; grid-row: 1 / span 2; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(2) { grid-column: 2; grid-row: 1; }
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(4) { grid-column: 2; grid-row: 2; }
+  html[data-desktop][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(1) > .dk-widget:nth-child(1) { flex: 1.1 1 0; }
+  html[data-desktop][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(1) > .dk-widget:nth-child(2) { flex: 2.2 1 0; }
+  html[data-desktop][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(1) > .dk-widget:nth-child(3) { flex: 1 1 0; }
 }

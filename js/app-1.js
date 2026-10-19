@@ -1188,8 +1188,8 @@ function updateDesktopWidgets() {
   box.innerHTML = window.innerWidth < 900
     // 폰: 2열 — 왼쪽 오늘 · 메모 / 오른쪽 달력 · 이번 달 가계부 · D-day·택배 (가계부 통계는 뺀다)
     ? stack(wToday, wMemo) + stack(wCal, wMoney, wDday)
-    // PC: 오늘(+메모) · 달력 · 이번 달 가계부(+통계) · D-day·택배 · 북마크
-    : stack(wToday, wMemo) + stack(wCal) + stack(wMoney, wStat) + stack(wDday) + stack(wBookmark);
+    // PC: 오늘·메모·D-day·택배 · 달력 · 이번 달 가계부(+통계) · 북마크
+    : stack(wToday, wMemo, wDday) + stack(wCal) + stack(wMoney, wStat) + stack(wBookmark);
   const ta = box.querySelector('.mf-input');
   if (ta && draft) { ta.value = draft; memoFeedInput(ta); if (hadFocus) ta.focus(); }
   const list = box.querySelector('.mf-scroll');
