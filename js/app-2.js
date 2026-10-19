@@ -105,6 +105,13 @@ function desktopFolder(name) {
   document.getElementById('deskFolderBody').innerHTML = f.items.map(it =>
     `<button type="button" class="desk-ico dk-folder-item" onclick="desktopFolderOpen('${it.tab}','${it.card || ''}')"><div class="tab-icon" aria-hidden="true">${it.icon}</div><div class="tab-label">${it.label}</div></button>`).join('');
   box.classList.add('open');
+  // 눌러 연 아이콘의 오른쪽 위에 붙여 띄운다 (화면 밖으로 나가지 않게)
+  const ico = document.getElementById('mainTab-' + name);
+  if (ico) {
+    const r = ico.getBoundingClientRect();
+    box.style.left = Math.max(0, Math.min(r.right + 8, window.innerWidth - box.offsetWidth)) + 'px';
+    box.style.top = Math.max(0, Math.min(r.top, window.innerHeight - 44 - box.offsetHeight)) + 'px';
+  }
   closeStartMenu();
 }
 
