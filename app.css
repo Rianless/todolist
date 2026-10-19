@@ -7218,3 +7218,12 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
   html[data-desktop][data-skin="w98"] .dk-folder-item .tab-label { font-size: 12px !important; color: #000 !important; padding: 1px 4px; }
   html[data-desktop][data-skin="w98"] .dk-folder-item:hover .tab-label, html[data-desktop][data-skin="w98"] .dk-folder-item:focus-visible .tab-label { background: #000080; color: #fff !important; outline: 1px dotted #ff0; }
 }
+
+/* SaveTube 카드 */
+.st-kind { display: grid; grid-template-columns: 1fr 1fr; gap: 6px; margin: 8px 0; }
+.st-kind button { padding: 10px 6px; border-radius: 10px; border: 1.5px solid var(--border, #ddd); background: transparent; color: var(--text2, inherit); font: inherit; cursor: pointer; }
+.st-kind button.on { border-color: var(--accent, #6c63ff); color: var(--text, inherit); font-weight: 600; }
+.st-bar { height: 6px; border-radius: 99px; background: var(--border, #ddd); overflow: hidden; margin: 10px 0 4px; }
+.st-bar i { display: block; height: 100%; width: 0; background: var(--accent, #6c63ff); transition: width .3s; }
+.st-set { margin-top: 10px; font-size: 12px; }
+.st-save { word-break: break-all; }

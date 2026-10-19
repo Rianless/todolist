@@ -304,6 +304,7 @@ const DK_FOLDERS = {
     { icon: '📔', label: '다이어리', tab: 'mypage', card: 'mpCardDiary' },
     { icon: '📝', label: '메모', tab: 'mypage', card: 'mpCardMemo' },
     { icon: '🔖', label: '북마크', tab: 'mypage', card: 'mpCardBookmark' },
+    { icon: '⬇️', label: 'SaveTube', tab: 'mypage', card: 'mpCardSaveTube' },
   ] },
 };
 
