@@ -287,10 +287,31 @@ let bookmarkSearchText = '';
 // 지금 열린 앱 아이콘(이름이 파란 칸 + 흰 글씨)
 let deskApp = null;
 
+// 바탕화면(PC)에서 가계부·마이페이지 아이콘을 누르면 뜨는 폴더 안의 항목
+const DK_FOLDERS = {
+  category: { title: '📁 가계부', items: [
+    { icon: '💰', label: '가계부', tab: 'category', card: 'mpCardLedger' },
+    { icon: '📅', label: '가계부 달력', tab: 'category' },
+    { icon: '📦', label: '택배 추적', tab: 'category', card: 'mpCardParcel' },
+    { icon: '🔖', label: '구독', tab: 'category', card: 'mpCardSubs' },
+    { icon: '🏦', label: '자산', tab: 'category', card: 'mpCardAccounts' },
+    { icon: '📊', label: '통계', tab: 'category', card: 'mpCardStats' },
+  ] },
+  mypage: { title: '📁 마이페이지', items: [
+    { icon: '👤', label: '닉네임', tab: 'mypage', card: 'mpCardNickname' },
+    { icon: '🏷️', label: '카테고리', tab: 'mypage', card: 'mpCardCat' },
+    { icon: '⏳', label: 'D-day', tab: 'mypage', card: 'mpCardDday' },
+    { icon: '📔', label: '다이어리', tab: 'mypage', card: 'mpCardDiary' },
+    { icon: '📝', label: '메모', tab: 'mypage', card: 'mpCardMemo' },
+    { icon: '🔖', label: '북마크', tab: 'mypage', card: 'mpCardBookmark' },
+  ] },
+};
+
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
 const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark' };
 
 document.addEventListener('click', closeStartMenu);
+document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDesktopFolder(); });
 window.addEventListener('load', desktopSync);
 setInterval(() => { if (!document.hidden) updateDesktopTicker(); }, 30000);   // 날짜가 바뀌거나 다른 기기에서 고친 것도 따라가게
 
