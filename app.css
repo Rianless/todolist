@@ -7227,3 +7227,17 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
 .st-bar i { display: block; height: 100%; width: 0; background: var(--accent, #6c63ff); transition: width .3s; }
 .st-set { margin-top: 10px; font-size: 12px; }
 .st-save { word-break: break-all; }
+
+/* PC 바탕화면 위젯: 화면을 꽉 채우도록 키움 (3열 × 2행, 남는 폭·높이를 균등 분배) */
+@media (min-width: 900px) {
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets { grid-template-columns: repeat(3, minmax(0, 1fr)); grid-auto-rows: minmax(0, 1fr); align-items: stretch; align-content: stretch; justify-content: stretch; gap: 16px; overflow: hidden; }
+  html[data-desktop][data-skin="w98"] .dk-stack { max-width: none; min-height: 0; gap: 16px; }
+  html[data-desktop][data-skin="w98"] .dk-widget { max-width: none; flex: 1 1 0; min-height: 0; font-size: 16px; }
+  html[data-desktop][data-skin="w98"] .dkw-title { font-size: 16px; }
+  html[data-desktop][data-skin="w98"] .dkw-body { padding: 10px 16px; flex: 1 1 auto; }
+  html[data-desktop][data-skin="w98"] .dkw-row { padding: 4px 0; }
+  html[data-desktop][data-skin="w98"] .dkw-kv { padding: 3px 0; }
+  html[data-desktop][data-skin="w98"] .dkw-bar { height: 14px; }
+  /* 가계부(+통계)는 내용이 길어 2행을 통째로 쓴다 → 빈 칸 없이 꽉 참 */
+  html[data-desktop][data-desktop-win][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(3) { grid-column: 3; grid-row: 1 / span 2; }
+}
