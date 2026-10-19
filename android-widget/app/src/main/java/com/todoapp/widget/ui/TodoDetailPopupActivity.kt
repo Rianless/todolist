@@ -22,13 +22,16 @@ import com.todoapp.widget.data.ChecklistItem
 import com.todoapp.widget.data.CloudStateClient
 import com.todoapp.widget.widget.TodoWidgetProvider
 import com.todoapp.widget.widget.WidgetLocalEdits
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.SupervisorJob
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
 import java.net.HttpURLConnection
 import java.net.URL
+import java.util.concurrent.ConcurrentHashMap
 import java.time.LocalDate
 import java.time.format.DateTimeFormatter
 
