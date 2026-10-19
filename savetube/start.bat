@@ -1,11 +1,10 @@
 @echo off
-chcp 65001 >nul
 cd /d "%~dp0"
 echo.
-echo  SaveTube 서버를 켰어요. 이 창을 닫으면 꺼져요.
+echo  SaveTube server is running. Closing this window stops it.
 echo.
-echo  폰 크롬에서 아래 주소 뒤에 :8000 을 붙여 접속하세요.
-echo  (예: http://192.168.0.12:8000)
+echo  On your phone, open this address followed by :8000
+echo  (example: http://192.168.0.12:8000)
 echo.
 ipconfig | findstr IPv4
 echo.
