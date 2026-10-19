@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v136-today-list';
+const CACHE_NAME = 'todolist-v137-savetube';
 const ASSETS = [
   './',
   './index.html',
@@ -19,6 +19,7 @@ const ASSETS = [
   './icon-512.png',
   './state-merge.js',
   './bookmarks.js',
+  './js/savetube.js',
   './parcels.js',
   './dday.js'
 ];

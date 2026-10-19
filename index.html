@@ -690,6 +690,52 @@
 
         </div>
 
+        <!-- ── SaveTube 카드 ── -->
+
+        <div class="mp-card" id="mpCardSaveTube">
+
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardSaveTube')">
+
+            <span class="mp-card-icon">⬇️</span>
+
+            <span class="mp-card-label">SaveTube (영상·음악 저장)</span>
+
+            <span class="mp-card-chevron">▼</span>
+
+          </div>
+
+          <div class="mp-card-body">
+
+            <div class="mp-card-inner">
+
+              <div class="bm-add">
+                <input type="url" class="form-input" id="stUrl" inputmode="url" autocomplete="off" placeholder="동영상 링크" onkeydown="if(event.key==='Enter'){event.preventDefault();stStart()}">
+                <button class="btn-cancel bm-go" onclick="stPaste()">붙여넣기</button>
+              </div>
+              <div class="st-kind" id="stKind">
+                <button type="button" data-kind="video" class="on" onclick="stSetKind('video')">🎬 영상 MP4</button>
+                <button type="button" data-kind="mp3" onclick="stSetKind('mp3')">🎵 소리만 MP3</button>
+              </div>
+              <select class="form-input" id="stQuality" aria-label="화질·음질"></select>
+              <button type="button" class="btn-save" id="stGo" style="width:100%;margin-top:8px;" onclick="stStart()">영상으로 저장하기</button>
+              <div class="st-bar"><i id="stBar"></i></div>
+              <div class="bm-hint" id="stMsg" role="status" style="color:var(--text2);"></div>
+              <a class="btn-save st-save" id="stSave" download style="display:none;text-align:center;text-decoration:none;"></a>
+
+              <details class="st-set">
+                <summary>⚙ 서버 설정</summary>
+                <input type="url" class="form-input" id="stServer" placeholder="https://내-savetube-서버 주소" autocomplete="off" style="margin-top:6px;">
+                <input type="password" class="form-input" id="stPw" placeholder="서버 비밀번호 (설정한 경우)" autocomplete="off" style="margin-top:6px;">
+                <button type="button" class="btn-cancel" style="width:100%;margin-top:6px;" onclick="stSaveServer()">설정 저장</button>
+                <div class="bm-hint" style="color:var(--text3);">서버는 저장소의 savetube/ 폴더(README 참고)로 직접 띄워야 해요. 이 기기에만 저장돼요. 본인이 권리를 가졌거나 저장이 허락된 콘텐츠에만 사용하세요.</div>
+              </details>
+
+            </div>
+
+          </div>
+
+        </div>
+
         <!-- ── 북마크 카드 ── -->
 
         <div class="mp-card" id="mpCardBookmark">
@@ -1942,6 +1988,7 @@
 
 <script src="/state-merge.js"></script>
 <script src="/bookmarks.js"></script>
+<script src="/js/savetube.js"></script>
 <script src="/parcels.js"></script>
 <script src="/dday.js"></script>
 <script src="/js/app-1.js"></script>
