@@ -45,6 +45,16 @@ CORS_ORIGINS = [o.strip() for o in os.getenv("CORS_ORIGINS", "*").split(",") if 
 app.add_middleware(CORSMiddleware, allow_origins=CORS_ORIGINS, allow_methods=["GET", "POST"], allow_headers=["*"])
 
 
+# 크롬은 https 사이트가 localhost 같은 내 PC 서버를 부르기 전에 허락(Private Network Access)을 묻는다.
+# 사전 확인(OPTIONS) 응답에 이 헤더가 있어야 통과한다. 바깥쪽에 둬서 CORS 응답에도 붙게 한다.
+@app.middleware("http")
+async def allow_private_network(request, call_next):
+    response = await call_next(request)
+    if request.headers.get("access-control-request-private-network") == "true":
+        response.headers["Access-Control-Allow-Private-Network"] = "true"
+    return response
+
+
 # ---------- 공통 ----------
 
 def check_key(key: str | None):

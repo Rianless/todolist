@@ -64,7 +64,7 @@
   };
 
   const isUp = async () => {
-    try { return (await fetch(server() + '/api/config', { signal: AbortSignal.timeout(2000) })).ok; }
+    try { return (await fetch(server() + '/api/config', { signal: AbortSignal.timeout(3000) })).ok; }
     catch (e) { return false; }
   };
 
@@ -73,12 +73,14 @@
     if (await isUp()) return true;
     if (!isLocal()) return false;
     setMsg('서버를 켜는 중… (브라우저가 묻으면 "열기"를 눌러 주세요)');
-    const f = document.createElement('iframe');
-    f.style.display = 'none';
-    f.src = 'savetube://start';
-    document.body.appendChild(f);
-    setTimeout(() => f.remove(), 3000);
-    for (let i = 0; i < 25; i++) { await sleep(1000); if (await isUp()) return true; }
+    // iframe 보다 링크 클릭이 크롬에서 더 잘 열린다
+    const a = document.createElement('a');
+    a.href = 'savetube://start';
+    a.style.display = 'none';
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => a.remove(), 3000);
+    for (let i = 0; i < 40; i++) { await sleep(1000); if (await isUp()) return true; }
     return false;
   }
 
