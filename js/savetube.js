@@ -12,12 +12,13 @@
     get(k) { try { return localStorage.getItem(k) || ''; } catch (e) { return ''; } },
     set(k, v) { try { localStorage.setItem(k, v); } catch (e) {} },
   };
-  const server = () => store.get('savetube-server').replace(/\/+$/, '');
+  const server = () => (store.get('savetube-server') || 'http://localhost:8000').replace(/\/+$/, '');
+  const isLocal = () => /^https?:\/\/(localhost|127\.0\.0\.1)(:|\/|$)/.test(server());
+  const sleep = ms => new Promise(r => setTimeout(r, ms));
   const pw = () => store.get('savetube-key');
   const extractUrl = t => ((t || '').match(/https?:\/\/[^\s<>"']+/) || [''])[0];
 
   async function call(path, body) {
-    if (!server()) throw new Error('먼저 아래 ⚙ 서버 주소를 저장해 주세요.');
     let r;
     try {
       r = await fetch(server() + path, {
@@ -62,6 +63,25 @@
     }
   };
 
+  const isUp = async () => {
+    try { return (await fetch(server() + '/api/config', { signal: AbortSignal.timeout(2000) })).ok; }
+    catch (e) { return false; }
+  };
+
+  // 서버가 꺼져 있고 이 PC(localhost)용 설정이면, 윈도우에 등록해 둔 savetube:// 로 start.bat 을 켠다
+  async function ensureServer() {
+    if (await isUp()) return true;
+    if (!isLocal()) return false;
+    setMsg('서버를 켜는 중… (브라우저가 묻으면 "열기"를 눌러 주세요)');
+    const f = document.createElement('iframe');
+    f.style.display = 'none';
+    f.src = 'savetube://start';
+    document.body.appendChild(f);
+    setTimeout(() => f.remove(), 3000);
+    for (let i = 0; i < 25; i++) { await sleep(1000); if (await isUp()) return true; }
+    return false;
+  }
+
   window.stStart = async function () {
     const url = extractUrl($('stUrl').value);
     if (!url) return setMsg('링크를 먼저 넣어 주세요.', true);
@@ -71,6 +91,11 @@
     $('stBar').style.width = '0';
     setMsg('준비 중…');
     try {
+      if (!(await ensureServer())) {
+        throw new Error(isLocal()
+          ? '서버를 켜지 못했어요. savetube 폴더의 register-launcher.bat 을 한 번 실행했는지 확인해 주세요.'
+          : '서버에 연결하지 못했어요. 주소(https)와 서버가 켜져 있는지 확인해 주세요.');
+      }
       const { id } = await call('/api/jobs', { url, kind, quality: $('stQuality').value });
       current = id;
       poll(id);
@@ -107,7 +132,7 @@
   }
 
   window.stInit = function () {
-    $('stServer').value = server();
+    $('stServer').value = store.get('savetube-server');
     $('stPw').value = pw();
     window.stSetKind(kind);
   };

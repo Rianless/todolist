@@ -27,6 +27,12 @@
 > 밖에서도 쓰고 싶으면 Cloudflare Tunnel(`cloudflared tunnel --url http://localhost:8000`)로 https 주소를 받을 수 있어요.
 > https 주소여야 **붙여넣기 버튼**과 **공유 메뉴 연동**이 동작합니다.
 
+### 할 일 앱에서 알아서 켜기 (Windows)
+`register-launcher.bat`을 한 번 실행하면 `savetube://` 주소가 등록됩니다.
+이후 이 PC의 할 일 앱 SaveTube 카드에서 저장을 누르면 서버가 꺼져 있을 때 `start.bat`이 최소화된 창으로 자동으로 켜져요.
+(크롬이 "SaveTube를 여시겠어요?"라고 물으면 열기를 누르세요. 폴더를 옮기면 다시 실행.)
+이 방식은 할 일 앱을 쓰는 PC와 서버 PC가 같을 때만 됩니다. 폰에서는 PC가 켜져 있어야 하고 서버 주소를 직접 넣어야 해요.
+
 ## 방법 B. 클라우드에 배포 (Render / Railway / Fly.io)
 GitHub에 올린 뒤 Docker로 배포하면 됩니다. `Dockerfile`이 ffmpeg·deno까지 설치합니다.
 
