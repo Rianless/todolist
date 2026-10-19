@@ -819,7 +819,7 @@
 
     </button>
 
-    <button class="tab-item" id="mainTab-category" role="tab" aria-selected="false" aria-controls="viewCategory" onclick="setMainTab('category',this)">
+    <button class="tab-item" id="mainTab-category" role="tab" aria-selected="false" aria-controls="viewCategory" onclick="deskIconClick('category',this)">
 
       <div class="tab-icon" aria-hidden="true">💰</div>
 
@@ -832,7 +832,7 @@
       <div class="tab-label">다이어리</div>
     </button>
 
-    <button class="tab-item" id="mainTab-mypage" role="tab" aria-selected="false" aria-controls="viewMypage" onclick="setMainTab('mypage',this)">
+    <button class="tab-item" id="mainTab-mypage" role="tab" aria-selected="false" aria-controls="viewMypage" onclick="deskIconClick('mypage',this)">
 
       <div class="tab-icon" aria-hidden="true">👤</div>
 
@@ -851,15 +851,20 @@
     <span class="dk-spacer"></span>
     <span class="dk-clock" id="dkClock"></span>
   </div>
+  <!-- 바탕화면 스킨(PC): 가계부·마이페이지 아이콘을 누르면 뜨는 폴더 창 -->
+  <div id="deskFolder" class="dk-folder" role="dialog" aria-modal="false" aria-labelledby="deskFolderTitle" onclick="event.stopPropagation()">
+    <div class="dk-folder-title"><span id="deskFolderTitle"></span><button type="button" onclick="closeDesktopFolder()" aria-label="폴더 닫기">✕</button></div>
+    <div class="dk-folder-body" id="deskFolderBody"></div>
+  </div>
   <div id="desktopWidgets" class="dk-widgets" aria-label="바탕화면 위젯"></div>
   <div id="desktopTicker" class="dk-ticker" role="status" aria-label="오늘 요약"><span id="dkTickerText"></span></div>
   <div id="desktopStartMenu" role="menu" onclick="event.stopPropagation()">
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
-    <button type="button" role="menuitem" onclick="desktopOpen('category')">💰 가계부</button>
+    <button type="button" role="menuitem" onclick="desktopFolder('category')">💰 가계부</button>
     <button type="button" role="menuitem" onclick="desktopOpen('bookmark')">🔖 북마크</button>
     <button type="button" role="menuitem" onclick="desktopOpen('diary')">📔 다이어리</button>
     <button type="button" role="menuitem" onclick="desktopOpen('memo')">📝 메모</button>
-    <button type="button" role="menuitem" onclick="desktopOpen('mypage')">👤 마이페이지</button>
+    <button type="button" role="menuitem" onclick="desktopFolder('mypage')">👤 마이페이지</button>
     <hr class="dk-phone-only">
     <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleNotif()">🔔 알림</button>
     <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();openSearch()">🔍 검색</button>

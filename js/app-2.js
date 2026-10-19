@@ -88,6 +88,34 @@ function desktopOpen(tab, cardId) {
     if (card) card.scrollIntoView({ block: 'start' });
   }
   closeStartMenu();
+  closeDesktopFolder();
+}
+
+// 바탕화면(PC)에서는 가계부·마이페이지 아이콘이 바로 열리는 대신 폴더 창을 먼저 연다
+function deskIconClick(tab, btn) {
+  if (document.documentElement.hasAttribute('data-desktop') && window.innerWidth >= 900) desktopFolder(tab);
+  else setMainTab(tab, btn);
+}
+
+function desktopFolder(name) {
+  const f = DK_FOLDERS[name];
+  const box = document.getElementById('deskFolder');
+  if (!f || !box) { desktopOpen(name); return; }
+  document.getElementById('deskFolderTitle').textContent = f.title;
+  document.getElementById('deskFolderBody').innerHTML = f.items.map(it =>
+    `<button type="button" class="desk-ico dk-folder-item" onclick="desktopFolderOpen('${it.tab}','${it.card || ''}')"><div class="tab-icon" aria-hidden="true">${it.icon}</div><div class="tab-label">${it.label}</div></button>`).join('');
+  box.classList.add('open');
+  closeStartMenu();
+}
+
+function desktopFolderOpen(tab, card) {
+  closeDesktopFolder();
+  desktopOpen(tab, card || undefined);
+}
+
+function closeDesktopFolder() {
+  const box = document.getElementById('deskFolder');
+  if (box) box.classList.remove('open');
 }
 
 function toggleStartMenu(e) {
