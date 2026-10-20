@@ -18,10 +18,21 @@
   const pw = () => store.get('savetube-key');
   const extractUrl = t => ((t || '').match(/https?:\/\/[^\s<>"']+/) || [''])[0];
 
+  // 크롬의 로컬 네트워크 접근 허용창: https 사이트가 내 PC 서버를 부를 때 targetAddressSpace 를 알려야 한다.
+  // 모르는 브라우저가 거부하면 옵션 없이 다시 시도한다.
+  async function req(path, opts) {
+    const space = isLocal() ? 'loopback' : 'local';
+    try { return await fetch(server() + path, { ...opts, targetAddressSpace: space }); }
+    catch (e) {
+      if (e instanceof TypeError && /targetAddressSpace|address space/i.test(e.message)) return fetch(server() + path, opts);
+      throw e;
+    }
+  }
+
   async function call(path, body) {
     let r;
     try {
-      r = await fetch(server() + path, {
+      r = await req(path, {
         method: body ? 'POST' : 'GET',
         headers: { 'Content-Type': 'application/json', 'X-App-Key': pw() },
         body: body ? JSON.stringify(body) : undefined,
@@ -64,7 +75,8 @@
   };
 
   const isUp = async () => {
-    try { return (await fetch(server() + '/api/config', { signal: AbortSignal.timeout(3000) })).ok; }
+    // 꺼져 있으면 바로 거절되니 길게 기다려도 괜찮다. 크롬 허용창에 답할 시간을 준다.
+    try { return (await req('/api/config', { signal: AbortSignal.timeout(15000) })).ok; }
     catch (e) { return false; }
   };
 
