@@ -64,10 +64,42 @@
     setMsg(server() ? '서버 설정을 저장했어요.' : '서버 주소를 지웠어요.');
   };
 
+  // 링크를 넣으면 서버에 물어 제목·썸네일을 보여준다. 확인하는 동안은 움직이는 게이지를 띄운다.
+  let checkTimer = null, checkSeq = 0;
+  const fmtTime = s => { s = Math.round(s || 0); const h = Math.floor(s / 3600), m = Math.floor(s % 3600 / 60), x = s % 60; const p = n => String(n).padStart(2, '0'); return h ? `${h}:${p(m)}:${p(x)}` : `${m}:${p(x)}`; };
+  const setBusy = on => $('stBarWrap').classList.toggle('busy', on);
+
+  async function checkLink() {
+    const url = extractUrl($('stUrl').value);
+    const seq = ++checkSeq;
+    $('stPreview').style.display = 'none';
+    if (!url) { setBusy(false); return; }
+    setBusy(true);
+    setMsg('링크 확인 중…');
+    try {
+      if (!(await ensureServer())) throw new Error(isLocal()
+        ? '서버를 켜지 못했어요. savetube 폴더의 register-launcher.bat 을 한 번 실행했는지 확인해 주세요.'
+        : '서버에 연결하지 못했어요. 주소(https)와 서버가 켜져 있는지 확인해 주세요.');
+      const d = await call('/api/info', { url });
+      if (seq !== checkSeq) return;
+      $('stThumb').src = d.thumbnail || '';
+      $('stTitle').textContent = d.title;
+      $('stMeta').textContent = [d.uploader, d.duration ? fmtTime(d.duration) : ''].filter(Boolean).join(' · ');
+      $('stPreview').style.display = 'flex';
+      setMsg('확인했어요. 저장 버튼을 눌러 주세요.');
+    } catch (e) {
+      if (seq === checkSeq) setMsg(e.message, true);
+    } finally {
+      if (seq === checkSeq) setBusy(false);
+    }
+  }
+  window.stCheckSoon = function () { clearTimeout(checkTimer); checkTimer = setTimeout(checkLink, 700); };
+
   window.stPaste = async function () {
     try {
       const t = await navigator.clipboard.readText();
       $('stUrl').value = extractUrl(t) || t;
+      clearTimeout(checkTimer); checkLink();
     } catch (e) {
       $('stUrl').focus();
       setMsg('붙여넣기가 막혀 있어요. 입력칸을 길게 눌러 붙여넣어 주세요.', true);
@@ -103,6 +135,7 @@
     $('stGo').disabled = true;
     $('stSave').style.display = 'none';
     $('stBar').style.width = '0';
+    checkSeq++; setBusy(false);
     setMsg('준비 중…');
     try {
       if (!(await ensureServer())) {
