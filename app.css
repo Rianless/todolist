@@ -6997,7 +6997,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 /* ===== 날짜별 가계부 달력 (PC 전용): 가계부 화면 맨 위 ===== */
 .ledger-cal { display: none; }
 @media (min-width: 900px) {
-  .ledger-cal { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: 16px; margin-bottom: 16px; align-items: stretch; flex: 0 0 auto; height: clamp(560px, calc(100dvh - 244px), 900px); }
+  .ledger-cal { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: 16px; margin-bottom: 16px; align-items: stretch; flex: 0 0 auto; height: clamp(440px, calc(100dvh - 244px), 900px); }
   .ledger-cal-main, .ledger-cal-detail { display: flex; flex-direction: column; min-height: 0; }
   .ledger-cal-main, .ledger-cal-detail { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px; min-width: 0; }
   .lc-nav { display: flex; align-items: center; gap: 8px; }
