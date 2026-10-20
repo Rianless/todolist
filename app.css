@@ -6728,6 +6728,8 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   html[data-desktop][data-skin="w98"] #mainContent { position: fixed; z-index: 6; left: calc(var(--dk-left) + 3px); right: calc(var(--dk-right) + 3px); top: calc(var(--dk-top) + 31px); bottom: calc(var(--dk-bottom) + 3px); height: auto; }
   html[data-desktop][data-skin="w98"] .fab-add { z-index: 7; right: calc(var(--dk-right) + 24px) !important; bottom: calc(var(--dk-bottom) + 20px) !important; }
   html[data-desktop][data-skin="w98"] #mainContent > .view.active { padding: 16px 20px 0; }
+  /* 가계부 화면: 달력 패널 윗선을 스크롤 막대 윗끝과 맞춘다 */
+  html[data-desktop][data-skin="w98"] #mainContent > #viewCategory.active { padding-top: 0; }
   /* 창 제목: 지금 보고 있는 화면 이름 */
   html[data-desktop][data-skin="w98"] .dk-winbtns { display: flex; gap: 2px; }
   html[data-desktop][data-skin="w98"] .dk-winbtn { width: 20px !important; height: 18px !important; min-height: 0 !important; padding: 0 !important; font-size: 11px !important; font-weight: 700 !important; line-height: 1; color: #000 !important; }
@@ -6997,7 +6999,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 /* ===== 날짜별 가계부 달력 (PC 전용): 가계부 화면 맨 위 ===== */
 .ledger-cal { display: none; }
 @media (min-width: 900px) {
-  .ledger-cal { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: 16px; margin-bottom: 16px; align-items: stretch; flex: 0 0 auto; height: clamp(440px, calc(100dvh - 244px), 900px); }
+  .ledger-cal { display: grid; grid-template-columns: minmax(0, 1.7fr) minmax(300px, 1fr); gap: 16px; margin-bottom: 16px; align-items: stretch; flex: 0 0 auto; height: clamp(360px, calc(100dvh - 248px), 900px); }
   .ledger-cal-main, .ledger-cal-detail { display: flex; flex-direction: column; min-height: 0; }
   .ledger-cal-main, .ledger-cal-detail { background: var(--panel); border: 1px solid var(--border); border-radius: 14px; padding: 14px; min-width: 0; }
   .lc-nav { display: flex; align-items: center; gap: 8px; }
@@ -7007,7 +7009,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   .lc-sum-inc { color: var(--green); font-weight: 700; }
   .lc-sum-exp { color: var(--red); font-weight: 700; }
   .lc-sum-bal { color: var(--text2); }
-  .lc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: auto; grid-auto-rows: minmax(68px, 1fr); gap: 5px; flex: 1; min-height: 0; }
+  .lc-grid { display: grid; grid-template-columns: repeat(7, minmax(0, 1fr)); grid-template-rows: auto; grid-auto-rows: minmax(40px, 1fr); gap: 5px; flex: 1; min-height: 0; }
   .lc-dow { text-align: center; font-size: 11px; font-weight: 700; padding: 4px 0; color: var(--text3); }
   .lc-dow.sun, .lc-cell.sun .lc-day { color: var(--red); }
   .lc-dow.sat, .lc-cell.sat .lc-day { color: var(--accent); }
