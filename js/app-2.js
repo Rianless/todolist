@@ -86,6 +86,10 @@ function desktopOpen(tab, cardId) {
     const card = document.getElementById(cardId);
     if (card && !card.classList.contains('open')) toggleMpCard(cardId);
     if (card) card.scrollIntoView({ block: 'start' });
+  } else {
+    // 카드 없이 화면만 여는 항목(가계부 달력 등)은 맨 위부터 보여 준다. 앞서 아래 카드로 스크롤해 뒀으면 달력이 안 보인다
+    const view = document.getElementById('view' + tab.charAt(0).toUpperCase() + tab.slice(1));
+    if (view) view.scrollTop = 0;
   }
   closeStartMenu();
   closeDesktopFolder();
