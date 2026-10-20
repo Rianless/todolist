@@ -290,8 +290,8 @@ let deskApp = null;
 // 바탕화면(PC)에서 가계부·마이페이지 아이콘을 누르면 뜨는 폴더 안의 항목
 const DK_FOLDERS = {
   category: { title: '📁 가계부', items: [
-    { icon: '💰', label: '가계부', tab: 'category', card: 'mpCardLedger' },
     { icon: '📅', label: '가계부 달력', tab: 'category' },
+    { icon: '💰', label: '가계부', tab: 'category', card: 'mpCardLedger' },
     { icon: '📦', label: '택배 추적', tab: 'category', card: 'mpCardParcel' },
     { icon: '🔖', label: '구독', tab: 'category', card: 'mpCardSubs' },
     { icon: '🏦', label: '자산', tab: 'category', card: 'mpCardAccounts' },
