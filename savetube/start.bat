@@ -9,4 +9,9 @@ echo.
 ipconfig | findstr IPv4
 echo.
 py -m uvicorn app:app --host 0.0.0.0 --port 8000
+if errorlevel 1 python -m uvicorn app:app --host 0.0.0.0 --port 8000
+if errorlevel 1 (
+  echo.
+  echo  Could not start. Install packages once:  py -m pip install -r requirements.txt
+)
 pause
