@@ -709,7 +709,7 @@
             <div class="mp-card-inner">
 
               <div class="bm-add">
-                <input type="url" class="form-input" id="stUrl" inputmode="url" autocomplete="off" placeholder="동영상 링크" onkeydown="if(event.key==='Enter'){event.preventDefault();stStart()}">
+                <input type="url" class="form-input" id="stUrl" inputmode="url" autocomplete="off" oninput="stCheckSoon()" placeholder="동영상 링크" onkeydown="if(event.key==='Enter'){event.preventDefault();stStart()}">
                 <button class="btn-cancel bm-go" onclick="stPaste()">붙여넣기</button>
               </div>
               <div class="st-kind" id="stKind">
@@ -718,7 +718,8 @@
               </div>
               <select class="form-input" id="stQuality" aria-label="화질·음질"></select>
               <button type="button" class="btn-save" id="stGo" style="width:100%;margin-top:8px;" onclick="stStart()">영상으로 저장하기</button>
-              <div class="st-bar"><i id="stBar"></i></div>
+              <div class="sv-bar" id="stBarWrap"><i id="stBar"></i></div>
+              <div class="sv-preview" id="stPreview" style="display:none;"><img id="stThumb" alt=""><div><div class="sv-title" id="stTitle"></div><div class="sv-meta" id="stMeta"></div></div></div>
               <div class="bm-hint" id="stMsg" role="status" style="color:var(--text2);"></div>
               <a class="btn-save st-save" id="stSave" download style="display:none;text-align:center;text-decoration:none;"></a>
 
