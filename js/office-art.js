@@ -27,7 +27,7 @@ const OfficeArt = (function () {
     const n = parseInt(hex.slice(1), 16), c = [(n >> 16) & 255, (n >> 8) & 255, n & 255].map(v => Math.max(0, Math.min(255, Math.round(v * f))));
     return (cache[k] = pack(c[0], c[1], c[2]));
   }
-  function Surf(w, h) { this.w = w; this.h = h; this.d = new Uint32Array(w * h); }
+  function Surf(w, h) { this.w = w; this.h = h; this.d = new Uint32Array(w * h); this.id = new Uint8Array(w * h); this.cur = 0; }   // id: 픽셀이 어느 부서(1부터)인지
 
   // 다각형 채우기: 픽셀 가운데가 안에 있으면 칠한다. c 는 색 또는 (x,y)=>색
   function poly(s, pts, c) {
@@ -43,7 +43,7 @@ const OfficeArt = (function () {
       xs.sort((p, q) => p - q);
       for (let i = 0; i + 1 < xs.length; i += 2) {
         const xa = Math.max(0, Math.ceil(xs[i] - .5)), xb = Math.min(s.w - 1, Math.ceil(xs[i + 1] - .5) - 1);
-        for (let x = xa; x <= xb; x++) s.d[y * s.w + x] = typeof c === 'function' ? c(x, y) : c;
+        for (let x = xa; x <= xb; x++) { const i = y * s.w + x; s.d[i] = typeof c === 'function' ? c(x, y) : c; s.id[i] = s.cur; }
       }
     }
   }
@@ -64,26 +64,93 @@ const OfficeArt = (function () {
     const ox = this.ox, oy = this.oy;
     this.P = (x, y, z) => [ox + (x - y) * T, oy + (x + y) * T / 2 - z];
   }
-  function cube(s, g, x, y, z, sx, sy, sz, base) {   // 윗면 밝게, 왼쪽 면 보통, 오른쪽 면 어둡게
+  function rawCube(s, g, x, y, z, sx, sy, sz, base) {   // 윗면 밝게, 왼쪽 면 보통, 오른쪽 면 어둡게
     const P = g.P;
     poly(s, [P(x, y + sy, z), P(x + sx, y + sy, z), P(x + sx, y + sy, z + sz), P(x, y + sy, z + sz)], C(base, .82));
     poly(s, [P(x + sx, y, z), P(x + sx, y + sy, z), P(x + sx, y + sy, z + sz), P(x + sx, y, z + sz)], C(base, .62));
     poly(s, [P(x, y, z + sz), P(x + sx, y, z + sz), P(x + sx, y + sy, z + sz), P(x, y + sy, z + sz)], C(base, 1.12));
   }
   // 벽·상자 면에 붙이는 사각형 (rectY: gy 가 같은 면, rectX: gx 가 같은 면)
-  const rectY = (s, g, y, x0, x1, z0, z1, c) => poly(s, [g.P(x0, y, z0), g.P(x1, y, z0), g.P(x1, y, z1), g.P(x0, y, z1)], c);
-  const rectX = (s, g, x, y0, y1, z0, z1, c) => poly(s, [g.P(x, y0, z0), g.P(x, y1, z0), g.P(x, y1, z1), g.P(x, y0, z1)], c);
+  const rawRectY = (s, g, y, x0, x1, z0, z1, c) => poly(s, [g.P(x0, y, z0), g.P(x1, y, z0), g.P(x1, y, z1), g.P(x0, y, z1)], c);
+  const rawRectX = (s, g, x, y0, y1, z0, z1, c) => poly(s, [g.P(x, y0, z0), g.P(x, y1, z0), g.P(x, y1, z1), g.P(x, y0, z1)], c);
+  // 부서 칸(Z)은 칸 안 좌표(0~6)로 그린다. 오른쪽 뒷벽 부서는 그대로, 왼쪽 뒷벽 부서는 x·y 를 바꿔 거울상으로
+  function Zone(g, ox, oy, m) { this.Z = true; this.g = g; this.ox = ox; this.oy = oy; this.m = m; }
+  function cube(s, g, x, y, z, sx, sy, sz, base) {
+    if (!g.Z) return rawCube(s, g, x, y, z, sx, sy, sz, base);
+    return g.m ? rawCube(s, g.g, g.ox + y, g.oy + x, z, sy, sx, sz, base) : rawCube(s, g.g, g.ox + x, g.oy + y, z, sx, sy, sz, base);
+  }
+  function rectY(s, g, y, x0, x1, z0, z1, c) {
+    if (!g.Z) return rawRectY(s, g, y, x0, x1, z0, z1, c);
+    return g.m ? rawRectX(s, g.g, g.ox + y, g.oy + x0, g.oy + x1, z0, z1, c) : rawRectY(s, g.g, g.oy + y, g.ox + x0, g.ox + x1, z0, z1, c);
+  }
+  function rectX(s, g, x, y0, y1, z0, z1, c) {
+    if (!g.Z) return rawRectX(s, g, x, y0, y1, z0, z1, c);
+    return g.m ? rawRectY(s, g.g, g.oy + x, g.ox + y0, g.ox + y1, z0, z1, c) : rawRectX(s, g.g, g.ox + x, g.oy + y0, g.oy + y1, z0, z1, c);
+  }
 
+  // 서버실 같은 방 하나짜리 바닥·벽
   function roomBase(s, g, th) {
     const { W, D, H } = g, P = g.P, S = g.th;
     poly(s, [P(0, D, 0), P(W, D, 0), P(W, D, -S), P(0, D, -S)], C(th.slab, .85));
     poly(s, [P(W, 0, 0), P(W, D, 0), P(W, D, -S), P(W, 0, -S)], C(th.slab, .6));
     for (let x = 0; x < W; x++) for (let y = 0; y < D; y++) poly(s, [P(x, y, 0), P(x + 1, y, 0), P(x + 1, y + 1, 0), P(x, y + 1, 0)], C((x + y) % 2 ? th.a : th.b));
-    const wall = (f) => (x) => (x % 4 === 0 ? C(th.pin, f) : C(th.wall, f));   // 핀스트라이프 벽
+    const wall = (f) => (x) => (x % 4 === 0 ? C(th.pin, f) : C(th.wall, f));
     poly(s, [P(0, 0, 0), P(W, 0, 0), P(W, 0, H), P(0, 0, H)], wall(.92));
     poly(s, [P(0, 0, 0), P(0, D, 0), P(0, D, H), P(0, 0, H)], wall(.7));
-    rectY(s, g, 0, 0, W, 0, 3, C(th.trim, .95)); rectX(s, g, 0, 0, D, 0, 3, C(th.trim, .72));          // 걸레받이
-    rectY(s, g, 0, 0, W, H - 3, H, C('#17171a')); rectX(s, g, 0, 0, D, H - 3, H, C('#17171a', .8));   // 윗줄
+    rawRectY(s, g, 0, 0, W, 0, 3, C(th.trim, .95)); rawRectX(s, g, 0, 0, D, 0, 3, C(th.trim, .72));
+    rawRectY(s, g, 0, 0, W, H - 3, H, C('#17171a')); rawRectX(s, g, 0, 0, D, H - 3, H, C('#17171a', .8));
+  }
+
+  // 층 배치: 뒷벽 두 면을 따라 부서 칸(6×6)이 ㄱ자로 놓이고, 가운데는 열린 공간.
+  // 오른쪽 벽에 a 칸, 왼쪽 벽에 (b-1) 칸 (모서리 칸은 오른쪽 벽 첫 칸과 같다)
+  const ZW = 6, DIMS = { 3: [2, 2], 4: [2, 3], 5: [3, 3] };
+  function layout(count) {
+    const [a, b] = DIMS[count], zones = [];
+    for (let i = 0; i < a; i++) zones.push({ ox: ZW * i, oy: 0, m: false });
+    for (let j = 1; j < b; j++) zones.push({ ox: 0, oy: ZW * j, m: true });
+    return { a, b, W: ZW * a, D: ZW * b, zones };
+  }
+  // 바닥 좌표 → 부서 번호(-1 은 열린 공간)
+  function zoneOfCell(L, x, y) {
+    if (y < ZW) return Math.min(L.a - 1, Math.floor(x / ZW));
+    if (x < ZW) return L.a - 1 + Math.min(L.b - 1, Math.floor(y / ZW));
+    return -1;
+  }
+  function floorBase(s, g, th, L) {
+    const { W, D, H } = g, P = g.P, S = g.th;
+    const wall = (f) => (x) => (x % 4 === 0 ? C(th.pin, f) : C(th.wall, f));   // 핀스트라이프 벽
+    s.cur = 0;
+    poly(s, [P(0, D, 0), P(W, D, 0), P(W, D, -S), P(0, D, -S)], C(th.slab, .85));
+    poly(s, [P(W, 0, 0), P(W, D, 0), P(W, D, -S), P(W, 0, -S)], C(th.slab, .6));
+    for (let x = 0; x < W; x++) for (let y = 0; y < D; y++) {
+      const z = zoneOfCell(L, x, y); s.cur = z + 1;
+      poly(s, [P(x, y, 0), P(x + 1, y, 0), P(x + 1, y + 1, 0), P(x, y + 1, 0)], C((x + y) % 2 ? th.a : th.b, z >= 0 && z % 2 ? 1.16 : 1));
+    }
+    for (let i = 0; i < L.a; i++) {   // 오른쪽 뒷벽: 부서 칸마다
+      const x0 = ZW * i, x1 = x0 + ZW; s.cur = i + 1;
+      poly(s, [P(x0, 0, 0), P(x1, 0, 0), P(x1, 0, H), P(x0, 0, H)], wall(.92));
+      rawRectY(s, g, 0, x0, x1, 0, 3, C(th.trim, .95)); rawRectY(s, g, 0, x0, x1, H - 3, H, C('#17171a'));
+    }
+    for (let j = 0; j < L.b; j++) {    // 왼쪽 뒷벽
+      const y0 = ZW * j, y1 = y0 + ZW; s.cur = j ? L.a + j : 1;
+      poly(s, [P(0, y0, 0), P(0, y1, 0), P(0, y1, H), P(0, y0, H)], wall(.7));
+      rawRectX(s, g, 0, y0, y1, 0, 3, C(th.trim, .72)); rawRectX(s, g, 0, y0, y1, H - 3, H, C('#17171a', .8));
+    }
+    s.cur = 0;
+  }
+  // 부서 칸 사이 낮은 칸막이 (가운데는 드나드는 틈). Z 칸 안 x=0 자리에 선다
+  function partition(s, Z) {
+    cube(s, Z, -.15, 0, 0, .3, 2.2, 9, COL.WHITE); cube(s, Z, -.15, 3.8, 0, .3, 2.2, 9, COL.WHITE);
+    rectX(s, Z, -.15, 0, 2.2, 8, 9, C(COL.RED)); rectX(s, Z, -.15, 3.8, 6, 8, 9, C(COL.RED));
+  }
+  // 가운데 열린 공간: 야구장 내야 모양 러그 (누르면 아무 일도 없음)
+  function infield(s, g, L, th) {
+    const x0 = ZW + 1, y0 = ZW + 1, x1 = L.W - 1, y1 = L.D - 1; if (x1 - x0 < 2 || y1 - y0 < 2) return;
+    s.cur = 0;
+    for (let x = x0; x < x1; x++) for (let y = y0; y < y1; y++) poly(s, [g.P(x, y, 0), g.P(x + 1, y, 0), g.P(x + 1, y + 1, 0), g.P(x, y + 1, 0)], C('#c89a62', (x + y) % 2 ? 1 : .94));
+    const m = [(x0 + x1) / 2 - .3, (y0 + y1) / 2 - .3];
+    [[x0, y0], [x1 - .8, y0], [x0, y1 - .8], [x1 - .8, y1 - .8]].forEach(b => rawCube(s, g, b[0], b[1], 0, .8, .8, 1.5, COL.WHITE));
+    rawCube(s, g, m[0], m[1], 0, .6, .6, 1.2, '#a67c4a');
   }
 
   // ── 도트 호랑이 직원 (9×12). 줄무늬 k, 털 o, 입 w, 유니폼 r ──
@@ -98,7 +165,7 @@ const OfficeArt = (function () {
       const row = rows[r];
       for (let c = 0; c < row.length; c++) {
         const ch = row[flip ? row.length - 1 - c : c]; if (ch === '.' || !pal[ch]) continue;
-        const px = x + c, py = y + r; if (px >= 0 && py >= 0 && px < s.w && py < s.h) s.d[py * s.w + px] = pal[ch];
+        const px = x + c, py = y + r; if (px >= 0 && py >= 0 && px < s.w && py < s.h) { s.d[py * s.w + px] = pal[ch]; s.id[py * s.w + px] = s.cur; }
       }
     }
   }
@@ -142,13 +209,13 @@ const OfficeArt = (function () {
       cube(s, g, 1.4, 2.2, 0, 3.2, 1.6, 7, COL.WOOD); cube(s, g, 1.8, 2.5, 7, .9, .7, .6, COL.WHITE); chair(s, g, .3, 2.6, COL.BLUE);
     },
     ceo(s, g) {   // 대표실: 큰 책상 + 트로피 + 깃발
-      rectX(s, g, .02, 1.2, 3.4, 10, 31, C(COL.RED)); rectX(s, g, .02, 1.2, 3.4, 18, 22, C(COL.WHITE));
+      rectY(s, g, .02, 4.1, 5.6, 10, 31, C(COL.RED)); rectY(s, g, .02, 4.1, 5.6, 18, 22, C(COL.WHITE));
       desk(s, g, 1, .4, 3.8, 1.8, COL.DARKW); cube(s, g, 3.3, .8, 9, .5, .5, 2, COL.GOLD); cube(s, g, 3.4, .9, 11, .3, .3, 4, COL.GOLD);
       monitor(s, g, 1.5, .8, 9); chair(s, g, 2.3, 2.7, COL.BLACK);
     },
     acct(s, g) {   // 회계부: 동전 쌓기 + 계산기
       desk(s, g, .8, .3, 4, 1.5); [[1.2, .6, 3], [1.9, .8, 5], [2.6, .6, 2], [3.3, .9, 4]].forEach(c => cube(s, g, c[0], c[1], 9, .6, .6, c[2], COL.GOLD));
-      cube(s, g, 4.2, .8, 9, .8, .6, 1.5, COL.DARK); rectX(s, g, .02, 1.5, 3.2, 12, 26, C(COL.GREEN)); rectX(s, g, .02, 1.8, 2.9, 15, 23, C(COL.PAPER));
+      cube(s, g, 4.2, .8, 9, .8, .6, 1.5, COL.DARK); rectY(s, g, .02, .9, 2.6, 13, 27, C(COL.GREEN)); rectY(s, g, .02, 1.15, 2.35, 16, 24, C(COL.PAPER));
       chair(s, g, 2.3, 2.3);
     },
     fin(s, g) {   // 재무팀: 금고
@@ -190,19 +257,44 @@ const OfficeArt = (function () {
     },
   };
 
-  // ── 방 하나 ──
+  // ── 층 하나: 부서 여러 칸 + 오가는 직원 ──
   const mounted = [];
-  function mountRoom(canvas, key, themeIdx, who) {
-    const g = new Grid(6, 6, 34, 6), th = THEMES[themeIdx];
-    canvas.width = g.w; canvas.height = g.h;
-    const r = { canvas, ctx: canvas.getContext('2d'), g, th, key, wk: walker([[3.4, 4.4], [5.2, 4.1], [5, 5.4], [2.8, 5.3]], who % 4), pal: palFor(who % 2 ? '#c8102e' : '#1a1a1d'), t: 0 };
-    mounted.push(r); drawRoom(r);
+  function mountFloor(canvas, themeIdx, keys, seed) {
+    const L = layout(keys.length), g = new Grid(L.W, L.D, 34, 6), cx = ZW + (L.W - ZW) / 2, cy = ZW + (L.D - ZW) / 2;
+    const fronts = L.zones.map(z => z.m ? [4.7, z.oy + 3.2] : [z.ox + 3.2, 4.7]), pts = [];
+    fronts.forEach((p, k) => { pts.push(p, [cx + (k % 2 ? 1.2 : -1.2), cy + (k % 3 - 1) * 1.2]); });
+    const loop = pts.concat(pts.slice(1, -1).reverse()), n = loop.length;
+    const f = { canvas, ctx: canvas.getContext('2d'), g, L, th: THEMES[themeIdx], keys, hover: -1, last: null,
+      wks: [0, 1, keys.length > 3 ? 2 : -1].filter(i => i >= 0).map(i => ({ w: walker(loop, Math.floor(n * i / 3) + seed), pal: palFor((i + seed) % 2 ? '#c8102e' : '#1a1a1d') })) };
+    canvas.width = g.w; canvas.height = g.h; mounted.push(f); drawFloor(f);
+    return L.zones.map(z => { const p = z.m ? g.P(0, z.oy + 3, g.H) : g.P(z.ox + 3, 0, g.H); return { x: p[0] / g.w * 100, y: p[1] / g.h * 100 }; }).concat([{ w: g.w, h: g.h }]);   // 이름표는 부서 뒷벽 위 간판 자리
   }
-  function drawRoom(r) {
-    const s = new Surf(r.g.w, r.g.h);
-    roomBase(s, r.g, r.th); PROPS[r.key](s, r.g); tiger(s, r.g, r.wk, r.pal);
-    outline(s); r.ctx.putImageData(new ImageData(new Uint8ClampedArray(s.d.buffer), s.w, s.h), 0, 0);
+  function drawFloor(f) {
+    const g = f.g, L = f.L, s = new Surf(g.w, g.h);
+    floorBase(s, g, f.th, L);
+    L.zones.map((z, k) => ({ z, k })).sort((p, q) => (p.z.ox + p.z.oy) - (q.z.ox + q.z.oy)).forEach(({ z, k }) => {
+      const Z = new Zone(g, z.ox, z.oy, z.m); s.cur = k + 1;
+      if (k) partition(s, Z);
+      PROPS[f.keys[k]](s, Z);
+    });
+    infield(s, g, L, f.th);
+    f.wks.forEach(o => { const zi = zoneOfCell(L, o.w.x, o.w.y); s.cur = zi + 1; tiger(s, g, o.w, o.pal); });
+    if (f.hover >= 0) {   // 마우스가 올라간 부서는 밝게
+      const h = f.hover + 1;
+      for (let i = 0; i < s.d.length; i++) if (s.id[i] === h && s.d[i]) { const v = s.d[i]; s.d[i] = pack(Math.min(255, (v & 255) + 34), Math.min(255, ((v >> 8) & 255) + 34), Math.min(255, ((v >> 16) & 255) + 34)); }
+    }
+    f.last = s.id; outline(s); f.ctx.putImageData(new ImageData(new Uint8ClampedArray(s.d.buffer), s.w, s.h), 0, 0);
   }
+  const floorOf = (canvas) => mounted.find(f => f.canvas === canvas);
+  // 화면에서 누른 자리가 몇 번째 부서인지 (그림에 기록해 둔 부서 번호로 찾는다. 없으면 -1)
+  function zoneAt(canvas, cx, cy) {
+    const f = floorOf(canvas); if (!f || !f.last) return -1;
+    const r = canvas.getBoundingClientRect(), x = Math.floor((cx - r.left) / r.width * canvas.width), y = Math.floor((cy - r.top) / r.height * canvas.height);
+    if (x < 0 || y < 0 || x >= canvas.width || y >= canvas.height) return -1;
+    return f.last[y * canvas.width + x] - 1;
+  }
+  function hover(canvas, z) { const f = floorOf(canvas); if (f && f.hover !== z) { f.hover = z; drawFloor(f); } }
+  function clearHover() { mounted.forEach(f => { if (f.hover >= 0) { f.hover = -1; drawFloor(f); } }); }
 
   // ── 지하 서버실 ──
   const srv = { busy: false, kind: 'app', drops: [], wk: { x: 1.5, y: 2.1, wait: 1, fr: 0, flip: true }, t: 0 };
@@ -253,7 +345,7 @@ const OfficeArt = (function () {
   let timer = null;
   function frame(visible) {
     if (!visible()) return;
-    mounted.forEach(r => { stepWalker(r.wk); drawRoom(r); });
+    mounted.forEach(f => { f.wks.forEach(o => stepWalker(o.w)); drawFloor(f); });
     srv.t++; drawServer();
   }
   function start(visible) {
@@ -261,7 +353,7 @@ const OfficeArt = (function () {
     timer = setInterval(() => frame(visible), 150);
   }
   function stop() { clearInterval(timer); timer = null; }
-  function redraw() { mounted.forEach(drawRoom); drawServer(); }
+  function redraw() { mounted.forEach(drawFloor); drawServer(); }
 
-  return { mountRoom, mountServer, mountAvatar, setServer, dropBox, start, stop, redraw };
+  return { mountFloor, zoneAt, hover, clearHover, mountServer, mountAvatar, setServer, dropBox, start, stop, redraw };
 })();

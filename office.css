@@ -39,23 +39,22 @@ html[data-theme="dark"] #officeView {
 #officeView .of-ball::after { right: -1px; border-right-color: transparent; border-top-color: transparent; border-bottom-color: transparent; }
 #officeView .of-board { padding: 4px 10px; background: #0d1f14; border: 2px solid #3b3b40; color: #ffd84a; font: 700 14px/1.2 ui-monospace, Consolas, monospace; letter-spacing: 1px; text-shadow: 0 0 6px rgba(255,216,74,.6); white-space: nowrap; }
 
-/* 층 */
-#officeView .of-floor { display: grid; grid-template-columns: 30px 1fr; margin-bottom: 6px; background: #2a2a30; }
+/* 층: 부서 여러 칸이 하나의 입체 바닥판 위에 있다 */
+#officeView .of-floor { display: grid; grid-template-columns: 30px 1fr; margin-bottom: 6px; background: linear-gradient(#26262c, #1f1f24); }
 #officeView .of-floor:last-of-type { margin-bottom: 0; }
 #officeView .of-fno { display: grid; place-items: center; background: var(--of-red); color: #fff; font: 800 13px/1 ui-monospace, Consolas, monospace; writing-mode: vertical-rl; letter-spacing: 2px; }
-#officeView .of-rooms { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 6px; padding: 6px; }
-
-/* 부서(방) */
-#officeView .of-room { position: relative; display: flex; flex-direction: column; background: #1f1f24; padding: 4px 4px 6px; transition: transform .1s, filter .1s; }
-#officeView .of-room:hover, #officeView .of-room:focus-visible { transform: translateY(-3px); filter: brightness(1.12); outline: 0; }
-#officeView .of-room:focus-visible { box-shadow: 0 0 0 3px #fff; }
-#officeView .of-room:active { transform: translateY(0); }
+#officeView .of-fcv { padding: 38px 8px 14px; min-width: 0; }
+#officeView .of-cvbox { position: relative; margin: 0 auto; }
 #officeView .of-cv { width: 100%; height: auto; }
-#officeView .of-label { display: flex; align-items: baseline; justify-content: space-between; gap: 6px; padding: 4px 6px 0; color: #fff; }
-#officeView .of-sign { font-size: 13px; font-weight: 800; white-space: nowrap; }
+
+/* 부서 이름표 (부서 뒷벽 위 간판) */
+#officeView .of-room { position: absolute; transform: translate(-50%, calc(-100% - 3px)); display: flex; align-items: center; gap: 5px; padding: 3px 8px; background: var(--of-black); color: #fff; border: 2px solid #fff; border-left: 5px solid var(--of-red); white-space: nowrap; box-shadow: 2px 2px 0 rgba(0,0,0,.45); transition: transform .1s; }
+#officeView .of-room:hover, #officeView .of-room:focus-visible { transform: translate(-50%, calc(-100% - 5px)); background: #2b2b31; outline: 0; }
+#officeView .of-room:focus-visible { box-shadow: 0 0 0 3px #ffd84a; }
+#officeView .of-sign { font-size: 12px; font-weight: 800; }
 #officeView .of-sign > span { margin-right: 3px; }
-#officeView .of-sub { font-size: 11px; color: #c9c2b2; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-#officeView .of-badge { position: absolute; top: 8px; left: 8px; max-width: 80%; padding: 2px 7px; background: var(--of-red); color: #fff; border: 2px solid #fff; font-size: 11px; font-weight: 800; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; box-shadow: 2px 2px 0 rgba(0,0,0,.4); }
+#officeView .of-sub { font-size: 10px; color: #c9c2b2; }
+#officeView .of-badge { padding: 1px 6px; background: var(--of-red); color: #fff; font-size: 10px; font-weight: 800; }
 #officeView .of-badge:empty { display: none; }
 
 /* 지하 서버실 */
@@ -81,7 +80,8 @@ html[data-office][data-office-in] #officeBack { display: flex !important; }
 #officeBack { position: fixed; z-index: 950; left: 10px; bottom: calc(76px + env(safe-area-inset-bottom)); align-items: center; gap: 6px; padding: 9px 14px; background: #c8102e; color: #fff; border: 3px solid #fff; font-weight: 800; font-size: 13px; line-height: 1; box-shadow: 3px 3px 0 rgba(0,0,0,.4); cursor: pointer; }
 
 @media (max-width: 640px) {
-  #officeView .of-rooms { grid-template-columns: repeat(2, 1fr); }
+  #officeView .of-sub { display: none; }
+  #officeView .of-room { padding: 2px 6px; gap: 3px; }
   #officeView .of-srv { grid-template-columns: 1fr; }
   #officeView .of-roof b { font-size: 15px; letter-spacing: 1px; }
   #officeView .of-board { font-size: 12px; padding: 3px 7px; }

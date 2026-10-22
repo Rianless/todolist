@@ -48,12 +48,10 @@ function officeBuild() {
   v.id = 'officeView';
   v.setAttribute('role', 'region');
   v.setAttribute('aria-label', '회사 로비');
-  const floors = OF_FLOORS.map((f, fi) => `<div class="of-floor"><div class="of-fno">${f.no}</div><div class="of-rooms">` + f.rooms.map((r, ri) =>
+  const floors = OF_FLOORS.map((f, fi) => `<div class="of-floor"><div class="of-fno">${f.no}</div><div class="of-fcv"><div class="of-cvbox"><canvas class="of-cv of-cv-floor" data-f="${fi}" aria-hidden="true"></canvas>` + f.rooms.map((r, ri) =>
     `<div role="button" tabindex="0" class="of-room" data-f="${fi}" data-r="${ri}" aria-label="${ofEsc(r.name)} — ${ofEsc(r.sub)} 열기">
-      <canvas class="of-cv" aria-hidden="true"></canvas>
-      <div class="of-label"><span class="of-sign"><span aria-hidden="true">${r.icon}</span>${ofEsc(r.name)}</span><span class="of-sub">${ofEsc(r.sub)}</span></div>
-      <span class="of-badge"></span>
-    </div>`).join('') + '</div></div>').join('');
+      <span class="of-sign"><span aria-hidden="true">${r.icon}</span>${ofEsc(r.name)}</span><span class="of-sub">${ofEsc(r.sub)}</span><span class="of-badge"></span>
+    </div>`).join('') + '</div></div></div>').join('');
   v.innerHTML = `<div class="of-wrap">
     <div class="of-bar"><canvas id="ofAvatar" class="of-avatar" aria-hidden="true"></canvas><h1>나의 하루 타이거 컴퍼니<small id="ofDate"></small></h1>
       <div role="button" tabindex="0" class="of-chip" id="ofTheme" title="테마 전환" aria-label="테마 전환">☀️</div>
@@ -65,7 +63,11 @@ function officeBuild() {
           <ul class="of-log" id="ofLogList"></ul></div></section></div>
     <p class="of-note">부서를 누르면 그 기능이 열려요. 왼쪽 아래 「🏢 로비로」로 돌아와요.</p></div>`;
   document.body.appendChild(v);
-  OF_FLOORS.forEach((f, fi) => f.rooms.forEach((r, ri) => OfficeArt.mountRoom(v.querySelector(`.of-room[data-f="${fi}"][data-r="${ri}"] canvas`), r.art, fi, fi * 5 + ri)));
+  OF_FLOORS.forEach((f, fi) => {   // 층 하나 = 그림 하나. 부서 이름표는 그 부서 뒷벽 위에 간판처럼 단다
+    const cv = v.querySelector(`canvas[data-f="${fi}"]`), at = OfficeArt.mountFloor(cv, fi, f.rooms.map(r => r.art), fi * 2), size = at.pop();
+    cv.parentNode.style.maxWidth = Math.round(size.w * 2.5) + 'px';
+    f.rooms.forEach((r, ri) => { const el = v.querySelector(`.of-room[data-f="${fi}"][data-r="${ri}"]`); el.style.left = at[ri].x + '%'; el.style.top = at[ri].y + '%'; });
+  });
   OfficeArt.mountServer(document.getElementById('ofSrvCv')); OfficeArt.mountAvatar(document.getElementById('ofAvatar'));
   OfficeArt.start(() => !document.hidden && document.documentElement.hasAttribute('data-office') && !document.documentElement.hasAttribute('data-office-in'));
 
@@ -75,6 +77,8 @@ function officeBuild() {
   document.body.appendChild(back);
 
   const act = (e) => {
+    const cv = e.target.closest('canvas.of-cv-floor');   // 바닥판의 부서를 직접 누름
+    if (cv) { const z = OfficeArt.zoneAt(cv, e.clientX, e.clientY); if (z >= 0) officeEnter(OF_FLOORS[cv.dataset.f].rooms[z]); return; }
     const room = e.target.closest('.of-room');
     if (room) return officeEnter(OF_FLOORS[room.dataset.f].rooms[room.dataset.r]);
     if (e.target.closest('#ofTheme')) return toggleTheme();
@@ -82,6 +86,13 @@ function officeBuild() {
     if (e.target.closest('#ofLink')) return officeToggleBridge();
   };
   v.addEventListener('click', act);
+  v.addEventListener('pointermove', (e) => {   // 마우스가 올라간 부서를 밝게
+    const cv = e.target.closest('canvas.of-cv-floor'), room = e.target.closest('.of-room');
+    if (cv) { const z = OfficeArt.zoneAt(cv, e.clientX, e.clientY); OfficeArt.hover(cv, z); cv.style.cursor = z >= 0 ? 'pointer' : 'default'; return; }
+    if (room) { OfficeArt.clearHover(); OfficeArt.hover(v.querySelector(`canvas[data-f="${room.dataset.f}"]`), +room.dataset.r); return; }
+    OfficeArt.clearHover();
+  });
+  v.addEventListener('pointerleave', () => OfficeArt.clearHover());
   v.addEventListener('keydown', (e) => { if ((e.key === 'Enter' || e.key === ' ') && e.target.matches('[role=button]')) { e.preventDefault(); act(e); } });
   back.addEventListener('keydown', (e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); back.click(); } });
 }
