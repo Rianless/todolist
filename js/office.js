@@ -50,10 +50,10 @@ function officeBuild() {
       <span class="of-sign"><span aria-hidden="true">${r.icon}</span>${ofEsc(r.name)}</span><span class="of-badge"></span>
     </div>`).join('') + '</div></div></div>').join('');
   v.innerHTML = `<div class="of-wrap">
-    <div class="of-bar"><canvas id="ofAvatar" class="of-avatar" aria-hidden="true"></canvas><h1>나의 하루 타이거 컴퍼니<small id="ofDate"></small></h1>
+    <div class="of-bar"><canvas id="ofAvatar" class="of-avatar" aria-hidden="true"></canvas><h1>나의 하루 오피스<small id="ofDate"></small></h1>
       <div role="button" tabindex="0" class="of-chip" id="ofTheme" title="테마 전환" aria-label="테마 전환">☀️</div>
       <div role="button" tabindex="0" class="of-chip" id="ofSkin" title="화면 스타일 바꾸기" aria-label="화면 스타일 바꾸기">🖥️</div></div>
-    <div class="of-building"><div class="of-roof"><span class="of-plate" aria-hidden="true"><canvas id="ofEmblem"></canvas></span><b>TIGER COMPANY</b><span class="of-board" id="ofBoard"></span></div>${floors}<div class="of-ground"></div>
+    <div class="of-building"><div class="of-roof"><b class="of-sign-hq">MY DAY HQ</b><span class="of-board" id="ofBoard"></span></div>${floors}<div class="of-ground"></div>
       <section class="of-basement" aria-label="지하 서버실"><div class="of-bhead"><span>🖥️ B1 서버실</span><span class="of-status" id="ofStatus" aria-live="polite"></span>
         <div role="button" tabindex="0" class="of-link" id="ofLink"></div></div>
         <div class="of-srv" id="ofSrv" data-busy="0"><canvas id="ofSrvCv" class="of-cv of-cv-srv" aria-hidden="true"></canvas>
@@ -62,10 +62,10 @@ function officeBuild() {
   document.body.appendChild(v);
   OF_FLOORS.forEach((f, fi) => {   // 층 하나 = 그림 하나. 부서 이름표는 그 부서 뒷벽 위에 간판처럼 단다
     const cv = v.querySelector(`canvas[data-f="${fi}"]`), at = OfficeArt.mountFloor(cv, fi, f.rooms.map(r => r.art), fi * 2), size = at.pop();
-    cv.parentNode.style.maxWidth = Math.round(size.w * 2.6) + 'px';
+    cv.parentNode.style.maxWidth = Math.round(size.w * 2.8) + 'px';
     f.rooms.forEach((r, ri) => { const el = v.querySelector(`.of-room[data-f="${fi}"][data-r="${ri}"]`); el.style.left = at[ri].x + '%'; el.style.top = at[ri].y + '%'; });
   });
-  OfficeArt.mountServer(document.getElementById('ofSrvCv')); OfficeArt.mountAvatar(document.getElementById('ofAvatar')); OfficeArt.mountAvatar(document.getElementById('ofEmblem'));
+  OfficeArt.mountServer(document.getElementById('ofSrvCv')); OfficeArt.mountAvatar(document.getElementById('ofAvatar'));
   OfficeArt.start(() => !document.hidden && document.documentElement.hasAttribute('data-office') && !document.documentElement.hasAttribute('data-office-in'));
 
   const back = document.createElement('div');
