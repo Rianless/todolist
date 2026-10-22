@@ -3,7 +3,7 @@
 <html lang="ko" data-theme="light">
 
 <head>
-<script>try{var __sk=localStorage.getItem("rianless_skin");var __r=document.documentElement;if(__sk==="desktop"){__r.setAttribute("data-skin","w98");__r.setAttribute("data-desktop","1");__r.setAttribute("data-desktop-win","min");}else{__r.setAttribute("data-skin",__sk===null?"w98":__sk);}}catch(e){document.documentElement.setAttribute("data-skin","w98");}</script>
+<script>try{var __sk=localStorage.getItem("rianless_skin");var __r=document.documentElement;if(__sk==="office"){__r.setAttribute("data-skin","w98");__r.setAttribute("data-office","1");}else if(__sk==="desktop"){__r.setAttribute("data-skin","w98");__r.setAttribute("data-desktop","1");__r.setAttribute("data-desktop-win","min");}else{__r.setAttribute("data-skin",__sk===null?"w98":__sk);}}catch(e){document.documentElement.setAttribute("data-skin","w98");}</script>
 
 <meta charset="UTF-8">
 
@@ -26,6 +26,7 @@
 <link rel="apple-touch-icon" href="/icon-192.png">
 
 <link rel="stylesheet" href="/app.css">
+<link rel="stylesheet" href="/office.css">
 
 </head>
 
@@ -100,7 +101,7 @@
         <button class="theme-btn" onclick="openSearch()" title="검색" aria-label="검색 열기">🔍</button>
 
         <button class="theme-btn" onclick="toggleTheme()" title="테마 전환" id="themeBtn" aria-label="테마 전환">☀️</button>
-        <button class="theme-btn skin-btn" onclick="toggleSkin()" title="화면 스타일 바꾸기 (윈도우 98 → 바탕화면 → 클래식)" id="skinBtn" aria-label="화면 스타일 바꾸기">🖥️</button>
+        <button class="theme-btn skin-btn" onclick="toggleSkin()" title="화면 스타일 바꾸기 (윈도우 98 → 바탕화면 → 클래식 → 회사)" id="skinBtn" aria-label="화면 스타일 바꾸기">🖥️</button>
 
       </div>
 
@@ -2001,6 +2002,7 @@
 <script src="/js/today.js"></script>
 <script src="/js/boot.js"></script>
 <script src="/js/mascot.js"></script>
+<script src="/js/office.js"></script>
 
 <script>
 

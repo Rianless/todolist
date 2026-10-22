@@ -3,7 +3,8 @@
   "version": "1.0.0",
   "scripts": {
     "office": "node ../claude-office/server.js",
-    "test": "node test/todo_filters.test.js && node test/state_merge.test.js && node test/state_api.test.js && node test/index_logic.test.js && node test/bookmarks.test.js && node test/parcels.test.js && node test/dday.test.js"
+    "office-bridge": "node tools/office-bridge.js",
+    "test": "node test/todo_filters.test.js && node test/state_merge.test.js && node test/state_api.test.js && node test/index_logic.test.js && node test/bookmarks.test.js && node test/parcels.test.js && node test/dday.test.js && node test/office_bridge.test.js"
   },
   "dependencies": {
     "@supabase/supabase-js": "^2.39.0"
