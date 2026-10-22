@@ -9,14 +9,12 @@ const OfficeArt = (function () {
   const PAD = 1;                                 // 바깥 윤곽선 자리
 
   // ── 색 ──
-  const COL = { WOOD: '#b5773f', DARKW: '#6b4423', DARK: '#2c2c33', RED: '#c8102e', WHITE: '#f4f1ea', GOLD: '#f2c230', BLUE: '#4a78c2', GREEN: '#3f9b4b',
-    PAPER: '#ece5d2', METAL: '#9aa3af', CARD: '#c89b5f', YEL: '#ffe066', PINK: '#ff8fb1', SCR: '#7fd6ff', BLACK: '#18181b', GRAY: '#8a8578' };
+  const COL = { WOOD: '#b5773f', DARKW: '#6b4423', DARK: '#2c2c33', RED: '#ea0029', WHITE: '#f4f1ea', GOLD: '#f2c230', BLUE: '#4a78c2', GREEN: '#3f9b4b',
+    PAPER: '#ece5d2', METAL: '#9aa3af', CARD: '#c89b5f', YEL: '#ffe066', PINK: '#ff8fb1', SCR: '#7fd6ff', BLACK: '#0d0d10', GRAY: '#8a8578' };
   const OUTLINE = '#17110d';
-  const THEMES = [   // 층마다 바닥·벽 분위기
-    { a: '#a3162a', b: '#8e1224', slab: '#5b0a15', wall: '#f3efe6', pin: '#5c5c64', trim: '#c8102e' },   // 3F 빨간 카펫
-    { a: '#3a3a42', b: '#2c2c33', slab: '#17171b', wall: '#f3efe6', pin: '#5c5c64', trim: '#1a1a1d' },   // 2F 검정 바닥
-    { a: '#2f8a3b', b: '#3aa349', slab: '#1c4f22', wall: '#f3efe6', pin: '#5c5c64', trim: '#c8102e' },   // 1F 잔디
-    { a: '#6a6a76', b: '#5e5e6a', slab: '#2a2a30', wall: '#a9a9b6', pin: '#8e8e9c', trim: '#c8102e' },   // B1 서버실
+  const HQ = { slab: '#17171b', wall: '#f1eee6', trim: '#ea0029', dark: '#0d0d10' };   // 본사 층: 흰 벽, 검정 판넬, 빨간 줄
+  const THEMES = [HQ, HQ, HQ,
+    { a: '#6a6a76', b: '#5e5e6a', slab: '#2a2a30', wall: '#d9d6cf', dark: '#2c2c33', trim: '#ea0029' },   // B1 서버실
   ];
 
   // ── 도트 판 ──
@@ -74,17 +72,19 @@ const OfficeArt = (function () {
   const rawRectY = (s, g, y, x0, x1, z0, z1, c) => poly(s, [g.P(x0, y, z0), g.P(x1, y, z0), g.P(x1, y, z1), g.P(x0, y, z1)], c);
   const rawRectX = (s, g, x, y0, y1, z0, z1, c) => poly(s, [g.P(x, y0, z0), g.P(x, y1, z0), g.P(x, y1, z1), g.P(x, y0, z1)], c);
   // 부서 칸(Z)은 칸 안 좌표(0~6)로 그린다. 오른쪽 뒷벽 부서는 그대로, 왼쪽 뒷벽 부서는 x·y 를 바꿔 거울상으로
-  function Zone(g, ox, oy, m) { this.Z = true; this.g = g; this.ox = ox; this.oy = oy; this.m = m; }
+  function Zone(g, ox, oy, m, free) { this.Z = true; this.g = g; this.ox = ox; this.oy = oy; this.m = m; this.free = !!free; }
   function cube(s, g, x, y, z, sx, sy, sz, base) {
     if (!g.Z) return rawCube(s, g, x, y, z, sx, sy, sz, base);
     return g.m ? rawCube(s, g.g, g.ox + y, g.oy + x, z, sy, sx, sz, base) : rawCube(s, g.g, g.ox + x, g.oy + y, z, sx, sy, sz, base);
   }
   function rectY(s, g, y, x0, x1, z0, z1, c) {
     if (!g.Z) return rawRectY(s, g, y, x0, x1, z0, z1, c);
+    if (g.free && y < .1) return;   // 섬에는 벽이 없다
     return g.m ? rawRectX(s, g.g, g.ox + y, g.oy + x0, g.oy + x1, z0, z1, c) : rawRectY(s, g.g, g.oy + y, g.ox + x0, g.ox + x1, z0, z1, c);
   }
   function rectX(s, g, x, y0, y1, z0, z1, c) {
     if (!g.Z) return rawRectX(s, g, x, y0, y1, z0, z1, c);
+    if (g.free && x < .1) return;
     return g.m ? rawRectY(s, g.g, g.oy + x, g.ox + y0, g.ox + y1, z0, z1, c) : rawRectX(s, g.g, g.ox + x, g.oy + y0, g.oy + y1, z0, z1, c);
   }
 
@@ -94,72 +94,76 @@ const OfficeArt = (function () {
     poly(s, [P(0, D, 0), P(W, D, 0), P(W, D, -S), P(0, D, -S)], C(th.slab, .85));
     poly(s, [P(W, 0, 0), P(W, D, 0), P(W, D, -S), P(W, 0, -S)], C(th.slab, .6));
     for (let x = 0; x < W; x++) for (let y = 0; y < D; y++) poly(s, [P(x, y, 0), P(x + 1, y, 0), P(x + 1, y + 1, 0), P(x, y + 1, 0)], C((x + y) % 2 ? th.a : th.b));
-    const wall = (f) => (x) => (x % 4 === 0 ? C(th.pin, f) : C(th.wall, f));
-    poly(s, [P(0, 0, 0), P(W, 0, 0), P(W, 0, H), P(0, 0, H)], wall(.92));
-    poly(s, [P(0, 0, 0), P(0, D, 0), P(0, D, H), P(0, 0, H)], wall(.7));
-    rawRectY(s, g, 0, 0, W, 0, 3, C(th.trim, .95)); rawRectX(s, g, 0, 0, D, 0, 3, C(th.trim, .72));
-    rawRectY(s, g, 0, 0, W, H - 3, H, C('#17171a')); rawRectX(s, g, 0, 0, D, H - 3, H, C('#17171a', .8));
+    wallSeg(s, g, th, 'y', 0, W, .92, 3.5); wallSeg(s, g, th, 'x', 0, D, .7, 1.5);
   }
 
-  // 층 배치: 뒷벽 두 면을 따라 부서 칸(6×6)이 ㄱ자로 놓이고, 가운데는 열린 공간.
-  // 오른쪽 벽에 a 칸, 왼쪽 벽에 (b-1) 칸 (모서리 칸은 오른쪽 벽 첫 칸과 같다)
-  const ZW = 6, DIMS = { 3: [2, 2], 4: [2, 3], 5: [3, 3] };
-  function layout(count) {
-    const [a, b] = DIMS[count], zones = [];
-    for (let i = 0; i < a; i++) zones.push({ ox: ZW * i, oy: 0, m: false });
-    for (let j = 1; j < b; j++) zones.push({ ox: 0, oy: ZW * j, m: true });
-    return { a, b, W: ZW * a, D: ZW * b, zones };
-  }
-  // 바닥 좌표 → 부서 번호(-1 은 열린 공간)
+  // 본사 한 층에 부서 12개: 뒷벽을 따라 8칸(오른쪽 4 + 왼쪽 4)과 가운데 섬 4칸, 한가운데는 잔디 위 야구장 내야
+  const ZW = 6, WALL_R = 4, WALL_L = 4;
+  const LAYOUT = (function () {
+    const zones = [];
+    for (let i = 0; i < WALL_R; i++) zones.push({ ox: ZW * i, oy: 0, m: false });
+    for (let j = 1; j <= WALL_L; j++) zones.push({ ox: 0, oy: ZW * j, m: true });
+    [[7, 8], [13, 8], [19, 8], [8, 17]].forEach(o => zones.push({ ox: o[0], oy: o[1], m: false, free: true }));
+    return { W: 25, D: 30, nWall: WALL_R + WALL_L, zones };
+  })();
+  const FIELD = { x0: 14, y0: 18, x1: 23, y1: 27 };   // 내야
+  // 바닥 좌표 → 부서 번호(-1 은 공용 공간)
   function zoneOfCell(L, x, y) {
-    if (y < ZW) return Math.min(L.a - 1, Math.floor(x / ZW));
-    if (x < ZW) return L.a - 1 + Math.min(L.b - 1, Math.floor(y / ZW));
+    if (y < ZW && x < ZW * WALL_R) return Math.floor(x / ZW);
+    if (x < ZW && y >= ZW && y < ZW * (WALL_L + 1)) return WALL_R - 1 + Math.floor(y / ZW);
+    for (let k = L.nWall; k < L.zones.length; k++) { const z = L.zones[k]; if (x >= z.ox && x < z.ox + ZW && y >= z.oy && y < z.oy + ZW) return k; }
     return -1;
   }
+  // 벽 한 토막: 흰 벽 + 검정 아래 판넬 + 빨간 줄 + 사선 포인트 (줄무늬 없음)
+  function wallSeg(s, g, th, plane, a0, a1, shade, slashAt) {
+    const P = g.P, H = g.H, pt = plane === 'y' ? (a, z) => P(a, 0, z) : (a, z) => P(0, a, z);
+    poly(s, [pt(a0, 0), pt(a1, 0), pt(a1, H), pt(a0, H)], C(th.wall, shade));
+    poly(s, [pt(a0, 0), pt(a1, 0), pt(a1, 10), pt(a0, 10)], C(th.dark, shade));
+    poly(s, [pt(a0, 10), pt(a1, 10), pt(a1, 12), pt(a0, 12)], C(th.trim, shade));
+    poly(s, [pt(a0, H - 3), pt(a1, H - 3), pt(a1, H), pt(a0, H)], C(th.dark, shade));
+    if (slashAt !== undefined) {   // 사선 포인트 (로고의 기울어진 조형에서 따온 것)
+      const a = a0 + slashAt;
+      poly(s, [pt(a, 12), pt(a + 1.2, 12), pt(a + 3.4, H - 3), pt(a + 2.2, H - 3)], C(th.trim, shade));
+      poly(s, [pt(a + 1.5, 12), pt(a + 1.9, 12), pt(a + 4.1, H - 3), pt(a + 3.7, H - 3)], C(th.dark, shade));
+    }
+  }
   function floorBase(s, g, th, L) {
-    const { W, D, H } = g, P = g.P, S = g.th;
-    const wall = (f) => (x) => (x % 4 === 0 ? C(th.pin, f) : C(th.wall, f));   // 핀스트라이프 벽
+    const { W, D } = g, P = g.P, S = g.th;
     s.cur = 0;
     poly(s, [P(0, D, 0), P(W, D, 0), P(W, D, -S), P(0, D, -S)], C(th.slab, .85));
     poly(s, [P(W, 0, 0), P(W, D, 0), P(W, D, -S), P(W, 0, -S)], C(th.slab, .6));
     for (let x = 0; x < W; x++) for (let y = 0; y < D; y++) {
       const z = zoneOfCell(L, x, y); s.cur = z + 1;
-      poly(s, [P(x, y, 0), P(x + 1, y, 0), P(x + 1, y + 1, 0), P(x, y + 1, 0)], C((x + y) % 2 ? th.a : th.b, z >= 0 && z % 2 ? 1.16 : 1));
+      const c = z < 0 ? C(x % 2 ? '#3a8f3f' : '#338238')                 // 잔디 (깎은 줄무늬)
+        : z < L.nWall ? C((x + y) % 2 ? '#d90f2d' : '#cb0c28')           // 부서: 빨간 카펫
+        : C((x + y) % 2 ? '#34343b' : '#2b2b32');                        // 섬: 검정 바닥
+      poly(s, [P(x, y, 0), P(x + 1, y, 0), P(x + 1, y + 1, 0), P(x, y + 1, 0)], c);
     }
-    for (let i = 0; i < L.a; i++) {   // 오른쪽 뒷벽: 부서 칸마다
-      const x0 = ZW * i, x1 = x0 + ZW; s.cur = i + 1;
-      poly(s, [P(x0, 0, 0), P(x1, 0, 0), P(x1, 0, H), P(x0, 0, H)], wall(.92));
-      rawRectY(s, g, 0, x0, x1, 0, 3, C(th.trim, .95)); rawRectY(s, g, 0, x0, x1, H - 3, H, C('#17171a'));
-    }
-    for (let j = 0; j < L.b; j++) {    // 왼쪽 뒷벽
-      const y0 = ZW * j, y1 = y0 + ZW; s.cur = j ? L.a + j : 1;
-      poly(s, [P(0, y0, 0), P(0, y1, 0), P(0, y1, H), P(0, y0, H)], wall(.7));
-      rawRectX(s, g, 0, y0, y1, 0, 3, C(th.trim, .72)); rawRectX(s, g, 0, y0, y1, H - 3, H, C('#17171a', .8));
-    }
+    s.cur = 0; wallSeg(s, g, th, 'y', 0, W, .92); wallSeg(s, g, th, 'x', 0, D, .7);   // 바탕
+    for (let i = 0; i < WALL_R; i++) { s.cur = i + 1; wallSeg(s, g, th, 'y', ZW * i, ZW * i + ZW, .92, .7); }
+    for (let j = 0; j <= WALL_L; j++) { s.cur = j ? WALL_R - 1 + j + 1 : 1; wallSeg(s, g, th, 'x', ZW * j, ZW * j + ZW, .7, .7); }
     s.cur = 0;
   }
-  // 부서 칸 사이 낮은 칸막이 (가운데는 드나드는 틈). Z 칸 안 x=0 자리에 선다
+  // 칸막이: 벽 부서 사이에 낮게 (가운데는 드나드는 틈). Z 칸 안 x=0 자리
   function partition(s, Z) {
     cube(s, Z, -.15, 0, 0, .3, 2.2, 9, COL.WHITE); cube(s, Z, -.15, 3.8, 0, .3, 2.2, 9, COL.WHITE);
     rectX(s, Z, -.15, 0, 2.2, 8, 9, C(COL.RED)); rectX(s, Z, -.15, 3.8, 6, 8, 9, C(COL.RED));
   }
-  // 가운데 열린 공간: 야구장 내야 모양 러그 (누르면 아무 일도 없음)
-  function infield(s, g, L, th) {
-    const x0 = ZW + 1, y0 = ZW + 1, x1 = L.W - 1, y1 = L.D - 1; if (x1 - x0 < 2 || y1 - y0 < 2) return;
-    s.cur = 0;
+  // 한가운데 야구장 내야 (누르면 아무 일도 없음)
+  function infield(s, g) {
+    const { x0, y0, x1, y1 } = FIELD; s.cur = 0;
     for (let x = x0; x < x1; x++) for (let y = y0; y < y1; y++) poly(s, [g.P(x, y, 0), g.P(x + 1, y, 0), g.P(x + 1, y + 1, 0), g.P(x, y + 1, 0)], C('#c89a62', (x + y) % 2 ? 1 : .94));
-    const m = [(x0 + x1) / 2 - .3, (y0 + y1) / 2 - .3];
-    [[x0, y0], [x1 - .8, y0], [x0, y1 - .8], [x1 - .8, y1 - .8]].forEach(b => rawCube(s, g, b[0], b[1], 0, .8, .8, 1.5, COL.WHITE));
-    rawCube(s, g, m[0], m[1], 0, .6, .6, 1.2, '#a67c4a');
+    [[x0, y0], [x1 - .9, y0], [x0, y1 - .9], [x1 - .9, y1 - .9]].forEach(b => rawCube(s, g, b[0], b[1], 0, .9, .9, 1.5, COL.WHITE));
+    rawCube(s, g, (x0 + x1) / 2 - .4, (y0 + y1) / 2 - .4, 0, .8, .8, 1.4, '#a67c4a');
   }
 
   // ── 도트 호랑이 직원 (9×12). 줄무늬 k, 털 o, 입 w, 유니폼 r ──
   const TIGER = [
     '.oo...oo.', 'ooooooooo', 'okooooook', 'ooeoooeoo', 'oowwkwwoo', '.owwwwwo.',
-    '..rrrrr..', '.orrrrro.', '.orrwrro.', '..rrrrr..',
+    '..rrrrr..', '.orrrrro.', '.orrnrro.', '..rrrrr..',
   ];
   const LEGS = ['..kk.kk..', '..kk.kk..'], LEGS2 = ['.kk...kk.', '..kk.kk..'];
-  const palFor = (jersey) => ({ o: C('#f28c28'), k: C('#16110d'), e: C('#16110d'), w: C('#fff4dc'), r: C(jersey), });
+  const palFor = (jersey) => ({ o: C('#f28c28'), k: C('#16110d'), e: C('#16110d'), w: C('#fff4dc'), r: C(jersey), n: C(jersey === '#f4f1ea' ? '#0d0d10' : '#ffffff') });
   function sprite(s, rows, pal, x, y, flip) {
     for (let r = 0; r < rows.length; r++) {
       const row = rows[r];
@@ -257,28 +261,33 @@ const OfficeArt = (function () {
     },
   };
 
-  // ── 층 하나: 부서 여러 칸 + 오가는 직원 ──
+  // ── 본사 한 층: 부서 12칸 + 오가는 직원 ──
   const mounted = [];
+  const JERSEYS = ['#ea0029', '#0d0d10', '#f4f1ea'];   // 빨강·검정·흰색(홈) 유니폼
   function mountFloor(canvas, themeIdx, keys, seed) {
-    const L = layout(keys.length), g = new Grid(L.W, L.D, 34, 6), cx = ZW + (L.W - ZW) / 2, cy = ZW + (L.D - ZW) / 2;
-    const fronts = L.zones.map(z => z.m ? [4.7, z.oy + 3.2] : [z.ox + 3.2, 4.7]), pts = [];
-    fronts.forEach((p, k) => { pts.push(p, [cx + (k % 2 ? 1.2 : -1.2), cy + (k % 3 - 1) * 1.2]); });
+    const L = LAYOUT, g = new Grid(L.W, L.D, 34, 6), Z = L.zones;
+    const front = (k) => { const z = Z[k]; return k < WALL_R ? [z.ox + 3, 7] : k < L.nWall ? [7, z.oy + 3] : [z.ox + 3, z.oy + 6.8]; };
+    const fc = [(FIELD.x0 + FIELD.x1) / 2, (FIELD.y0 + FIELD.y1) / 2];
+    const order = [0, 1, 2, 3, 10, 'F', 11, 7, 6, 5, 4, 8, 9], pts = order.map(k => k === 'F' ? fc : front(k));
     const loop = pts.concat(pts.slice(1, -1).reverse()), n = loop.length;
-    const f = { canvas, ctx: canvas.getContext('2d'), g, L, th: THEMES[themeIdx], keys, hover: -1, last: null,
-      wks: [0, 1, keys.length > 3 ? 2 : -1].filter(i => i >= 0).map(i => ({ w: walker(loop, Math.floor(n * i / 3) + seed), pal: palFor((i + seed) % 2 ? '#c8102e' : '#1a1a1d') })) };
+    const f = { canvas, ctx: canvas.getContext('2d'), g, L, th: HQ, keys, hover: -1, last: null,
+      wks: [0, 1, 2, 3, 4].map(i => ({ w: walker(loop, Math.floor(n * i / 5) + seed), pal: palFor(JERSEYS[(i + seed) % 3]) })) };
     canvas.width = g.w; canvas.height = g.h; mounted.push(f); drawFloor(f);
-    return L.zones.map(z => { const p = z.m ? g.P(0, z.oy + 3, g.H) : g.P(z.ox + 3, 0, g.H); return { x: p[0] / g.w * 100, y: p[1] / g.h * 100 }; }).concat([{ w: g.w, h: g.h }]);   // 이름표는 부서 뒷벽 위 간판 자리
+    return Z.map((z, k) => {
+      const p = k < WALL_R ? g.P(z.ox + 3, 0, g.H) : k < L.nWall ? g.P(0, z.oy + 3, g.H) : g.P(z.ox + 3, z.oy + 3, 30);   // 이름표: 벽 부서는 뒷벽 위, 섬은 소품 위
+      return { x: p[0] / g.w * 100, y: p[1] / g.h * 100 };
+    }).concat([{ w: g.w, h: g.h }]);
   }
   function drawFloor(f) {
     const g = f.g, L = f.L, s = new Surf(g.w, g.h);
     floorBase(s, g, f.th, L);
+    infield(s, g);
     L.zones.map((z, k) => ({ z, k })).sort((p, q) => (p.z.ox + p.z.oy) - (q.z.ox + q.z.oy)).forEach(({ z, k }) => {
-      const Z = new Zone(g, z.ox, z.oy, z.m); s.cur = k + 1;
-      if (k) partition(s, Z);
+      const Z = new Zone(g, z.ox, z.oy, z.m, z.free); s.cur = k + 1;
+      if (k && k < L.nWall) partition(s, Z);
       PROPS[f.keys[k]](s, Z);
     });
-    infield(s, g, L, f.th);
-    f.wks.forEach(o => { const zi = zoneOfCell(L, o.w.x, o.w.y); s.cur = zi + 1; tiger(s, g, o.w, o.pal); });
+    f.wks.forEach(o => { s.cur = zoneOfCell(L, o.w.x, o.w.y) + 1; tiger(s, g, o.w, o.pal); });
     if (f.hover >= 0) {   // 마우스가 올라간 부서는 밝게
       const h = f.hover + 1;
       for (let i = 0; i < s.d.length; i++) if (s.id[i] === h && s.d[i]) { const v = s.d[i]; s.d[i] = pack(Math.min(255, (v & 255) + 34), Math.min(255, ((v >> 8) & 255) + 34), Math.min(255, ((v >> 16) & 255) + 34)); }

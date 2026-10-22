@@ -5,24 +5,21 @@
      내 PC 의 Claude Code 가 코드를 쓰고 고치고 돌리는 모습도 보인다.
 ══════════════════════════════════════ */
 
-// 부서: open = [탭, 마이페이지/가계부 카드 id]. badge 는 지금 데이터로 그리는 작은 숫자표.
+// 부서(본사 한 층). 순서가 곧 자리: 오른쪽 벽 4칸 → 왼쪽 벽 4칸 → 가운데 섬 4칸 (js/office-art.js LAYOUT 과 같은 순서)
+// open = [탭, 마이페이지/가계부 카드 id]. badge 는 지금 데이터로 그리는 작은 숫자표.
 const OF_FLOORS = [
-  { no: '3F', rooms: [
+  { no: 'HQ', rooms: [
     { icon: '📅', name: '비서실', sub: '일정', art: 'sec', open: ['calendar'], badge: () => { const t = itemsOnDate(fmtDate(new Date())), left = t.filter(i => !i.done).length; return t.length ? `오늘 ${left}/${t.length}` : '오늘 비었어요'; } },
     { icon: '⏳', name: '기획실', sub: 'D-day', art: 'plan', open: ['mypage', 'mpCardDday'], badge: () => ddays.length ? `${ddays.length}개` : '' },
     { icon: '📔', name: '대표실', sub: '다이어리', art: 'ceo', open: ['mypage', 'mpCardDiary'], badge: () => diaries.length ? `${diaries.length}편` : '' },
-  ] },
-  { no: '2F', rooms: [
     { icon: '💰', name: '회계부', sub: '가계부', art: 'acct', open: ['category', 'mpCardLedger'], badge: () => { const n = new Date(), t = statsMonthTotals(ledger, subscriptions, n.getFullYear(), n.getMonth(), getSubDatesForMonth); return t.expense ? `이달 ${Math.round(t.expense / 10000).toLocaleString('ko-KR')}만원` : ''; } },
-    { icon: '🏦', name: '재무팀', sub: '자산', art: 'fin', open: ['category', 'mpCardAccounts'], badge: () => '' },
-    { icon: '🔖', name: '구독관리팀', sub: '구독', art: 'subs', open: ['category', 'mpCardSubs'], badge: () => subscriptions.length ? `${subscriptions.length}개` : '' },
-    { icon: '📊', name: '통계실', sub: '통계', art: 'stat', open: ['category', 'mpCardStats'], badge: () => '' },
-  ] },
-  { no: '1F', rooms: [
-    { icon: '📦', name: '물류팀', sub: '택배', art: 'logi', open: ['category', 'mpCardParcel'], badge: () => { const n = parcels.filter(p => !p.done).length; return n ? `배송 ${n}건` : ''; } },
     { icon: '📚', name: '자료실', sub: '북마크', art: 'arch', open: ['mypage', 'mpCardBookmark'], badge: () => bookmarks.length ? `${bookmarks.length}개` : '' },
     { icon: '📝', name: '메모실', sub: '메모', art: 'memo', open: ['mypage', 'mpCardMemo'], badge: () => memos.length ? `${memos.length}개` : '' },
+    { icon: '📊', name: '통계실', sub: '통계', art: 'stat', open: ['category', 'mpCardStats'], badge: () => '' },
     { icon: '⬇️', name: '미디어팀', sub: 'SaveTube', art: 'media', open: ['mypage', 'mpCardSaveTube'], badge: () => '' },
+    { icon: '🏦', name: '재무팀', sub: '자산', art: 'fin', open: ['category', 'mpCardAccounts'], badge: () => '' },
+    { icon: '🔖', name: '구독관리팀', sub: '구독', art: 'subs', open: ['category', 'mpCardSubs'], badge: () => subscriptions.length ? `${subscriptions.length}개` : '' },
+    { icon: '📦', name: '물류팀', sub: '택배', art: 'logi', open: ['category', 'mpCardParcel'], badge: () => { const n = parcels.filter(p => !p.done).length; return n ? `배송 ${n}건` : ''; } },
     { icon: '⚙️', name: '총무팀', sub: '설정', art: 'admin', open: ['mypage'], badge: () => '' },
   ] },
 ];
@@ -49,14 +46,14 @@ function officeBuild() {
   v.setAttribute('role', 'region');
   v.setAttribute('aria-label', '회사 로비');
   const floors = OF_FLOORS.map((f, fi) => `<div class="of-floor"><div class="of-fno">${f.no}</div><div class="of-fcv"><div class="of-cvbox"><canvas class="of-cv of-cv-floor" data-f="${fi}" aria-hidden="true"></canvas>` + f.rooms.map((r, ri) =>
-    `<div role="button" tabindex="0" class="of-room" data-f="${fi}" data-r="${ri}" aria-label="${ofEsc(r.name)} — ${ofEsc(r.sub)} 열기">
-      <span class="of-sign"><span aria-hidden="true">${r.icon}</span>${ofEsc(r.name)}</span><span class="of-sub">${ofEsc(r.sub)}</span><span class="of-badge"></span>
+    `<div role="button" tabindex="0" class="of-room" data-f="${fi}" data-r="${ri}" title="${ofEsc(r.sub)}" aria-label="${ofEsc(r.name)} — ${ofEsc(r.sub)} 열기">
+      <span class="of-sign"><span aria-hidden="true">${r.icon}</span>${ofEsc(r.name)}</span><span class="of-badge"></span>
     </div>`).join('') + '</div></div></div>').join('');
   v.innerHTML = `<div class="of-wrap">
     <div class="of-bar"><canvas id="ofAvatar" class="of-avatar" aria-hidden="true"></canvas><h1>나의 하루 타이거 컴퍼니<small id="ofDate"></small></h1>
       <div role="button" tabindex="0" class="of-chip" id="ofTheme" title="테마 전환" aria-label="테마 전환">☀️</div>
       <div role="button" tabindex="0" class="of-chip" id="ofSkin" title="화면 스타일 바꾸기" aria-label="화면 스타일 바꾸기">🖥️</div></div>
-    <div class="of-building"><div class="of-roof"><span class="of-ball" aria-hidden="true"></span><b>TIGER COMPANY</b><span class="of-board" id="ofBoard"></span></div>${floors}<div class="of-ground"></div>
+    <div class="of-building"><div class="of-roof"><span class="of-plate" aria-hidden="true"><canvas id="ofEmblem"></canvas></span><b>TIGER COMPANY</b><span class="of-board" id="ofBoard"></span></div>${floors}<div class="of-ground"></div>
       <section class="of-basement" aria-label="지하 서버실"><div class="of-bhead"><span>🖥️ B1 서버실</span><span class="of-status" id="ofStatus" aria-live="polite"></span>
         <div role="button" tabindex="0" class="of-link" id="ofLink"></div></div>
         <div class="of-srv" id="ofSrv" data-busy="0"><canvas id="ofSrvCv" class="of-cv of-cv-srv" aria-hidden="true"></canvas>
@@ -65,10 +62,10 @@ function officeBuild() {
   document.body.appendChild(v);
   OF_FLOORS.forEach((f, fi) => {   // 층 하나 = 그림 하나. 부서 이름표는 그 부서 뒷벽 위에 간판처럼 단다
     const cv = v.querySelector(`canvas[data-f="${fi}"]`), at = OfficeArt.mountFloor(cv, fi, f.rooms.map(r => r.art), fi * 2), size = at.pop();
-    cv.parentNode.style.maxWidth = Math.round(size.w * 2.5) + 'px';
+    cv.parentNode.style.maxWidth = Math.round(size.w * 2.6) + 'px';
     f.rooms.forEach((r, ri) => { const el = v.querySelector(`.of-room[data-f="${fi}"][data-r="${ri}"]`); el.style.left = at[ri].x + '%'; el.style.top = at[ri].y + '%'; });
   });
-  OfficeArt.mountServer(document.getElementById('ofSrvCv')); OfficeArt.mountAvatar(document.getElementById('ofAvatar'));
+  OfficeArt.mountServer(document.getElementById('ofSrvCv')); OfficeArt.mountAvatar(document.getElementById('ofAvatar')); OfficeArt.mountAvatar(document.getElementById('ofEmblem'));
   OfficeArt.start(() => !document.hidden && document.documentElement.hasAttribute('data-office') && !document.documentElement.hasAttribute('data-office-in'));
 
   const back = document.createElement('div');

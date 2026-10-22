@@ -6,8 +6,8 @@
 html[data-office]:not([data-office-in]) #officeView { display: block; }
 
 #officeView {
-  --of-red: #c8102e; --of-black: #17171a; --of-cream: #f3efe6; --of-ink: #1c1a17; --of-sub: #6d655a;
-  --of-sky1: #9fd0f0; --of-sky2: #eaf5fb; --of-grass: #4f9a43; --of-frame: #1c1c20;
+  --of-red: #ea0029; --of-black: #0d0d10; --of-cream: #f3efe6; --of-ink: #1c1a17; --of-sub: #6d655a;
+  --of-sky1: #9fd0f0; --of-sky2: #eaf5fb; --of-grass: #4f9a43; --of-frame: #0d0d10;
   position: fixed; inset: 0; z-index: 900; overflow-y: auto; -webkit-overflow-scrolling: touch;
   background: linear-gradient(var(--of-sky1), var(--of-sky2) 40%, var(--of-grass) 40%);
   color: var(--of-ink); font-family: inherit; line-height: 1.35;
@@ -31,20 +31,19 @@ html[data-theme="dark"] #officeView {
 
 /* 건물과 지붕 전광판 */
 #officeView .of-building { position: relative; margin-top: 8px; background: var(--of-frame); padding: 0 6px 6px; border: 3px solid var(--of-frame); box-shadow: 0 6px 0 rgba(0,0,0,.25); }
-#officeView .of-roof { display: flex; align-items: center; gap: 12px; margin: 0 -6px 6px; padding: 10px 14px; background: var(--of-black); border-bottom: 5px solid var(--of-red); color: #fff; }
+#officeView .of-roof { position: relative; display: flex; align-items: center; gap: 12px; margin: 0 -6px 6px; padding: 10px 14px; overflow: hidden; color: #fff; border-bottom: 5px solid var(--of-red);
+  background: linear-gradient(115deg, var(--of-black) 0 62%, var(--of-red) 62% 66%, var(--of-black) 66% 68%, var(--of-red) 68% 69.5%, var(--of-black) 69.5%); }
 #officeView .of-roof b { flex: 1; font: 800 19px/1 ui-monospace, Consolas, monospace; letter-spacing: 3px; text-shadow: 0 0 8px rgba(255,255,255,.35); }
-#officeView .of-ball { width: 22px; height: 22px; border-radius: 50%; background: #fff; box-shadow: inset -3px -3px 0 #d9d3c4; position: relative; flex: none; }
-#officeView .of-ball::before, #officeView .of-ball::after { content: ""; position: absolute; top: 3px; bottom: 3px; width: 5px; border: 2px solid var(--of-red); border-radius: 50%; }
-#officeView .of-ball::before { left: -1px; border-left-color: transparent; border-top-color: transparent; border-bottom-color: transparent; }
-#officeView .of-ball::after { right: -1px; border-right-color: transparent; border-top-color: transparent; border-bottom-color: transparent; }
+#officeView .of-plate { flex: none; width: 34px; height: 36px; padding: 3px 3px 10px; background: var(--of-red); clip-path: polygon(0 0, 100% 0, 100% 62%, 50% 100%, 0 62%); display: grid; place-items: start center; }
+#officeView .of-plate canvas { width: 26px; height: 28px; background: var(--of-black); }
 #officeView .of-board { padding: 4px 10px; background: #0d1f14; border: 2px solid #3b3b40; color: #ffd84a; font: 700 14px/1.2 ui-monospace, Consolas, monospace; letter-spacing: 1px; text-shadow: 0 0 6px rgba(255,216,74,.6); white-space: nowrap; }
 
 /* 층: 부서 여러 칸이 하나의 입체 바닥판 위에 있다 */
 #officeView .of-floor { display: grid; grid-template-columns: 30px 1fr; margin-bottom: 6px; background: linear-gradient(#26262c, #1f1f24); }
 #officeView .of-floor:last-of-type { margin-bottom: 0; }
 #officeView .of-fno { display: grid; place-items: center; background: var(--of-red); color: #fff; font: 800 13px/1 ui-monospace, Consolas, monospace; writing-mode: vertical-rl; letter-spacing: 2px; }
-#officeView .of-fcv { padding: 38px 8px 14px; min-width: 0; }
-#officeView .of-cvbox { position: relative; margin: 0 auto; }
+#officeView .of-fcv { padding: 40px 8px 14px; min-width: 0; overflow-x: auto; }
+#officeView .of-cvbox { position: relative; margin: 0 auto; min-width: 620px; }
 #officeView .of-cv { width: 100%; height: auto; }
 
 /* 부서 이름표 (부서 뒷벽 위 간판) */
@@ -53,7 +52,6 @@ html[data-theme="dark"] #officeView {
 #officeView .of-room:focus-visible { box-shadow: 0 0 0 3px #ffd84a; }
 #officeView .of-sign { font-size: 12px; font-weight: 800; }
 #officeView .of-sign > span { margin-right: 3px; }
-#officeView .of-sub { font-size: 10px; color: #c9c2b2; }
 #officeView .of-badge { padding: 1px 6px; background: var(--of-red); color: #fff; font-size: 10px; font-weight: 800; }
 #officeView .of-badge:empty { display: none; }
 
@@ -80,7 +78,6 @@ html[data-office][data-office-in] #officeBack { display: flex !important; }
 #officeBack { position: fixed; z-index: 950; left: 10px; bottom: calc(76px + env(safe-area-inset-bottom)); align-items: center; gap: 6px; padding: 9px 14px; background: #c8102e; color: #fff; border: 3px solid #fff; font-weight: 800; font-size: 13px; line-height: 1; box-shadow: 3px 3px 0 rgba(0,0,0,.4); cursor: pointer; }
 
 @media (max-width: 640px) {
-  #officeView .of-sub { display: none; }
   #officeView .of-room { padding: 2px 6px; gap: 3px; }
   #officeView .of-srv { grid-template-columns: 1fr; }
   #officeView .of-roof b { font-size: 15px; letter-spacing: 1px; }
