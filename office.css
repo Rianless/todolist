@@ -23,7 +23,7 @@ html[data-theme="dark"] #officeView {
 
 /* 맨 위 줄 */
 #officeView .of-bar { display: flex; align-items: center; gap: 10px; margin-bottom: 14px; }
-#officeView .of-avatar { width: 44px; height: 48px; flex: none; }
+#officeView .of-avatar { width: 46px; height: 54px; flex: none; }
 #officeView .of-bar h1 { flex: 1; margin: 0; font-size: 18px; font-weight: 800; color: var(--of-ink); }
 #officeView .of-bar small { display: block; font-size: 12px; font-weight: 600; color: var(--of-sub); }
 #officeView .of-chip { width: 40px; height: 40px; display: grid; place-items: center; font-size: 19px; background: var(--of-card); border: 2px solid var(--of-line); border-radius: 14px; box-shadow: 0 3px 0 var(--of-line); }

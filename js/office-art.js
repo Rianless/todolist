@@ -167,42 +167,62 @@ const OfficeArt = (function () {
     cube(s, Z, -.15, 0, 0, .3, 2.2, 11, COL.PANEL); cube(s, Z, -.15, 3.8, 0, .3, 2.2, 11, COL.PANEL);
   }
 
-  // ── 사람 (9×12). 머리 h, 피부 s, 눈 e, 셔츠 t, 바지 p ──
-  const FRONT = ['..hhhhh..', '.hhhhhhh.', '.hsssssh.', '.hsesesh.', '..sssss..', '...sss...', '.ttttttt.', 'ttttttttt', 'sttttttts', '.ttttttt.'];
-  const BACK = ['..hhhhh..', '.hhhhhhh.', '.hhhhhhh.', '.hhhhhhh.', '..hhhhh..', '...hhh...', '.ttttttt.', 'ttttttttt', 'sttttttts', '.ttttttt.'];
-  const LEGS = ['..pp.pp..', '..pp.pp..'], LEGS2 = ['.pp...pp.', '..pp.pp..'];
-  const SKIN = ['#f2c9a5', '#e0a97e', '#b9805a', '#8a5a3c'], HAIR = ['#3b2a20', '#1c1c24', '#a8522a', '#d9b25a', '#6b4a3a', '#7a5ab0'];
-  const SHIRT = ['#4c7fd6', '#e0563f', '#4aa05a', '#f2c24b', '#f08fb0', '#8a6ad6', '#46b6b0', '#f0a050'], PANTS = ['#3a3f5c', '#5a4a3a', '#2f2f3a'];
+  // ── 사람 (11×15, 머리가 큰 귀여운 도트). 머리 h/H, 피부 s, 눈 e, 볼 c, 입 m, 셔츠 t, 바지 p, 신발 b ──
+  const FRONT = ['...hhhhh...', '..hHHhhhh..', '.hhhhhhhhh.', '.hhhhhhhhh.', '.hsssssssh.', '.hsesssesh.', '.hsesssesh.', '..scsmscs..', '...sssss...',
+    '..ttttttt..', '.ttttttttt.', '.ttttttttt.', '.sttttttts.'];
+  const BACK = ['...hhhhh...', '..hHHhhhh..', '.hhhhhhhhh.', '.hhhhhhhhh.', '.hhhhhhhhh.', '.hhhhhhhhh.', '.hhhhhhhhh.', '..hhhhhhh..', '...hhhhh...',
+    '..ttttttt..', '.ttttttttt.', '.ttttttttt.', '.sttttttts.'];
+  const LEGS = ['..ppp.ppp..', '..bbb.bbb..'], LEGS2 = ['.ppp...ppp.', '.bbb...bbb.'];
+  function longHair(rows) {   // 긴 머리: 턱 아래로 머리카락이 흘러내림
+    return rows.map((r, i) => { if (i !== 8 && i !== 9) return r; const a = r.split(''); a[1] = 'h'; a[9] = 'h'; if (i === 8) { a[2] = 'h'; a[8] = 'h'; } return a.join(''); });
+  }
+  const FRONT_L = longHair(FRONT), BACK_L = longHair(BACK);
+  const SKIN = ['#f6d3b3', '#e8b48a', '#c58a62', '#8f5e3f'], HAIR = ['#3b2a20', '#1f1f2b', '#b4572c', '#e0b95e', '#6b4a3a', '#2b3a67', '#7a3b2e'];
+  const SHIRT = ['#4c7fd6', '#e0563f', '#4aa05a', '#f2c24b', '#f08fb0', '#8a6ad6', '#46b6b0', '#f0a050', '#ffffff'], PANTS = ['#3a3f5c', '#5a4a3a', '#2f2f3a', '#6b5b8a'];
+  const mix = (hex, to, t) => { const a = parseInt(hex.slice(1), 16), b = parseInt(to.slice(1), 16); const m = (sh) => Math.round(((a >> sh) & 255) * (1 - t) + ((b >> sh) & 255) * t); return '#' + ((1 << 24) | (m(16) << 16) | (m(8) << 8) | m(0)).toString(16).slice(1); };
   const people = [];
-  function palOf(i) {   // 사람마다 머리·피부·옷 조합이 다르게
+  function palOf(i) {   // 사람마다 머리·피부·옷·머리 모양이 다르게
     i = ((i % 48) + 48) % 48;
-    if (!people[i]) people[i] = { h: C(HAIR[(i * 5) % HAIR.length]), s: C(SKIN[(i * 3) % SKIN.length]), e: C('#2b2b35'), t: C(SHIRT[i % SHIRT.length]), p: C(PANTS[i % PANTS.length]) };
+    if (!people[i]) {
+      const hair = HAIR[(i * 5) % HAIR.length], skin = SKIN[(i * 3) % SKIN.length];
+      people[i] = { h: C(hair), H: C(mix(hair, '#ffffff', .28)), s: C(skin), c: C(mix(skin, '#ff7a8a', .38)), m: C(mix(skin, '#8a2f3a', .6)), e: C('#241c2e'),
+        t: C(SHIRT[i % SHIRT.length]), p: C(PANTS[i % PANTS.length]), b: C('#3a2f3a'), long: i % 3 === 1 };
+    }
     return people[i];
   }
+  const OUT_SPR = '#3b2c4d';
   function sprite(s, rows, pal, x, y, flip) {
-    for (let r = 0; r < rows.length; r++) {
+    const w = rows[0].length, h = rows.length, W2 = w + 2, occ = new Uint8Array(W2 * (h + 2));
+    for (let r = 0; r < h; r++) {
       const row = rows[r];
-      for (let c = 0; c < row.length; c++) {
-        const ch = row[flip ? row.length - 1 - c : c]; if (ch === '.' || !pal[ch]) continue;
+      for (let c = 0; c < w; c++) {
+        const ch = row[flip ? w - 1 - c : c]; if (ch === '.' || !pal[ch]) continue;
+        occ[(r + 1) * W2 + c + 1] = 1;
         const px = x + c, py = y + r; if (px >= 0 && py >= 0 && px < s.w && py < s.h) { s.d[py * s.w + px] = pal[ch]; s.id[py * s.w + px] = s.cur; }
       }
     }
+    const oc = C(OUT_SPR);   // 사람마다 어두운 윤곽선 한 줄
+    for (let r = -1; r <= h; r++) for (let c = -1; c <= w; c++) {
+      const i = (r + 1) * W2 + c + 1; if (occ[i]) continue;
+      if (occ[i - 1] || occ[i + 1] || occ[i - W2] || occ[i + W2]) { const px = x + c, py = y + r; if (px >= 0 && py >= 0 && px < s.w && py < s.h) { s.d[py * s.w + px] = oc; s.id[py * s.w + px] = s.cur; } }
+    }
   }
+  const front = (pal) => pal.long ? FRONT_L : FRONT, back = (pal) => pal.long ? BACK_L : BACK;
   // 앉아 있는 사람 (칸 안 좌표). back=true 면 등을 보이고 앉는다(모니터를 보는 중)
-  function seated(s, Z, x, y, pi, back, lift) {
-    const w = worldOf(Z, x, y), p = (Z.g || Z).P(w[0], w[1], lift === undefined ? 4 : lift);
-    sprite(s, back ? BACK : FRONT, palOf(pi), Math.round(p[0]) - 4, Math.round(p[1]) - 9, false);
+  function seated(s, Z, x, y, pi, backView, lift) {
+    const w = worldOf(Z, x, y), p = (Z.g || Z).P(w[0], w[1], lift === undefined ? 4 : lift), pal = palOf(pi);
+    sprite(s, backView ? back(pal) : front(pal), pal, Math.round(p[0]) - 5, Math.round(p[1]) - 12, false);
   }
   function standing(s, Z, x, y, pi, flip) {
-    const w = worldOf(Z, x, y), p = (Z.g || Z).P(w[0], w[1], 0);
+    const w = worldOf(Z, x, y), p = (Z.g || Z).P(w[0], w[1], 0), pal = palOf(pi);
     poly(s, [[p[0] - 4, p[1]], [p[0], p[1] - 1.5], [p[0] + 4, p[1]], [p[0], p[1] + 1.5]], C('#000000', 1));
-    sprite(s, FRONT.concat(LEGS), palOf(pi), Math.round(p[0]) - 4, Math.round(p[1]) - 11, !!flip);
+    sprite(s, front(pal).concat(LEGS), pal, Math.round(p[0]) - 5, Math.round(p[1]) - 14, !!flip);
   }
   function person(s, g, wk) {   // 걸어 다니는 사람
-    const p = g.P(wk.x, wk.y, 0), bob = (wk.wait > 0 && (wk.fr >> 2) % 2) ? 1 : 0;
+    const p = g.P(wk.x, wk.y, 0), bob = (wk.wait > 0 && (wk.fr >> 2) % 2) ? 1 : 0, pal = palOf(wk.pi);
     poly(s, [[p[0] - 4, p[1]], [p[0], p[1] - 1.5], [p[0] + 4, p[1]], [p[0], p[1] + 1.5]], C('#000000', 1));
-    const rows = FRONT.concat(wk.wait > 0 ? LEGS : (wk.fr % 2 ? LEGS2 : LEGS));
-    sprite(s, rows, palOf(wk.pi), Math.round(p[0]) - 4, Math.round(p[1]) - rows.length + 1 + bob, wk.flip);
+    const rows = front(pal).concat(wk.wait > 0 ? LEGS : (wk.fr % 2 ? LEGS2 : LEGS));
+    sprite(s, rows, pal, Math.round(p[0]) - 5, Math.round(p[1]) - rows.length + 1 + bob, wk.flip);
   }
   function walker(path, phase, pi) { return { path, pi, i: phase % path.length, x: path[phase % path.length][0], y: path[phase % path.length][1], wait: 3 + phase * 4, fr: 0, flip: false }; }
   function stepWalker(wk) {
@@ -383,7 +403,7 @@ const OfficeArt = (function () {
     monitor(s, g, 1, .75, 8, srv.busy ? '#9be58a' : COL.SCR);
     chair(s, g, 1.1, 2.1);
     // 일하는 사람: 일하는 중이면 몸이 살짝 움직인다
-    const p = g.P(1.55, 2.4, 4 + (srv.busy && t % 2 ? 1 : 0)); sprite(s, BACK, palOf(40), Math.round(p[0]) - 4, Math.round(p[1]) - 9, false);
+    const p = g.P(1.55, 2.4, 4 + (srv.busy && t % 2 ? 1 : 0)), dp = palOf(40); sprite(s, back(dp), dp, Math.round(p[0]) - 5, Math.round(p[1]) - 12, false);
     chairBack(s, g, 1.1, 2.1);
     cube(s, g, 6.8, 2.6, 0, 1.2, 1.2, 4, COL.CARD); cube(s, g, 8.2, 2.8, 0, 1, 1, 3, COL.CARD); cube(s, g, 7.1, 2.9, 4, .8, .8, 3, COL.CARD);
     // 새로 만들어진 파일: 상자가 바닥에서 랙으로 올라간다
@@ -399,9 +419,9 @@ const OfficeArt = (function () {
 
   // 작은 사람 얼굴(머리 줄 표시용)
   function mountAvatar(canvas) {
-    const s = new Surf(11, 12);
-    sprite(s, FRONT, palOf(3), 1, 1, false); outline(s);
-    canvas.width = 11; canvas.height = 12; canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(s.d.buffer), 11, 12), 0, 0);
+    const s = new Surf(13, 15), pal = palOf(4);
+    sprite(s, front(pal), pal, 1, 1, false);
+    canvas.width = 13; canvas.height = 15; canvas.getContext('2d').putImageData(new ImageData(new Uint8ClampedArray(s.d.buffer), 13, 15), 0, 0);
   }
 
   // ── 움직임: 느린 프레임으로 걷는다 (움직임 줄이기 설정이면 한 장만) ──
