@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v141-office';
+const CACHE_NAME = 'todolist-v142-office';
 const ASSETS = [
   './',
   './index.html',
@@ -13,6 +13,7 @@ const ASSETS = [
   './js/today.js',
   './js/boot.js',
   './js/mascot.js',
+  './js/office-art.js',
   './js/office.js',
   './characters/manifest.json',
   './characters/lines.json',

@@ -8,22 +8,22 @@
 // 부서: open = [탭, 마이페이지/가계부 카드 id]. badge 는 지금 데이터로 그리는 작은 숫자표.
 const OF_FLOORS = [
   { no: '3F', rooms: [
-    { icon: '📅', name: '비서실', sub: '일정', who: '👩‍💼', open: ['calendar'], badge: () => { const t = itemsOnDate(fmtDate(new Date())), left = t.filter(i => !i.done).length; return t.length ? `오늘 ${left}/${t.length}` : '오늘 비었어요'; } },
-    { icon: '⏳', name: '기획실', sub: 'D-day', who: '🧑‍🏫', open: ['mypage', 'mpCardDday'], badge: () => ddays.length ? `${ddays.length}개` : '' },
-    { icon: '📔', name: '대표실', sub: '다이어리', who: '🧑‍💼', open: ['mypage', 'mpCardDiary'], badge: () => diaries.length ? `${diaries.length}편` : '' },
+    { icon: '📅', name: '비서실', sub: '일정', art: 'sec', open: ['calendar'], badge: () => { const t = itemsOnDate(fmtDate(new Date())), left = t.filter(i => !i.done).length; return t.length ? `오늘 ${left}/${t.length}` : '오늘 비었어요'; } },
+    { icon: '⏳', name: '기획실', sub: 'D-day', art: 'plan', open: ['mypage', 'mpCardDday'], badge: () => ddays.length ? `${ddays.length}개` : '' },
+    { icon: '📔', name: '대표실', sub: '다이어리', art: 'ceo', open: ['mypage', 'mpCardDiary'], badge: () => diaries.length ? `${diaries.length}편` : '' },
   ] },
   { no: '2F', rooms: [
-    { icon: '💰', name: '회계부', sub: '가계부', who: '👨‍💼', open: ['category', 'mpCardLedger'], badge: () => { const n = new Date(), t = statsMonthTotals(ledger, subscriptions, n.getFullYear(), n.getMonth(), getSubDatesForMonth); return t.expense ? `이달 ${Math.round(t.expense / 10000).toLocaleString('ko-KR')}만원` : ''; } },
-    { icon: '🏦', name: '재무팀', sub: '자산', who: '🧑‍💻', open: ['category', 'mpCardAccounts'], badge: () => '' },
-    { icon: '🔖', name: '구독관리팀', sub: '구독', who: '🙋', open: ['category', 'mpCardSubs'], badge: () => subscriptions.length ? `${subscriptions.length}개` : '' },
-    { icon: '📊', name: '통계실', sub: '통계', who: '🧑‍🔬', open: ['category', 'mpCardStats'], badge: () => '' },
+    { icon: '💰', name: '회계부', sub: '가계부', art: 'acct', open: ['category', 'mpCardLedger'], badge: () => { const n = new Date(), t = statsMonthTotals(ledger, subscriptions, n.getFullYear(), n.getMonth(), getSubDatesForMonth); return t.expense ? `이달 ${Math.round(t.expense / 10000).toLocaleString('ko-KR')}만원` : ''; } },
+    { icon: '🏦', name: '재무팀', sub: '자산', art: 'fin', open: ['category', 'mpCardAccounts'], badge: () => '' },
+    { icon: '🔖', name: '구독관리팀', sub: '구독', art: 'subs', open: ['category', 'mpCardSubs'], badge: () => subscriptions.length ? `${subscriptions.length}개` : '' },
+    { icon: '📊', name: '통계실', sub: '통계', art: 'stat', open: ['category', 'mpCardStats'], badge: () => '' },
   ] },
   { no: '1F', rooms: [
-    { icon: '📦', name: '물류팀', sub: '택배', who: '🧑‍🔧', open: ['category', 'mpCardParcel'], badge: () => { const n = parcels.filter(p => !p.done).length; return n ? `배송 ${n}건` : ''; } },
-    { icon: '📚', name: '자료실', sub: '북마크', who: '🧓', open: ['mypage', 'mpCardBookmark'], badge: () => bookmarks.length ? `${bookmarks.length}개` : '' },
-    { icon: '📝', name: '메모실', sub: '메모', who: '✍️', open: ['mypage', 'mpCardMemo'], badge: () => memos.length ? `${memos.length}개` : '' },
-    { icon: '⬇️', name: '미디어팀', sub: 'SaveTube', who: '🧑‍🎤', open: ['mypage', 'mpCardSaveTube'], badge: () => '' },
-    { icon: '⚙️', name: '총무팀', sub: '설정', who: '🧑‍💼', open: ['mypage'], badge: () => '' },
+    { icon: '📦', name: '물류팀', sub: '택배', art: 'logi', open: ['category', 'mpCardParcel'], badge: () => { const n = parcels.filter(p => !p.done).length; return n ? `배송 ${n}건` : ''; } },
+    { icon: '📚', name: '자료실', sub: '북마크', art: 'arch', open: ['mypage', 'mpCardBookmark'], badge: () => bookmarks.length ? `${bookmarks.length}개` : '' },
+    { icon: '📝', name: '메모실', sub: '메모', art: 'memo', open: ['mypage', 'mpCardMemo'], badge: () => memos.length ? `${memos.length}개` : '' },
+    { icon: '⬇️', name: '미디어팀', sub: 'SaveTube', art: 'media', open: ['mypage', 'mpCardSaveTube'], badge: () => '' },
+    { icon: '⚙️', name: '총무팀', sub: '설정', art: 'admin', open: ['mypage'], badge: () => '' },
   ] },
 ];
 
@@ -50,21 +50,24 @@ function officeBuild() {
   v.setAttribute('aria-label', '회사 로비');
   const floors = OF_FLOORS.map((f, fi) => `<div class="of-floor"><div class="of-fno">${f.no}</div><div class="of-rooms">` + f.rooms.map((r, ri) =>
     `<div role="button" tabindex="0" class="of-room" data-f="${fi}" data-r="${ri}" aria-label="${ofEsc(r.name)} — ${ofEsc(r.sub)} 열기">
-      <div class="of-sign"><span aria-hidden="true">${r.icon}</span>${ofEsc(r.name)}</div><div class="of-sub">${ofEsc(r.sub)}</div>
-      <div class="of-desk"><span class="of-who" aria-hidden="true" style="animation-delay:${((fi * 5 + ri) * 0.37).toFixed(2)}s">${r.who}</span><span class="of-badge"></span></div>
+      <canvas class="of-cv" aria-hidden="true"></canvas>
+      <div class="of-label"><span class="of-sign"><span aria-hidden="true">${r.icon}</span>${ofEsc(r.name)}</span><span class="of-sub">${ofEsc(r.sub)}</span></div>
+      <span class="of-badge"></span>
     </div>`).join('') + '</div></div>').join('');
-  const rack = '<div class="of-rack">' + '<div class="of-unit"><i class="of-led"></i><i class="of-led"></i><i class="of-led"></i></div>'.repeat(5) + '</div>';
   v.innerHTML = `<div class="of-wrap">
-    <div class="of-bar"><h1>🏢 나의 하루 주식회사<small id="ofDate"></small></h1>
+    <div class="of-bar"><canvas id="ofAvatar" class="of-avatar" aria-hidden="true"></canvas><h1>나의 하루 타이거 컴퍼니<small id="ofDate"></small></h1>
       <div role="button" tabindex="0" class="of-chip" id="ofTheme" title="테마 전환" aria-label="테마 전환">☀️</div>
       <div role="button" tabindex="0" class="of-chip" id="ofSkin" title="화면 스타일 바꾸기" aria-label="화면 스타일 바꾸기">🖥️</div></div>
-    <div class="of-building"><div class="of-roof">나의 하루 주식회사</div>${floors}<div class="of-ground"></div>
+    <div class="of-building"><div class="of-roof"><span class="of-ball" aria-hidden="true"></span><b>TIGER COMPANY</b><span class="of-board" id="ofBoard"></span></div>${floors}<div class="of-ground"></div>
       <section class="of-basement" aria-label="지하 서버실"><div class="of-bhead"><span>🖥️ B1 서버실</span><span class="of-status" id="ofStatus" aria-live="polite"></span>
         <div role="button" tabindex="0" class="of-link" id="ofLink"></div></div>
-        <div class="of-srv" id="ofSrv" data-busy="0"><div class="of-racks">${rack}${rack}${rack}</div>
-          <div class="of-side"><span class="of-dev" aria-hidden="true">🧑‍💻</span><ul class="of-log" id="ofLogList"></ul></div></div></section></div>
+        <div class="of-srv" id="ofSrv" data-busy="0"><canvas id="ofSrvCv" class="of-cv of-cv-srv" aria-hidden="true"></canvas>
+          <ul class="of-log" id="ofLogList"></ul></div></section></div>
     <p class="of-note">부서를 누르면 그 기능이 열려요. 왼쪽 아래 「🏢 로비로」로 돌아와요.</p></div>`;
   document.body.appendChild(v);
+  OF_FLOORS.forEach((f, fi) => f.rooms.forEach((r, ri) => OfficeArt.mountRoom(v.querySelector(`.of-room[data-f="${fi}"][data-r="${ri}"] canvas`), r.art, fi, fi * 5 + ri)));
+  OfficeArt.mountServer(document.getElementById('ofSrvCv')); OfficeArt.mountAvatar(document.getElementById('ofAvatar'));
+  OfficeArt.start(() => !document.hidden && document.documentElement.hasAttribute('data-office') && !document.documentElement.hasAttribute('data-office-in'));
 
   const back = document.createElement('div');
   back.id = 'officeBack'; back.setAttribute('role', 'button'); back.tabIndex = 0; back.textContent = '🏢 로비로';
@@ -95,6 +98,7 @@ function officeRefresh() {
   if (!v) return;
   const d = new Date();
   document.getElementById('ofDate').textContent = d.toLocaleDateString('ko-KR', { month: 'long', day: 'numeric', weekday: 'long' });
+  try { const t = itemsOnDate(fmtDate(d)), left = t.filter(i => !i.done).length; document.getElementById('ofBoard').textContent = t.length ? `TODAY ${left}/${t.length}` : 'TODAY 0'; } catch (e) { }
   document.getElementById('ofTheme').textContent = document.documentElement.getAttribute('data-theme') === 'dark' ? '🌙' : '☀️';
   v.querySelectorAll('.of-room').forEach(el => {
     let t = ''; try { t = OF_FLOORS[el.dataset.f].rooms[el.dataset.r].badge() || ''; } catch (e) { }
@@ -110,13 +114,10 @@ function officePulse(kind, text, file) {
   ofLog.unshift({ kind, text, file: file || '', time });
   ofLog.length = Math.min(ofLog.length, 5);
   if (srv) {
-    srv.dataset.busy = '1'; srv.dataset.kind = kind;
+    srv.dataset.busy = '1'; srv.dataset.kind = kind; OfficeArt.setServer(true, kind);
     clearTimeout(ofBusyTimer);
-    ofBusyTimer = setTimeout(() => { srv.dataset.busy = '0'; officeRenderServer(); }, 1800);
-    if (kind === 'write') {   // 새로 만들어지는 것: 상자가 하나 올라온다
-      const pkg = document.createElement('span'); pkg.className = 'of-pkg'; pkg.textContent = '📦'; pkg.setAttribute('aria-hidden', 'true');
-      srv.appendChild(pkg); setTimeout(() => pkg.remove(), 1700);
-    }
+    ofBusyTimer = setTimeout(() => { srv.dataset.busy = '0'; OfficeArt.setServer(false); officeRenderServer(); }, 1800);
+    if (kind === 'write') OfficeArt.dropBox();   // 새로 만들어지는 것: 상자가 바닥에서 랙으로 올라간다
   }
   officeRenderServer();
 }
