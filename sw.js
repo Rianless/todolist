@@ -1,8 +1,9 @@
-const CACHE_NAME = 'todolist-v140-savetube';
+const CACHE_NAME = 'todolist-v142-office';
 const ASSETS = [
   './',
   './index.html',
   './app.css',
+  './office.css',
   './js/app-1.js',
   './js/app-2.js',
   './js/app-3.js',
@@ -12,6 +13,8 @@ const ASSETS = [
   './js/today.js',
   './js/boot.js',
   './js/mascot.js',
+  './js/office-art.js',
+  './js/office.js',
   './characters/manifest.json',
   './characters/lines.json',
   './manifest.json',
