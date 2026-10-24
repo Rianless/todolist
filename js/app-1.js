@@ -1179,7 +1179,7 @@ function updateDesktopWidgets() {
   const wMoney = win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml);
   const wStat = win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml);
   const wDday = win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml);
-  // PC는 D-day와 택배를 따로 보여준다
+  // D-day와 택배는 따로 보여준다
   const wDdayOnly = win('⏳ D-day', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayRows);
   const wParcel = win('📦 택배', open('열기', "desktopOpen('category','mpCardParcel')"), `<div class="dkw-sub">기다리는 택배 ${waitList.length}건</div>` + parcelRows);
   // ⑦ 북마크: 저장한 링크 전체 (북마크 앱과 같은 최신순), 누르면 새 탭으로 열림
@@ -1189,8 +1189,8 @@ function updateDesktopWidgets() {
   const wBookmark = win(`🔖 북마크`, open('열기', "desktopOpen('bookmark')"), `<div class="dkw-bm-list">${bmRows || '<div class="dkw-empty">저장한 링크가 없어요</div>'}</div>`);
   const stack = (...ws) => `<div class="dk-stack">${ws.join('')}</div>`;
   box.innerHTML = window.innerWidth < 900
-    // 폰: 2열 — 왼쪽 오늘 · 메모 / 오른쪽 달력 · 이번 달 가계부 · D-day·택배 (가계부 통계는 뺀다)
-    ? stack(wToday, wMemo) + stack(wCal, wMoney, wDday)
+    // 폰: 2열 — 왼쪽 오늘 · 메모 / 오른쪽 달력 · 이번 달 가계부 · D-day · 택배 (가계부 통계는 뺀다)
+    ? stack(wToday, wMemo) + stack(wCal, wMoney, wDdayOnly, wParcel)
     // PC: 달력·북마크·D-day·택배(각각) · 오늘 · 이번 달 가계부(+통계) · 메모
     : stack(wCal, wBookmark, wDdayOnly, wParcel) + stack(wToday) + stack(wMoney, wStat) + stack(wMemo);
   const ta = box.querySelector('.mf-input');
