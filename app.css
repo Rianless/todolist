@@ -7258,3 +7258,18 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
   html[data-desktop][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(1) > .dk-widget:nth-child(2) { flex: 1.6 1 0; }
   html[data-desktop][data-skin="w98"] .dk-widgets > .dk-stack:nth-child(1) > .dk-widget:nth-child(3) { flex: 1.5 1 0; }
 }
+
+/* 구독 목록: 카드를 여러 열로 배치하고, 정보는 줄 단위로 나눠 가로로 길어지지 않게 */
+#subsList { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 8px; margin-bottom: 8px; }
+#subsList .sub-card { margin-bottom: 0; display: flex; flex-direction: column; gap: 6px; min-width: 0; }
+#subsList .sub-empty { grid-column: 1 / -1; }
+.sub-card-head { display: flex; justify-content: space-between; align-items: baseline; gap: 8px; }
+.sub-card-head .sub-name { min-width: 0; overflow-wrap: anywhere; }
+.sub-card-head .sub-amount { white-space: nowrap; text-align: right; }
+.sub-card-head .sub-amount small { display: block; font-size: 10px; font-weight: 400; color: var(--text3); font-family: var(--font-body); }
+.sub-card .sub-cat-chip { align-self: flex-start; }
+.sub-lines { display: flex; flex-direction: column; gap: 3px; }
+.sub-line { display: flex; justify-content: space-between; gap: 8px; font-size: 11px; color: var(--text3); }
+.sub-line b { font-weight: 600; color: var(--text2, var(--text)); text-align: right; overflow-wrap: anywhere; }
+.sub-memo { font-size: 11px; color: var(--text3); white-space: pre-wrap; padding-top: 6px; border-top: 1px dashed var(--border); overflow-wrap: anywhere; }
+#subsList .sub-card-actions { margin-top: auto; padding-top: 4px; }

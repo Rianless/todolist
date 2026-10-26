@@ -738,25 +738,26 @@ function renderSubs() {
     const days = next ? daysBetweenDates(today, next) : null;
     card.className = 'sub-card' + (s.paused || !next ? ' paused' : '') + (days !== null && days <= 3 ? ' soon' : '');
     const cycleLabel = SUB_CYCLE_LABEL[s.cycle] || '';
-    const nextText = next ? `다음 결제 ${next.slice(5).replace('-', '/')}` : (s.paused ? '일시정지 중' : '결제 종료');
+    const nextText = next ? `${next.slice(5).replace('-', '/')}${days !== null && days <= 7 ? (days === 0 ? ' (오늘)' : ` (D-${days})`) : ''}` : (s.paused ? '일시정지 중' : '결제 종료');
     const acc = s.accountId ? accountName(s.accountId) : '';
-        const meta = [s.category, nextText, acc, s.noLedger ? '지출에 합산 안 함' : ''].filter(Boolean).map(escapeLedgerText).join(' · ');
+    const row = (label, value) => `<div class="sub-line"><span>${label}</span><b>${escapeLedgerText(value)}</b></div>`;
+    const lines = [
+      row('다음 결제', nextText),
+      acc ? row('결제 통장', acc) : '',
+      s.endDate ? row('종료일', s.endDate) : '',
+      s.noLedger ? row('지출 합계', '합산 안 함') : ''
+    ].join('');
     card.innerHTML = `
-      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:8px">
-        <div style="min-width:0">
-          <div class="sub-name">${escapeLedgerText(s.name)}${subStatusBadge(s, next, today)}</div>
-          <div class="sub-meta">${meta}</div>
-          ${s.endDate ? `<div class="sub-meta">${escapeLedgerText(s.endDate)} 까지</div>` : ''}
-          ${s.memo ? `<div class="sub-meta" style="white-space:pre-wrap">${escapeLedgerText(s.memo)}</div>` : ''}
-        </div>
-        <div style="text-align:right;white-space:nowrap">
-          <div class="sub-amount">₩${Number(s.amount || 0).toLocaleString()}</div>
-          <div class="sub-meta">${cycleLabel}</div>
-        </div>
+      <div class="sub-card-head">
+        <div class="sub-name">${escapeLedgerText(s.name)}${subStatusBadge(s, next, today)}</div>
+        <div class="sub-amount">₩${Number(s.amount || 0).toLocaleString()}<small>${cycleLabel}</small></div>
       </div>
+      ${s.category ? `<span class="sub-cat-chip">${escapeLedgerText(s.category)}</span>` : ''}
+      <div class="sub-lines">${lines}</div>
+      ${s.memo ? `<div class="sub-memo">${escapeLedgerText(s.memo)}</div>` : ''}
       <div class="sub-card-actions">
         <button type="button" data-act="edit">수정</button>
-                <button type="button" data-act="ledger">${s.noLedger ? '지출 합산 켜기' : '지출 합산 끄기'}</button>
+        <button type="button" data-act="ledger">${s.noLedger ? '합산 켜기' : '합산 끄기'}</button>
         <button type="button" data-act="pause">${s.paused ? '다시 시작' : '일시정지'}</button>
       </div>`;
     card.onclick = () => editSubscription(i);
