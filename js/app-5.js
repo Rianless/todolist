@@ -1053,6 +1053,7 @@ function renderLedgerCalendar() {
       `<span class="lc-day">${n}</span>` +
       (d && d.expense ? `<span class="lc-exp">-${d.expense.toLocaleString()}</span>` : '') +
       (d && d.income ? `<span class="lc-inc">+${d.income.toLocaleString()}</span>` : '') +
+      (d && d.subs.length ? d.subs.slice(0, 2).map(s => `<span class="lc-sub" title="구독 결제 · ${escapeLedgerText(s.name)}">🔖 ${escapeLedgerText(s.name)}</span>`).join('') + (d.subs.length > 2 ? `<span class="lc-sub">+${d.subs.length - 2}</span>` : '') : '') +
       `</div>`;
   }
   grid.innerHTML = html;
