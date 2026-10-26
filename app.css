@@ -7273,3 +7273,15 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
 .sub-line b { font-weight: 600; color: var(--text2, var(--text)); text-align: right; overflow-wrap: anywhere; }
 .sub-memo { font-size: 11px; color: var(--text3); white-space: pre-wrap; padding-top: 6px; border-top: 1px dashed var(--border); overflow-wrap: anywhere; }
 #subsList .sub-card-actions { margin-top: auto; padding-top: 4px; }
+
+/* 마이페이지 목록: 넓은 화면에서는 한 줄로 늘어지지 않게 여러 열의 카드로 배치 */
+#ledgerList, #accountList, #investList, #parcelList, #ddayList { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 8px; align-items: start; }
+#ledgerList > *, #accountList > *, #investList > *, #parcelList > *, #ddayList > * { min-width: 0; }
+#ledgerList > .ledger-day-head, #ledgerList > .ledger-transfer-head, #ledgerList > div:not([class]),
+#accountList > .account-empty, #parcelList > .memo-empty, #ddayList > .memo-empty, #parcelList > .bm-item[style*="column"] { grid-column: 1 / -1; }
+#ledgerList .ledger-entry, #accountList .account-row, #investList .invest-row {
+  padding: 10px 12px; border: 1px solid var(--border); border-bottom: 1px solid var(--border); border-radius: 8px; background: var(--panel);
+}
+#ledgerList .ledger-entry-info, #accountList .account-info { overflow: hidden; }
+#ledgerList .ledger-entry-cat { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+#parcelList .bm-item, #ddayList .dd-item { margin-bottom: 0; }
