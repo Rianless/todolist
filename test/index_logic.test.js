@@ -143,7 +143,7 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   assert.strictEqual(days['2026-10-13'].income, 50000);                                   // 이체 100,000 은 수입이 아니다
   assert.strictEqual(days['2026-10-12'].expense, 20000);
   assert.deepStrictEqual(days['2026-10-13'].entries.map(e => e.id), [3, 2, 1]);           // 최근 등록이 위로
-  assert.deepStrictEqual(days['2026-10-13'].subs, [{ name: 'Netflix', category: '구독', amount: 17000, counted: true }]);
+  assert.deepStrictEqual(days['2026-10-13'].subs, [{ subIndex: 0, name: 'Netflix', category: '구독', amount: 17000, counted: true }]);
   assert.strictEqual(days['2026-10-13'].transfers.length, 1);
   assert.deepStrictEqual(Object.keys(A.ledgerDayData([], [], [], 2026, 9, subDates)), []);
 }

@@ -7021,7 +7021,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
   .lc-exp { color: var(--red); }
   .lc-inc { color: var(--green); }
   .lc-cell.today .lc-day { text-decoration: underline; }
-  .lc-sub { font-size: clamp(10px, 1.2vh, 13px); font-weight: 600; color: #9d00ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+  .lc-sub { font-size: clamp(10px, 1.2vh, 13px); font-weight: 600; color: #9d00ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
   .lc-cell.selected { background: var(--tab-act); outline: 2px solid var(--accent); outline-offset: -2px; }
   .lc-detail-head { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
   .lc-detail-date { font-size: 16px; font-weight: 800; color: var(--text); }

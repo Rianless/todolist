@@ -985,7 +985,7 @@ function ledgerDayData(ledgerList, subList, transferList, y, m, subDatesFn) {
     if (e.type === 'income') d.income += amount;
     else if (e.type === 'expense') d.expense += amount;
   });
-  (subList || []).forEach(sub => {
+  (subList || []).forEach((sub, subIndex) => {
     if (!sub.date || sub.paused) return;
     subDatesFn(sub, y, m).forEach(ds => {
       if (!ds.startsWith(prefix)) return;
@@ -993,7 +993,7 @@ function ledgerDayData(ledgerList, subList, transferList, y, m, subDatesFn) {
       const d = day(ds);
             // 구독마다 '가계부 지출에 합산'을 끌 수 있다(sub.noLedger). 끈 구독은 그날 목록에는 남기되 지출 합계에는 더하지 않는다
       const counted = !sub.noLedger;
-      d.subs.push({ name: sub.name, category: sub.category || '구독', amount, counted });
+      d.subs.push({ subIndex, name: sub.name, category: sub.category || '구독', amount, counted });
       if (counted) d.expense += amount;
     });
   });
@@ -1053,7 +1053,7 @@ function renderLedgerCalendar() {
       `<span class="lc-day">${n}</span>` +
       (d && d.expense ? `<span class="lc-exp">-${d.expense.toLocaleString()}</span>` : '') +
       (d && d.income ? `<span class="lc-inc">+${d.income.toLocaleString()}</span>` : '') +
-      (d && d.subs.length ? d.subs.slice(0, 2).map(s => `<span class="lc-sub" title="구독 결제 · ${escapeLedgerText(s.name)}">🔖 ${escapeLedgerText(s.name)}</span>`).join('') + (d.subs.length > 2 ? `<span class="lc-sub">+${d.subs.length - 2}</span>` : '') : '') +
+      (d && d.subs.length ? d.subs.slice(0, 2).map(s => `<span class="lc-sub" title="구독 수정 · ${escapeLedgerText(s.name)}" onclick="event.stopPropagation();ledgerCalSelect('${ds}');editSubscription(${s.subIndex})">🔖 ${escapeLedgerText(s.name)}</span>`).join('') + (d.subs.length > 2 ? `<span class="lc-sub">+${d.subs.length - 2}</span>` : '') : '') +
       `</div>`;
   }
   grid.innerHTML = html;
@@ -1076,6 +1076,7 @@ function renderLedgerCalendar() {
     rows.push(`<div class="lc-row sub">
       <div class="lc-row-info"><div class="lc-row-title">🔖 ${escapeLedgerText(sub.name)}</div><div class="ledger-entry-cat">구독 결제 · ${escapeLedgerText(sub.category)}${sub.counted === false ? ' (지출에 합산 안 함)' : ''}</div></div>
       <div class="lc-row-amt expense"${sub.counted === false ? ' style="opacity:.55;"' : ''}>-${sub.amount.toLocaleString()}원</div>
+      <button type="button" class="ledger-entry-edit" onclick="editSubscription(${sub.subIndex})" aria-label="${escapeLedgerText(sub.name)} 구독 수정">수정</button>
     </div>`);
   });
   d.transfers.forEach(t => {
