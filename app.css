@@ -7361,3 +7361,7 @@ html[data-skin="w98"] .calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-
   padding-left: 11px !important;
   font-weight: 700 !important;
 }
+
+/* PC 달력 칸: 수입(+)과 지출(−)을 한 줄에 나란히 */
+.calendar-surface .cal-money { display: flex; justify-content: center; gap: 4px; max-width: calc(100% - 4px); margin: 1px auto 0; }
+.calendar-surface .cal-money .cal-spend { display: inline-block; flex: 0 0 auto; margin: 0; max-width: none; overflow: visible; font-size: 10px; letter-spacing: -.3px; }

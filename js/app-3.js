@@ -1263,21 +1263,24 @@ function renderCal() {
 
     // 그날 지출 합계 (가계부 지출 + 구독 결제) — 달력 선택 패널의 합계와 같은 값
     const dayIncomeSum = lmap[ds] ? lmap[ds].income : 0;
+    const dayExpense = (lmap[ds] ? lmap[ds].expense : 0)
+      + evts.filter(it => it.isSub).reduce((sum, it) => sum + Number(it.amount || 0), 0);
+    // PC: 수입과 지출을 한 줄에 나란히. 모바일은 칸이 좁아 줄을 나눈다
+    const moneyRow = !compactCal && dayIncomeSum > 0 && dayExpense > 0 ? document.createElement('div') : null;
+    if (moneyRow) { moneyRow.className = 'cal-money'; cell.appendChild(moneyRow); }
     if (dayIncomeSum > 0) {
       const inc = document.createElement('span');
       inc.className = 'cal-spend cal-income';
       inc.textContent = `+${compactLedgerAmount(dayIncomeSum)}`;
       inc.title = `이 날 수입 +${dayIncomeSum.toLocaleString()}원`;
-      cell.appendChild(inc);
+      (moneyRow || cell).appendChild(inc);
     }
-    const dayExpense = (lmap[ds] ? lmap[ds].expense : 0)
-      + evts.filter(it => it.isSub).reduce((sum, it) => sum + Number(it.amount || 0), 0);
     if (dayExpense > 0) {
       const spend = document.createElement('span');
       spend.className = 'cal-spend';
       spend.textContent = `-${compactLedgerAmount(dayExpense)}`;
       spend.title = `이 날 지출 -${dayExpense.toLocaleString()}원`;
-      cell.appendChild(spend);
+      (moneyRow || cell).appendChild(spend);
     }
     const dayRoutines = routinesForDate(ds);
     if (!compactCal && dayRoutines.length) {
