@@ -1265,17 +1265,17 @@ function renderCal() {
     const dayIncomeSum = lmap[ds] ? lmap[ds].income : 0;
     const dayExpense = (lmap[ds] ? lmap[ds].expense : 0)
       + evts.filter(it => it.isSub).reduce((sum, it) => sum + Number(it.amount || 0), 0);
-    // PC: 수입과 지출을 한 줄에 나란히. 모바일은 칸이 좁아 줄을 나눈다
+    // PC: 수입과 지출을 한 줄에 나란히. 폰 달력에는 금액을 넣지 않는다 (금액은 가계부 달력에서 본다)
     const moneyRow = !compactCal && dayIncomeSum > 0 && dayExpense > 0 ? document.createElement('div') : null;
     if (moneyRow) { moneyRow.className = 'cal-money'; cell.appendChild(moneyRow); }
-    if (dayIncomeSum > 0) {
+    if (!compactCal && dayIncomeSum > 0) {
       const inc = document.createElement('span');
       inc.className = 'cal-spend cal-income';
       inc.textContent = `+${compactLedgerAmount(dayIncomeSum)}`;
       inc.title = `이 날 수입 +${dayIncomeSum.toLocaleString()}원`;
       (moneyRow || cell).appendChild(inc);
     }
-    if (dayExpense > 0) {
+    if (!compactCal && dayExpense > 0) {
       const spend = document.createElement('span');
       spend.className = 'cal-spend';
       spend.textContent = `-${compactLedgerAmount(dayExpense)}`;

@@ -1051,8 +1051,8 @@ function renderLedgerCalendar() {
     const cls = ['lc-cell', dow === 0 ? 'sun' : dow === 6 ? 'sat' : '', ds === todayStr ? 'today' : '', ds === ledgerCalSelected ? 'selected' : ''].filter(Boolean).join(' ');
     html += `<div class="${cls}" role="gridcell" tabindex="0" data-date="${ds}" onclick="ledgerCalSelect('${ds}')" onkeydown="if(event.key==='Enter'||event.key===' '){event.preventDefault();ledgerCalSelect('${ds}')}">` +
       `<span class="lc-day">${n}</span>` +
-      (d && d.expense ? `<span class="lc-exp">-${d.expense.toLocaleString()}</span>` : '') +
-      (d && d.income ? `<span class="lc-inc">+${d.income.toLocaleString()}</span>` : '') +
+      (d && d.expense ? `<span class="lc-exp">-<span class="lc-full">${d.expense.toLocaleString()}</span><span class="lc-short">${compactLedgerAmount(d.expense)}</span></span>` : '') +
+      (d && d.income ? `<span class="lc-inc">+<span class="lc-full">${d.income.toLocaleString()}</span><span class="lc-short">${compactLedgerAmount(d.income)}</span></span>` : '') +
       (d && d.subs.length ? d.subs.slice(0, 2).map(s => `<span class="lc-sub" title="구독 수정 · ${escapeLedgerText(s.name)}" onclick="event.stopPropagation();ledgerCalSelect('${ds}');editSubscription(${s.subIndex})">🔖 ${escapeLedgerText(s.name)}</span>`).join('') + (d.subs.length > 2 ? `<span class="lc-sub">+${d.subs.length - 2}</span>` : '') : '') +
       `</div>`;
   }
