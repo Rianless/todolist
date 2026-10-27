@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v143-savetube';
+const CACHE_NAME = 'todolist-v144-calstyle';
 const ASSETS = [
   './',
   './index.html',

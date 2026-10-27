@@ -1035,6 +1035,26 @@ function addMoneyEvents(dmap, y, m) {
 
 }
 
+// 달력 칸 일정 표시 스타일 (기본/막대/글자/진하게/큰 글씨) — 고른 값은 이 기기에 기억한다
+const CAL_STYLES = ['default', 'bar', 'text', 'solid', 'big'];
+function applyCalStyle(style) {
+  if (!CAL_STYLES.includes(style)) style = 'default';
+  const surface = document.getElementById('calSurface');
+  if (surface) surface.dataset.calStyle = style;
+  document.querySelectorAll('.cal-style-btn').forEach(b => b.classList.toggle('active', b.dataset.style === style));
+  return style;
+}
+function setCalStyle(style) {
+  style = applyCalStyle(style);
+  try { localStorage.setItem('rianless_cal_style', style); } catch (e) {}
+  renderCal(); // 스타일마다 칸에 들어가는 줄 수가 달라 다시 맞춘다
+}
+(function initCalStyle() {
+  let saved = 'default';
+  try { saved = localStorage.getItem('rianless_cal_style') || 'default'; } catch (e) {}
+  applyCalStyle(saved);
+})();
+
 function renderCal() {
   const compactCal = isCompactCal();
 
@@ -1592,6 +1612,8 @@ function fitCalCells(grid) {
       more.dataset.base = String(base);
       more.textContent = `+${base + hidden}`;
     }
+    // 큰 글씨(두 줄) 일정 하나도 안 들어가면 한 줄로 줄여 칸 안에 맞춘다
+    if (chips.length && cell.scrollHeight > cell.clientHeight + 1) chips[0].classList.add('cal-one-line');
   });
 }
 
