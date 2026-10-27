@@ -6186,6 +6186,7 @@ button:active:not(:disabled) {
   .cal-legend { display: flex; flex-wrap: wrap; gap: 4px 12px; justify-content: center; padding: 8px 4px 0; font-size: 10px; color: var(--text3); }
   .cal-legend span { display: inline-flex; align-items: center; gap: 4px; }
   .cal-legend i { display: inline-block; width: 6px; height: 6px; border-radius: 50%; }
+  .cal-legend i.imp { background: var(--text2); outline: 1.5px solid var(--text); outline-offset: 1px; }
   .cal-legend i.pie { box-sizing: border-box; border: 1px solid #e3b52a; background: conic-gradient(#f6c945 60%, var(--border2) 0); }
   .cal-legend b.imp { padding: 1px 4px; border-radius: 3px; background: var(--panel2); color: var(--text2); font-size: 8px; font-weight: 700; }
   .calendar-surface .cal-cell > .cal-dot { display: block; margin-top: 2px; }
@@ -7389,3 +7390,8 @@ html[data-skin="w98"] .calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-
 .calendar-surface .cal-chiprow { display: flex; align-items: center; gap: 4px; width: calc(100% - 4px); margin: 2px auto 0; }
 .calendar-surface .cal-chiprow > .cal-dot { flex: 1 1 0; min-width: 0; width: auto !important; margin: 0 !important; }
 .calendar-surface .cal-chiprow > .cal-more { flex: none; margin: 0; padding: 0; font-size: 11px; font-weight: 700; color: var(--text2); white-space: nowrap; }
+
+/* 폰 일정 달력: 중요(⭐) 일정 점은 테두리 */
+.calendar-surface .cal-pt.imp { outline: 1.5px solid var(--text); outline-offset: 1px; }
+/* 폰 달력은 일정이 점이라 표시 스타일 버튼이 필요 없다 */
+@media (max-width: 899px) { .cal-style-bar { display: none; } }
