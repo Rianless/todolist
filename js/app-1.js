@@ -1145,7 +1145,7 @@ function updateDesktopWidgets() {
   const ddayRows = dds.length ? dds.map(d => `<div class="dkw-kv dkw-two"><span>${esc(d.emoji || '⭐')} ${esc(d.title)}<small class="dkw-meta">${esc(ddayDateText(d.calc.target))}${d.yearly ? ' · 매년' : ''}</small></span><b>${esc(d.calc.label)}</b></div>`).join('') : '<div class="dkw-empty">다가오는 D-day가 없어요</div>';
   const parcelRows = waitList.length ? waitList.slice(0, 6).map(x => {
     const meta = [x.shop, Parcels.carrierName(x.carrier)].filter(Boolean).join(' · ') || (Parcels.isPending(x) ? '운송장 대기' : '');
-    return `<div class="dkw-kv dkw-two"><span>📦 ${esc(Parcels.labelOf(x))}</span><small class="dkw-meta">${esc(meta)}</small></div>`;
+    return `<div class="dkw-kv dkw-two dkw-parcel"><span>📦 ${esc(Parcels.labelOf(x))}${meta ? `<small class="dkw-meta">${esc(meta)}</small>` : ''}</span></div>`;
   }).join('') + (waitList.length > 6 ? `<div class="dkw-empty">외 ${waitList.length - 6}건</div>` : '') : '<div class="dkw-empty">기다리는 택배가 없어요</div>';
   const ddayHtml = ddayRows + `<div class="dkw-sub">기다리는 택배 ${waitList.length}건</div>` + parcelRows;
   // ⑤ 가계부 통계: 지난달 대비, 최근 6개월 추이, 카테고리 비중

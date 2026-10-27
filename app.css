@@ -7154,6 +7154,7 @@ html[data-skin="w98"] .dkc-grid .dkc-day.today { background: #000080 !important;
 .dkw-meta { display: block; margin-top: 1px; font-size: 12px; font-weight: 400; color: #606060; }
 .dkw-two > small.dkw-meta { display: inline; margin: 0 0 0 8px; flex: none; }
 .dkw-two > span > small.dkw-meta { display: block; margin: 1px 0 0; }
+.dkw-parcel > span { flex: 1; overflow: visible; text-overflow: clip; overflow-wrap: anywhere; }
 
 /* 오늘 탭(폰): 가계부·통계 카드의 줄·소제목 */
 .td-kv { display: flex; justify-content: space-between; gap: 8px; padding: 4px 0; font-size: 13px; color: var(--text); }
