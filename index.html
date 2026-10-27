@@ -404,6 +404,8 @@
                 <datalist id="parcelShopList"></datalist>
                 <button class="btn-save bm-go" onclick="addParcel()">추가</button>
               </div>
+              <label style="display:flex;align-items:center;gap:6px;margin-top:6px;font-size:13px;"><input type="checkbox" id="parcelOverseas" onchange="document.getElementById('parcelForeignNo').style.display=this.checked?'':'none'"> 🌏 해외직구 (통관 추적)</label>
+              <input type="text" class="form-input" id="parcelForeignNo" autocomplete="off" placeholder="해외 운송장·주문번호 (통관 조회용, 선택)" style="display:none;margin-top:6px;" onkeydown="if(event.key==='Enter'){event.preventDefault();addParcel()}">
               <div class="bm-hint" id="parcelHint"></div>
               <div id="parcelShareHelp" style="display:none;font-size:11px;color:var(--text3);margin:0 0 8px;line-height:1.5;"></div>
 

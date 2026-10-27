@@ -84,6 +84,20 @@
     return { number, carrier: byLen || null, guessed: !!byLen };
   }
 
+  // ── 해외직구 통관 추적 ──
+  // 해외에서 온 택배는 국내에 도착해 통관이 끝나야 국내 운송장이 생긴다. 그동안은 관세청 유니패스(UNI-PASS)의
+  // 화물통관 진행정보에서 해외 운송장(HBL)이나 주문번호로 조회한다.
+  const CUSTOMS_URL = 'https://unipass.customs.go.kr/csp/index.do';
+  // 해외 운송장·주문번호: 공백·하이픈을 없애고 대문자로. 6~30자의 영문·숫자가 아니면 null (빈 값은 '')
+  function cleanForeignNo(input) {
+    const n = String(input == null ? '' : input).replace(/[\s-]/g, '').toUpperCase();
+    if (!n) return '';
+    return /^[A-Z0-9]{6,30}$/.test(n) ? n : null;
+  }
+  // 'wait' 통관 중, 'cleared' 통관 완료, null 해외직구가 아님
+  const customsStage = p => (!p || !p.overseas ? null : p.customsDone || p.number ? 'cleared' : 'wait');
+  const customsUrl = p => (customsStage(p) === 'wait' ? CUSTOMS_URL : null);
+
   // 운송장 번호가 아직 없는(물건 이름만 적어 둔) 택배
   const isPending = p => !!p && !p.number;
 
@@ -100,7 +114,7 @@
   // 진행 중(받기 전) 먼저, 받은 것은 뒤로. 같은 그룹 안에서는 최근 추가한 순서.
   const sortParcels = list => (list || []).slice().sort((a, b) => (a.done ? 1 : 0) - (b.done ? 1 : 0) || b.id - a.id);
 
-  const api = { parseText, detectShop, CARRIERS, SHOPS, cleanShop, carrierName, normalizeNumber, trackUrl, labelOf, isPending, findDuplicate, sortParcels };
+  const api = { parseText, detectShop, CARRIERS, SHOPS, cleanShop, carrierName, normalizeNumber, cleanForeignNo, customsStage, customsUrl, CUSTOMS_URL, trackUrl, labelOf, isPending, findDuplicate, sortParcels };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.Parcels = api;
 })();

@@ -1295,13 +1295,20 @@ function addParcel(opts) {
   if (number && Parcels.findDuplicate(parcels, carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return false; }
   hint.textContent = '';
   const shop = Parcels.cleanShop(document.getElementById('parcelShop').value);
+  const overseas = document.getElementById('parcelOverseas').checked;
+  const hbl = overseas ? Parcels.cleanForeignNo(document.getElementById('parcelForeignNo').value) : '';
+  if (hbl === null) { hint.textContent = '해외 운송장·주문번호를 확인해 주세요 (영문·숫자 6~30자)'; return false; }
   const p = { id: parcelNextId++, name, done: false, createdAt: fmtDate(new Date()) };
   if (shop) p.shop = shop;
+  if (overseas) { p.overseas = true; if (hbl) p.hbl = hbl; }
     if (number) { p.carrier = carrier; p.number = number; if (opts && opts.guessed) p.guess = true; }
   parcels.push(p);
   document.getElementById('parcelNumber').value = '';
   document.getElementById('parcelName').value = '';
       document.getElementById('parcelShop').value = '';
+  document.getElementById('parcelOverseas').checked = false;
+  document.getElementById('parcelForeignNo').value = '';
+  document.getElementById('parcelForeignNo').style.display = 'none';
   saveParcels();
   renderParcelList();
   armParcelTapGuard();

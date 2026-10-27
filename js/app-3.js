@@ -76,9 +76,28 @@ function handleParcelShare() {
 function trackParcel(id) {
   if (parcelTapGuarded()) return;
   const p = parcels.find(x => x.id === id);
+  const customs = Parcels.customsUrl(p);
+  if (customs) {   // 통관 중인 해외직구: 유니패스 화물통관 조회를 열고, 해외 운송장은 붙여넣기 쉽게 복사해 둔다
+    if (p.hbl) { try { navigator.clipboard.writeText(p.hbl); } catch (e) {} }
+    showToast(p.hbl ? `🛃 ${p.hbl} 복사됨 — 유니패스 '화물통관 진행정보'에 붙여넣어 조회하세요` : '🛃 유니패스에서 화물통관 진행정보를 조회하세요', { type: 'info', duration: 3500 });
+    window.open(customs, '_blank', 'noopener');
+    return;
+  }
   if (Parcels.isPending(p)) { attachParcelStart(id); return; }
   const url = Parcels.trackUrl(p);
   if (url) window.open(url, '_blank', 'noopener');
+}
+
+// 통관이 끝났다고 표시하고 국내 운송장 번호 입력으로 넘어간다
+function parcelCustomsCleared(id) {
+  if (parcelTapGuarded()) return;
+  const p = parcels.find(x => x.id === id);
+  if (!p) return;
+  p.customsDone = true;
+  saveParcels();
+  if (Parcels.isPending(p)) attachParcelStart(id);
+  else renderParcelList();
+  showToast('🛃 통관 완료로 표시했어요', { type: 'success', duration: 1800 });
 }
 
 function attachParcelStart(id) {
@@ -138,9 +157,14 @@ function editParcelSubmit() {
   if (number === null) { hint.textContent = '운송장 번호를 확인해 주세요 (숫자·영문 6~30자)'; return false; }
   if (!number && !name) { hint.textContent = '물건 이름이나 운송장 번호를 적어 주세요'; return false; }
   if (number && Parcels.findDuplicate(parcels.filter(x => x !== p), carrier, number)) { hint.textContent = '이미 등록된 운송장이에요'; return false; }
+  const overseas = document.getElementById('parcelEditOverseas').checked;
+  const hbl = overseas ? Parcels.cleanForeignNo(document.getElementById('parcelEditForeignNo').value) : '';
+  if (hbl === null) { hint.textContent = '해외 운송장·주문번호를 확인해 주세요 (영문·숫자 6~30자)'; return false; }
   const changedNumber = number !== (p.number || '') || (number && carrier !== p.carrier);
   p.name = name;
   if (shop) p.shop = shop; else delete p.shop;
+  if (overseas) { p.overseas = true; if (hbl) p.hbl = hbl; else delete p.hbl; }
+  else { delete p.overseas; delete p.hbl; delete p.customsDone; }
   if (number) {
     p.carrier = carrier;
     p.number = number;
@@ -233,6 +257,8 @@ function renderParcelList() {
         <select class="form-input" id="parcelEditCarrier" aria-label="택배사" style="flex:0 0 auto;max-width:42%;">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === (p.carrier || lastCarrier) ? ' selected' : ''}>${c.name}</option>`).join('')}</select>
         <input type="text" class="form-input" id="parcelEditNumber" autocomplete="off" placeholder="운송장 번호 (비우면 운송장 대기)" value="${esc(p.number || '')}" oninput="smartParcelNumber(this,'parcelEditCarrier','parcelEditHint')" onkeydown="if(event.key==='Enter'){event.preventDefault();editParcelSubmit()}">
       </div>
+      <label style="display:flex;align-items:center;gap:6px;font-size:13px;"><input type="checkbox" id="parcelEditOverseas"${p.overseas ? ' checked' : ''} onchange="document.getElementById('parcelEditForeignNo').style.display=this.checked?'':'none'"> 🌏 해외직구 (통관 추적)</label>
+      <input type="text" class="form-input" id="parcelEditForeignNo" autocomplete="off" placeholder="해외 운송장·주문번호 (통관 조회용, 선택)" value="${esc(p.hbl || '')}" style="${p.overseas ? '' : 'display:none;'}" onkeydown="if(event.key==='Enter'){event.preventDefault();editParcelSubmit()}">
       <div class="bm-add"><button class="btn-save bm-go" onclick="editParcelSubmit()">저장</button><button class="btn-cancel bm-go" onclick="editParcelCancel()">취소</button></div>
       <div class="bm-hint" id="parcelEditHint"></div>
     </div>` : p.id === attachingParcelId ? `
@@ -246,11 +272,12 @@ function renderParcelList() {
       <div class="bm-hint" id="parcelAttachHint"></div>
     </div>` : `
     <div class="bm-item" onclick="trackParcel(${p.id})" style="${p.done ? 'opacity:.55;' : ''}">
-      <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : Parcels.isPending(p) ? '⏳' : '📦'}</span>
+      <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : Parcels.customsStage(p) === 'wait' ? '🛃' : Parcels.isPending(p) ? '⏳' : '📦'}</span>
       <div class="bm-text">
         <div class="bm-title">${esc(Parcels.labelOf(p))}</div>
-        <div class="bm-url">${p.ledgerId != null ? '💳 ' : ''}${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : `<select aria-label="택배사 바꾸기" title="택배사 바꾸기" style="font-size:10px;max-width:120px;" onclick="event.stopPropagation()" onchange="changeParcelCarrier(${p.id}, this.value)">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === p.carrier ? ' selected' : ''}>${c.name}</option>`).join('')}</select>${p.guess ? ' <span style="color:var(--red,#e5484d);">⚠ 추정</span>' : ''} · ${esc(p.number)}`}</div>
+        <div class="bm-url">${p.ledgerId != null ? '💳 ' : ''}${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.customsStage(p) === 'wait' ? `🛃 통관 중${p.hbl ? ' · ' + esc(p.hbl) : ''} · 눌러서 유니패스 조회` : Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : `<select aria-label="택배사 바꾸기" title="택배사 바꾸기" style="font-size:10px;max-width:120px;" onclick="event.stopPropagation()" onchange="changeParcelCarrier(${p.id}, this.value)">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === p.carrier ? ' selected' : ''}>${c.name}</option>`).join('')}</select>${p.guess ? ' <span style="color:var(--red,#e5484d);">⚠ 추정</span>' : ''} · ${esc(p.number)}`}</div>
       </div>
+      ${!p.done && Parcels.customsStage(p) === 'wait' ? `<button class="bm-del" title="통관 완료" onclick="parcelCustomsCleared(${p.id});event.stopPropagation()">🛃</button>` : ''}
       <button class="bm-del" title="수정" onclick="editParcelStart(${p.id});event.stopPropagation()">✏️</button>
       <button class="bm-del" title="${p.done ? '다시 배송 중으로' : '수령 완료'}" onclick="toggleParcelDone(${p.id});event.stopPropagation()">${p.done ? '↩' : '✔'}</button>
       <button class="bm-del" title="삭제" onclick="deleteParcel(${p.id});event.stopPropagation()">✕</button>
