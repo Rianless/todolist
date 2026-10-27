@@ -1377,11 +1377,11 @@ function renderCal() {
 
 
     } else {
-      // 모바일: 중요(⭐ 높음) 일정은 지금처럼 제목 칩으로, 나머지 일정·구독·적금·루틴은 점으로 보여준다.
+      // 모바일: 일정 제목은 글자가 작아 안 보이므로 모두 색 점으로만 보여 준다 (중요 ⭐ 일정은 점에 테두리).
       // 자세한 내용은 날짜를 눌러 아래 패널에서 본다.
       const personal = evts.filter(it => !it.isSub && !it.isInvest);
-      const chipItems = personal.filter(it => it.priority === 'high').slice(0, 2);
-      const dotItems = personal.filter(it => !chipItems.includes(it));
+      const chipItems = [];
+      const dotItems = personal;
       const dots = document.createElement('div');
       dots.className = 'cal-dots';
       const addDot = (cls, color, label) => {
@@ -1394,7 +1394,7 @@ function renderCal() {
       };
       dotItems.slice(0, 4).forEach(it => {
         const hidden = (it.secret && !it._unlocked) || it.hideTitle;
-        addDot(it.done ? 'done' : '', hidden ? 'var(--text3)' : getCatColor(it.category), hidden ? '비공개 일정' : it.title);
+        addDot((it.done ? 'done' : '') + (it.priority === 'high' ? ' imp' : ''), hidden ? 'var(--text3)' : getCatColor(it.category), hidden ? '비공개 일정' : it.title);
       });
       if (dotItems.length > 4) {
         const more = document.createElement('span');
