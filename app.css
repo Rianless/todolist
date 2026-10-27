@@ -6389,11 +6389,11 @@ html[data-skin="w98"] .dd-pin, html[data-skin="w98"] .dd-del { background: none 
 html[data-skin="w98"] .dd-preview { color: #000080; border-radius: 0; }
 
 /* 달력 칸·하루 패널의 D-day */
-.cal-dday { position: absolute; left: 3px; right: 3px; bottom: 3px; display: flex; align-items: center; gap: 3px; padding: 1px 4px; font-size: 10px; font-weight: 700; line-height: 1.25; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 6px; overflow: hidden; pointer-events: none; }
+.cal-dday { position: absolute; left: 3px; top: 3px; max-width: calc(50% - 16px); display: flex; align-items: center; gap: 3px; padding: 1px 4px; font-size: 10px; font-weight: 700; line-height: 1.25; color: var(--accent); background: color-mix(in srgb, var(--accent) 14%, transparent); border-radius: 6px; overflow: hidden; pointer-events: none; }
 .cal-dday i { font-style: normal; }
 .cal-dday .t { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .cal-dday em { font-style: normal; opacity: .8; }
-@media (max-width: 899px) { .cal-dday { right: auto; padding: 0 3px; font-size: 12px; } .cal-dday .t { display: none; } }
+@media (max-width: 899px) { .cal-dday { padding: 0 3px; font-size: 12px; } .cal-dday .t { display: none; } }
 .agenda-dday { display: flex; align-items: center; gap: 8px; margin: 8px 0; padding: 8px 10px; font-size: 13px; color: var(--text); background: var(--panel2, var(--panel)); border: 1px solid var(--border2); border-left: 3px solid var(--accent); border-radius: 8px; cursor: pointer; }
 .agenda-dday strong { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 .agenda-dday em { font-style: normal; font-weight: 800; color: var(--accent); }
@@ -7365,3 +7365,8 @@ html[data-skin="w98"] .calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-
 /* PC 달력 칸: 수입(+)과 지출(−)을 한 줄에 나란히 */
 .calendar-surface .cal-money { display: flex; justify-content: center; gap: 4px; max-width: calc(100% - 4px); margin: 1px auto 0; }
 .calendar-surface .cal-money .cal-spend { display: inline-block; flex: 0 0 auto; margin: 0; max-width: none; overflow: visible; font-size: 10px; letter-spacing: -.3px; }
+
+/* PC 달력 칸: 넘친 일정 개수(+n)를 첫 일정 오른쪽에 */
+.calendar-surface .cal-chiprow { display: flex; align-items: center; gap: 4px; width: calc(100% - 4px); margin: 2px auto 0; }
+.calendar-surface .cal-chiprow > .cal-dot { flex: 1 1 0; min-width: 0; width: auto !important; margin: 0 !important; }
+.calendar-surface .cal-chiprow > .cal-more { flex: none; margin: 0; padding: 0; font-size: 11px; font-weight: 700; color: var(--text2); white-space: nowrap; }

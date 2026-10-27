@@ -1223,7 +1223,7 @@ function renderCal() {
 
     cell.appendChild(num);
 
-    // D-day: 그 날짜가 D-day(또는 매년 기념일)이면 칸 오른쪽 위에 아이콘과 이름을 보여 준다
+    // D-day: 그 날짜가 D-day(또는 매년 기념일)이면 칸 왼쪽 위에 아이콘과 이름을 보여 준다
     const ddHere = Dday.onDate(ddays, ds);
     if (ddHere.length) {
       const dm = document.createElement('span');
@@ -1617,6 +1617,15 @@ function fitCalCells(grid) {
     }
     // 큰 글씨(두 줄) 일정 하나도 안 들어가면 한 줄로 줄여 칸 안에 맞춘다
     if (chips.length && cell.scrollHeight > cell.clientHeight + 1) chips[0].classList.add('cal-one-line');
+    // "+n" 은 칸 맨 아래 대신 첫 일정 줄 오른쪽에 붙인다 (여러 날 막대는 칸을 가로질러 그대로 둔다)
+    const more = cell.querySelector(':scope > .cal-more');
+    const first = cell.querySelector(':scope > .cal-dot:not(.cal-gap)');
+    if (more && first && !first.classList.contains('cal-span')) {
+      const row = document.createElement('div');
+      row.className = 'cal-chiprow';
+      cell.insertBefore(row, first);
+      row.append(first, more);
+    }
   });
 }
 
