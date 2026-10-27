@@ -1424,6 +1424,9 @@ function renderCal() {
         chip.title = '⭐ ' + (item.time ? `${item.time.split('~')[0]} ` : '') + displayTitle;
         cell.appendChild(chip);
       });
+      // D-day 이모티콘은 일정 표시(점·칩) 아래로
+      const dd = cell.querySelector(':scope > .cal-dday');
+      if (dd) cell.appendChild(dd);
     }
 
     // 셀 드롭 대상

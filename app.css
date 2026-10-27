@@ -7057,16 +7057,20 @@ html[data-skin="w98"] .lc-row { border-bottom-color: #c0c0c0; }
 html[data-skin="w98"] .lc-detail-head { border-bottom-color: #808080; }
 
 .lc-short { display: none; }
+.lc-dots { display: none; }
 /* 폰: 달력 위, 고른 날 상세는 아래로 쌓고 칸은 좁게 (금액은 줄여서 보여 준다) */
 @media (max-width: 899px) {
   .ledger-cal-main, .ledger-cal-detail { margin-bottom: 12px; }
   .lc-grid { gap: 3px; grid-auto-rows: minmax(54px, auto); }
   .lc-cell { padding: 4px 1px; align-items: center; text-align: center; border-radius: 6px; }
   .lc-day { font-size: 13px; }
-  .lc-exp, .lc-inc { font-size: 9px; line-height: 11px; }
-  .lc-full { display: none; }
-  .lc-short { display: inline; }
-  .lc-sub { max-width: 100%; font-size: 9px; }
+  .lc-exp, .lc-inc, .lc-sub { display: none; }   /* 금액·구독 이름은 글자가 작아 안 보여서 점으로만 표시하고, 자세한 건 날짜를 눌러 아래에서 본다 */
+  .lc-dots { display: flex; justify-content: center; gap: 4px; margin-top: 6px; }
+  .lc-pt { width: 8px; height: 8px; border-radius: 50%; }
+  .lc-pt.exp { background: var(--red); }
+  .lc-pt.inc { background: var(--green); }
+  .lc-pt.sub { background: #9d00ff; }
+  .cal-cell > .cal-dday { position: static; display: flex; justify-content: center; max-width: none; margin: 2px auto 0; padding: 0; background: none !important; }
   .lc-month { font-size: 15px; }
   .lc-rows { flex: none; }
 }
