@@ -7290,7 +7290,7 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
 
 /* ════════════════════════════════════════════════════════════
    달력 칸 일정 표시 스타일 — 월 보기 위 버튼으로 고른다 (기본은 위의 기존 모양 그대로)
-   막대 · 글자 · 진하게 · 큰 글씨. 여러 날 일정(.cal-span)은 모양을 건드리지 않고 색만 맞춘다.
+   막대 · 글자 · 진하게 · 큰 글씨. 윈도우98 등 스킨 규칙보다 앞서도록 html[data-skin] 로 시작한다. 여러 날 일정(.cal-span)은 모양을 건드리지 않고 색만 맞춘다.
 ════════════════════════════════════════════════════════════ */
 .cal-style-bar { display: flex; gap: 4px; justify-content: flex-end; margin: 0 0 8px; flex-wrap: wrap; }
 .cal-style-btn {
@@ -7301,7 +7301,7 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
 .cal-style-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
 
 /* 막대: 왼쪽 색 띠 + 읽기 편한 본문색 글자 */
-.calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-span) {
+html[data-skin] .calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-span) {
   background: var(--panel2) !important;
   color: var(--text) !important;
   font-weight: 600;
@@ -7310,10 +7310,10 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
   padding-left: 9px !important;
   text-shadow: none;
 }
-.calendar-surface[data-cal-style="bar"] .cal-dot.done:not(.cal-span) { opacity: .45; }
+html[data-skin] .calendar-surface[data-cal-style="bar"] .cal-dot.done:not(.cal-span) { opacity: .45; }
 
 /* 글자: 배경 없이 색 점 + 제목만, 깔끔하게 */
-.calendar-surface[data-cal-style="text"] .cal-dot:not(.cal-span) {
+html[data-skin] .calendar-surface[data-cal-style="text"] .cal-dot:not(.cal-span) {
   background: transparent !important;
   color: var(--text) !important;
   font-weight: 500;
@@ -7322,24 +7322,24 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
   box-shadow: none !important;
   text-shadow: none;
 }
-.calendar-surface[data-cal-style="text"] .cal-dot:not(.cal-span)::before {
+html[data-skin] .calendar-surface[data-cal-style="text"] .cal-dot:not(.cal-span)::before {
   content: ''; position: absolute; left: 2px; top: 50%; width: 6px; height: 6px; margin-top: -3px;
   border-radius: 50%; background: var(--event-color, var(--accent));
 }
-.calendar-surface[data-cal-style="text"] .cal-dot.done:not(.cal-span) { opacity: .45; }
+html[data-skin] .calendar-surface[data-cal-style="text"] .cal-dot.done:not(.cal-span) { opacity: .45; }
 
 /* 진하게: 카테고리 색으로 꽉 채우고 흰 글씨 */
-.calendar-surface[data-cal-style="solid"] .cal-dot {
+html[data-skin] .calendar-surface[data-cal-style="solid"] .cal-dot {
   background: var(--event-color, var(--accent)) !important;
   color: #fff !important;
   font-weight: 700;
   text-shadow: 0 1px 1px rgba(0,0,0,.25);
   box-shadow: none !important;
 }
-.calendar-surface[data-cal-style="solid"] .cal-dot.done { opacity: .4; }
+html[data-skin] .calendar-surface[data-cal-style="solid"] .cal-dot.done { opacity: .4; }
 
 /* 큰 글씨: 글자를 키우고 긴 제목은 두 줄까지 보여준다 */
-.calendar-surface[data-cal-style="big"] .cal-dot:not(.cal-span) {
+html[data-skin] .calendar-surface[data-cal-style="big"] .cal-dot:not(.cal-span) {
   height: auto;
   min-height: 20px;
   font-size: 12px;
@@ -7351,6 +7351,13 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
   text-overflow: clip;
 }
 @media (max-width: 899px) {
-  .calendar-surface[data-cal-style="big"] .cal-dot:not(.cal-span) { font-size: 10px; line-height: 13px; min-height: 17px; }
+  html[data-skin] .calendar-surface[data-cal-style="big"] .cal-dot:not(.cal-span) { font-size: 10px; line-height: 13px; min-height: 17px; }
 }
-.calendar-surface[data-cal-style="big"] .cal-dot.cal-one-line { -webkit-line-clamp: 1; min-height: 0; }
+html[data-skin] .calendar-surface[data-cal-style="big"] .cal-dot.cal-one-line { -webkit-line-clamp: 1; min-height: 0; }
+/* 윈도우98 스킨은 기본 칩이 이미 흰 바탕 + 왼쪽 띠라, 막대는 회색 바탕과 굵은 띠로 구분한다 */
+html[data-skin="w98"] .calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-span) {
+  background: #dfdfdf !important;
+  box-shadow: inset 6px 0 var(--event-color, #000080) !important;
+  padding-left: 11px !important;
+  font-weight: 700 !important;
+}
