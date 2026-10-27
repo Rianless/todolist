@@ -56,6 +56,20 @@ assert.strictEqual(P.detectShop(''), null);
   assert.strictEqual(r(null).number, null);
 }
 
+// 해외직구 통관: 국내 운송장이 생기기 전까지는 통관 중
+{
+  const P = require('../parcels.js');
+  assert.strictEqual(P.customsStage({ name: '국내' }), null);
+  assert.strictEqual(P.customsStage({ overseas: true }), 'wait');
+  assert.strictEqual(P.customsStage({ overseas: true, customsDone: true }), 'cleared');
+  assert.strictEqual(P.customsStage({ overseas: true, carrier: 'kr.cjlogistics', number: '123456789012' }), 'cleared');
+  assert.strictEqual(P.customsUrl({ overseas: true }), P.CUSTOMS_URL);
+  assert.strictEqual(P.customsUrl({ overseas: true, customsDone: true }), null);
+  assert.strictEqual(P.cleanForeignNo(' yt-1234 5678 '), 'YT12345678');
+  assert.strictEqual(P.cleanForeignNo(''), '');
+  assert.strictEqual(P.cleanForeignNo('ab'), null);
+}
+
 // 동기화: 두 기기에서 각각 추가한 택배가 둘 다 남는다
 const base = { parcels: [], parcelNextId: 1 };
 const local = { parcels: [{ id: 1, carrier: 'kr.hanjin', number: '111111' }], parcelNextId: 2 };
