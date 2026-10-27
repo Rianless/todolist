@@ -181,7 +181,14 @@
         </div>
 
         <div class="calendar-stage">
-          <div class="calendar-surface">
+          <div class="calendar-surface" id="calSurface" data-cal-style="default">
+            <div class="cal-style-bar" role="group" aria-label="일정 표시 스타일">
+              <button type="button" class="cal-style-btn active" data-style="default" onclick="setCalStyle('default')">기본</button>
+              <button type="button" class="cal-style-btn" data-style="bar" onclick="setCalStyle('bar')">막대</button>
+              <button type="button" class="cal-style-btn" data-style="text" onclick="setCalStyle('text')">글자</button>
+              <button type="button" class="cal-style-btn" data-style="solid" onclick="setCalStyle('solid')">진하게</button>
+              <button type="button" class="cal-style-btn" data-style="big" onclick="setCalStyle('big')">큰 글씨</button>
+            </div>
             <div class="cal-grid" id="calGrid"></div>
 
             <div class="cal-legend" aria-label="달력 표시 설명">

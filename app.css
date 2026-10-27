@@ -7287,3 +7287,70 @@ html[data-skin="w98"] .dkw-bm { color: #000 !important; background: none !import
 #ledgerList .ledger-entry-info, #accountList .account-info { overflow: hidden; }
 #ledgerList .ledger-entry-cat { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
 #parcelList .bm-item, #ddayList .dd-item { margin-bottom: 0; }
+
+/* ════════════════════════════════════════════════════════════
+   달력 칸 일정 표시 스타일 — 월 보기 위 버튼으로 고른다 (기본은 위의 기존 모양 그대로)
+   막대 · 글자 · 진하게 · 큰 글씨. 여러 날 일정(.cal-span)은 모양을 건드리지 않고 색만 맞춘다.
+════════════════════════════════════════════════════════════ */
+.cal-style-bar { display: flex; gap: 4px; justify-content: flex-end; margin: 0 0 8px; flex-wrap: wrap; }
+.cal-style-btn {
+  border: 1px solid var(--border2); background: transparent; color: var(--text3);
+  font: inherit; font-size: 11px; font-weight: 600; padding: 3px 9px; border-radius: 999px; cursor: pointer;
+}
+.cal-style-btn.active { background: var(--accent); border-color: var(--accent); color: #fff; }
+.cal-style-btn:focus-visible { outline: 2px solid var(--accent); outline-offset: 1px; }
+
+/* 막대: 왼쪽 색 띠 + 읽기 편한 본문색 글자 */
+.calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-span) {
+  background: var(--panel2) !important;
+  color: var(--text) !important;
+  font-weight: 600;
+  border-radius: 3px !important;
+  box-shadow: inset 3px 0 var(--event-color, var(--accent)) !important;
+  padding-left: 9px !important;
+  text-shadow: none;
+}
+.calendar-surface[data-cal-style="bar"] .cal-dot.done:not(.cal-span) { opacity: .45; }
+
+/* 글자: 배경 없이 색 점 + 제목만, 깔끔하게 */
+.calendar-surface[data-cal-style="text"] .cal-dot:not(.cal-span) {
+  background: transparent !important;
+  color: var(--text) !important;
+  font-weight: 500;
+  padding-left: 12px !important;
+  position: relative;
+  box-shadow: none !important;
+  text-shadow: none;
+}
+.calendar-surface[data-cal-style="text"] .cal-dot:not(.cal-span)::before {
+  content: ''; position: absolute; left: 2px; top: 50%; width: 6px; height: 6px; margin-top: -3px;
+  border-radius: 50%; background: var(--event-color, var(--accent));
+}
+.calendar-surface[data-cal-style="text"] .cal-dot.done:not(.cal-span) { opacity: .45; }
+
+/* 진하게: 카테고리 색으로 꽉 채우고 흰 글씨 */
+.calendar-surface[data-cal-style="solid"] .cal-dot {
+  background: var(--event-color, var(--accent)) !important;
+  color: #fff !important;
+  font-weight: 700;
+  text-shadow: 0 1px 1px rgba(0,0,0,.25);
+  box-shadow: none !important;
+}
+.calendar-surface[data-cal-style="solid"] .cal-dot.done { opacity: .4; }
+
+/* 큰 글씨: 글자를 키우고 긴 제목은 두 줄까지 보여준다 */
+.calendar-surface[data-cal-style="big"] .cal-dot:not(.cal-span) {
+  height: auto;
+  min-height: 20px;
+  font-size: 12px;
+  line-height: 16px;
+  white-space: normal;
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  -webkit-box-orient: vertical;
+  text-overflow: clip;
+}
+@media (max-width: 899px) {
+  .calendar-surface[data-cal-style="big"] .cal-dot:not(.cal-span) { font-size: 10px; line-height: 13px; min-height: 17px; }
+}
+.calendar-surface[data-cal-style="big"] .cal-dot.cal-one-line { -webkit-line-clamp: 1; min-height: 0; }
