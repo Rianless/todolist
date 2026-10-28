@@ -840,17 +840,18 @@ async function loadItemsFromAPI() {
 
 ══════════════════════════════════════ */
 
-// 스킨: 'w98'(윈도우 98) → 'desktop'(98 바탕화면, PC만) → 'classic' → 다시 'w98'
+// 스킨: 'w98'(윈도우 98) → 'desktop'(98 바탕화면, PC만) → 'mac'(macOS 느낌) → 'classic' → 다시 'w98'
 // 바탕화면은 data-skin="w98" 위에 data-desktop 을 더한 것이라 폰(900px 미만)에서는 98 과 똑같이 보인다.
 function currentSkinName() {
   const h = document.documentElement;
+  if (h.getAttribute('data-skin') === 'mac') return 'mac';
   if (h.getAttribute('data-skin') !== 'w98') return 'classic';
   return h.hasAttribute('data-desktop') ? 'desktop' : 'w98';
 }
 
 function applySkin(name) {
   const h = document.documentElement;
-  h.setAttribute('data-skin', name === 'classic' ? 'classic' : 'w98');
+  h.setAttribute('data-skin', name === 'classic' ? 'classic' : name === 'mac' ? 'mac' : 'w98');
   if (name === 'desktop') h.setAttribute('data-desktop', '1'); else h.removeAttribute('data-desktop');
   h.removeAttribute('data-desktop-win');
   h.removeAttribute('data-desktop-max');
@@ -860,7 +861,7 @@ function applySkin(name) {
 }
 
 function toggleSkin() {
-  const order = ['w98', 'desktop', 'classic'];
+  const order = ['w98', 'desktop', 'mac', 'classic'];
   const cur = currentSkinName();
   // 폰에 'desktop' 이 저장돼 있으면(98 과 똑같이 보임) 한 번에 클래식으로
   applySkin(order.includes(cur) ? order[(order.indexOf(cur) + 1) % order.length] : 'classic');
