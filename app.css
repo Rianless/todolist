@@ -7478,20 +7478,83 @@ html[data-skin="mac"] .prog-track { background: rgba(120,120,128,.18) !important
 html[data-skin="mac"] .prog-fill { background: var(--accent) !important; border-radius: 99px !important; box-shadow: none !important; }
 html[data-skin="mac"] .prog-label, html[data-skin="mac"] .prog-pct { color: var(--text2) !important; }
 
-/* 모달: 창 + 신호등 버튼 */
+/* 모달 (공통): 유리 질감 */
 html[data-skin="mac"] .modal-overlay { background: rgba(0,0,0,.25) !important; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
 html[data-skin="mac"] .modal-sheet, html[data-skin="mac"] .detail-sheet, html[data-skin="mac"] .add-sheet, html[data-skin="mac"] .day-sheet {
   background: rgba(255,255,255,.92) !important; -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px);
-  border: 1px solid rgba(0,0,0,.10) !important; border-radius: 14px !important; clip-path: none !important;
-  box-shadow: 0 22px 60px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.2) !important;
+  border: 1px solid rgba(0,0,0,.10) !important; clip-path: none !important;
 }
-html[data-skin="mac"] .modal-sheet .modal-header { position: relative; padding-left: 64px !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; background: none !important; }
-html[data-skin="mac"] .modal-sheet .modal-header::before {
-  content: ''; position: absolute; left: 16px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
-  background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840;
-}
+html[data-skin="mac"] .modal-sheet .modal-header { position: relative; border-bottom: 1px solid rgba(0,0,0,.08) !important; background: none !important; }
 html[data-skin="mac"] .modal-sheet .modal-title { font-size: 15px !important; font-weight: 600; color: var(--text) !important; text-align: center; }
 html[data-skin="mac"] .modal-sheet .modal-header button { border-radius: 50% !important; }
+
+/* 폰 = iOS: 아래에서 올라오는 시트 + 손잡이 */
+@media (max-width: 899px) {
+  html[data-skin="mac"] .modal-sheet, html[data-skin="mac"] .detail-sheet, html[data-skin="mac"] .add-sheet, html[data-skin="mac"] .day-sheet {
+    border-radius: 20px 20px 0 0 !important; box-shadow: 0 -8px 40px rgba(0,0,0,.18) !important;
+  }
+  html[data-skin="mac"] .modal-sheet .modal-header { padding-top: 18px !important; }
+  html[data-skin="mac"] .modal-sheet .modal-header::before {
+    content: ''; position: absolute; left: 50%; top: 7px; width: 36px; height: 5px; margin-left: -18px; border-radius: 3px; background: rgba(60,60,67,.3);
+  }
+  html[data-skin="mac"] #macMenubar { display: none !important; }
+}
+
+/* PC = macOS: 메뉴바 + 떠 있는 창 + 신호등 + 사이드바 */
+#macMenubar { display: none; }
+@media (min-width: 900px) {
+  html[data-skin="mac"] body { background: radial-gradient(1200px 700px at 20% 10%, #6fa8ff 0%, transparent 60%), radial-gradient(1000px 700px at 85% 90%, #c68bff 0%, transparent 60%), linear-gradient(135deg, #3b5bdb, #7048e8 55%, #e599f7) fixed !important; }
+  html[data-skin="mac"] #macMenubar {
+    display: flex; position: fixed; top: 0; left: 0; right: 0; height: 28px; z-index: 8000; align-items: center; justify-content: space-between;
+    padding: 0 14px; background: rgba(30,30,32,.35); -webkit-backdrop-filter: saturate(180%) blur(24px); backdrop-filter: saturate(180%) blur(24px);
+    color: #fff; font-size: 13px; user-select: none;
+  }
+  html[data-skin="mac"] #macMenubar .mb-l, html[data-skin="mac"] #macMenubar .mb-r { display: flex; align-items: center; gap: 4px; }
+  html[data-skin="mac"] #macMenubar svg { width: 14px; height: 14px; fill: #fff; margin-right: 8px; }
+  html[data-skin="mac"] #macMenubar b { font-weight: 700; margin-right: 10px; }
+  html[data-skin="mac"] #macMenubar button { cursor: default; padding: 2px 9px; border-radius: 5px !important; color: #fff !important; font-size: 13px; background: none !important; border: none !important; box-shadow: none !important; min-height: 0; }
+  html[data-skin="mac"] #macMenubar button:hover { background: rgba(255,255,255,.2) !important; }
+  html[data-skin="mac"] #macMenubar .mb-clock { padding: 2px 8px; font-variant-numeric: tabular-nums; }
+
+  html[data-skin="mac"] #app {
+    position: fixed !important; top: 40px; left: 24px; right: 24px; bottom: 24px; height: auto !important; max-width: none !important; margin: 0;
+    border-radius: 12px; overflow: hidden; background: rgba(246,246,246,.86) !important;
+    -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px);
+    box-shadow: 0 0 0 .5px rgba(0,0,0,.35), 0 28px 80px rgba(0,0,0,.45) !important;
+  }
+  html[data-skin="mac"] .app-header {
+    position: relative; height: 100% !important; padding: 54px 12px 14px !important; border-radius: 0 !important;
+    background: rgba(236,236,240,.72) !important; border: none !important; border-right: 1px solid rgba(0,0,0,.10) !important;
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  html[data-skin="mac"] .app-header::before {
+    content: ''; position: absolute; left: 18px; top: 18px; width: 12px; height: 12px; border-radius: 50%;
+    background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840, 0 0 0 .5px rgba(0,0,0,.2);
+  }
+  html[data-skin="mac"] .header-title { font-size: 13px !important; color: var(--text3) !important; font-weight: 600; margin-top: 4px; }
+  html[data-skin="mac"] .header-title span { color: var(--text3) !important; }
+  html[data-skin="mac"] .tab-bar {
+    background: transparent !important; border: none !important; padding: 0 !important; margin-top: 16px !important; box-shadow: none !important;
+    -webkit-backdrop-filter: none; backdrop-filter: none;
+  }
+  html[data-skin="mac"] .tab-item { min-height: 32px !important; padding: 0 10px !important; border-radius: 7px !important; flex-direction: row !important; gap: 8px; justify-content: flex-start !important; }
+  html[data-skin="mac"] .tab-item .tab-label { font-size: 13px !important; font-weight: 500; color: var(--text); }
+  html[data-skin="mac"] .tab-item .tab-icon { font-size: 15px !important; }
+  html[data-skin="mac"] .tab-item:hover { background: rgba(0,0,0,.05) !important; }
+  html[data-skin="mac"] .tab-item.active { background: var(--accent) !important; }
+  html[data-skin="mac"] .tab-item.active .tab-label { color: #fff !important; }
+  html[data-skin="mac"] .pc-topbar { background: rgba(246,246,246,.7) !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; height: 52px !important; }
+  html[data-skin="mac"] .pc-topbar-title::before { text-align: center; }
+  html[data-skin="mac"] .modal-overlay { align-items: center !important; justify-content: center; }
+  html[data-skin="mac"] .modal-sheet, html[data-skin="mac"] .detail-sheet, html[data-skin="mac"] .add-sheet, html[data-skin="mac"] .day-sheet {
+    border-radius: 12px !important; box-shadow: 0 22px 60px rgba(0,0,0,.35), 0 0 0 .5px rgba(0,0,0,.25) !important;
+  }
+  html[data-skin="mac"] .modal-sheet .modal-header { padding-left: 70px !important; }
+  html[data-skin="mac"] .modal-sheet .modal-header::before {
+    content: ''; position: absolute; left: 16px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+    background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840;
+  }
+}
 
 /* 스크롤바 */
 html[data-skin="mac"] ::-webkit-scrollbar { width: 8px; height: 8px; }
