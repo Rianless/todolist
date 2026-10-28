@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v146-macskin2';
+const CACHE_NAME = 'todolist-v147-macskin3';
 const ASSETS = [
   './',
   './index.html',
