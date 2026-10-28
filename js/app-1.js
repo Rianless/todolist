@@ -860,6 +860,17 @@ function applySkin(name) {
   desktopSync();
 }
 
+// macOS 스킨 메뉴바 시계 (예: 10월 28일 (수) 오후 3:07)
+function macClockTick() {
+  const el = document.getElementById('macClock');
+  if (!el) return;
+  const d = new Date();
+  el.textContent = (d.getMonth() + 1) + '월 ' + d.getDate() + '일 (' + '일월화수목금토'[d.getDay()] + ') ' +
+    d.toLocaleTimeString('ko-KR', { hour: 'numeric', minute: '2-digit' });
+}
+macClockTick();
+setInterval(macClockTick, 15000);
+
 function toggleSkin() {
   const order = ['w98', 'desktop', 'mac', 'classic'];
   const cur = currentSkinName();
