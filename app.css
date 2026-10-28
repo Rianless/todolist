@@ -7395,3 +7395,104 @@ html[data-skin="w98"] .calendar-surface[data-cal-style="bar"] .cal-dot:not(.cal-
 .calendar-surface .cal-pt.imp { outline: 1.5px solid var(--text); outline-offset: 1px; }
 /* 폰 달력은 일정이 점이라 표시 스타일 버튼이 필요 없다 */
 @media (max-width: 899px) { .cal-style-bar { display: none; } }
+
+/* ===== macOS 스킨 (헤더의 🖥️ 단추로 전환: 98 → 바탕화면 → 맥 → 클래식) ===== */
+html[data-skin="mac"] {
+  --bg: #ececec; --bg2: #f5f5f7; --panel: #ffffff; --panel2: #f5f5f7;
+  --border: rgba(0,0,0,.10); --border2: rgba(0,0,0,.16);
+  --cyan: #007aff; --magenta: #af52de; --purple: #5856d6; --yellow: #ff9f0a;
+  --accent: #007aff; --accent2: #007aff;
+  --text: #1d1d1f; --text2: #515154; --text3: #86868b;
+  --red: #ff3b30; --green: #28a745;
+  --card-bg: #ffffff; --input-bg: #ffffff; --tab-bg: rgba(246,246,246,.85); --tab-act: rgba(0,122,255,.12);
+  --radius-sm: 6px; --radius-md: 10px; --radius-lg: 14px;
+  --angular-shadow: none;
+  --shadow: 0 1px 3px rgba(0,0,0,.08), 0 4px 14px rgba(0,0,0,.06);
+  --font-main: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Apple SD Gothic Neo', 'Noto Sans KR', sans-serif;
+  --font-title: var(--font-main); --font-body: var(--font-main);
+  --scanlines: 0;
+}
+html[data-skin="mac"] body {
+  background: linear-gradient(135deg, #cfd9ff 0%, #e8d9ff 50%, #ffd9e6 100%) fixed !important;
+  color: var(--text); font-family: var(--font-main) !important; font-size: 14px;
+  -webkit-font-smoothing: antialiased;
+}
+html[data-skin="mac"] *, html[data-skin="mac"] *::before, html[data-skin="mac"] *::after {
+  font-family: var(--font-main) !important; text-shadow: none !important; letter-spacing: 0 !important;
+}
+html[data-skin="mac"] .header-sys, html[data-skin="mac"] .header-badges, html[data-skin="mac"] .header-sys-extra,
+html[data-skin="mac"] .corner-d, html[data-skin="mac"] .dc { display: none !important; }
+html[data-skin="mac"] body::before, html[data-skin="mac"] body::after { display: none !important; }
+
+/* 반투명 유리 패널 */
+html[data-skin="mac"] .app-header, html[data-skin="mac"] .tab-bar {
+  background: rgba(246,246,246,.78) !important;
+  -webkit-backdrop-filter: saturate(180%) blur(20px); backdrop-filter: saturate(180%) blur(20px);
+  border: none !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; box-shadow: none !important; clip-path: none !important;
+}
+html[data-skin="mac"] .tab-bar { border-bottom: none !important; border-top: 1px solid rgba(0,0,0,.08) !important; }
+html[data-skin="mac"] .app-header::after { display: none !important; }
+html[data-skin="mac"] .header-title { color: var(--text) !important; font-size: 17px !important; font-weight: 700; background: none !important; }
+html[data-skin="mac"] .header-title span { color: var(--accent) !important; }
+html[data-skin="mac"] .header-sub, html[data-skin="mac"] .header-left p { color: var(--text3) !important; }
+
+/* 둥근 카드 */
+html[data-skin="mac"] .todo-card, html[data-skin="mac"] .note-card, html[data-skin="mac"] .stat-card,
+html[data-skin="mac"] .sub-card, html[data-skin="mac"] .calendar-surface, html[data-skin="mac"] .asset-card,
+html[data-skin="mac"] .collapse-card, html[data-skin="mac"] .section-card, html[data-skin="mac"] .panel-card, html[data-skin="mac"] .mp-card {
+  background: #fff !important; border: 1px solid rgba(0,0,0,.06) !important; border-radius: 12px !important;
+  box-shadow: var(--shadow) !important; clip-path: none !important;
+}
+html[data-skin="mac"] .cal-cell { border-radius: 8px !important; clip-path: none !important; border-color: rgba(0,0,0,.05) !important; background: transparent !important; box-shadow: none !important; }
+html[data-skin="mac"] .cal-cell.today { background: rgba(0,122,255,.10) !important; }
+
+/* 버튼: 알약형 / 파란 강조 */
+html[data-skin="mac"] button, html[data-skin="mac"] .add-btn, html[data-skin="mac"] .today-btn, html[data-skin="mac"] .cal-today-btn {
+  border-radius: 8px !important; clip-path: none !important; box-shadow: 0 1px 1px rgba(0,0,0,.08) !important;
+  background: #fff; border: 1px solid rgba(0,0,0,.12) !important; color: var(--text);
+}
+html[data-skin="mac"] button:hover { background: #f5f5f7; }
+html[data-skin="mac"] button:active { background: #e8e8ed; }
+html[data-skin="mac"] .add-btn, html[data-skin="mac"] .fab, html[data-skin="mac"] .fab-add, html[data-skin="mac"] .add-fab {
+  background: linear-gradient(#4da3ff, #007aff) !important; color: #fff !important; border: 1px solid #0a6fe0 !important;
+}
+html[data-skin="mac"] .fab, html[data-skin="mac"] .fab-add, html[data-skin="mac"] .add-fab { border-radius: 50% !important; box-shadow: 0 4px 14px rgba(0,122,255,.4) !important; }
+html[data-skin="mac"] .tab-item { background: transparent !important; border: none !important; box-shadow: none !important; color: var(--text3); }
+html[data-skin="mac"] .tab-item.active { color: var(--accent) !important; background: var(--tab-act) !important; border-radius: 10px !important; }
+html[data-skin="mac"] .tab-item.active::before, html[data-skin="mac"] .tab-item::after { display: none !important; }
+html[data-skin="mac"] .cal-subtab-bar { background: rgba(120,120,128,.12) !important; border-radius: 9px !important; border: none !important; box-shadow: none !important; padding: 2px; }
+html[data-skin="mac"] .cal-subtab { border: none !important; box-shadow: none !important; background: transparent; }
+html[data-skin="mac"] .cal-subtab.active { background: #fff !important; border-radius: 7px !important; box-shadow: 0 1px 3px rgba(0,0,0,.15) !important; }
+html[data-skin="mac"] .cal-subtab.active::after { display: none !important; }
+
+/* 입력창 */
+html[data-skin="mac"] input:not([type=checkbox]):not([type=radio]), html[data-skin="mac"] select, html[data-skin="mac"] textarea {
+  background: #fff !important; border: 1px solid rgba(0,0,0,.15) !important; border-radius: 8px !important; box-shadow: inset 0 1px 1px rgba(0,0,0,.04) !important; color: var(--text) !important;
+}
+html[data-skin="mac"] input:focus, html[data-skin="mac"] select:focus, html[data-skin="mac"] textarea:focus {
+  outline: none !important; border-color: var(--accent) !important; box-shadow: 0 0 0 3px rgba(0,122,255,.25) !important;
+}
+
+/* 진행바 */
+html[data-skin="mac"] .prog-track { background: rgba(120,120,128,.18) !important; border-radius: 99px !important; box-shadow: none !important; height: 6px; }
+html[data-skin="mac"] .prog-fill { background: var(--accent) !important; border-radius: 99px !important; box-shadow: none !important; }
+html[data-skin="mac"] .prog-label, html[data-skin="mac"] .prog-pct { color: var(--text2) !important; }
+
+/* 모달: 창 + 신호등 버튼 */
+html[data-skin="mac"] .modal-overlay { background: rgba(0,0,0,.25) !important; -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px); }
+html[data-skin="mac"] .modal-sheet, html[data-skin="mac"] .detail-sheet, html[data-skin="mac"] .add-sheet, html[data-skin="mac"] .day-sheet {
+  background: rgba(255,255,255,.92) !important; -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px);
+  border: 1px solid rgba(0,0,0,.10) !important; border-radius: 14px !important; clip-path: none !important;
+  box-shadow: 0 22px 60px rgba(0,0,0,.3), 0 0 0 .5px rgba(0,0,0,.2) !important;
+}
+html[data-skin="mac"] .modal-sheet .modal-header { position: relative; padding-left: 64px !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; background: none !important; }
+html[data-skin="mac"] .modal-sheet .modal-header::before {
+  content: ''; position: absolute; left: 16px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%;
+  background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840;
+}
+html[data-skin="mac"] .modal-sheet .modal-title { font-size: 15px !important; font-weight: 600; color: var(--text) !important; text-align: center; }
+html[data-skin="mac"] .modal-sheet .modal-header button { border-radius: 50% !important; }
+
+/* 스크롤바 */
+html[data-skin="mac"] ::-webkit-scrollbar { width: 8px; height: 8px; }
+html[data-skin="mac"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.25); border-radius: 99px; }
