@@ -7558,6 +7558,46 @@ html[data-skin="mac"] .modal-sheet .modal-header button { border-radius: 50% !im
   }
 }
 
+/* 다이어리 안쪽: 윈도우 98 메모장 → macOS 메모 앱 느낌 (읽기 창은 폰·PC 공통) */
+html[data-skin="mac"] .dya-paper { padding: 0 !important; }
+html[data-skin="mac"] .dya-win { background: #fff; border-radius: 12px; box-shadow: 0 0 0 .5px rgba(0,0,0,.18), 0 6px 22px rgba(0,0,0,.12); padding: 0; overflow: hidden; }
+html[data-skin="mac"] .dya-win-tb { position: relative; justify-content: center; padding: 10px 14px 10px 70px; color: var(--text2); font-size: 13px; font-weight: 600; background: rgba(246,246,246,.9); border-bottom: 1px solid rgba(0,0,0,.08); }
+html[data-skin="mac"] .dya-win-tb::before { content: ''; position: absolute; left: 14px; top: 50%; width: 12px; height: 12px; margin-top: -6px; border-radius: 50%; background: #ff5f57; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840; }
+html[data-skin="mac"] .dya-win-tb i { position: absolute; left: 0; top: 0; width: 60px; height: 100%; margin: 0; }
+html[data-skin="mac"] .dya-win-tb i b { position: absolute; left: 0; top: 0; width: 60px; height: 100%; opacity: 0; background: none; box-shadow: none; }
+html[data-skin="mac"] .dya-win-tb i b:not(.x) { display: none; }
+html[data-skin="mac"] .dya-win-tb i b.x { width: 20px; left: 10px; top: 50%; height: 20px; margin-top: -10px; }
+html[data-skin="mac"] .dya-win-mn { padding: 6px 14px; gap: 14px; font-size: 12px; color: var(--text3); border-bottom: 1px solid rgba(0,0,0,.06); background: #fafafa; }
+html[data-skin="mac"] .dya-mn-sep { color: rgba(0,0,0,.2); }
+html[data-skin="mac"] .dya-win-mn .dya-mn-act { color: var(--accent) !important; border-radius: 6px !important; padding: 2px 8px !important; margin-left: 0; }
+html[data-skin="mac"] .dya-win-mn .dya-mn-act:hover { background: rgba(0,122,255,.12) !important; color: var(--accent) !important; }
+html[data-skin="mac"] .dya-win-ct { background: #fff; box-shadow: none; padding: 18px 22px; font-family: var(--font-main) !important; }
+html[data-skin="mac"] .dya-win-ct .dya-head { border-bottom: 1px solid rgba(0,0,0,.08); }
+html[data-skin="mac"] .dya-head .dt { color: var(--text3); }
+html[data-skin="mac"] .dya-empty { color: var(--text3); }
+html[data-skin="mac"] .dya-win-ct .dya-body { font-size: 15px; line-height: 1.7; }
+@media (min-width: 900px) {
+  html[data-skin="mac"] #viewDiary.active { background: transparent; padding: 14px !important; gap: 14px; }
+  html[data-skin="mac"] .dya-side { flex-basis: 260px; }
+  html[data-skin="mac"] .dya-profile { background: #fff; border-radius: 12px; box-shadow: 0 0 0 .5px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.06); color: var(--text); padding: 12px; }
+  html[data-skin="mac"] .dya-avatar { background: linear-gradient(135deg, #5ac8fa, #007aff); border-radius: 50%; box-shadow: none; }
+  html[data-skin="mac"] .dya-count b { color: var(--accent); }
+  html[data-skin="mac"] .dya-new { background: var(--accent) !important; color: #fff !important; border: none !important; border-radius: 9px !important; box-shadow: none !important; }
+  html[data-skin="mac"] .dya-new:hover { background: #0a84ff !important; }
+  html[data-skin="mac"] .dya-lockrow button, html[data-skin="mac"] .dya-tools button { color: var(--text) !important; font-size: 12px; }
+  html[data-skin="mac"] .dya-list { background: #fff; border-radius: 12px; box-shadow: 0 0 0 .5px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.06); padding: 6px; }
+  html[data-skin="mac"] .dya-month { background: none; color: var(--text3); padding: 8px 8px 4px; font-size: 11px; text-transform: none; }
+  html[data-skin="mac"] .dya-item { border-bottom: none; border-radius: 8px !important; color: var(--text) !important; padding: 7px 10px; }
+  html[data-skin="mac"] .dya-item:hover { background: rgba(0,0,0,.04) !important; }
+  html[data-skin="mac"] .dya-item.active { background: var(--accent) !important; color: #fff !important; }
+  html[data-skin="mac"] .dya-form { background: #fff; border-radius: 12px; box-shadow: 0 0 0 .5px rgba(0,0,0,.1), 0 1px 4px rgba(0,0,0,.06); padding: 16px; }
+  html[data-skin="mac"] .dya-form label { color: var(--text2); }
+  html[data-skin="mac"] .dya-form input[type=text], html[data-skin="mac"] .dya-form input[type=date], html[data-skin="mac"] .dya-form textarea { box-shadow: inset 0 1px 1px rgba(0,0,0,.04) !important; padding: 8px 10px; font-family: var(--font-main) !important; }
+  html[data-skin="mac"] .dya-form .dy-picks button { background: #f5f5f7; border: 1px solid rgba(0,0,0,.08) !important; border-radius: 8px !important; box-shadow: none; }
+  html[data-skin="mac"] .dya-form .dy-picks button.on { background: rgba(0,122,255,.12); border-color: var(--accent) !important; }
+  html[data-skin="mac"] .dya-tools button { border-radius: 8px !important; padding: 5px 12px; }
+}
+
 /* 스크롤바 */
 html[data-skin="mac"] ::-webkit-scrollbar { width: 8px; height: 8px; }
 html[data-skin="mac"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.25); border-radius: 99px; }
