@@ -7543,6 +7543,8 @@ html[data-skin="mac"] .modal-sheet .modal-header button { border-radius: 50% !im
   html[data-skin="mac"] .tab-item:hover { background: rgba(0,0,0,.05) !important; }
   html[data-skin="mac"] .tab-item.active { background: var(--accent) !important; }
   html[data-skin="mac"] .tab-item.active .tab-label { color: #fff !important; }
+  /* 다이어리 뷰는 position:absolute; inset:0 이라, 기준이 없으면 사이드바까지 덮는다 */
+  html[data-skin="mac"] #mainContent { position: relative; }
   html[data-skin="mac"] .pc-topbar { background: rgba(246,246,246,.7) !important; border-bottom: 1px solid rgba(0,0,0,.08) !important; height: 52px !important; }
   html[data-skin="mac"] .pc-topbar-title::before { text-align: center; }
   html[data-skin="mac"] .modal-overlay { align-items: center !important; justify-content: center; }
