@@ -268,7 +268,11 @@ window.addEventListener('resize', statsGuard);
 let dkWasPhone = window.innerWidth < 900;
 window.addEventListener('resize', () => {
   const phone = window.innerWidth < 900;
-  if (phone !== dkWasPhone) { dkWasPhone = phone; try { updateDesktopWidgets(); } catch (e) {} }
+  if (phone !== dkWasPhone) {
+    dkWasPhone = phone;
+    try { skinApplyAttrs(); statsGuard(); desktopSync(); } catch (e) {}   // 맥은 폭에 따라 바탕화면 ↔ 폰 화면이 바뀐다
+    try { updateDesktopWidgets(); } catch (e) {}
+  }
 });
 
 const MEMO_MAX = 500;       // 메모 한 개의 최대 글자 수 (홈 메모 입력)
