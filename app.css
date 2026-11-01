@@ -6723,7 +6723,7 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
 .dk-ticker, .dk-widgets, #viewMemo, #viewBookmark, #viewDiary { display: none; }
 @media (min-width: 900px) {
   html[data-desktop][data-skin="w98"] { --dk-left: 128px; --dk-top: 40px; --dk-right: 16px; --dk-bottom: 44px; }
-  html[data-desktop][data-desktop-max] { --dk-left: 0px; --dk-top: 0px; --dk-right: 0px; --dk-bottom: 34px; }
+  html[data-desktop][data-desktop-max]:not([data-desktop-win]) { --dk-left: 0px; --dk-top: 0px; --dk-right: 0px; --dk-bottom: 34px; }
   html[data-desktop][data-skin="w98"] body, html[data-desktop][data-skin="w98"] #app { background: #5a9488 !important; }
   html[data-desktop][data-skin="w98"] #app { display: block; position: relative; height: 100dvh; }
 
@@ -6774,7 +6774,7 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   html[data-desktop][data-skin="w98"] .dk-sep { width: 2px; height: 22px; box-shadow: inset 1px 0 #808080, inset -1px 0 #fff; }
   html[data-desktop][data-skin="w98"] .dk-spacer { flex: 1; }
   html[data-desktop][data-skin="w98"] .dk-ticker { display: block; position: fixed; z-index: 20; left: var(--dk-left); right: var(--dk-right); top: 8px; height: 24px; overflow: hidden; padding: 0 10px; background: #fff; box-shadow: var(--w98-sunken); font-size: 12px; line-height: 24px; white-space: nowrap; color: #000; }
-  html[data-desktop][data-desktop-max][data-skin="w98"] .dk-ticker { display: none; }
+  html[data-desktop][data-desktop-max]:not([data-desktop-win])[data-skin="w98"] .dk-ticker { display: none; }
   html[data-desktop][data-skin="w98"] .dk-ticker.marquee #dkTickerText { display: inline-block; padding-left: 100%; animation: dkTicker 40s linear infinite; }
   html[data-desktop][data-skin="w98"] .dk-ticker.marquee:hover #dkTickerText { animation-play-state: paused; }
   html[data-desktop][data-skin="w98"] .dk-clock { height: 26px; min-width: 84px; display: flex; align-items: center; justify-content: center; padding: 0 10px; font-size: 12px; background: #c0c0c0; box-shadow: var(--w98-sunken); }
@@ -7143,7 +7143,7 @@ html[data-desktop][data-skin="w98"] .dk-stack { display: flex; flex-direction: c
 
 /* PC 바탕화면: 앱 아이콘 키우기 (위젯·창은 --dk-left 만큼 오른쪽으로 밀려 가로가 그만큼 줄어든다) */
 @media (min-width: 900px) {
-  html[data-desktop][data-skin="w98"]:not([data-desktop-max]) { --dk-left: 168px; }
+  html[data-desktop][data-skin="w98"]:not([data-desktop-max]), html[data-desktop][data-desktop-win][data-skin="w98"] { --dk-left: 168px; }
   html[data-desktop][data-skin="w98"] .tab-item, html[data-desktop][data-skin="w98"] .tab-item.active, html[data-desktop][data-skin="w98"] .tab-item:active, html[data-desktop][data-skin="w98"] .desk-ico, html[data-desktop][data-skin="w98"] .desk-ico:active { left: 8px; width: 148px !important; height: 100px !important; gap: 5px !important; }
   html[data-desktop][data-skin="w98"] .tab-item .tab-icon, html[data-desktop][data-skin="w98"] .desk-ico .tab-icon { font-size: 54px !important; line-height: 62px; height: 62px; }
   html[data-desktop][data-skin="w98"] .tab-item .tab-label, html[data-desktop][data-skin="w98"] .desk-ico .tab-label { font-size: 15px !important; padding: 1px 6px; }
@@ -7739,7 +7739,7 @@ html[data-desktop][data-skin="mac"] .dk-task.pressed { box-shadow: var(--w98-sun
 html[data-desktop][data-skin="mac"] .dk-sep { width: 2px; height: 22px; box-shadow: inset 1px 0 #808080, inset -1px 0 #fff; }
 html[data-desktop][data-skin="mac"] .dk-spacer { flex: 1; }
 html[data-desktop][data-skin="mac"] .dk-ticker { display: block; position: fixed; z-index: 20; left: var(--dk-left); right: var(--dk-right); top: 8px; height: 24px; overflow: hidden; padding: 0 10px; background: #fff; box-shadow: var(--w98-sunken); font-size: 12px; line-height: 24px; white-space: nowrap; color: #000; }
-html[data-desktop][data-desktop-max][data-skin="mac"] .dk-ticker { display: none; }
+html[data-desktop][data-desktop-max]:not([data-desktop-win])[data-skin="mac"] .dk-ticker { display: none; }
 html[data-desktop][data-skin="mac"] .dk-ticker.marquee #dkTickerText { display: inline-block; padding-left: 100%; animation: dkTicker 40s linear infinite; }
 html[data-desktop][data-skin="mac"] .dk-ticker.marquee:hover #dkTickerText { animation-play-state: paused; }
 html[data-desktop][data-skin="mac"] .dk-clock { height: 26px; min-width: 84px; display: flex; align-items: center; justify-content: center; padding: 0 10px; font-size: 12px; background: #c0c0c0; box-shadow: var(--w98-sunken); }
@@ -7784,7 +7784,7 @@ html[data-desktop][data-skin="mac"] .dkw-check { width: 20px; height: 20px; font
 html[data-desktop][data-skin="mac"] .dkw-time { font-size: 13px; }
 }
 @media (min-width: 900px) {
-html[data-desktop][data-skin="mac"]:not([data-desktop-max]) { --dk-left: 168px; }
+html[data-desktop][data-skin="mac"]:not([data-desktop-max]), html[data-desktop][data-desktop-win][data-skin="mac"] { --dk-left: 168px; }
 html[data-desktop][data-skin="mac"] .tab-item, html[data-desktop][data-skin="mac"] .tab-item.active, html[data-desktop][data-skin="mac"] .tab-item:active, html[data-desktop][data-skin="mac"] .desk-ico, html[data-desktop][data-skin="mac"] .desk-ico:active { left: 8px; width: 148px !important; height: 100px !important; gap: 5px !important; }
 html[data-desktop][data-skin="mac"] .tab-item .tab-icon, html[data-desktop][data-skin="mac"] .desk-ico .tab-icon { font-size: 54px !important; line-height: 62px; height: 62px; }
 html[data-desktop][data-skin="mac"] .tab-item .tab-label, html[data-desktop][data-skin="mac"] .desk-ico .tab-label { font-size: 15px !important; padding: 1px 6px; }
@@ -7849,7 +7849,7 @@ html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-w
     --w98-sunken: inset 0 0 0 .5px rgba(0,0,0,.22);
     --w98-title: none;
   }
-  html[data-desktop][data-desktop-max][data-skin="mac"] { --dk-left: 0px; --dk-top: 28px; --dk-right: 0px; --dk-bottom: 40px; }
+  html[data-desktop][data-desktop-max]:not([data-desktop-win])[data-skin="mac"] { --dk-left: 0px; --dk-top: 28px; --dk-right: 0px; --dk-bottom: 40px; }
   /* 배경화면: 맥 바탕화면 그라데이션 (창은 그 위에 떠 있다) */
   html[data-desktop][data-skin="mac"] body, html[data-desktop][data-skin="mac"] #app { background: transparent !important; }
   html[data-desktop][data-skin="mac"] body { background: radial-gradient(1200px 700px at 20% 10%, #6fa8ff 0%, transparent 60%), radial-gradient(1000px 700px at 85% 90%, #c68bff 0%, transparent 60%), linear-gradient(135deg, #3b5bdb, #7048e8 55%, #c2255c) fixed !important; }
