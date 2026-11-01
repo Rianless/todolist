@@ -165,8 +165,7 @@ const DISPLAY_THEMES = [
   { id: 'dark', icon: '🌙', name: '다크', desc: '어두운 화면' }
 ];
 const DISPLAY_SKINS = [
-  { id: 'w98', icon: '🪟', name: '윈도우 98', desc: '옛날 윈도우 느낌' },
-  { id: 'desktop', icon: '🖥️', name: '바탕화면', desc: '98 바탕화면 (PC 전용)' },
+  { id: 'desktop', icon: '🖥️', name: '바탕화면', desc: '윈도우 98 바탕화면' },
   { id: 'mac', icon: '🍎', name: '맥', desc: 'macOS 느낌' },
   { id: 'classic', icon: '✨', name: '클래식', desc: '기본 스타일' }
 ];
