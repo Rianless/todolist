@@ -7028,7 +7028,7 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 .lc-dow { text-align: center; font-size: 11px; font-weight: 700; padding: 4px 0; color: var(--text3); }
 .lc-dow.sun, .lc-cell.sun .lc-day { color: var(--red); }
 .lc-dow.sat, .lc-cell.sat .lc-day { color: var(--accent); }
-.lc-cell { display: flex; flex-direction: column; gap: 2px; min-height: 0; padding: 7px 9px; overflow: hidden; cursor: pointer; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; }
+.lc-cell { display: flex; flex-direction: column; gap: 1px; min-height: 0; padding: 5px 6px; overflow: hidden; cursor: pointer; background: var(--panel2); border: 1px solid var(--border); border-radius: 8px; }
 .lc-cell.empty { background: transparent; border-color: transparent; cursor: default; }
 .lc-cell:not(.empty):hover { border-color: var(--accent); }
 .lc-day { font-size: clamp(14px, 1.7vh, 19px); font-weight: 700; color: var(--text); }
@@ -7036,7 +7036,10 @@ html[data-desktop][data-desk-app="bookmark"][data-skin="w98"] .pc-topbar-title::
 .lc-exp { color: var(--red); }
 .lc-inc { color: var(--green); }
 .lc-cell.today .lc-day { text-decoration: underline; }
-.lc-sub { font-size: clamp(10px, 1.2vh, 13px); font-weight: 600; color: #9d00ff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; cursor: pointer; }
+.lc-sub { display: flex; align-items: baseline; gap: 4px; line-height: 1.25; font-size: clamp(10px, 1.2vh, 13px); font-weight: 600; color: #9d00ff; white-space: nowrap; overflow: hidden; cursor: pointer; }
+.lc-sub-name { flex: 0 1 auto; min-width: 0; overflow: hidden; text-overflow: ellipsis; }
+.lc-sub-amt { flex: none; margin-left: auto; font-weight: 700; }
+.lc-sub-short { display: none; }
 .lc-cell.selected { background: var(--tab-act); outline: 2px solid var(--accent); outline-offset: -2px; }
 .lc-detail-head { padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--border); }
 .lc-detail-date { font-size: 16px; font-weight: 800; color: var(--text); }
@@ -7078,7 +7081,8 @@ html[data-skin="w98"] .lc-detail-head { border-bottom-color: #808080; }
   .lc-grid { gap: 3px; grid-auto-rows: minmax(54px, auto); }
   .lc-cell { padding: 4px 1px; align-items: center; text-align: center; border-radius: 6px; }
   .lc-day { font-size: 13px; }
-  .lc-exp, .lc-inc, .lc-sub { display: none; }   /* 금액·구독 이름은 글자가 작아 안 보여서 점으로만 표시하고, 자세한 건 날짜를 눌러 아래에서 본다 */
+  .lc-exp, .lc-inc, .lc-sub { display: none; }
+  .lc-sub-short { display: block; margin-top: 2px; font-size: 9.5px; font-weight: 700; line-height: 1.2; color: #9d00ff; white-space: nowrap; }   /* 금액·구독 이름은 글자가 작아 안 보여서 점으로만 표시하고, 자세한 건 날짜를 눌러 아래에서 본다 */
   .lc-dots { display: flex; justify-content: center; gap: 4px; margin-top: 6px; }
   .lc-pt { width: 8px; height: 8px; border-radius: 50%; }
   .lc-pt.exp { background: var(--red); }
@@ -7689,3 +7693,5 @@ html[data-theme="dark"][data-skin="w98"] :is(.mp-card-icon, .ds-ico) { filter: i
 html[data-skin="w98"] .lc-add-btn { color: #000 !important; background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border-radius: 0; }
 .lc-move-btn { min-width: 28px; padding-left: 6px; padding-right: 6px; }
 .lc-move-btn:disabled { opacity: .3; cursor: default; }
+
+.lc-sub-more { font-weight: 600; opacity: .85; }
