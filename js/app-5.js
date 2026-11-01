@@ -1439,10 +1439,24 @@ function renderLedgerCatManager() {
   names.forEach(name => {
     const row = document.createElement('div');
     row.className = 'cheongdo-manager-row';
-    row.style.gridTemplateColumns = 'minmax(0,1fr) auto auto';
+    row.style.gridTemplateColumns = 'minmax(0,1fr) auto auto auto auto';
     const label = document.createElement('span');
     label.className = 'cheongdo-manager-name';
     label.textContent = name;
+    const idx = names.indexOf(name);
+    const mkMove = (txt, dir, label) => {
+      const b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'cheongdo-visibility-btn lc-move-btn';
+      b.textContent = txt;
+      b.setAttribute('aria-label', `${name} ${label}`);
+      const edge = dir < 0 ? idx === 0 : idx === names.length - 1;
+      b.disabled = edge;
+      b.onclick = () => moveLedgerCategory(name, dir);
+      return b;
+    };
+    const up = mkMove('▲', -1, '위로');
+    const down = mkMove('▼', 1, '아래로');
     const edit = document.createElement('button');
     edit.type = 'button';
     edit.className = 'cheongdo-visibility-btn';
@@ -1455,7 +1469,7 @@ function renderLedgerCatManager() {
     del.textContent = '삭제';
     del.setAttribute('aria-label', `${name} 삭제`);
     del.onclick = () => deleteLedgerCategory(name);
-    row.append(label, edit, del);
+    row.append(label, up, down, edit, del);
     list.appendChild(row);
   });
 }
@@ -1477,6 +1491,15 @@ function addLedgerCategory() {
   }
   list.push(name);
   input.value = '';
+  afterLedgerCategoryChange();
+}
+
+// 카테고리 순서 바꾸기 (위/아래로 한 칸). 가계부 입력창의 카테고리 목록도 이 순서를 따른다.
+function moveLedgerCategory(name, dir) {
+  const list = ledgerCategories[ledgerCatTab] || [];
+  const i = list.indexOf(name), j = i + dir;
+  if (i < 0 || j < 0 || j >= list.length) return;
+  [list[i], list[j]] = [list[j], list[i]];
   afterLedgerCategoryChange();
 }
 
