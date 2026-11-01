@@ -891,7 +891,9 @@ function saveLedger() {
 
   if (currentMainTab === 'calendar') { if(currentCalSubTab==='cal') renderCal(); else if(currentCalSubTab==='week') renderWeek(); }
 
-  showToast(wasEditing ? '가계부 내역을 수정했습니다' : `${ledgerType === 'income' ? '수입' : '지출'}을 저장했습니다`, { type: 'success', duration: 1800 });
+  const accNote = ledgerAccountNote(entry);
+  if (accNote) showToast(accNote.long, { type: 'info', duration: 4200 });
+  else showToast(wasEditing ? '가계부 내역을 수정했습니다' : `${ledgerType === 'income' ? '수입' : '지출'}을 저장했습니다`, { type: 'success', duration: 1800 });
 
 }
 
@@ -1349,11 +1351,23 @@ function ledgerRows(entries, trs) {
   ].sort((a, b) => b.date.localeCompare(a.date) || (b.id - a.id));
 }
 
+// 통장에 연결한 내역이라도 통장 기준일 이전이거나 아직 오지 않은 날짜면 잔액에 안 들어간다. 그 이유를 알려 준다.
+function ledgerAccountNote(e) {
+  if (!e || e.accountId == null || !e.date) return null;
+  const acc = accounts.find(a => a.id === e.accountId);
+  if (!acc) return null;
+  const base = acc.baseDate || '0000-01-01';
+  if (e.date < base) return { short: '⚠️ 잔액 미반영 (통장 기준일 이전)', long: `‘${acc.name}’ 기준일(${base}) 이전 날짜라 잔액에는 반영되지 않아요. 통장 수정에서 기준일을 바꿀 수 있어요` };
+  if (e.date > fmtDate(new Date())) return { short: '⏳ 잔액 반영 예정 (날짜가 되면)', long: `오늘 이후 날짜라 해당 날짜가 되면 ‘${acc.name}’ 잔액에 반영돼요` };
+  return null;
+}
+
 function ledgerEntryMeta(e) {
   const parts = [e.category, accountName(e.accountId)].filter(Boolean);
   const extras = ledgerExtrasText(e);
   return (parts.length ? `<div class="ledger-entry-cat">${escapeLedgerText(parts.join(' · '))}</div>` : '') +
-    (extras ? `<div class="ledger-entry-cat">💸 ${escapeLedgerText(extras)}</div>` : '');
+    (extras ? `<div class="ledger-entry-cat">💸 ${escapeLedgerText(extras)}</div>` : '') +
+    (ledgerAccountNote(e) ? `<div class="ledger-entry-cat">${escapeLedgerText(ledgerAccountNote(e).short)}</div>` : '');
 }
 
 function transferRowHtml(t) {
