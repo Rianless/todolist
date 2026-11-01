@@ -674,7 +674,7 @@ function loadData() {
 
         document.documentElement.setAttribute('data-theme', payload.theme);
 
-        document.getElementById('themeBtn').textContent = payload.theme === 'dark' ? '☀️' : '🌙';
+        if (typeof renderDisplaySettings === 'function') renderDisplaySettings();
 
       }
 
