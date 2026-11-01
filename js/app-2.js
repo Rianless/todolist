@@ -472,6 +472,7 @@ function openMemoAdd(id) {
   editingMemoId = m ? m.id : null;
   document.getElementById('memoModalTitle').textContent = m ? '메모 수정' : '메모 추가';
   document.getElementById('memoText').value = m ? m.content : '';
+  document.getElementById('memoTitleField').value = m ? String(m.title || '') : '';
   history.pushState({modal:'memo'}, '');
   document.getElementById('memoModal').classList.add('open');
   setTimeout(() => document.getElementById('memoText').focus(), 200);
@@ -481,12 +482,15 @@ function closeMemoModal() { document.getElementById('memoModal').classList.remov
 
 function saveMemoModal() {
   const text = document.getElementById('memoText').value.replace(/\s+$/, '');
-  if (!text.trim()) { closeMemoModal(); return; }
+  const title = document.getElementById('memoTitleField').value.trim();
+  if (!text.trim() && !title) { closeMemoModal(); return; }
   if (editingMemoId !== null) {
     const m = memos.find(x => x.id === editingMemoId);
-    if (m) { m.content = text; m.updated = new Date().toISOString(); }
+    if (m) { m.content = text; if (title) m.title = title; else delete m.title; m.updated = new Date().toISOString(); }
   } else {
-    memos.push({ id: memoNextId++, content: text, date: fmtDate(new Date()), updated: new Date().toISOString() });
+    const nm = { id: memoNextId++, content: text, date: fmtDate(new Date()), updated: new Date().toISOString() };
+    if (title) nm.title = title;
+    memos.push(nm);
   }
   editingMemoId = null;
   closeMemoModal();
@@ -547,6 +551,7 @@ function renderMemoList() {
   el.innerHTML = list.map(m => `
     <div class="memo-item${m.pinned ? ' pinned' : ''}" onclick="openMemoAdd(${m.id})">
       <div class="memo-item-date">${m.pinned ? '📌 ' : ''}${m.date}</div>
+      ${String(m.title || '').trim() ? `<div class="memo-item-title">${escapeLedgerText(m.title.trim())}</div>` : ''}
       <div class="memo-item-content">${escapeLedgerText(m.content)}</div>
       <button class="memo-item-pin" aria-label="${m.pinned ? '고정 해제' : '맨 위에 고정'}" onclick="toggleMemoPin(${m.id});event.stopPropagation()">${m.pinned ? '📌' : '📍'}</button>
       <button class="memo-item-del" aria-label="메모 삭제" onclick="deleteMemo(${m.id});event.stopPropagation()">✕</button>
