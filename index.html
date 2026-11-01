@@ -822,8 +822,10 @@
           <button type="button" id="memoDelBtn" onclick="memoDeleteActive()" title="이 메모 지우기">🗑️ 지우기</button>
           <span class="mm-tools-hint">입력하면 자동으로 저장돼요</span>
         </div>
-        <input type="text" id="memoTitleInput" class="mm-title-input" maxlength="60" placeholder="제목 (비우면 첫 줄이 제목이 돼요)" oninput="memoInput()" aria-label="메모 제목" autocomplete="off">
-        <textarea id="memoEditor" class="mm-editor" spellcheck="false" oninput="memoInput()" placeholder="왼쪽에서 메모를 고르거나 '새 메모'를 눌러 시작하세요." aria-label="메모 내용"></textarea>
+        <div class="mm-doc">
+          <input type="text" id="memoTitleInput" class="mm-title-input" maxlength="60" placeholder="제목 (비우면 첫 줄이 제목이 돼요)" oninput="memoInput()" aria-label="메모 제목" autocomplete="off">
+          <textarea id="memoEditor" class="mm-editor" spellcheck="false" oninput="memoInput()" placeholder="왼쪽에서 메모를 고르거나 '새 메모'를 눌러 시작하세요." aria-label="메모 내용"></textarea>
+        </div>
         <div class="mm-status" id="memoStatus"></div>
       </section>
     </div>
