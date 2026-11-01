@@ -309,7 +309,6 @@ const DK_FOLDERS = {
 };
 
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
-const DK_PHONE_CARD = { memo: 'mpCardMemo', bookmark: 'mpCardBookmark' };
 
 document.addEventListener('click', closeStartMenu);
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDesktopFolder(); });
