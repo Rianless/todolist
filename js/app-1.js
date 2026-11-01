@@ -842,22 +842,38 @@ async function loadItemsFromAPI() {
 
 // 화면 스타일: 'desktop'(윈도우 98 바탕화면) → 'mac'(macOS 느낌) → 'classic' → 다시 'desktop'  (PC·폰 공통, 예전 'w98' 은 'desktop' 으로 본다)
 function currentSkinName() {
+  const pref = document.documentElement.getAttribute('data-skin-pref');
+  if (pref === 'desktop' || pref === 'mac' || pref === 'classic') return pref;
   const h = document.documentElement;
   if (h.getAttribute('data-skin') === 'mac') return 'mac';
   if (h.getAttribute('data-skin') !== 'w98') return 'classic';
   return 'desktop';
 }
 
+// 고른 스킨(data-skin-pref)에 맞춰 화면 속성을 맞춘다.
+// 맥은 PC 폭(900px 이상)이면 바탕화면(아이콘·위젯·창) 모드, 폰이면 지금의 맥 화면.
+function skinApplyAttrs(opts) {
+  const h = document.documentElement;
+  const pref = currentSkinName();
+  const desktop = pref === 'desktop' || (pref === 'mac' && window.innerWidth >= 900);
+  h.setAttribute('data-skin', pref === 'desktop' ? 'w98' : pref);
+  if (desktop) {
+    if (!h.hasAttribute('data-desktop')) { h.setAttribute('data-desktop', '1'); if (!(opts && opts.keepWin)) h.setAttribute('data-desktop-win', 'min'); }
+  } else {
+    h.removeAttribute('data-desktop'); h.removeAttribute('data-desktop-win'); h.removeAttribute('data-desktop-max');
+  }
+}
+
 function applySkin(name) {
   if (name === 'w98') name = 'desktop';
   const h = document.documentElement;
-  h.setAttribute('data-skin', name === 'classic' ? 'classic' : name === 'mac' ? 'mac' : 'w98');
-  if (name === 'desktop') h.setAttribute('data-desktop', '1'); else h.removeAttribute('data-desktop');
-  h.removeAttribute('data-desktop-win');
-  h.removeAttribute('data-desktop-max');
+  h.setAttribute('data-skin-pref', name === 'classic' ? 'classic' : name === 'mac' ? 'mac' : 'desktop');
+  h.removeAttribute('data-desktop'); h.removeAttribute('data-desktop-win'); h.removeAttribute('data-desktop-max');
+  skinApplyAttrs();
   try { localStorage.setItem('rianless_skin', name); } catch (e) {}
   statsGuard();
   desktopSync();
+  try { updateDesktopWidgets(); } catch (e) {}
 }
 
 function toggleSkin() {
