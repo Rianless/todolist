@@ -7680,3 +7680,12 @@ html[data-theme="dark"][data-skin="w98"] { filter: invert(1) hue-rotate(180deg);
 html[data-theme="dark"][data-skin="w98"] :is(img, video, canvas):not(#mascot *, #mascotTab *), html[data-theme="dark"][data-skin="w98"] :is(#mascot, #mascotTab) { filter: invert(1) hue-rotate(180deg); }
 html[data-theme="dark"][data-skin="w98"] .tab-icon { filter: invert(1) hue-rotate(180deg) drop-shadow(1px 1px 0 rgba(0,0,0,.5)) !important; }
 html[data-theme="dark"][data-skin="w98"] :is(.mp-card-icon, .ds-ico) { filter: invert(1) hue-rotate(180deg); }
+
+
+/* ===== 가계부 카테고리 편집: 이름 입력칸은 넓게, 추가 버튼은 작게, 순서 버튼 ===== */
+.lc-add-row { display: flex; align-items: stretch; gap: 6px; margin: 0 0 12px; }
+.lc-add-row .form-input { flex: 1 1 auto; width: auto; min-width: 0; padding: 10px 12px; font-size: 14px; }
+.lc-add-btn { flex: none; width: auto; min-width: 0; padding: 0 14px; font-size: 12px; font-weight: 700; white-space: nowrap; color: #fff; background: var(--accent); border: none; border-radius: var(--radius-sm, 6px); cursor: pointer; }
+html[data-skin="w98"] .lc-add-btn { color: #000 !important; background: #c0c0c0 !important; box-shadow: var(--w98-raised) !important; border-radius: 0; }
+.lc-move-btn { min-width: 28px; padding-left: 6px; padding-right: 6px; }
+.lc-move-btn:disabled { opacity: .3; cursor: default; }

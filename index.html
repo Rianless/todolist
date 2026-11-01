@@ -967,7 +967,8 @@
     <div class="modal-header">
       <div>
         <div class="modal-title" id="ledgerCatTitle">가계부 카테고리 편집</div>
-        <div class="cheongdo-manager-help">카테고리를 추가, 이름 변경, 삭제할 수 있어요. 삭제해도 기존 내역은 그대로 남습니다.</div>
+        <div class="cheongdo-manager-help">카테고리를 추가, 이름 변경, 삭제할 수 있어요.</div>
+        <div class="cheongdo-manager-help">삭제해도 기존 내역은 그대로 남습니다.</div>
       </div>
       <button class="modal-close" type="button" onclick="closeLedgerCatManager()" aria-label="닫기">✕</button>
     </div>
@@ -976,11 +977,11 @@
         <button type="button" class="ledger-chip expense active" id="lcTabExpense" onclick="setLedgerCatTab('expense')" style="flex:1;">지출</button>
         <button type="button" class="ledger-chip income" id="lcTabIncome" onclick="setLedgerCatTab('income')" style="flex:1;">수입</button>
       </div>
-      <div id="ledgerCatList" class="cheongdo-manager-list"></div>
-      <div class="ledger-filter-row" style="margin-top:12px;">
-        <input class="form-input" id="ledgerCatNew" type="text" maxlength="20" placeholder="새 카테고리 이름" onkeydown="if(event.key==='Enter'){addLedgerCategory();}">
-        <button type="button" class="ledger-add-btn" style="flex:none;white-space:nowrap;" onclick="addLedgerCategory()">추가</button>
+      <div class="lc-add-row">
+        <input class="form-input" id="ledgerCatNew" type="text" maxlength="20" placeholder="새 카테고리 이름을 입력하세요" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter'){addLedgerCategory();}">
+        <button type="button" class="lc-add-btn" onclick="addLedgerCategory()">추가</button>
       </div>
+      <div id="ledgerCatList" class="cheongdo-manager-list"></div>
       <button type="button" class="ledger-export-btn" style="margin-top:10px;width:100%;" onclick="resetLedgerCategories()">기본값으로 되돌리기</button>
     </div>
   </div>
