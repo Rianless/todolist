@@ -840,16 +840,17 @@ async function loadItemsFromAPI() {
 
 ══════════════════════════════════════ */
 
-// 스킨: 'w98'(윈도우 98) → 'desktop'(98 바탕화면, PC만) → 'mac'(macOS 느낌) → 'classic' → 다시 'w98'
+// 스킨: 'desktop'(98 바탕화면) → 'mac'(macOS 느낌) → 'classic' → 다시 'desktop'  (예전 'w98' 은 'desktop' 으로 본다)
 // 바탕화면은 data-skin="w98" 위에 data-desktop 을 더한 것이라 폰(900px 미만)에서는 98 과 똑같이 보인다.
 function currentSkinName() {
   const h = document.documentElement;
   if (h.getAttribute('data-skin') === 'mac') return 'mac';
   if (h.getAttribute('data-skin') !== 'w98') return 'classic';
-  return h.hasAttribute('data-desktop') ? 'desktop' : 'w98';
+  return 'desktop';
 }
 
 function applySkin(name) {
+  if (name === 'w98') name = 'desktop';
   const h = document.documentElement;
   h.setAttribute('data-skin', name === 'classic' ? 'classic' : name === 'mac' ? 'mac' : 'w98');
   if (name === 'desktop') h.setAttribute('data-desktop', '1'); else h.removeAttribute('data-desktop');
@@ -872,10 +873,9 @@ macClockTick();
 setInterval(macClockTick, 15000);
 
 function toggleSkin() {
-  const order = ['w98', 'desktop', 'mac', 'classic'];
+  const order = ['desktop', 'mac', 'classic'];
   const cur = currentSkinName();
-  // 폰에 'desktop' 이 저장돼 있으면(98 과 똑같이 보임) 한 번에 클래식으로
-  applySkin(order.includes(cur) ? order[(order.indexOf(cur) + 1) % order.length] : 'classic');
+  applySkin(order[(order.indexOf(cur) + 1) % order.length]);
 }
 
 // 이번 주(오늘부터 토요일까지) 남은 구독 결제를 날짜순으로. 한 주가 두 달에 걸쳐도 둘 다 본다.

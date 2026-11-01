@@ -7628,7 +7628,7 @@ html[data-skin="mac"] ::-webkit-scrollbar-thumb { background: rgba(0,0,0,.25); b
 .ds-check { flex: none; width: 20px; height: 20px; line-height: 20px; text-align: center; font-size: 13px; font-weight: 700; color: #fff; border-radius: 50%; background: transparent; }
 .ds-opt.on .ds-check { background: var(--accent); }
 .ds-note { margin-top: 12px; font-size: 11px; line-height: 1.5; color: var(--text3); }
-@media (min-width: 900px) { .ds-grid:not(.ds-grid-2) { grid-template-columns: 1fr 1fr; } }
+@media (min-width: 900px) { .ds-grid:not(.ds-grid-2) { grid-template-columns: repeat(3, 1fr); } }
 html[data-skin="w98"] .ds-opt { background: #c0c0c0; border: none; border-radius: 0; box-shadow: var(--w98-raised); color: #000; }
 html[data-skin="w98"] .ds-opt .ds-txt b { color: #000; }
 html[data-skin="w98"] .ds-opt .ds-txt small { color: #404040; }
