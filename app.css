@@ -6788,7 +6788,7 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   /* ----- 메모장 앱: 왼쪽 목록 + 오른쪽 탭·편집기 ----- */
   html[data-desktop][data-main-tab="memo"][data-skin="w98"] #mainContent { overflow: hidden; }
   html[data-desktop][data-main-tab="memo"][data-skin="w98"] #viewMemo.active { display: flex !important; flex-direction: row !important; gap: 8px; position: absolute; inset: 0; height: auto; margin: 0; padding: 8px; box-sizing: border-box; }
-  .mm-side { flex: 0 0 270px; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
+  .mm-side { flex: 0 0 200px; display: flex; flex-direction: column; min-height: 0; gap: 6px; }
   .mm-side-top { display: flex; flex-direction: column; gap: 6px; }
   .mm-new { padding: 6px 10px; font-size: 13px; font-weight: 700; color: #000 !important; }
   .mm-search { width: 100%; box-sizing: border-box; padding: 5px 8px; font-size: 12px; background: #fff; color: #000; border: none; box-shadow: var(--w98-sunken); }
