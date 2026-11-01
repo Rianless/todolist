@@ -4048,7 +4048,9 @@ body::after {
 
 .memo-item.pinned .memo-item-pin { opacity:1; }
 
-.memo-item-content { padding-right: 52px; }
+.memo-item-content { padding-right: 52px; overflow-wrap: anywhere; word-break: break-word; min-width: 0; }
+.memo-item { min-width: 0; max-width: 100%; box-sizing: border-box; overflow: hidden; }
+#memoList { min-width: 0; max-width: 100%; }
 
 .memo-empty { text-align:center; color:var(--text3); padding:30px 0; font-size:12px; }
 
@@ -6790,8 +6792,8 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   .mm-side-top { display: flex; flex-direction: column; gap: 6px; }
   .mm-new { padding: 6px 10px; font-size: 13px; font-weight: 700; color: #000 !important; }
   .mm-search { width: 100%; box-sizing: border-box; padding: 5px 8px; font-size: 12px; background: #fff; color: #000; border: none; box-shadow: var(--w98-sunken); }
-  .mm-list { flex: 1; min-height: 0; overflow-y: auto; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
-  .mm-item { display: block; width: 100%; text-align: left; padding: 6px 8px; cursor: pointer; background: transparent !important; box-shadow: none !important; color: #000 !important; border: none; border-bottom: 1px dotted #c0c0c0; }
+  .mm-list { flex: 1; min-height: 0; min-width: 0; overflow-x: hidden; overflow-y: auto; background: #fff; box-shadow: var(--w98-sunken); padding: 2px; }
+  .mm-item { display: block; width: 100%; max-width: 100%; box-sizing: border-box; overflow: hidden; text-align: left; padding: 6px 8px; cursor: pointer; background: transparent !important; box-shadow: none !important; color: #000 !important; border: none; border-bottom: 1px dotted #c0c0c0; }
   .mm-item.active { background: #000080 !important; color: #fff !important; }
   .mm-item-title { display: flex; gap: 4px; font-size: 13px; font-weight: 700; }
   .mm-item-title span { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
