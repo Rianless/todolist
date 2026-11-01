@@ -8101,6 +8101,11 @@ html[data-desktop][data-desktop-win][data-skin="mac"] .dk-folder-item .tab-label
   html[data-desktop][data-skin="mac"] .mm-status, html[data-desktop][data-skin="mac"] .bk-status, html[data-desktop][data-skin="mac"] .mm-count { color: #86868b; background: transparent; box-shadow: none; }
   html[data-desktop][data-skin="mac"] .mm-new { color: #007aff !important; font-weight: 600; }
 
+  /* 달력 위젯의 월 이동 화살표, 메모 위젯의 수정·고정·삭제: 흰 바탕 없이 글자만 */
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-nav button, html[data-desktop][data-skin="mac"] .dk-widget .mf-actions button { background: transparent !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+  html[data-desktop][data-skin="mac"] .dk-widget .mf-actions button { color: #007aff !important; }
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-nav button:active, html[data-desktop][data-skin="mac"] .dk-widget .mf-actions button:active { opacity: .5; }
+
   /* 마스코트는 독 위로 */
   html[data-desktop][data-skin="mac"] #mascot, html[data-desktop][data-skin="mac"] #mascotTab { bottom: calc(var(--dk-bar) + 6px) !important; }
 }
