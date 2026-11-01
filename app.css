@@ -4072,8 +4072,8 @@ body::after {
 .mf-content { margin: 3px 0 6px; font-size: 13px; line-height: 1.5; color: var(--text); white-space: pre-wrap; word-break: break-word; }
 .mf-content a { color: var(--accent); }
 .mf-title { margin-top: 3px; font-size: 14px; color: var(--text); overflow-wrap: anywhere; }
-.mf-actions { display: flex; gap: 14px; }
-.mf-actions button { padding: 0; font-size: 11px; color: var(--text3); background: none; border: none; box-shadow: none; cursor: pointer; }
+.mf-actions { display: flex; flex-wrap: wrap; gap: 4px 12px; }
+.mf-actions button { white-space: nowrap; padding: 0; font-size: 11px; color: var(--text3); background: none; border: none; box-shadow: none; cursor: pointer; }
 .mf-actions button:hover { color: var(--accent); }
 .mf-post.pinned { border-left-color: var(--accent); }
 
@@ -7672,3 +7672,11 @@ html[data-skin="w98"] .ds-opt.on .ds-txt b { color: #000080; }
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-folder-item .tab-icon { font-size: 34px !important; line-height: 40px; height: 40px; filter: none; }
   html[data-desktop][data-desktop-win][data-skin="w98"] .dk-folder-item .tab-label { font-size: 12px !important; color: #000 !important; text-shadow: none !important; padding: 1px 4px; }
 }
+
+/* ===== 바탕화면 스킨의 다크 테마 =====
+   이 스킨은 색을 하나하나 정해 둬서 테마 값이 닿지 않는다. 화면 전체를 뒤집어 어두운 98 로 만들고,
+   그림(아이콘·이미지·마스코트)은 한 번 더 뒤집어 원래 색으로 돌려놓는다. */
+html[data-theme="dark"][data-skin="w98"] { filter: invert(1) hue-rotate(180deg); }
+html[data-theme="dark"][data-skin="w98"] :is(img, video, canvas):not(#mascot *, #mascotTab *), html[data-theme="dark"][data-skin="w98"] :is(#mascot, #mascotTab) { filter: invert(1) hue-rotate(180deg); }
+html[data-theme="dark"][data-skin="w98"] .tab-icon { filter: invert(1) hue-rotate(180deg) drop-shadow(1px 1px 0 rgba(0,0,0,.5)) !important; }
+html[data-theme="dark"][data-skin="w98"] :is(.mp-card-icon, .ds-ico) { filter: invert(1) hue-rotate(180deg); }
