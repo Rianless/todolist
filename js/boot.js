@@ -298,6 +298,7 @@ const DK_FOLDERS = {
     { icon: '📊', label: '통계', tab: 'category', card: 'mpCardStats' },
   ] },
   mypage: { title: '📁 마이페이지', items: [
+    { icon: '🎨', label: '화면 설정', tab: 'mypage', card: 'mpCardDisplay' },
     { icon: '👤', label: '닉네임', tab: 'mypage', card: 'mpCardNickname' },
     { icon: '🏷️', label: '카테고리', tab: 'mypage', card: 'mpCardCat' },
     { icon: '⏳', label: 'D-day', tab: 'mypage', card: 'mpCardDday' },
