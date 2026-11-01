@@ -1056,7 +1056,7 @@ function renderLedgerCalendar() {
       (d && (d.expense || d.income || d.subs.length) ? `<span class="lc-dots" aria-hidden="true">${d.expense ? '<i class="lc-pt exp"></i>' : ''}${d.income ? '<i class="lc-pt inc"></i>' : ''}${d.subs.length ? '<i class="lc-pt sub"></i>' : ''}</span>` : '') +
       (d && d.expense ? `<span class="lc-exp">-<span class="lc-full">${d.expense.toLocaleString()}</span><span class="lc-short">${compactLedgerAmount(d.expense)}</span></span>` : '') +
       (d && d.income ? `<span class="lc-inc">+<span class="lc-full">${d.income.toLocaleString()}</span><span class="lc-short">${compactLedgerAmount(d.income)}</span></span>` : '') +
-      (d && d.subs.length ? d.subs.slice(0, 2).map(s => `<span class="lc-sub" title="구독 수정 · ${escapeLedgerText(s.name)}" onclick="event.stopPropagation();ledgerCalSelect('${ds}');editSubscription(${s.subIndex})">🔖 ${escapeLedgerText(s.name)}</span>`).join('') + (d.subs.length > 2 ? `<span class="lc-sub">+${d.subs.length - 2}</span>` : '') : '') +
+      (d && d.subs.length ? d.subs.slice(0, 2).map(s => `<span class="lc-sub" title="구독 수정 · ${escapeLedgerText(s.name)} ${(Number(s.amount) || 0).toLocaleString()}원${s.counted ? '' : ' (지출에 합산 안 함)'}" onclick="event.stopPropagation();ledgerCalSelect('${ds}');editSubscription(${s.subIndex})"><span class="lc-sub-name">${escapeLedgerText(s.name)}</span><span class="lc-sub-amt">${(Number(s.amount) || 0).toLocaleString()}</span></span>`).join('') + (d.subs.length > 2 ? `<span class="lc-sub lc-sub-more">+${d.subs.length - 2}건 더</span>` : '') + `<span class="lc-sub-short">${d.subs.reduce((sum, x) => sum + (Number(x.amount) || 0), 0).toLocaleString()}</span>` : '') +
       `</div>`;
   }
   grid.innerHTML = html;
