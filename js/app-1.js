@@ -851,11 +851,11 @@ function currentSkinName() {
 }
 
 // 고른 스킨(data-skin-pref)에 맞춰 화면 속성을 맞춘다.
-// 맥은 PC 폭(900px 이상)이면 바탕화면(아이콘·위젯·창) 모드, 폰이면 지금의 맥 화면.
+// 바탕화면과 맥은 PC·폰 모두 바탕화면(아이콘·위젯·창) 모드.
 function skinApplyAttrs(opts) {
   const h = document.documentElement;
   const pref = currentSkinName();
-  const desktop = pref === 'desktop' || (pref === 'mac' && window.innerWidth >= 900);
+  const desktop = pref === 'desktop' || pref === 'mac';
   h.setAttribute('data-skin', pref === 'desktop' ? 'w98' : pref);
   if (desktop) {
     if (!h.hasAttribute('data-desktop')) { h.setAttribute('data-desktop', '1'); if (!(opts && opts.keepWin)) h.setAttribute('data-desktop-win', 'closed'); }   // 처음엔 열린 창이 없다 (작업표시줄에도 창 단추가 없음)
