@@ -76,9 +76,7 @@ function desktopTaskClick() {
   desktopSync();
 }
 function desktopOpen(tab, cardId) {
-  // 폰에는 메모·북마크·통계 전용 창이 없어서 마이페이지의 그 카드를 펼쳐 보여 준다
-  let app = null;
-  if (window.innerWidth < 900 && DK_PHONE_CARD[tab]) { app = tab; cardId = DK_PHONE_CARD[tab]; tab = 'mypage'; }
+  const app = null;
   setMainTab(tab, document.getElementById('mainTab-' + tab));
   deskApp = app;
   desktopSync();
@@ -97,8 +95,7 @@ function desktopOpen(tab, cardId) {
 
 // 바탕화면(PC)에서는 가계부·마이페이지 아이콘이 바로 열리는 대신 폴더 창을 먼저 연다
 function deskIconClick(tab, btn) {
-  if (document.documentElement.hasAttribute('data-desktop') && window.innerWidth >= 900) desktopFolder(tab);
-  else setMainTab(tab, btn);
+  desktopFolder(tab);
 }
 
 function desktopFolder(name) {
@@ -164,22 +161,14 @@ const DISPLAY_THEMES = [
   { id: 'light', icon: '☀️', name: '라이트', desc: '밝은 화면' },
   { id: 'dark', icon: '🌙', name: '다크', desc: '어두운 화면' }
 ];
-const DISPLAY_SKINS = [
-  { id: 'desktop', icon: '🖥️', name: '바탕화면', desc: '윈도우 98 바탕화면' },
-  { id: 'mac', icon: '🍎', name: '맥', desc: 'macOS 느낌' },
-  { id: 'classic', icon: '✨', name: '클래식', desc: '기본 스타일' }
-];
 function renderDisplaySettings() {
-  const tl = document.getElementById('dsThemeList'), sl = document.getElementById('dsSkinList');
-  if (!tl || !sl) return;
+  const tl = document.getElementById('dsThemeList');
+  if (!tl) return;
   const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
-  const skin = currentSkinName();
   const opt = (o, on, fn) => `<button type="button" class="ds-opt${on ? ' on' : ''}" role="radio" aria-checked="${on}" onclick="${fn}('${o.id}')">` +
     `<span class="ds-ico" aria-hidden="true">${o.icon}</span><span class="ds-txt"><b>${o.name}</b><small>${o.desc}</small></span><span class="ds-check" aria-hidden="true">${on ? '✓' : ''}</span></button>`;
   tl.innerHTML = DISPLAY_THEMES.map(o => opt(o, o.id === theme, 'setTheme')).join('');
-  sl.innerHTML = DISPLAY_SKINS.map(o => opt(o, o.id === skin, 'pickSkin')).join('');
 }
-function pickSkin(name) { applySkin(name); renderDisplaySettings(); }
 
 function updateHeaderBadges() {
 

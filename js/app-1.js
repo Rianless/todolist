@@ -840,26 +840,8 @@ async function loadItemsFromAPI() {
 
 ══════════════════════════════════════ */
 
-// 스킨: 'desktop'(98 바탕화면) → 'mac'(macOS 느낌) → 'classic' → 다시 'desktop'  (예전 'w98' 은 'desktop' 으로 본다)
-// 바탕화면은 data-skin="w98" 위에 data-desktop 을 더한 것이라 폰(900px 미만)에서는 98 과 똑같이 보인다.
-function currentSkinName() {
-  const h = document.documentElement;
-  if (h.getAttribute('data-skin') === 'mac') return 'mac';
-  if (h.getAttribute('data-skin') !== 'w98') return 'classic';
-  return 'desktop';
-}
-
-function applySkin(name) {
-  if (name === 'w98') name = 'desktop';
-  const h = document.documentElement;
-  h.setAttribute('data-skin', name === 'classic' ? 'classic' : name === 'mac' ? 'mac' : 'w98');
-  if (name === 'desktop') h.setAttribute('data-desktop', '1'); else h.removeAttribute('data-desktop');
-  h.removeAttribute('data-desktop-win');
-  h.removeAttribute('data-desktop-max');
-  try { localStorage.setItem('rianless_skin', name); } catch (e) {}
-  statsGuard();
-  desktopSync();
-}
+// 화면은 윈도우 98 바탕화면 하나만 쓴다 (PC·폰 공통). 예전에 저장된 스킨 값은 무시한다.
+function currentSkinName() { return 'desktop'; }
 
 // macOS 스킨 메뉴바 시계 (예: 10월 28일 (수) 오후 3:07)
 function macClockTick() {
@@ -871,12 +853,6 @@ function macClockTick() {
 }
 macClockTick();
 setInterval(macClockTick, 15000);
-
-function toggleSkin() {
-  const order = ['desktop', 'mac', 'classic'];
-  const cur = currentSkinName();
-  applySkin(order[(order.indexOf(cur) + 1) % order.length]);
-}
 
 // 이번 주(오늘부터 토요일까지) 남은 구독 결제를 날짜순으로. 한 주가 두 달에 걸쳐도 둘 다 본다.
 function desktopWeekSubs(subList, todayStr, subDatesFn) {
@@ -1214,7 +1190,7 @@ function updateDesktopWidgets() {
 // 통계 앱은 바탕화면 스킨(PC)에서만 열린다. 스킨을 바꾸거나 창이 좁아져 못 쓰게 되면 달력으로 돌아간다.
 function statsGuard() {
   try {
-    if ((currentMainTab === 'memo' || currentMainTab === 'bookmark') && !(window.innerWidth >= 900 && document.documentElement.hasAttribute('data-desktop') && document.documentElement.getAttribute('data-skin') === 'w98')) {
+    if ((currentMainTab === 'memo' || currentMainTab === 'bookmark') && !document.documentElement.hasAttribute('data-desktop')) {
       setMainTab('calendar', document.getElementById('mainTab-calendar'));
     }
   } catch (e) {}
@@ -1360,9 +1336,18 @@ function memoInput() {
   renderMemoStatus(true);
 }
 
+function memoIsPhone() { return window.innerWidth < 900; }
+// 폰: 편집기에서 목록으로 돌아간다
+function memoBack() {
+  memoFlush();
+  memoPruneEmpty(null);
+  memoTabs = []; memoActive = null;
+  renderMemoApp();
+}
 function memoOpen(id) {
   memoFlush();
   memoPruneEmpty(id);
+  if (memoIsPhone()) memoTabs = [];
   if (!memoTabs.includes(id)) memoTabs.push(id);
   memoActive = id;
   renderMemoApp();
@@ -1374,6 +1359,7 @@ function memoNew() {
   memos.push(m);
   memoSearchText = '';
   const box = document.getElementById('memoSearch'); if (box) box.value = '';
+  if (memoIsPhone()) memoTabs = [];
   memoTabs.push(m.id);
   memoActive = m.id;
   renderMemoApp();
@@ -1401,7 +1387,8 @@ function memoDeleteActive() {
   if ((String(m.content || '').trim() || String(m.title || '').trim()) && !confirm(`'${memoDisplayTitle(m)}' 메모를 지울까요?`)) return;
   memos = memos.filter(x => x.id !== m.id);
   memoTabs = memoTabs.filter(x => x !== m.id);
-  memoActive = memoTabs.length ? memoTabs[memoTabs.length - 1] : null;
+  memoActive = memoTabs.length && !memoIsPhone() ? memoTabs[memoTabs.length - 1] : null;
+  if (memoIsPhone()) memoTabs = [];
   saveMemos();
   renderMemoApp();
 }
@@ -1453,10 +1440,12 @@ function renderMemoApp() {
   if (memoActive !== null && !memos.some(m => m.id === memoActive)) memoActive = null;
   if (memoActive === null && memoTabs.length) memoActive = memoTabs[memoTabs.length - 1];
   renderMemoSide(); renderMemoTabs(); renderMemoEditor();
+  const mv = document.getElementById('viewMemo');
+  if (mv) mv.classList.toggle('mm-detail', memoActive !== null);
 }
 // 메모장을 처음 열 때: 탭이 없으면 가장 최근 메모를 연다
 function memoEnter() {
-  if (!memoTabs.length && memos.length) {
+  if (!memoTabs.length && memos.length && !memoIsPhone()) {
     const top = memoSort(memos)[0];
     memoTabs = [top.id]; memoActive = top.id;
   }

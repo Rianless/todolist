@@ -3,7 +3,7 @@
 <html lang="ko" data-theme="light">
 
 <head>
-<script>try{var __sk=localStorage.getItem("rianless_skin");if(__sk==="office"){__sk=null;localStorage.removeItem("rianless_skin");}var __r=document.documentElement;if(__sk===null||__sk==="w98"){__sk="desktop";}if(__sk==="desktop"){__r.setAttribute("data-skin","w98");__r.setAttribute("data-desktop","1");__r.setAttribute("data-desktop-win","min");}else{__r.setAttribute("data-skin",__sk===null?"w98":__sk);}}catch(e){document.documentElement.setAttribute("data-skin","w98");}</script>
+<script>try{var __r=document.documentElement;__r.setAttribute("data-skin","w98");__r.setAttribute("data-desktop","1");__r.setAttribute("data-desktop-win","min");localStorage.removeItem("rianless_skin");}catch(e){document.documentElement.setAttribute("data-skin","w98");document.documentElement.setAttribute("data-desktop","1");}</script>
 
 <meta charset="UTF-8">
 
@@ -539,7 +539,7 @@
 
         <!-- ── 닉네임 설정 카드 ── -->
 
-        <!-- ── 화면 설정 카드 (테마 · 화면 스타일) ── -->
+        <!-- ── 화면 설정 카드 (테마) ── -->
         <div class="mp-card" id="mpCardDisplay">
           <div class="mp-card-header" onclick="toggleMpCard('mpCardDisplay')">
             <span class="mp-card-icon">🎨</span>
@@ -550,9 +550,6 @@
             <div class="mp-card-inner">
               <div class="ds-title">테마</div>
               <div class="ds-grid ds-grid-2" id="dsThemeList" role="radiogroup" aria-label="테마"></div>
-              <div class="ds-title">화면 스타일</div>
-              <div class="ds-grid" id="dsSkinList" role="radiogroup" aria-label="화면 스타일"></div>
-              <div class="ds-note">‘바탕화면’은 화면이 넓은 PC에서는 아이콘과 창이 있는 바탕화면 모양으로, 폰에서는 간단한 화면으로 보여요.</div>
             </div>
           </div>
         </div>
@@ -834,6 +831,7 @@
       <section class="mm-main">
         <div class="mm-tabs" id="memoTabs" role="tablist"></div>
         <div class="mm-tools">
+          <button type="button" class="mm-back" onclick="memoBack()">◀ 목록</button>
           <button type="button" id="memoPinBtn" onclick="memoTogglePin()" title="맨 위에 고정">📌 고정</button>
           <button type="button" id="memoDelBtn" onclick="memoDeleteActive()" title="이 메모 지우기">🗑️ 지우기</button>
           <span class="mm-tools-hint">입력하면 자동으로 저장돼요</span>
@@ -956,7 +954,6 @@
     <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();openSearch()">🔍 검색</button>
     <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleTheme()">☀️ 테마 바꾸기</button>
     <hr>
-    <button type="button" role="menuitem" onclick="closeStartMenu();toggleSkin()">🖥️ 화면 스타일 바꾸기</button>
   </div>
 
 </div><!-- end app -->
