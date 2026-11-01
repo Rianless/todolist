@@ -140,28 +140,47 @@ function closeStartMenu() {
   if (menu) menu.classList.remove('open');
 }
 
-function toggleTheme() {
-
+function setTheme(name) {
   const html = document.documentElement;
-
-  const isDark = html.getAttribute('data-theme') === 'dark';
-
-  html.setAttribute('data-theme', isDark ? 'light' : 'dark');
-
-  document.getElementById('themeBtn').textContent = isDark ? '🌙' : '☀️';
-
+  const next = name === 'dark' ? 'dark' : 'light';
+  if (html.getAttribute('data-theme') === next) { renderDisplaySettings(); return; }
+  html.setAttribute('data-theme', next);
+  const tb = document.getElementById('themeBtn');
+  if (tb) tb.textContent = next === 'dark' ? '☀️' : '🌙';
   saveData();
-
   updateHeaderBadges();
-
   if (currentCalSubTab === 'week') renderWeek();
-
   else if (currentCalSubTab === 'list') renderList();
-
   else renderCal();
+  renderDisplaySettings();
 }
 
+function toggleTheme() {
+  setTheme(document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark');
+}
 
+// 마이페이지 > 화면 설정 카드: 테마·화면 스타일 고르기
+const DISPLAY_THEMES = [
+  { id: 'light', icon: '☀️', name: '라이트', desc: '밝은 화면' },
+  { id: 'dark', icon: '🌙', name: '다크', desc: '어두운 화면' }
+];
+const DISPLAY_SKINS = [
+  { id: 'w98', icon: '🪟', name: '윈도우 98', desc: '옛날 윈도우 느낌' },
+  { id: 'desktop', icon: '🖥️', name: '바탕화면', desc: '98 바탕화면 (PC 전용)' },
+  { id: 'mac', icon: '🍎', name: '맥', desc: 'macOS 느낌' },
+  { id: 'classic', icon: '✨', name: '클래식', desc: '기본 스타일' }
+];
+function renderDisplaySettings() {
+  const tl = document.getElementById('dsThemeList'), sl = document.getElementById('dsSkinList');
+  if (!tl || !sl) return;
+  const theme = document.documentElement.getAttribute('data-theme') === 'dark' ? 'dark' : 'light';
+  const skin = currentSkinName();
+  const opt = (o, on, fn) => `<button type="button" class="ds-opt${on ? ' on' : ''}" role="radio" aria-checked="${on}" onclick="${fn}('${o.id}')">` +
+    `<span class="ds-ico" aria-hidden="true">${o.icon}</span><span class="ds-txt"><b>${o.name}</b><small>${o.desc}</small></span><span class="ds-check" aria-hidden="true">${on ? '✓' : ''}</span></button>`;
+  tl.innerHTML = DISPLAY_THEMES.map(o => opt(o, o.id === theme, 'setTheme')).join('');
+  sl.innerHTML = DISPLAY_SKINS.map(o => opt(o, o.id === skin, 'pickSkin')).join('');
+}
+function pickSkin(name) { applySkin(name); renderDisplaySettings(); }
 
 function updateHeaderBadges() {
 
@@ -253,6 +272,8 @@ function toggleMpCard(id) {
     if (id === 'mpCardBookmark') renderBookmarkList();
 
     if (id === 'mpCardParcel') renderParcelList();
+
+    if (id === 'mpCardDisplay') renderDisplaySettings();
 
     if (id === 'mpCardNickname') renderMypageView();
 

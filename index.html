@@ -111,8 +111,6 @@
 
         <button class="theme-btn" onclick="openSearch()" title="검색" aria-label="검색 열기">🔍</button>
 
-        <button class="theme-btn" onclick="toggleTheme()" title="테마 전환" id="themeBtn" aria-label="테마 전환">☀️</button>
-        <button class="theme-btn skin-btn" onclick="toggleSkin()" title="화면 스타일 바꾸기 (윈도우 98 → 바탕화면 → 맥 → 클래식)" id="skinBtn" aria-label="화면 스타일 바꾸기">🖥️</button>
 
       </div>
 
@@ -540,6 +538,24 @@
 
 
         <!-- ── 닉네임 설정 카드 ── -->
+
+        <!-- ── 화면 설정 카드 (테마 · 화면 스타일) ── -->
+        <div class="mp-card" id="mpCardDisplay">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardDisplay')">
+            <span class="mp-card-icon">🎨</span>
+            <span class="mp-card-label">화면 설정</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div class="ds-title">테마</div>
+              <div class="ds-grid ds-grid-2" id="dsThemeList" role="radiogroup" aria-label="테마"></div>
+              <div class="ds-title">화면 스타일</div>
+              <div class="ds-grid" id="dsSkinList" role="radiogroup" aria-label="화면 스타일"></div>
+              <div class="ds-note">‘바탕화면’은 화면이 넓은 PC에서만 바탕화면 모양으로 보여요. 폰에서는 윈도우 98과 똑같이 보입니다.</div>
+            </div>
+          </div>
+        </div>
 
         <div class="mp-card" id="mpCardNickname">
 
