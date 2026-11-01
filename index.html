@@ -1901,14 +1901,15 @@
             <select class="form-select" id="a_type"></select>
           </div>
           <div>
-            <label class="form-label">현재 잔액 (원)</label>
+            <label class="form-label">시작 잔액 (원)</label>
             <input class="form-input" id="a_balance" type="text" inputmode="numeric" placeholder="0" autocomplete="off" oninput="formatSignedAmount(this)">
           </div>
         </div>
         <div class="form-group">
           <label class="form-label">내역 반영 시작일</label>
           <input class="form-input" id="a_base" type="date">
-          <div class="account-hint">이 날짜부터의 수입·지출·이체가 잔액에 반영돼요. 오늘까지의 내역만 계산해요.</div>
+          <div class="account-hint">시작 잔액은 이 날짜 당일 맨 처음의 잔액이에요. 이 날짜부터 오늘까지의 수입·지출·이체가 더해지고 빠져서 현재 잔액이 돼요.</div>
+          <div class="account-hint" id="a_now_hint" style="font-weight:700;"></div>
         </div>
         <div class="form-group">
           <label class="form-label">메모</label>

@@ -63,7 +63,8 @@ function openAccountModal(id) {
   document.getElementById('accountModalTitle').textContent = acc ? '통장 수정' : '통장 추가';
   document.getElementById('a_name').value = acc ? acc.name : '';
   typeSel.value = acc ? (acc.type || '기타') : '입출금';
-  document.getElementById('a_balance').value = acc ? accountBalance(acc).toLocaleString('ko-KR') : '';
+  document.getElementById('a_balance').value = acc ? (Number(acc.initialBalance) || 0).toLocaleString('ko-KR') : '';
+  document.getElementById('a_now_hint').textContent = acc ? `지금 잔액: ${accountBalance(acc).toLocaleString('ko-KR')}원` : '';
   document.getElementById('a_base').value = acc ? (acc.baseDate || fmtDate(new Date())) : fmtDate(new Date());
   document.getElementById('a_memo').value = acc ? (acc.memo || '') : '';
   document.getElementById('a_delete').style.display = acc ? '' : 'none';
@@ -83,7 +84,7 @@ function saveAccount() {
     return;
   }
   const today = fmtDate(new Date());
-  const typed = parseSignedAmount(document.getElementById('a_balance').value);   // 사용자가 입력한 "현재 잔액"
+  const typed = parseSignedAmount(document.getElementById('a_balance').value);   // 사용자가 입력한 "시작 잔액" (시작일 당일 맨 처음 잔액)
   const baseDate = document.getElementById('a_base').value || today;
   const fields = {
     name,
@@ -95,8 +96,8 @@ function saveAccount() {
   if (wasEditing) {
     const acc = accounts.find(a => a.id === editingAccountId);
     if (acc) {
-      // 입력한 현재 잔액이 되도록 시작 잔액을 맞춘다 (시작일 이후 내역은 그대로 반영)
-      Object.assign(acc, fields, { initialBalance: typed - accountNet(acc.id, baseDate, today) });
+      // 시작 잔액은 입력한 그대로 두고, 시작일 이후 내역이 더해지고 빠져서 현재 잔액이 된다
+      Object.assign(acc, fields, { initialBalance: typed });
     }
   } else {
     accounts.push({ id: accountNextId++, ...fields, initialBalance: typed });
