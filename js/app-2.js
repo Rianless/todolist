@@ -63,7 +63,7 @@ function desktopWin(act) {
   if (act === 'max') {
     if (h.hasAttribute('data-desktop-max')) h.removeAttribute('data-desktop-max'); else h.setAttribute('data-desktop-max', '1');
   } else if (act === 'min') h.setAttribute('data-desktop-win', 'min');
-  else if (act === 'close') h.setAttribute('data-desktop-win', 'closed');
+  else if (act === 'close') { h.setAttribute('data-desktop-win', 'closed'); h.removeAttribute('data-desktop-max'); }   // 닫으면 다음에 열 땐 보통 크기로
   if ((act === 'min' || act === 'close') && currentMainTab === 'diary') diaryRelock();   // 창을 내리면 다시 잠근다
   desktopSync();
 }

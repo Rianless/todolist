@@ -858,7 +858,7 @@ function skinApplyAttrs(opts) {
   const desktop = pref === 'desktop' || (pref === 'mac' && window.innerWidth >= 900);
   h.setAttribute('data-skin', pref === 'desktop' ? 'w98' : pref);
   if (desktop) {
-    if (!h.hasAttribute('data-desktop')) { h.setAttribute('data-desktop', '1'); if (!(opts && opts.keepWin)) h.setAttribute('data-desktop-win', 'min'); }
+    if (!h.hasAttribute('data-desktop')) { h.setAttribute('data-desktop', '1'); if (!(opts && opts.keepWin)) h.setAttribute('data-desktop-win', 'closed'); }   // 처음엔 열린 창이 없다 (작업표시줄에도 창 단추가 없음)
   } else {
     h.removeAttribute('data-desktop'); h.removeAttribute('data-desktop-win'); h.removeAttribute('data-desktop-max');
   }
