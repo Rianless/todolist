@@ -7935,6 +7935,11 @@ html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-w
   html[data-desktop][data-skin="mac"] .dk-folder-body { background: transparent; box-shadow: none; margin-top: 0; }
   html[data-desktop][data-skin="mac"] .dk-folder-item .tab-label { color: #1d1d1f !important; text-shadow: none !important; }
 
+  /* 달력 위젯의 월 이동 화살표, 메모 위젯의 수정·고정·삭제: 흰 바탕 없이 글자만 */
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-nav button, html[data-desktop][data-skin="mac"] .dk-widget .mf-actions button { background: transparent !important; box-shadow: none !important; border: none !important; border-radius: 0 !important; }
+  html[data-desktop][data-skin="mac"] .dk-widget .mf-actions button { color: #007aff !important; }
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-nav button:active, html[data-desktop][data-skin="mac"] .dk-widget .mf-actions button:active { opacity: .5; }
+
   /* 메모장·북마크 앱 안쪽 */
   html[data-desktop][data-skin="mac"] .mm-list, html[data-desktop][data-skin="mac"] .bk-folders, html[data-desktop][data-skin="mac"] .bk-content { border-radius: 10px; background: #fff; }
   html[data-desktop][data-skin="mac"] .mm-item { border-radius: 8px; border-bottom-color: rgba(0,0,0,.06); }
