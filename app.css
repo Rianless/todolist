@@ -4048,6 +4048,7 @@ body::after {
 
 .memo-item.pinned .memo-item-pin { opacity:1; }
 
+.memo-item-title { font-size: 14px; font-weight: 700; color: var(--text); padding-right: 52px; margin-bottom: 3px; overflow-wrap: anywhere; }
 .memo-item-content { padding-right: 52px; overflow-wrap: anywhere; word-break: break-word; min-width: 0; }
 .memo-item { min-width: 0; max-width: 100%; box-sizing: border-box; overflow: hidden; }
 #memoList { min-width: 0; max-width: 100%; }
@@ -4070,6 +4071,7 @@ body::after {
 .mf-meta b { font-size: 13px; color: var(--text); }
 .mf-content { margin: 3px 0 6px; font-size: 13px; line-height: 1.5; color: var(--text); white-space: pre-wrap; word-break: break-word; }
 .mf-content a { color: var(--accent); }
+.mf-title { margin-top: 3px; font-size: 14px; color: var(--text); overflow-wrap: anywhere; }
 .mf-actions { display: flex; gap: 14px; }
 .mf-actions button { padding: 0; font-size: 11px; color: var(--text3); background: none; border: none; box-shadow: none; cursor: pointer; }
 .mf-actions button:hover { color: var(--accent); }
@@ -6813,6 +6815,8 @@ html[data-skin="classic"] .st-bargroup.cur .st-bar-label { color: var(--text); }
   .mm-tools button { padding: 3px 10px; font-size: 12px; color: #000 !important; }
   .mm-tools button:disabled { opacity: .5; }
   .mm-tools-hint { margin-left: auto; font-size: 11px; color: #404040; }
+  .mm-title-input { width: 100%; box-sizing: border-box; margin-bottom: 6px; padding: 6px 12px; font: 700 15px 'Malgun Gothic', 'Noto Sans KR', sans-serif; color: #000; background: #fff; border: none; box-shadow: var(--w98-sunken); outline: none; }
+  .mm-title-input:disabled { background: #dfdfdf; }
   .mm-editor { flex: 1; min-height: 0; width: 100%; box-sizing: border-box; resize: none; padding: 10px 12px; font: 14px/1.6 'Malgun Gothic', 'Noto Sans KR', sans-serif; color: #000; background: #fff; border: none; box-shadow: var(--w98-sunken); outline: none; }
   .mm-editor:disabled { background: #dfdfdf; }
   .mm-status { margin-top: 6px; padding: 3px 8px; font-size: 11px; color: #000; box-shadow: var(--w98-sunken); min-height: 18px; }

@@ -1229,16 +1229,22 @@ function memoTitle(content) {
   if (!line) return '(빈 메모)';
   return line.length > 28 ? line.slice(0, 28) + '…' : line;
 }
-// 첫 줄 다음 내용 한 줄 미리보기
-function memoPreview(content) {
-  const lines = String(content || '').split('\n').map(x => x.trim()).filter(Boolean).slice(1);
+// 직접 정한 제목이 있으면 그것을, 없으면 첫 줄을 제목으로 쓴다
+function memoDisplayTitle(m) {
+  const t = String((m && m.title) || '').trim();
+  if (!t) return memoTitle(m && m.content);
+  return t.length > 28 ? t.slice(0, 28) + '…' : t;
+}
+// 제목 다음 내용 한 줄 미리보기 (직접 정한 제목이 있으면 첫 줄부터 보여 준다)
+function memoPreview(content, hasTitle) {
+  const lines = String(content || '').split('\n').map(x => x.trim()).filter(Boolean).slice(hasTitle ? 0 : 1);
   const text = lines.join(' ');
   return text.length > 60 ? text.slice(0, 60) + '…' : text;
 }
 function memoFilter(list, query) {
   const q = String(query || '').trim().toLowerCase();
   if (!q) return list.slice();
-  return list.filter(m => String(m.content || '').toLowerCase().includes(q));
+  return list.filter(m => (String(m.title || '') + '\n' + String(m.content || '')).toLowerCase().includes(q));
 }
 // 고정한 메모가 맨 위, 그다음 최근에 고친 순
 function memoSort(list) {
@@ -1271,6 +1277,7 @@ function memoPostHtml(m, query) {
   return `<article class="memo-item mf-post${m.pinned ? ' pinned' : ''}">` +
     `<div class="mf-avatar" aria-hidden="true">${escapeLedgerText(nick.charAt(0).toUpperCase())}</div>` +
     `<div class="mf-body"><div class="mf-meta"><b>${escapeLedgerText(nick)}</b><span>${m.pinned ? '📌 ' : ''}${escapeLedgerText(memoPostTime(m))}</span></div>` +
+    (String(m.title || '').trim() ? `<div class="mf-title"><b>${escapeLedgerText(m.title.trim())}</b></div>` : '') +
     `<div class="mf-content">${body}</div>` +
     `<div class="mf-actions"><button type="button" onclick="openMemoAdd(${m.id})">✏️ 수정</button>` +
     `<button type="button" onclick="toggleMemoPin(${m.id})">${m.pinned ? '📌 고정 해제' : '📍 고정'}</button>` +
@@ -1331,16 +1338,18 @@ function memoCurrent() { return memos.find(x => x.id === memoActive) || null; }
 // 아직 아무것도 안 쓴 빈 메모는 지운다 (keepId 는 남김)
 function memoPruneEmpty(keepId) {
   const before = memos.length;
-  memos = memos.filter(m => m.id === keepId || String(m.content || '').trim() || m.pinned);
+  memos = memos.filter(m => m.id === keepId || String(m.content || '').trim() || String(m.title || '').trim() || m.pinned);
   if (memos.length !== before) { saveMemos(); memoTabs = memoTabs.filter(id => memos.some(m => m.id === id)); }
 }
 
 // 편집기에 쓴 글을 메모에 반영하고 저장
 function memoFlush() {
   if (memoSaveTimer) { clearTimeout(memoSaveTimer); memoSaveTimer = null; }
-  const m = memoCurrent(), ta = document.getElementById('memoEditor');
-  if (m && ta && !ta.disabled && ta.value !== m.content) {
+  const m = memoCurrent(), ta = document.getElementById('memoEditor'), ti = document.getElementById('memoTitleInput');
+  const newTitle = ti ? ti.value.trim() : String(m && m.title || '');
+  if (m && ta && !ta.disabled && (ta.value !== m.content || newTitle !== String(m.title || ''))) {
     m.content = ta.value;
+    if (newTitle) m.title = newTitle; else delete m.title;
     m.updated = new Date().toISOString();
     saveMemos();
   }
@@ -1389,7 +1398,7 @@ function memoTogglePin() {
 function memoDeleteActive() {
   const m = memoCurrent(); if (!m) return;
   memoFlush();
-  if (String(m.content || '').trim() && !confirm(`'${memoTitle(m.content)}' 메모를 지울까요?`)) return;
+  if ((String(m.content || '').trim() || String(m.title || '').trim()) && !confirm(`'${memoDisplayTitle(m)}' 메모를 지울까요?`)) return;
   memos = memos.filter(x => x.id !== m.id);
   memoTabs = memoTabs.filter(x => x !== m.id);
   memoActive = memoTabs.length ? memoTabs[memoTabs.length - 1] : null;
@@ -1402,8 +1411,8 @@ function renderMemoSide() {
   if (!box) return;
   const list = memoSort(memoFilter(memos, memoSearchText));
   box.innerHTML = list.length ? list.map(m => `<button type="button" class="mm-item${m.id === memoActive ? ' active' : ''}" onclick="memoOpen(${m.id})">` +
-    `<div class="mm-item-title">${m.pinned ? '<b>📌</b>' : ''}<span>${memoHighlight(memoTitle(m.content), memoSearchText)}</span></div>` +
-    (memoPreview(m.content) ? `<div class="mm-item-prev">${escapeLedgerText(memoPreview(m.content))}</div>` : '') +
+    `<div class="mm-item-title">${m.pinned ? '<b>📌</b>' : ''}<span>${memoHighlight(memoDisplayTitle(m), memoSearchText)}</span></div>` +
+    (memoPreview(m.content, !!String(m.title || '').trim()) ? `<div class="mm-item-prev">${escapeLedgerText(memoPreview(m.content, !!String(m.title || '').trim()))}</div>` : '') +
     `<div class="mm-item-date">${escapeLedgerText(String(m.updated || m.date || '').slice(0, 10))}</div></button>`).join('')
     : `<div class="mm-empty">${memoSearchText.trim() ? '찾는 메모가 없어요' : '메모가 없어요. 새 메모를 만들어 보세요'}</div>`;
   const cnt = document.getElementById('memoAppCount');
@@ -1413,7 +1422,7 @@ function renderMemoTabs() {
   const box = document.getElementById('memoTabs');
   if (!box) return;
   box.innerHTML = memoTabs.map(id => memos.find(m => m.id === id)).filter(Boolean).map(m =>
-    `<div class="mm-tab${m.id === memoActive ? ' active' : ''}" role="tab" aria-selected="${m.id === memoActive}" onclick="memoOpen(${m.id})" title="${escapeLedgerText(memoTitle(m.content))}"><span>${escapeLedgerText(memoTitle(m.content))}</span><i class="mm-tab-x" onclick="memoCloseTab(${m.id}, event)" aria-label="탭 닫기">✕</i></div>`).join('');
+    `<div class="mm-tab${m.id === memoActive ? ' active' : ''}" role="tab" aria-selected="${m.id === memoActive}" onclick="memoOpen(${m.id})" title="${escapeLedgerText(memoDisplayTitle(m))}"><span>${escapeLedgerText(memoDisplayTitle(m))}</span><i class="mm-tab-x" onclick="memoCloseTab(${m.id}, event)" aria-label="탭 닫기">✕</i></div>`).join('');
 }
 function renderMemoStatus(typing) {
   const st = document.getElementById('memoStatus'), ta = document.getElementById('memoEditor');
@@ -1427,6 +1436,11 @@ function renderMemoEditor() {
   const ta = document.getElementById('memoEditor'), m = memoCurrent();
   if (!ta) return;
   ta.disabled = !m;
+  const ti = document.getElementById('memoTitleInput');
+  if (ti) {
+    ti.disabled = !m;
+    if (!(memoSaveTimer && document.activeElement === ti)) ti.value = m ? String(m.title || '') : '';
+  }
   // 입력 중(저장 대기)이면 쓰는 글을 덮어쓰지 않는다
   if (!(memoSaveTimer && document.activeElement === ta)) ta.value = m ? m.content : '';
   const pin = document.getElementById('memoPinBtn'), del = document.getElementById('memoDelBtn');
