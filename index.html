@@ -3,7 +3,7 @@
 <html lang="ko" data-theme="light">
 
 <head>
-<script>try{var __r=document.documentElement;__r.setAttribute("data-skin","w98");__r.setAttribute("data-desktop","1");__r.setAttribute("data-desktop-win","min");localStorage.removeItem("rianless_skin");}catch(e){document.documentElement.setAttribute("data-skin","w98");document.documentElement.setAttribute("data-desktop","1");}</script>
+<script>try{var __sk=localStorage.getItem("rianless_skin");var __r=document.documentElement;if(__sk===null||__sk==="w98"||__sk==="office"){__sk="desktop";}if(__sk==="desktop"){__r.setAttribute("data-skin","w98");__r.setAttribute("data-desktop","1");__r.setAttribute("data-desktop-win","min");}else{__r.setAttribute("data-skin",__sk==="mac"?"mac":"classic");}}catch(e){document.documentElement.setAttribute("data-skin","w98");document.documentElement.setAttribute("data-desktop","1");}</script>
 
 <meta charset="UTF-8">
 
@@ -539,7 +539,7 @@
 
         <!-- ── 닉네임 설정 카드 ── -->
 
-        <!-- ── 화면 설정 카드 (테마) ── -->
+        <!-- ── 화면 설정 카드 (테마 · 화면 스타일) ── -->
         <div class="mp-card" id="mpCardDisplay">
           <div class="mp-card-header" onclick="toggleMpCard('mpCardDisplay')">
             <span class="mp-card-icon">🎨</span>
@@ -550,6 +550,8 @@
             <div class="mp-card-inner">
               <div class="ds-title">테마</div>
               <div class="ds-grid ds-grid-2" id="dsThemeList" role="radiogroup" aria-label="테마"></div>
+              <div class="ds-title">화면 스타일</div>
+              <div class="ds-grid" id="dsSkinList" role="radiogroup" aria-label="화면 스타일"></div>
             </div>
           </div>
         </div>
@@ -952,7 +954,8 @@
     <hr class="dk-phone-only">
     <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleNotif()">🔔 알림</button>
     <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();openSearch()">🔍 검색</button>
-    <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleTheme()">☀️ 테마 바꾸기</button>
+    <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleSkin()">🎨 테마 바꾸기 (바탕화면·맥·클래식)</button>
+    <button type="button" class="dk-phone-only" role="menuitem" onclick="closeStartMenu();toggleTheme()">🌓 라이트/다크 전환</button>
     <hr>
   </div>
 
