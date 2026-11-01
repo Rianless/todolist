@@ -311,7 +311,12 @@ const DK_FOLDERS = {
 
 // 아이콘·시작 메뉴에서 열기. cardId 가 있으면 마이페이지의 그 카드(북마크, 메모)를 펼친다
 
-document.addEventListener('click', closeStartMenu);
+// 폴더 창을 연 그 클릭이 바로 문서까지 올라와 다시 닫지 않게, 연 직후의 클릭은 건너뛴다
+let deskFolderOpenedAt = 0;
+document.addEventListener('click', e => {
+  closeStartMenu();
+  if (performance.now() - deskFolderOpenedAt > 80 && !(e.target.closest && e.target.closest('#deskFolder'))) closeDesktopFolder();
+});
 document.addEventListener('keydown', e => { if (e.key === 'Escape') closeDesktopFolder(); });
 window.addEventListener('load', desktopSync);
 setInterval(() => { if (!document.hidden) updateDesktopTicker(); }, 30000);   // 날짜가 바뀌거나 다른 기기에서 고친 것도 따라가게

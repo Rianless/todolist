@@ -107,6 +107,7 @@ function desktopFolder(name) {
   document.getElementById('deskFolderBody').innerHTML = f.items.map(it =>
     `<button type="button" class="desk-ico dk-folder-item" onclick="desktopFolderOpen('${it.tab}','${it.card || ''}')"><div class="tab-icon" aria-hidden="true">${it.icon}</div><div class="tab-label">${it.label}</div></button>`).join('');
   box.classList.add('open');
+  deskFolderOpenedAt = performance.now();
   // 눌러 연 아이콘의 오른쪽 위에 붙여 띄운다 (화면 밖으로 나가지 않게)
   const ico = document.getElementById('mainTab-' + name);
   if (ico) {
