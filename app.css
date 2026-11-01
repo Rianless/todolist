@@ -7865,7 +7865,8 @@ html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-w
     background: rgba(246,246,248,.96); border-radius: 12px; box-shadow: 0 0 0 .5px rgba(0,0,0,.35), 0 24px 70px rgba(0,0,0,.40);
   }
   html[data-desktop][data-skin="mac"] #pcTopbar {
-    display: flex; align-items: center; gap: 8px; height: 38px !important; padding: 0 14px !important; border-radius: 12px 12px 0 0 !important;
+    display: flex; align-items: center; gap: 8px; height: 31px !important; padding: 0 14px !important; border-radius: 12px 12px 0 0 !important;
+    top: var(--dk-top) !important; left: var(--dk-left) !important; right: var(--dk-right) !important;   /* 창 틀 맨 위에 딱 맞춰, 보이는 막대 높이와 일치시킨다 */
     background: linear-gradient(#ececee, #dedee1) !important; border: none !important; border-bottom: 1px solid rgba(0,0,0,.14) !important; box-shadow: none !important;
   }
   html[data-desktop][data-skin="mac"] #pcTopbar .pc-topbar-spacer { display: none; }
