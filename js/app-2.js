@@ -165,7 +165,7 @@ const DISPLAY_THEMES = [
 ];
 const DISPLAY_SKINS = [
   { id: 'desktop', icon: '🖥️', name: '바탕화면', desc: '윈도우 98 바탕화면' },
-  { id: 'mac', icon: '🍎', name: '맥', desc: 'macOS 바탕화면 (PC) · 폰은 맥 화면' },
+  { id: 'mac', icon: '🍎', name: '맥', desc: 'macOS 느낌의 바탕화면' },
   { id: 'classic', icon: '✨', name: '클래식', desc: '기본 스타일' }
 ];
 function renderDisplaySettings() {
