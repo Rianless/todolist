@@ -840,8 +840,30 @@ async function loadItemsFromAPI() {
 
 ══════════════════════════════════════ */
 
-// 화면은 윈도우 98 바탕화면 하나만 쓴다 (PC·폰 공통). 예전에 저장된 스킨 값은 무시한다.
-function currentSkinName() { return 'desktop'; }
+// 화면 스타일: 'desktop'(윈도우 98 바탕화면) → 'mac'(macOS 느낌) → 'classic' → 다시 'desktop'  (PC·폰 공통, 예전 'w98' 은 'desktop' 으로 본다)
+function currentSkinName() {
+  const h = document.documentElement;
+  if (h.getAttribute('data-skin') === 'mac') return 'mac';
+  if (h.getAttribute('data-skin') !== 'w98') return 'classic';
+  return 'desktop';
+}
+
+function applySkin(name) {
+  if (name === 'w98') name = 'desktop';
+  const h = document.documentElement;
+  h.setAttribute('data-skin', name === 'classic' ? 'classic' : name === 'mac' ? 'mac' : 'w98');
+  if (name === 'desktop') h.setAttribute('data-desktop', '1'); else h.removeAttribute('data-desktop');
+  h.removeAttribute('data-desktop-win');
+  h.removeAttribute('data-desktop-max');
+  try { localStorage.setItem('rianless_skin', name); } catch (e) {}
+  statsGuard();
+  desktopSync();
+}
+
+function toggleSkin() {
+  const order = ['desktop', 'mac', 'classic'];
+  applySkin(order[(order.indexOf(currentSkinName()) + 1) % order.length]);
+}
 
 // macOS 스킨 메뉴바 시계 (예: 10월 28일 (수) 오후 3:07)
 function macClockTick() {
