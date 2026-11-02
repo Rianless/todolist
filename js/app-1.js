@@ -864,11 +864,11 @@ function skinApplyAttrs(opts) {
   }
 }
 
-// 맥 스킨(PC 폭)에서는 달성률 막대·알림/검색 단추를 위쪽 메뉴바의 시계 옆으로 옮긴다 (아래는 독이 차지).
+// 맥 스킨(PC 폭)에서는 달성률 막대·알림/검색 단추를 작업표시줄 안으로 옮겨 시계 옆에 붙인다.
 // 그 밖의 화면에서는 원래 자리(머리글)로 되돌린다.
 const _dkTrayHome = {};
 function dkDockTray() {
-  const h = document.documentElement, bar = document.querySelector('#macMenubar .mb-r');
+  const h = document.documentElement, bar = document.getElementById('desktopTaskbar');
   if (!bar) return;
   const want = h.getAttribute('data-skin') === 'mac' && h.hasAttribute('data-desktop') && window.innerWidth >= 900;
   [['progBarWrap', '.progress-bar-wrap'], ['dkHdrCtl', '.header-controls']].forEach(([key, sel]) => {
@@ -876,7 +876,7 @@ function dkDockTray() {
     if (!el) return;
     if (want) {
       if (!_dkTrayHome[key]) { _dkTrayHome[key] = document.createComment('dk-tray-' + key); el.parentNode.insertBefore(_dkTrayHome[key], el); }
-      if (el.parentNode !== bar) bar.insertBefore(el, document.getElementById('macSys'));
+      if (el.parentNode !== bar) bar.insertBefore(el, document.getElementById('dkClock'));
     } else if (_dkTrayHome[key] && _dkTrayHome[key].parentNode && el.parentNode === bar) {
       _dkTrayHome[key].parentNode.insertBefore(el, _dkTrayHome[key]);
     }
