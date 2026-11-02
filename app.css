@@ -8156,3 +8156,13 @@ html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.has::after { top: ca
 
 /* PC 홈 북마크 위젯: 목록 자체 스크롤을 없애고 위젯 본문 스크롤 하나만 사용 */
 html[data-desktop] .dkw-bm-list { max-height: none; overflow: visible; }
+
+/* PC 맥 스킨 작업표시줄: [열린 창 단추(남는 공간 가득)] [메뉴] [달성률] [알림·검색] [시계] 순으로 오른쪽에 모음 */
+@media (min-width: 900px) {
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-spacer { display: none !important; }
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-task { order: 1; flex: 1 1 0 !important; min-width: 0 !important; max-width: none !important; width: auto !important; }
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-start { order: 2; flex: none; margin-left: 0 !important; }
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .progress-bar-wrap { order: 3; position: static !important; flex: none; display: flex !important; align-items: center; width: 190px; height: 28px; margin: 0 !important; }
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .header-controls { order: 4; position: static !important; flex: none; display: flex !important; align-items: center; margin: 0 !important; }
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-clock { order: 5; margin-left: 0 !important; flex: none; }
+}

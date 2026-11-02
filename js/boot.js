@@ -270,7 +270,7 @@ window.addEventListener('resize', () => {
   const phone = window.innerWidth < 900;
   if (phone !== dkWasPhone) {
     dkWasPhone = phone;
-    try { skinApplyAttrs(); statsGuard(); desktopSync(); } catch (e) {}   // 맥은 폭에 따라 바탕화면 ↔ 폰 화면이 바뀐다
+    try { skinApplyAttrs(); dkDockTray(); statsGuard(); desktopSync(); } catch (e) {}   // 맥은 폭에 따라 바탕화면 ↔ 폰 화면이 바뀐다
     try { updateDesktopWidgets(); } catch (e) {}
   }
 });
@@ -842,3 +842,5 @@ scheduleMidnightRefresh();
 })();
 
 
+
+try { dkDockTray(); } catch (e) {}
