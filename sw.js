@@ -23,6 +23,7 @@ const ASSETS = [
   './bookmarks.js',
   './js/savetube.js',
   './parcels.js',
+  './ledger-import.js',
   './dday.js'
 ];
 
