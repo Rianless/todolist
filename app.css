@@ -8166,3 +8166,9 @@ html[data-desktop] .dkw-bm-list { max-height: none; overflow: visible; }
   html[data-desktop][data-skin="mac"] #desktopTaskbar .header-controls { order: 4; position: static !important; flex: none; display: flex !important; align-items: center; margin: 0 !important; }
   html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-clock { order: 5; margin-left: 0 !important; flex: none; }
 }
+
+/* PC 맥 스킨 작업표시줄: 메뉴를 왼쪽, 열린 창 단추를 그 오른쪽(남는 공간 가득)으로 / 메뉴 글자는 흰 칸 안에서 왼쪽 정렬 */
+@media (min-width: 900px) {
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-start { order: 1; width: 130px; justify-content: flex-start !important; text-align: left; }
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-task { order: 2; }
+}
