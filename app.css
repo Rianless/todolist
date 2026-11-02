@@ -8149,3 +8149,7 @@ html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.today { border-radiu
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day { position: relative !important; }
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.has::after { content: ''; position: absolute; left: 50%; top: calc(50% + 11px); width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #1fa84f; }
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.today.has::after { background: #fff; }
+
+/* PC 홈 달력 위젯: 알약 속 날짜 숫자 키움 (점 위치도 맞춤) */
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day { font-size: 16px !important; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.has::after { top: calc(50% + 13px); }
