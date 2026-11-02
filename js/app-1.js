@@ -1133,7 +1133,7 @@ function updateDesktopWidgets() {
   const now = new Date(), todayStr = fmtDate(now);
   const real = i => !i.isSub && !i.isInvest;
   const esc = escapeLedgerText;
-  const win = (title, link, inner) => `<section class="dk-widget"><div class="dkw-title"><span>${title}</span>${link || ''}</div><div class="dkw-body">${inner}</div></section>`;
+  const win = (title, link, inner, key) => `<section class="dk-widget"${key ? ` data-w="${key}"` : ''}><div class="dkw-title"><span>${title}</span>${link || ''}</div><div class="dkw-body">${inner}</div></section>`;
   const open = (label, call) => `<button type="button" onclick="${call}">${label}</button>`;
   const MAX = 7;
 
@@ -1220,15 +1220,15 @@ function updateDesktopWidgets() {
   const allMemos = memoSort(memos);
   const keepList = box.querySelector('.mf-scroll'), listTop = keepList ? keepList.scrollTop : 0;
   const memoWidget = memoComposerHtml() + `<div class="mf-scroll">` + (allMemos.length ? allMemos.map(x => memoPostHtml(x)).join('') : '<div class="dkw-empty">아직 메모가 없어요</div>') + `</div>`;
-  const wToday = win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml);
-  const wMemo = win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget);
-  const wCal = win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml);
-  const wMoney = win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml);
+  const wToday = win(`📋 오늘 — ${m + 1}월 ${now.getDate()}일 ${DOW_KO[now.getDay()]}요일`, open('열기', "desktopOpen('calendar')"), todayHtml, 'today');
+  const wMemo = win('📝 메모', open('마이페이지 메모', "desktopOpen('mypage','mpCardMemo')"), memoWidget, 'memo');
+  const wCal = win('📅 달력', open('열기', "desktopOpen('calendar')"), goalHtml, 'cal');
+  const wMoney = win('💰 이번 달 가계부', open('열기', "desktopOpen('category')"), moneyHtml, 'money');
   const wStat = win('📊 가계부 통계', open('통계', "desktopOpen('category','mpCardStats')"), statHtml);
   const wDday = win('⏳ D-day · 택배', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayHtml);
   // D-day와 택배는 따로 보여준다
-  const wDdayOnly = win('⏳ D-day', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayRows);
-  const wParcel = win('📦 택배', open('열기', "desktopOpen('category','mpCardParcel')"), `<div class="dkw-sub">기다리는 택배 ${waitList.length}건</div>` + parcelRows);
+  const wDdayOnly = win('⏳ D-day', open('열기', "desktopOpen('mypage','mpCardDday')"), ddayRows, 'dday');
+  const wParcel = win('📦 택배', open('열기', "desktopOpen('category','mpCardParcel')"), `<div class="dkw-sub">기다리는 택배 ${waitList.length}건</div>` + parcelRows, 'parcel');
   // ⑦ 북마크: 저장한 링크 전체 (북마크 앱과 같은 최신순), 누르면 새 탭으로 열림
   const bmRows = [...bookmarks].reverse().map(b => `<button type="button" class="dkw-bm" onclick="openBookmark(${b.id})" title="${esc(b.url)}">` +
     `<span class="dkw-bm-icon"><span>${esc(Bookmarks.labelOf(b).slice(0, 1).toUpperCase())}</span><img loading="lazy" alt="" src="${esc(Bookmarks.faviconOf(b.url))}" onerror="this.style.visibility='hidden'"></span>` +
