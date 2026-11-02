@@ -8354,3 +8354,9 @@ html[data-skin="mac"] #searchResults:not(:empty) { border-top: 1px solid rgba(0,
   html[data-desktop][data-skin="mac"] .dkw-body:has(> .mf-scroll) > .mf-compose { flex: none; }
   html[data-desktop][data-skin="mac"] .dkw-body > .mf-scroll { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto; }
 }
+
+
+/* 맥 홈 위젯 달력: 날짜 숫자를 작고 단정하게 (알약 속 16px 은 너무 컸다) */
+html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day { font-size: 12px !important; min-height: 26px !important; }
+html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day.has::after { top: calc(50% + 9px); }
+html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 11px; }
