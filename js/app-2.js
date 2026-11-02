@@ -47,6 +47,7 @@ function desktopMarkIcon() {
 
 function desktopSync() {
   desktopMarkIcon();
+  if (window.macDockSync) macDockSync();
   updateDesktopTicker();
   const task = document.getElementById('dkTask');
   if (!task) return;
