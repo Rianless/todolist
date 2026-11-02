@@ -8136,3 +8136,11 @@ html[data-desktop] .dkw-bm-list .dkw-bm { padding: 10px 14px; }
 /* PC 홈 달력 위젯: 요일 줄은 글자 높이만 쓰고, 날짜 칸을 요일 바로 아래로 */
 html[data-desktop] .dk-widget:has(.dkc-grid) .dkc-grid { grid-template-rows: auto; }
 html[data-desktop] .dk-widget:has(.dkc-grid) .dkc-dow { margin-bottom: 10px; }
+
+/* PC 홈 달력 위젯: 알약형 날짜 + 주말 색 띠 */
+html[data-desktop][data-skin] .dk-widget .dkc-grid { gap: 4px 4px; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day { height: auto !important; min-height: 30px !important; margin: 0 !important; border: none !important; border-radius: 999px !important; background: transparent !important; box-shadow: none !important; color: var(--text) !important; font-weight: 400 !important; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.sun { background: rgba(255,59,48,.09) !important; color: #c00000 !important; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.sat { background: rgba(0,122,255,.09) !important; color: #0000c0 !important; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day:hover { background: rgba(0,122,255,.18) !important; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.today { border-radius: 999px !important; background: linear-gradient(135deg,#007aff,#7a5cff) !important; color: #fff !important; font-weight: 700 !important; }
