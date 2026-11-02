@@ -8132,3 +8132,6 @@ html[data-desktop] .dkw-bm-list .dkw-bm { margin: 0; }
 html[data-desktop] .bk-folders .bk-fitem { margin-bottom: 10px; }
 html[data-desktop] .bk-folders .bk-fitem:last-child { margin-bottom: 0; }
 html[data-desktop] .dkw-bm-list .dkw-bm { padding: 10px 14px; }
+
+/* PC 홈 달력 위젯: 요일 줄은 글자 높이만 쓰고, 날짜 칸을 요일 바로 아래로 */
+html[data-desktop] .dk-widget:has(.dkc-grid) .dkc-grid { grid-template-rows: auto; }
