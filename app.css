@@ -8215,9 +8215,22 @@ html[data-skin="mac"] #macMenubar .mb-ico { width: 16px; height: 16px; color: #f
 html[data-skin="mac"] #macMenubar .mb-bat { width: 20px; }
 
 @media (max-width: 899px) {
-  /* 폰 메뉴바에서는 애플 로고를 그림처럼만 (메뉴는 아래 막대의 '메뉴' 단추가 연다) */
-  html[data-skin="mac"] #macMenubar .mb-l .mb-apple { display: inline-flex !important; pointer-events: none; background: none !important; border: none !important; box-shadow: none !important; min-height: 0; }
+  /* 폰 메뉴바: 애플 로고를 누르면 앱 목록·알림·검색·테마 메뉴가 펼쳐진다 */
+  html[data-skin="mac"] #macMenubar .mb-l .mb-apple { display: inline-flex !important; background: none !important; border: none !important; box-shadow: none !important; min-height: 0; }
 }
+
+/* 아래 독 모양 — Lucian UX/UI Prompt #208 (MIT). PC·폰 공통 */
+.u208-dk { pointer-events: auto; display: flex; align-items: flex-end; gap: 6px; height: 64px; box-sizing: border-box; padding: 8px 10px; border-radius: 22px; background: rgba(255,255,255,.28); box-shadow: inset 0 0 0 1px rgba(255,255,255,.48), 0 14px 38px -10px rgba(24,10,70,.6); backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%); }
+.u208-a { position: relative; flex: none; width: var(--s, 48px); height: var(--s, 48px); margin-bottom: var(--lift, 0px); padding: 0; border: 0; border-radius: 24%; background: none; cursor: pointer; }
+html[data-skin="mac"] #macDock .u208-a { background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 24% !important; min-height: 0; padding: 0; }
+.u208-a svg { width: 100%; height: 100%; display: block; border-radius: 24%; box-shadow: 0 4px 10px -4px rgba(0,0,0,.45); }
+.u208-a::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .2s; }
+.u208-a.is-run::after { opacity: .95; }
+.u208-a.is-hop { animation: u208-hop .9s cubic-bezier(.3,.6,.4,1) 2; }
+@keyframes u208-hop { 30% { transform: translateY(-22px); } 55% { transform: translateY(0); } 72% { transform: translateY(-6px); } }
+.u208-a:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
+.u208-tip { position: fixed; left: 0; bottom: 0; padding: 4px 10px; border-radius: 8px; background: rgba(40,32,60,.85); color: #fff; font-size: 12px; font-weight: 700; white-space: nowrap; pointer-events: none; opacity: 0; transform: translate(-50%, 0); transition: opacity .15s; }
+.u208-tip.is-on { opacity: 1; }
 
 @media (min-width: 900px) {
   html[data-desktop][data-skin="mac"] { --dk-bottom: 92px; }
@@ -8248,17 +8261,6 @@ html[data-skin="mac"] #macMenubar .mb-bat { width: 20px; }
 
   /* 아래 독 — Lucian UX/UI Prompt #208 (MIT) */
   html[data-desktop][data-skin="mac"] #macDock { display: flex; position: fixed; left: 0; right: 0; bottom: 8px; z-index: 30; justify-content: center; pointer-events: none; }
-  .u208-dk { pointer-events: auto; display: flex; align-items: flex-end; gap: 6px; height: 64px; box-sizing: border-box; padding: 8px 10px; border-radius: 22px; background: rgba(255,255,255,.28); box-shadow: inset 0 0 0 1px rgba(255,255,255,.48), 0 14px 38px -10px rgba(24,10,70,.6); backdrop-filter: blur(22px) saturate(180%); -webkit-backdrop-filter: blur(22px) saturate(180%); }
-  .u208-a { position: relative; flex: none; width: var(--s, 48px); height: var(--s, 48px); margin-bottom: var(--lift, 0px); padding: 0; border: 0; border-radius: 24%; background: none; cursor: pointer; }
-  html[data-skin="mac"] #macDock .u208-a { background: none !important; border: 0 !important; box-shadow: none !important; border-radius: 24% !important; min-height: 0; padding: 0; }
-  .u208-a svg { width: 100%; height: 100%; display: block; border-radius: 24%; box-shadow: 0 4px 10px -4px rgba(0,0,0,.45); }
-  .u208-a::after { content: ""; position: absolute; left: 50%; bottom: -6px; width: 4px; height: 4px; margin-left: -2px; border-radius: 50%; background: #fff; opacity: 0; transition: opacity .2s; }
-  .u208-a.is-run::after { opacity: .95; }
-  .u208-a.is-hop { animation: u208-hop .9s cubic-bezier(.3,.6,.4,1) 2; }
-  @keyframes u208-hop { 30% { transform: translateY(-22px); } 55% { transform: translateY(0); } 72% { transform: translateY(-6px); } }
-  .u208-a:focus-visible { outline: 2px solid #fff; outline-offset: 2px; }
-  .u208-tip { position: fixed; left: 0; bottom: 0; padding: 4px 10px; border-radius: 8px; background: rgba(40,32,60,.85); color: #fff; font-size: 12px; font-weight: 700; white-space: nowrap; pointer-events: none; opacity: 0; transform: translate(-50%, 0); transition: opacity .15s; }
-  .u208-tip.is-on { opacity: 1; }
 
   /* 바탕화면 아이콘: 맥 앱 아이콘처럼 둥근 사각형 타일 */
   html[data-desktop][data-skin="mac"] :is(.tab-item, .desk-ico):not(.dk-folder-item) .tab-icon { width: 62px; height: 62px; line-height: 62px; font-size: 34px !important; text-align: center; border-radius: 15px; filter: none; box-shadow: 0 6px 14px -4px rgba(20,8,60,.55), inset 0 0 0 .5px rgba(255,255,255,.35); }
@@ -8353,4 +8355,29 @@ html[data-skin="mac"] #searchResults:not(:empty) { border-top: 1px solid rgba(0,
   html[data-desktop][data-skin="mac"] .dkw-body:has(> .mf-scroll) { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
   html[data-desktop][data-skin="mac"] .dkw-body:has(> .mf-scroll) > .mf-compose { flex: none; }
   html[data-desktop][data-skin="mac"] .dkw-body > .mf-scroll { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto; }
+}
+
+
+/* ═══════════════════════════════════════════════════════════
+   아이맥(macOS) 느낌 3: 폰(웹앱) 최적화
+   - 아래 작업표시줄 막대 → 아이폰·맥 같은 떠 있는 독 (눌러서 앱 열기, 열린 앱엔 점)
+   - 애플 로고 메뉴, 신호등 단추 터치 크기, 안전 영역
+   ═══════════════════════════════════════════════════════════ */
+@media (max-width: 899px) {
+  html[data-desktop][data-skin="mac"] { --dk-bar: calc(82px + env(safe-area-inset-bottom, 0px)); }
+  html[data-desktop][data-skin="mac"] #desktopTaskbar { display: none !important; }
+  html[data-desktop][data-skin="mac"] #macDock { display: flex; position: fixed; left: 0; right: 0; bottom: calc(8px + env(safe-area-inset-bottom, 0px)); z-index: 30; justify-content: center; pointer-events: none; }
+  html[data-desktop][data-skin="mac"] .u208-dk { gap: 6px; padding: 8px; height: 60px; border-radius: 20px; }
+  html[data-desktop][data-skin="mac"] .u208-a:active { transform: scale(.92) !important; }
+
+  /* 애플 메뉴: 메뉴바 바로 아래로 */
+  html[data-desktop][data-skin="mac"] #macMenubar .mb-apple { padding: 2px 12px 2px 4px; }
+  html[data-desktop][data-skin="mac"] #desktopStartMenu { left: 8px; top: 34px; bottom: auto; width: 250px; max-height: calc(100dvh - var(--dk-bar) - 50px); }
+  html[data-desktop][data-skin="mac"] #desktopStartMenu button { padding: 11px 14px !important; }
+  html[data-desktop][data-skin="mac"] #desktopStartMenu hr:last-child { display: none; }
+
+  /* 창 신호등: 손가락으로 누르기 쉬운 크기 */
+  html[data-desktop][data-skin="mac"] .dk-winbtns { gap: 10px; }
+  html[data-desktop][data-skin="mac"] .dk-winbtns .dk-winbtn { width: 18px !important; height: 18px !important; }
+  html[data-desktop][data-skin="mac"] #pcTopbar .pc-topbar-title { padding-right: 46px; }
 }
