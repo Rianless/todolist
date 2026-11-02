@@ -8172,3 +8172,8 @@ html[data-desktop] .dkw-bm-list { max-height: none; overflow: visible; }
   html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-start { order: 1; width: 130px; justify-content: flex-start !important; text-align: left; }
   html[data-desktop][data-skin="mac"] #desktopTaskbar .dk-task { order: 2; }
 }
+
+/* PC 맥 작업표시줄: 열린 창 단추가 없어도 달성률·알림·검색·시계는 오른쪽에 붙임 */
+@media (min-width: 900px) {
+  html[data-desktop][data-skin="mac"] #desktopTaskbar .progress-bar-wrap { margin-left: auto !important; }
+}
