@@ -8424,3 +8424,23 @@ html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 11px; }
   html[data-desktop][data-desktop-win][data-skin="mac"] :is(.tab-item, .desk-ico):not(.dk-folder-item) { display: none !important; }
   html[data-desktop][data-desktop-win][data-skin="mac"] .dk-widgets { top: 70px; }
 }
+
+
+/* 맥 폰 홈: 택배·D-day 위젯만 한 줄에 2열로 (스택을 풀어 위젯을 직접 그리드에 놓고, 나머지는 한 줄 전체) */
+@media (max-width: 899px) {
+  html[data-desktop][data-desktop-win][data-skin="mac"] .dk-widgets { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  html[data-desktop][data-desktop-win][data-skin="mac"] .dk-widgets { grid-auto-rows: max-content; }
+  html[data-desktop][data-skin="mac"] .dk-stack { display: contents; }
+  html[data-desktop][data-skin="mac"] .dk-widget { grid-column: 1 / -1; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="today"] { order: 1; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="memo"] { order: 2; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] { order: 3; grid-column: 1; align-self: stretch; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] { order: 4; grid-column: 2; align-self: stretch; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="cal"] { order: 5; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="money"] { order: 6; }
+  /* 반쪽 폭이라 제목·글자는 한 단계 작게 */
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"], html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] { font-size: 13px; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] .dkw-title, html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] .dkw-title { padding: 12px 12px 4px; font-size: 13px; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] .dkw-body, html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] .dkw-body { padding: 4px 12px 12px; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] .dkw-title button, html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] .dkw-title button { padding: 0 9px !important; }
+}
