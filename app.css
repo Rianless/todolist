@@ -8368,3 +8368,25 @@ html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 11px; }
   html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day.sat { background: transparent !important; }
   html[data-skin="mac"] #macMenubar .mb-sys { display: none !important; }
 }
+
+
+/* 맥 폰 홈: 위젯을 1열로 넓게, 글자·여백을 키워 한눈에 읽히게 (2열은 너무 빽빽했다) */
+@media (max-width: 899px) {
+  html[data-desktop][data-desktop-win][data-skin="mac"] .dk-widgets { grid-template-columns: minmax(0, 1fr); gap: 14px; left: 12px; right: 12px; }
+  html[data-desktop][data-skin="mac"] .dk-stack { gap: 14px; }
+  html[data-desktop][data-skin="mac"] .dk-widget { font-size: 14px; border-radius: 16px; }
+  html[data-desktop][data-skin="mac"] .dkw-title { padding: 12px 14px 4px; font-size: 14px; }
+  html[data-desktop][data-skin="mac"] .dkw-title button { height: 24px !important; padding: 0 12px !important; font-size: 12px !important; border-radius: 12px !important; }
+  html[data-desktop][data-skin="mac"] .dkw-body { padding: 6px 14px 14px; }
+  html[data-desktop][data-skin="mac"] .dkw-row { padding: 6px 0; gap: 10px; }
+  html[data-desktop][data-skin="mac"] .dkw-kv { padding: 5px 0; }
+  html[data-desktop][data-skin="mac"] .dkw-sub { margin: 10px 0 4px; }
+  html[data-desktop][data-skin="mac"] .dkw-empty { padding: 6px 0; }
+  html[data-desktop][data-skin="mac"] .dkw-check { width: 24px; height: 24px; }
+  html[data-desktop][data-skin="mac"] .dk-widget .mf-compose { padding: 10px; gap: 10px; }
+  html[data-desktop][data-skin="mac"] .dk-widget .mf-avatar { display: flex; flex: none; width: 36px; height: 36px; align-items: center; justify-content: center; }
+  html[data-desktop][data-skin="mac"] .dk-widget .mf-input { font-size: 16px; min-height: 64px; }
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day { font-size: 14px !important; min-height: 34px !important; }
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day.has::after { top: calc(50% + 11px); }
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 12px; }
+}
