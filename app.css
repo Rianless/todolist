@@ -8434,9 +8434,9 @@ html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 11px; }
   html[data-desktop][data-skin="mac"] .dk-widget { grid-column: 1 / -1; }
   html[data-desktop][data-skin="mac"] .dk-widget[data-w="today"] { order: 1; }
   html[data-desktop][data-skin="mac"] .dk-widget[data-w="memo"] { order: 2; }
-  html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] { order: 3; grid-column: 1; align-self: stretch; }
-  html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] { order: 4; grid-column: 2; align-self: stretch; }
-  html[data-desktop][data-skin="mac"] .dk-widget[data-w="cal"] { order: 5; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] { order: 4; grid-column: 1; align-self: stretch; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] { order: 5; grid-column: 2; align-self: stretch; }
+  html[data-desktop][data-skin="mac"] .dk-widget[data-w="cal"] { order: 3; }
   html[data-desktop][data-skin="mac"] .dk-widget[data-w="money"] { order: 6; }
   /* 반쪽 폭이라 제목·글자는 한 단계 작게 */
   html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"], html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] { font-size: 13px; }
