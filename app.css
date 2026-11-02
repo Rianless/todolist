@@ -8131,3 +8131,4 @@ html[data-desktop] .dkw-bm-list { display: flex; flex-direction: column; gap: 10
 html[data-desktop] .dkw-bm-list .dkw-bm { margin: 0; }
 html[data-desktop] .bk-folders .bk-fitem { margin-bottom: 10px; }
 html[data-desktop] .bk-folders .bk-fitem:last-child { margin-bottom: 0; }
+html[data-desktop] .dkw-bm-list .dkw-bm { padding: 10px 14px; }
