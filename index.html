@@ -387,8 +387,8 @@
 
               <div class="ledger-actions ledger-actions-stack">
                 <button class="ledger-export-btn" onclick="exportLedgerCSV();event.stopPropagation()" aria-label="현재 월 가계부 CSV 내보내기">CSV</button>
-                <button class="ledger-export-btn" onclick="document.getElementById('ledgerImportFile').click();event.stopPropagation()" aria-label="토스 등에서 받은 CSV 가져오기">CSV 가져오기</button>
-                <input type="file" id="ledgerImportFile" accept=".csv,.txt,text/csv" hidden onchange="importLedgerCSV(this)">
+                <button class="ledger-export-btn" onclick="document.getElementById('ledgerImportFile').click();event.stopPropagation()" aria-label="토스 등에서 받은 엑셀·CSV 가져오기">엑셀·CSV 가져오기</button>
+                <input type="file" id="ledgerImportFile" accept=".xlsx,.csv,.txt,text/csv,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" hidden onchange="importLedgerCSV(this)">
               </div>
 
             </div>

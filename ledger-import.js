@@ -50,6 +50,11 @@
   }
 
   function normDate(s) {
+    // 엑셀이 날짜를 일련번호(예: 46327.5)로 저장한 경우
+    if (/^\d{5}(\.\d+)?$/.test(String(s).trim())) {
+      const d = new Date(Math.round((Number(s) - 25569) * 86400000));
+      return d.toISOString().slice(0, 10);
+    }
     const m = String(s || '').match(/(\d{4})\D{0,2}(\d{1,2})\D{0,2}(\d{1,2})/);
     if (!m) return '';
     return `${m[1]}-${String(m[2]).padStart(2, '0')}-${String(m[3]).padStart(2, '0')}`;
@@ -119,7 +124,75 @@
     return '기타';
   }
 
-  const api = { parseCSV, decodeBytes, detectColumns, toEntries, dedupe, guessCategory, normDate, num };
+  // ── 엑셀(.xlsx) 읽기: zip 을 풀고 시트 XML 에서 칸 값을 꺼낸다 (외부 라이브러리 없음) ──
+  const dec = new TextDecoder('utf-8');
+  async function inflateRaw(bytes) {
+    const stream = new Blob([bytes]).stream().pipeThrough(new DecompressionStream('deflate-raw'));
+    return new Uint8Array(await new Response(stream).arrayBuffer());
+  }
+  async function unzip(buf) {
+    const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+    const dv = new DataView(u8.buffer, u8.byteOffset, u8.byteLength);
+    let eocd = -1;
+    for (let i = u8.length - 22; i >= Math.max(0, u8.length - 65557); i--) if (dv.getUint32(i, true) === 0x06054b50) { eocd = i; break; }
+    if (eocd < 0) throw new Error('엑셀(.xlsx) 파일이 아니에요');
+    const count = dv.getUint16(eocd + 10, true);
+    let p = dv.getUint32(eocd + 16, true);
+    const files = {};
+    for (let n = 0; n < count; n++) {
+      if (dv.getUint32(p, true) !== 0x02014b50) break;
+      const method = dv.getUint16(p + 10, true), csize = dv.getUint32(p + 20, true);
+      const nlen = dv.getUint16(p + 28, true), elen = dv.getUint16(p + 30, true), clen = dv.getUint16(p + 32, true);
+      const off = dv.getUint32(p + 42, true);
+      const name = dec.decode(u8.subarray(p + 46, p + 46 + nlen));
+      p += 46 + nlen + elen + clen;
+      if (!/^xl\/(sharedStrings\.xml|worksheets\/sheet\d+\.xml)$/.test(name)) continue;
+      const start = off + 30 + dv.getUint16(off + 26, true) + dv.getUint16(off + 28, true);
+      const data = u8.subarray(start, start + csize);
+      files[name] = dec.decode(method === 0 ? data : await inflateRaw(data));
+    }
+    return files;
+  }
+  const unxml = t => t.replace(/&lt;/g, '<').replace(/&gt;/g, '>').replace(/&quot;/g, '"').replace(/&apos;/g, "'").replace(/&#(\d+);/g, (m, d) => String.fromCodePoint(+d)).replace(/&#x([0-9a-f]+);/gi, (m, h) => String.fromCodePoint(parseInt(h, 16))).replace(/&amp;/g, '&');
+  const textOf = xml => [...xml.matchAll(/<t(?:\s[^>]*)?>([\s\S]*?)<\/t>/g)].map(m => unxml(m[1])).join('');
+  const colIndex = ref => ref.replace(/\d+/g, '').split('').reduce((a, c) => a * 26 + c.charCodeAt(0) - 64, 0) - 1;
+
+  async function xlsxToRows(buf) {
+    const files = await unzip(buf);
+    const shared = files['xl/sharedStrings.xml'] ? [...files['xl/sharedStrings.xml'].matchAll(/<si(?:\s[^>]*)?>([\s\S]*?)<\/si>/g)].map(m => textOf(m[1])) : [];
+    const sheets = Object.keys(files).filter(k => k.startsWith('xl/worksheets/')).sort((a, b) => parseInt(a.match(/\d+/)[0]) - parseInt(b.match(/\d+/)[0]));
+    if (!sheets.length) throw new Error('엑셀 시트를 찾지 못했어요');
+    const rows = [];
+    for (const rm of files[sheets[0]].matchAll(/<row(?:\s[^>]*)?>([\s\S]*?)<\/row>/g)) {
+      const row = [];
+      for (const cm of rm[1].matchAll(/<c\s([^>]*?)(?:\/>|>([\s\S]*?)<\/c>)/g)) {
+        const attrs = cm[1], body = cm[2] || '';
+        const ref = (attrs.match(/\br="([A-Z]+\d+)"/) || [])[1];
+        const type = (attrs.match(/\bt="(\w+)"/) || [])[1];
+        const idx = ref ? colIndex(ref) : row.length;
+        const v = (body.match(/<v>([\s\S]*?)<\/v>/) || [])[1];
+        let val = '';
+        if (type === 's') val = shared[+v] || '';
+        else if (type === 'inlineStr') val = textOf(body);
+        else if (v !== undefined) val = unxml(v);
+        while (row.length < idx) row.push('');
+        row[idx] = String(val).trim();
+      }
+      if (row.some(x => x !== '')) rows.push(row);
+    }
+    return rows;
+  }
+  const isXlsx = u8 => u8.length > 4 && u8[0] === 0x50 && u8[1] === 0x4b;
+
+  // 파일 바이트가 엑셀이든 CSV 든 표(rows)로 바꿔 준다
+  async function readTable(buf) {
+    const u8 = buf instanceof Uint8Array ? buf : new Uint8Array(buf);
+    if (isXlsx(u8)) return xlsxToRows(u8);
+    if (u8.length > 4 && u8[0] === 0xd0 && u8[1] === 0xcf) throw new Error('예전 엑셀(.xls)은 읽지 못해요. 엑셀에서 .xlsx 나 CSV 로 다시 저장해 주세요');
+    return parseCSV(decodeBytes(u8));
+  }
+
+  const api = { readTable, xlsxToRows, parseCSV, decodeBytes, detectColumns, toEntries, dedupe, guessCategory, normDate, num };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.LedgerImport = api;
 })();

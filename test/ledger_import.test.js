@@ -27,3 +27,14 @@ assert.strictEqual(L.guessCategory({ type: 'expense', title: '배달의민족', 
 const euc = new Uint8Array([0xB3, 0xAF, 0xC2, 0xA5]); // "날짜"
 assert.strictEqual(L.decodeBytes(euc), '날짜');
 console.log('ledger import tests passed');
+
+// 엑셀(.xlsx) — openpyxl 로 만든 샘플
+(async () => {
+  const fs = require('fs');
+  const f = require('path').join(__dirname, 'fixtures', 'ledger-sample.xlsx');
+  const rows = await L.readTable(fs.readFileSync(f));
+  const r = L.toEntries(rows);
+  assert.deepStrictEqual(r.entries.map(e => [e.date, e.type, e.amount, e.title]), [
+    ['2026-11-01', 'expense', 4500, '스타벅스 & 강남점'], ['2026-11-02', 'income', 30000, '김토스'], ['2026-11-03', 'expense', 3200, '가나다']]);
+  console.log('xlsx import test passed');
+})().catch(e => { console.error(e); process.exit(1); });

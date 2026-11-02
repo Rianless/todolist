@@ -1365,18 +1365,18 @@ function scheduleNotifications() {
 }
 
 
-// 토스 등에서 내려받은 CSV 를 가계부에 한꺼번에 넣는다. 이미 있는 내역(날짜·구분·금액·이름 동일)은 건너뛴다.
+// 토스 등에서 내려받은 엑셀(.xlsx)·CSV 를 가계부에 한꺼번에 넣는다. 이미 있는 내역(날짜·구분·금액·이름 동일)은 건너뛴다.
 function importLedgerCSV(input) {
   const file = input && input.files && input.files[0];
   if (input) input.value = '';
   if (!file) return;
   const reader = new FileReader();
   reader.onerror = () => showToast('파일을 읽지 못했어요', { type: 'error', duration: 2400 });
-  reader.onload = () => {
+  reader.onload = async () => {
     let result;
-    try { result = LedgerImport.toEntries(LedgerImport.parseCSV(LedgerImport.decodeBytes(reader.result))); }
-    catch (e) { console.error('[ledger import]', e); showToast('CSV 를 해석하지 못했어요', { type: 'error', duration: 2400 }); return; }
-    if (result.error) { alert(result.error + '\n\n토스에서 받은 파일이 엑셀(.xlsx)이면 엑셀에서 "CSV 로 저장" 후 다시 시도해 주세요.'); return; }
+    try { result = LedgerImport.toEntries(await LedgerImport.readTable(reader.result)); }
+    catch (e) { console.error('[ledger import]', e); alert((e && e.message) || '파일을 해석하지 못했어요'); return; }
+    if (result.error) { alert(result.error); return; }
     const { fresh, dups } = LedgerImport.dedupe(result.entries, ledger);
     if (!fresh.length) { alert(`새로 넣을 내역이 없어요.\n(이미 있는 내역 ${dups.length}건, 읽지 못한 줄 ${result.skipped.length}건)`); return; }
     const sum = t => fresh.filter(e => e.type === t).reduce((a, e) => a + e.amount, 0);
