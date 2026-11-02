@@ -26,6 +26,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import com.todoapp.widget.data.applyAppToken
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
@@ -87,6 +88,7 @@ class TodoDetailPopupActivity : AppCompatActivity() {
                 runCatching {
                     val url = URL("$API_URL?id=$id")
                     val conn = url.openConnection() as HttpURLConnection
+                    conn.applyAppToken()
                     val response = conn.inputStream.bufferedReader().readText()
                     conn.disconnect()
                     val arr = JSONArray(response)
@@ -180,6 +182,7 @@ class TodoDetailPopupActivity : AppCompatActivity() {
                     runCatching {
                         val url = URL("$API_URL?id=${todo.id}")
                         val conn = url.openConnection() as HttpURLConnection
+                        conn.applyAppToken()
                         conn.requestMethod = "PATCH"
                         conn.setRequestProperty("Content-Type", "application/json")
                         conn.doOutput = true
@@ -210,6 +213,7 @@ class TodoDetailPopupActivity : AppCompatActivity() {
                     runCatching {
                         val url = URL("$API_URL?id=${todo.id}")
                         val conn = url.openConnection() as HttpURLConnection
+                        conn.applyAppToken()
                         conn.requestMethod = "DELETE"
                         conn.inputStream.close()
                         conn.disconnect()

@@ -28,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import org.json.JSONArray
 import org.json.JSONObject
+import com.todoapp.widget.data.applyAppToken
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
@@ -87,6 +88,7 @@ class AddEditActivity : AppCompatActivity() {
                 runCatching {
                     val conn = URL("https://todolist-liart-mu.vercel.app/api/state")
                         .openConnection() as HttpURLConnection
+                    conn.applyAppToken()
                     val response = conn.inputStream.bufferedReader().readText()
                     conn.disconnect()
                     val array = JSONObject(response)
@@ -125,6 +127,7 @@ class AddEditActivity : AppCompatActivity() {
                 runCatching {
                     val url = URL("$API_URL?id=$todoId")
                     val conn = url.openConnection() as HttpURLConnection
+                    conn.applyAppToken()
                     val response = conn.inputStream.bufferedReader().readText()
                     conn.disconnect()
                     val arr = JSONArray(response)
@@ -191,6 +194,7 @@ class AddEditActivity : AppCompatActivity() {
                         // 수정
                         val url = URL("$API_URL?id=$todoId")
                         val conn = url.openConnection() as HttpURLConnection
+                        conn.applyAppToken()
                         conn.requestMethod = "PATCH"
                         conn.setRequestProperty("Content-Type", "application/json")
                         conn.setRequestProperty("Prefer", "return=representation")
@@ -202,6 +206,7 @@ class AddEditActivity : AppCompatActivity() {
                     } else {
                         // 추가
                         val listConn = URL(API_URL).openConnection() as HttpURLConnection
+                        listConn.applyAppToken()
                         val listResponse = listConn.inputStream.bufferedReader().readText()
                         listConn.disconnect()
                         val rows = JSONArray(listResponse)
@@ -214,6 +219,7 @@ class AddEditActivity : AppCompatActivity() {
 
                         val url = URL(API_URL)
                         val conn = url.openConnection() as HttpURLConnection
+                        conn.applyAppToken()
                         conn.requestMethod = "POST"
                         conn.setRequestProperty("Content-Type", "application/json")
                         conn.setRequestProperty("Prefer", "return=representation")

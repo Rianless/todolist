@@ -13,6 +13,7 @@ import com.todoapp.widget.data.applyItemOrder
 import com.todoapp.widget.data.repeatOccursOn
 import kotlinx.coroutines.runBlocking
 import org.json.JSONArray
+import com.todoapp.widget.data.applyAppToken
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.LocalDate
@@ -57,6 +58,7 @@ class TodoWidgetFactory(
                 // 선택된 날짜만 가져오기
                 val url = URL("$apiUrl?date=$selectedDate")
                 val conn = url.openConnection() as HttpURLConnection
+                conn.applyAppToken()
                 conn.setRequestProperty("Content-Type", "application/json")
 
                 val response = conn.inputStream.bufferedReader().readText()

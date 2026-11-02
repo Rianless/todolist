@@ -2,6 +2,11 @@ const { app, BrowserWindow, Tray, Menu, nativeImage, shell, ipcMain, screen, net
 const path = require('path');
 const fs = require('fs');
 
+// 서버가 접근 토큰(APP_TOKEN)을 요구하면 환경변수 TODOLIST_TOKEN 또는 설정 폴더의 app-token.txt 에 적어 둔 값을 보낸다.
+function readAppToken() {
+  if (process.env.TODOLIST_TOKEN) return process.env.TODOLIST_TOKEN.trim();
+  try { return fs.readFileSync(path.join(app.getPath('userData'), 'app-token.txt'), 'utf8').trim(); } catch (e) { return ''; }
+}
 // 웹앱/폰 위젯과 같은 서버. 바꿔야 하면 환경변수 TODOLIST_URL 로 덮어쓴다.
 const SERVER_URL = (process.env.TODOLIST_URL || 'https://todolist-liart-mu.vercel.app').replace(/\/+$/, '');
 
@@ -181,7 +186,7 @@ ipcMain.handle('api', async (_e, { method, path: apiPath, body }) => {
   try {
     const res = await net.fetch(SERVER_URL + apiPath, {
       method,
-      headers: body === undefined ? {} : { 'Content-Type': 'application/json' },
+      headers: { ...(body === undefined ? {} : { 'Content-Type': 'application/json' }), ...(readAppToken() ? { 'x-app-token': readAppToken() } : {}) },
       body: body === undefined ? undefined : JSON.stringify(body)
     });
     return { ok: res.ok, status: res.status, text: await res.text() };

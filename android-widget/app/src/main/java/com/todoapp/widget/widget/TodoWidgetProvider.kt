@@ -32,6 +32,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import org.json.JSONArray
+import com.todoapp.widget.data.applyAppToken
 import java.net.HttpURLConnection
 import java.net.URL
 import java.time.DayOfWeek
@@ -280,6 +281,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
                         runCatching {
                             val url = URL("$API_URL?id=$id")
                             val conn = url.openConnection() as HttpURLConnection
+                            conn.applyAppToken()
                             conn.requestMethod = "PATCH"
                             conn.setRequestProperty("Content-Type", "application/json")
                             conn.doOutput = true
@@ -981,6 +983,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
             val dateValue = date.format(DateTimeFormatter.ISO_LOCAL_DATE)
             val url = URL("$API_URL?date=$dateValue")
             val conn = url.openConnection() as HttpURLConnection
+            conn.applyAppToken()
             conn.connectTimeout = 8000
             conn.readTimeout = 8000
             val response = conn.inputStream.bufferedReader().readText()
@@ -1026,6 +1029,7 @@ class TodoWidgetProvider : AppWidgetProvider() {
             val toDate = weekEnd.format(DateTimeFormatter.ISO_LOCAL_DATE)
             val url = URL("$API_URL?from=$fromDate&to=$toDate")
             val conn = url.openConnection() as HttpURLConnection
+            conn.applyAppToken()
             val response = conn.inputStream.bufferedReader().readText()
             conn.disconnect()
             val arr = JSONArray(response)

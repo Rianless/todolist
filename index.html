@@ -2045,6 +2045,42 @@
 
 
 
+<script>
+/* 서버(/api/state·/api/todos)가 접근 토큰을 요구하면 기기에 저장해 둔 토큰을 요청마다 붙인다.
+   토큰이 없거나 틀리면(401) 한 번 물어보고 저장한 뒤 같은 요청을 다시 보낸다. */
+(function () {
+  var KEY = 'rianless_app_token', nativeFetch = window.fetch.bind(window), asking = null, declinedAt = 0;
+  function get() { try { return localStorage.getItem(KEY) || ''; } catch (e) { return ''; } }
+  function set(v) { try { localStorage.setItem(KEY, v); } catch (e) {} }
+  function isGuarded(input) {
+    try { var u = new URL(typeof input === 'string' ? input : input.url, location.href); return u.origin === location.origin && /^\/api\/(state|todos)(\/|$)/.test(u.pathname); } catch (e) { return false; }
+  }
+  function withToken(input, init, token) {
+    var headers = new Headers((init && init.headers) || (typeof input !== 'string' && input.headers) || {});
+    if (token) headers.set('x-app-token', token);
+    return [input, Object.assign({}, init || {}, { headers: headers })];
+  }
+  function ask(wrong) {
+    if (Date.now() - declinedAt < 300000) return Promise.resolve('');  // 방금 취소했으면 5분간 다시 묻지 않는다
+    if (!asking) asking = Promise.resolve().then(function () {
+      var v = window.prompt((wrong ? '비밀번호가 맞지 않아요. 다시 입력해 주세요.\n\n' : '') + '서버 접근 비밀번호(APP_TOKEN)를 입력해 주세요.\n이 기기에만 저장돼요.');
+      if (v && v.trim()) set(v.trim()); else declinedAt = Date.now();
+      return v ? v.trim() : '';
+    }).then(function (v) { asking = null; return v; });
+    return asking;
+  }
+  function attempt(input, init, token, tries) {
+    var a = withToken(input, init, token);
+    return nativeFetch(a[0], a[1]).then(function (res) {
+      if (res.status !== 401 || tries >= 3) return res;
+      return ask(!!token).then(function (t) { return t ? attempt(input, init, t, tries + 1) : res; });
+    });
+  }
+  window.fetch = function (input, init) {
+    return isGuarded(input) ? attempt(input, init, get(), 1) : nativeFetch(input, init);
+  };
+})();
+</script>
 <script src="/state-merge.js"></script>
 <script src="/bookmarks.js"></script>
 <script src="/js/savetube.js"></script>

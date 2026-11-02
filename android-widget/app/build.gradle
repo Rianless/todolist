@@ -15,6 +15,9 @@ android {
         versionCode 19
         versionName "2.6.2"
         testInstrumentationRunner "androidx.test.runner.AndroidJUnitRunner"
+        // 서버 접근 토큰: 소스에 적지 않고 빌드할 때 환경변수/gradle 속성 APP_TOKEN 으로 넣는다 (없으면 빈 값)
+        def appToken = (System.getenv('APP_TOKEN') ?: (project.findProperty('APP_TOKEN') ?: '')).toString().replace('\\', '\\\\').replace('"', '\\"')
+        buildConfigField 'String', 'APP_TOKEN', "\"${appToken}\""
     }
 
     buildTypes {
@@ -32,6 +35,7 @@ android {
     }
     buildFeatures {
         viewBinding true
+        buildConfig true
     }
 }
 

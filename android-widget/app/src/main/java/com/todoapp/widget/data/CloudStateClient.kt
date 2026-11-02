@@ -107,6 +107,7 @@ object CloudStateClient {
     private fun fetchDayTodoIds(date: LocalDate): List<String>? {
         return runCatching {
             val connection = URL("$TODOS_API_URL?date=$date").openConnection() as HttpURLConnection
+            connection.applyAppToken()
             connection.connectTimeout = 8000
             connection.readTimeout = 8000
             val response = connection.inputStream.bufferedReader().readText()
@@ -285,6 +286,7 @@ object CloudStateClient {
     private fun fetchState(): JSONObject? {
         return runCatching {
             val connection = URL(STATE_API_URL).openConnection() as HttpURLConnection
+            connection.applyAppToken()
             connection.connectTimeout = 8000
             connection.readTimeout = 8000
             val response = connection.inputStream.bufferedReader().readText()
@@ -296,6 +298,7 @@ object CloudStateClient {
     private fun postState(state: JSONObject): Boolean {
         return runCatching {
             val connection = URL(STATE_API_URL).openConnection() as HttpURLConnection
+            connection.applyAppToken()
             connection.requestMethod = "POST"
             connection.setRequestProperty("Content-Type", "application/json")
             connection.connectTimeout = 8000
