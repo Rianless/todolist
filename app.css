@@ -8346,3 +8346,11 @@ html[data-skin="mac"] #searchResults:not(:empty) { border-top: 1px solid rgba(0,
   /* 창이 앞에 있는 느낌: 더 깊은 그림자 */
   html[data-desktop][data-skin="mac"] #app::before { box-shadow: 0 0 0 .5px rgba(0,0,0,.4), 0 30px 90px rgba(10,0,40,.5); }
 }
+
+
+/* 맥 홈 위젯 '메모': 입력창은 위에 고정하고, 스크롤은 그 아래 메모 목록에서만 (위젯 본문 스크롤과 목록 스크롤이 겹치던 것 정리) */
+@media (min-width: 900px) {
+  html[data-desktop][data-skin="mac"] .dkw-body:has(> .mf-scroll) { display: flex; flex-direction: column; overflow: hidden; min-height: 0; }
+  html[data-desktop][data-skin="mac"] .dkw-body:has(> .mf-scroll) > .mf-compose { flex: none; }
+  html[data-desktop][data-skin="mac"] .dkw-body > .mf-scroll { flex: 1 1 0; min-height: 0; max-height: none; overflow-y: auto; }
+}
