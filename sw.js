@@ -1,10 +1,8 @@
-const CACHE_NAME = 'todolist-v149-imac';
+const CACHE_NAME = 'todolist-v150-revert';
 const ASSETS = [
   './',
   './index.html',
   './app.css',
-  './wallpaper-mac.svg',
-  './js/mac-dock.js',
   './js/app-1.js',
   './js/app-2.js',
   './js/app-3.js',
