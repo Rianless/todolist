@@ -18,7 +18,9 @@
     { tab: 'mypage', name: '마이페이지', c: ['#a5d8ff', '#228be6'], art: '<circle cx="23" cy="17" r="7" fill="#fff"/><path d="M9 38c0-8 6-12 14-12s14 4 14 12z" fill="#fff"/>' }
   ];
   var uid = Math.random().toString(36).slice(2, 7);
-  var mx = null, fi = -1, raf = 0, BASE = 48, MAX = 84, SPREAD = 96, GAP = 6;
+  // 폰(900px 미만)은 터치라 커지는 효과 없이 조금 작은 아이콘으로 나란히 둔다
+  function isPhone() { return window.innerWidth < 900; }
+  var mx = null, fi = -1, raf = 0, BASE = isPhone() ? 44 : 48, MAX = 84, SPREAD = 96, GAP = 6;
   var A = APPS.map(function (ap, i) {
     var gid = 'u208g' + uid + i;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'u208-a'; b.setAttribute('aria-label', ap.name + ' 열기');
@@ -40,7 +42,7 @@
     A.forEach(function (a, i) {
       var c = (i - (A.length - 1) / 2) * (BASE + GAP), tg = BASE;
       if (mx !== null) { var d = (mx - c) / SPREAD; tg = BASE + (MAX - BASE) * Math.exp(-d * d * 1.6); }
-      else if (fi === i) tg = MAX * 0.8;
+      else if (fi === i && !isPhone()) tg = MAX * 0.8;
       a.s += (tg - a.s) * (rm ? 1 : 0.28);
       if (Math.abs(tg - a.s) > 0.1) busy = true; else a.s = tg;
       a.el.style.setProperty('--s', a.s.toFixed(2) + 'px'); a.el.style.setProperty('--lift', ((a.s - BASE) * 0.25).toFixed(2) + 'px');
@@ -55,7 +57,7 @@
   function run() { if (!raf) raf = requestAnimationFrame(frame); }
   // 커서가 독 근처(위쪽 150px까지)에 있을 때만 반응합니다. 독은 늘 화면 가운데 정렬이라 가운데를 기준으로 잽니다
   document.addEventListener('pointermove', function (e) {
-    if (!dk.offsetWidth) return;   // 독이 안 보이는 화면(폰·다른 스킨)
+    if (!dk.offsetWidth || isPhone()) return;   // 독이 안 보이는 화면(다른 스킨)이거나 터치 폰
     var y = e.clientY - dk.getBoundingClientRect().bottom;
     var next = y > -150 && y < 14 ? e.clientX - window.innerWidth / 2 : null;
     if (next === null && mx === null) return;
@@ -63,6 +65,14 @@
     run();
   });
   document.documentElement.addEventListener('pointerleave', function () { mx = null; run(); });
+
+  window.addEventListener('resize', function () {
+    var nb = isPhone() ? 44 : 48;
+    if (nb === BASE) return;
+    BASE = nb; mx = null; fi = -1;
+    A.forEach(function (a) { a.s = BASE; });
+    run();
+  });
 
   // 열려 있는(또는 최소화된) 앱 아래에 점, 달력 아이콘은 오늘 날짜로
   window.macDockSync = function () {
@@ -74,4 +84,5 @@
     if (day) day.textContent = d.getDate();
   };
   window.macDockSync();
+  run();   // 처음 크기(폰 44 / PC 48)를 바로 적용
 })();
