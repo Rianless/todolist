@@ -8192,3 +8192,6 @@ html[data-desktop] .dkw-bm-list { max-height: none; overflow: visible; }
 }
 /* 맥: 빨강·노랑·초록 점과 팝업 제목 사이를 띄움 (PC·폰 공통) */
 html[data-skin="mac"] .modal-sheet .modal-header { padding-left: 92px !important; padding-top: 18px !important; }
+
+/* 맥 팝업: 빨강·노랑·초록 점의 세로 중심을 제목·닫기 단추와 같은 선에 맞춤 */
+html[data-skin="mac"] .modal-sheet .modal-header::before { top: calc(50% + 3px) !important; }
