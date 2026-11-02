@@ -8277,3 +8277,72 @@ html[data-skin="mac"] #macMenubar .mb-bat { width: 20px; }
 @media (prefers-reduced-motion: reduce) {
   .u208-a.is-hop { animation: none; }
 }
+
+
+/* ═══════════════════════════════════════════════════════════
+   아이맥(macOS) 느낌 2: 팝업 · 검색(스포트라이트) · 알림창 · 폴더 창 · 앱 화면
+   ═══════════════════════════════════════════════════════════ */
+
+/* 팝업(시트): 창 제목 줄처럼 — 위 막대가 회색 그라데이션, 제목은 가운데, 닫기는 작은 회색 원 */
+html[data-skin="mac"] .modal-sheet, html[data-skin="mac"] .detail-sheet, html[data-skin="mac"] .add-sheet, html[data-skin="mac"] .day-sheet { overflow: hidden; }
+html[data-skin="mac"] .modal-sheet .modal-header {
+  background: linear-gradient(#ececee, #dedee1) !important; border-bottom: 1px solid rgba(0,0,0,.14) !important;
+  padding: 14px 92px 12px !important; min-height: 0; justify-content: center; margin: 0;
+}
+html[data-skin="mac"] .modal-sheet .modal-title { flex: 1; text-align: center; font-size: 13px !important; font-weight: 600; color: #3a3a3c !important; }
+html[data-skin="mac"] .modal-sheet .modal-header .modal-close {
+  position: absolute; right: 12px; top: calc(50% + 3px); transform: translateY(-50%); width: 22px !important; height: 22px !important; min-height: 0 !important; padding: 0 !important;
+  font-size: 11px !important; line-height: 22px; border-radius: 50% !important; background: rgba(0,0,0,.08) !important; border: none !important; box-shadow: none !important; color: #6e6e73 !important;
+}
+html[data-skin="mac"] .modal-sheet .modal-header .modal-close:hover { background: rgba(0,0,0,.16) !important; }
+html[data-skin="mac"] .modal-sheet .modal-body { background: #f5f5f7; }
+
+/* 확인창: 맥 경고창처럼 가운데 아이콘 + 굵은 문구 + 버튼 */
+html[data-skin="mac"] .confirm-sheet { border-radius: 14px !important; padding: 22px 22px 16px !important; text-align: center; max-width: 320px !important; }
+html[data-skin="mac"] .confirm-sheet .confirm-icon { font-size: 40px; }
+html[data-skin="mac"] .confirm-sheet .confirm-msg { font-size: 13px; font-weight: 600; color: #1d1d1f !important; line-height: 1.5; }
+html[data-skin="mac"] .confirm-sheet .confirm-actions { display: flex; gap: 8px; margin-top: 14px; }
+html[data-skin="mac"] .confirm-sheet .confirm-actions button { flex: 1; height: 28px; min-height: 0; padding: 0 10px; font-size: 13px; }
+html[data-skin="mac"] .confirm-sheet .btn-save { background: linear-gradient(#4da3ff, #007aff) !important; color: #fff !important; border: 1px solid #0a6fe0 !important; }
+
+/* 검색: 스포트라이트처럼 크고 둥근 한 줄 입력 */
+html[data-skin="mac"] #searchOverlay { background: rgba(20,10,50,.28) !important; -webkit-backdrop-filter: blur(14px); backdrop-filter: blur(14px); }
+html[data-skin="mac"] #searchBox {
+  width: min(680px, calc(100vw - 32px)); border-radius: 16px !important; background: rgba(246,246,248,.88) !important; padding: 0 !important; overflow: hidden; clip-path: none !important;
+  -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px); border: none !important; box-shadow: 0 0 0 .5px rgba(0,0,0,.3), 0 24px 70px rgba(0,0,0,.45) !important;
+}
+html[data-skin="mac"] #searchBox .search-dc, html[data-skin="mac"] #searchBox .search-sys { display: none !important; }
+html[data-skin="mac"] #searchBox .search-header { position: absolute; right: 12px; top: 12px; z-index: 2; padding: 0; margin: 0; border: none; background: none; }
+html[data-skin="mac"] #searchBox .search-header .modal-close { width: 22px; height: 22px; min-height: 0; padding: 0; font-size: 11px; line-height: 22px; border-radius: 50% !important; background: rgba(0,0,0,.08) !important; border: none !important; box-shadow: none !important; color: #6e6e73 !important; }
+html[data-skin="mac"] #searchBox .search-input-wrap { margin: 0; padding: 6px 48px 6px 16px; background: none !important; border: none !important; box-shadow: none !important; }
+html[data-skin="mac"] #searchBox .search-input { font-size: 20px !important; height: 44px; background: transparent !important; border: none !important; box-shadow: none !important; padding-left: 6px; }
+html[data-skin="mac"] #searchBox .search-input:focus { box-shadow: none !important; }
+html[data-skin="mac"] #searchResults:not(:empty) { border-top: 1px solid rgba(0,0,0,.1); padding: 6px; }
+
+@media (min-width: 900px) {
+  /* 애플 메뉴: 끝에 남던 구분선 제거, 메뉴 줄 높이를 맥처럼 촘촘하게 */
+  html[data-desktop][data-skin="mac"] #desktopStartMenu hr:last-child { display: none; }
+  html[data-desktop][data-skin="mac"] #desktopStartMenu button { padding: 5px 12px !important; font-size: 13px !important; }
+
+  /* 폴더 창(가계부·마이페이지): 신호등 + 가운데 제목. 닫기 단추가 빨간 점 */
+  html[data-desktop][data-skin="mac"] .dk-folder-title { position: relative; justify-content: center; padding: 10px 40px; font-size: 13px; }
+  html[data-desktop][data-skin="mac"] .dk-folder-title span { flex: none; }
+  html[data-desktop][data-skin="mac"] .dk-folder-title button {
+    position: absolute; left: 14px; top: 50%; margin-top: -6px; width: 12px; height: 12px; min-height: 0; padding: 0; font-size: 0 !important; border: none !important;
+    border-radius: 50% !important; background: #ff5f57 !important; box-shadow: 20px 0 0 #febc2e, 40px 0 0 #28c840, inset 0 0 0 .5px rgba(0,0,0,.2) !important;
+  }
+  html[data-desktop][data-skin="mac"] .dk-folder-body { padding: 18px 12px; }
+
+  /* 마이페이지: 시스템 설정처럼 가운데 좁게, 화살표는 작고 회색으로 */
+  html[data-desktop][data-skin="mac"] #viewMypage .mp-card { width: min(780px, 100%); box-sizing: border-box; margin-left: auto !important; margin-right: auto !important; }
+  html[data-desktop][data-skin="mac"] .mp-card-chevron { font-size: 10px; color: #8e8e93; }
+  html[data-desktop][data-skin="mac"] .mp-card-header { border-radius: 12px; }
+
+  /* 메모·북마크: 왼쪽 목록은 사이드바처럼 연한 회색 바탕 */
+  html[data-desktop][data-skin="mac"] .mm-list, html[data-desktop][data-skin="mac"] .bk-folders { background: rgba(236,236,240,.9) !important; box-shadow: inset 0 0 0 .5px rgba(0,0,0,.08); }
+  html[data-desktop][data-skin="mac"] .mm-search, html[data-desktop][data-skin="mac"] .bk-search, html[data-desktop][data-skin="mac"] .bk-addr input { border-radius: 8px !important; }
+  html[data-desktop][data-skin="mac"] .mm-item:hover:not(.active), html[data-desktop][data-skin="mac"] .bk-fitem:hover:not(.on) { background: rgba(0,0,0,.05); }
+
+  /* 창이 앞에 있는 느낌: 더 깊은 그림자 */
+  html[data-desktop][data-skin="mac"] #app::before { box-shadow: 0 0 0 .5px rgba(0,0,0,.4), 0 30px 90px rgba(10,0,40,.5); }
+}
