@@ -8153,3 +8153,6 @@ html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.today.has::after { b
 /* PC 홈 달력 위젯: 알약 속 날짜 숫자 키움 (점 위치도 맞춤) */
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day { font-size: 16px !important; }
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.has::after { top: calc(50% + 13px); }
+
+/* PC 홈 북마크 위젯: 목록 자체 스크롤을 없애고 위젯 본문 스크롤 하나만 사용 */
+html[data-desktop] .dkw-bm-list { max-height: none; overflow: visible; }
