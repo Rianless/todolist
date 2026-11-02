@@ -8195,3 +8195,8 @@ html[data-skin="mac"] .modal-sheet .modal-header { padding-left: 92px !important
 
 /* 맥 팝업: 빨강·노랑·초록 점의 세로 중심을 제목·닫기 단추와 같은 선에 맞춤 */
 html[data-skin="mac"] .modal-sheet .modal-header::before { top: calc(50% + 3px) !important; }
+
+/* PC 윈도우 98 작업표시줄: 달성률 막대를 알림·검색 단추 바로 옆(왼쪽)에 붙임 */
+@media (min-width: 900px) {
+  html[data-desktop][data-skin="w98"] .progress-bar-wrap { right: 162px; }
+}
