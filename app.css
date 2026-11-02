@@ -8144,3 +8144,8 @@ html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.sun { background: rg
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.sat { background: rgba(0,122,255,.09) !important; color: #0000c0 !important; }
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day:hover { background: rgba(0,122,255,.18) !important; }
 html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.today { border-radius: 999px !important; background: linear-gradient(135deg,#007aff,#7a5cff) !important; color: #fff !important; font-weight: 700 !important; }
+
+/* PC 홈 달력 위젯: 할 일이 있는 날은 초록 점 (칸 기준으로 위치 고정) */
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day { position: relative !important; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.has::after { content: ''; position: absolute; left: 50%; bottom: 3px; width: 5px; height: 5px; margin-left: -2.5px; border-radius: 50%; background: #1fa84f; }
+html[data-desktop][data-skin] .dk-widget .dkc-grid .dkc-day.today.has::after { background: #fff; }
