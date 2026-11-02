@@ -8360,3 +8360,11 @@ html[data-skin="mac"] #searchResults:not(:empty) { border-top: 1px solid rgba(0,
 html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day { font-size: 12px !important; min-height: 26px !important; }
 html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day.has::after { top: calc(50% + 9px); }
 html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 11px; }
+
+
+/* 맥 폰 홈: 달력 위젯의 일·토 색 알약 배경 없애기(글자색만 유지), 메뉴바의 와이파이·배터리 아이콘 숨기기 */
+@media (max-width: 899px) {
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day.sun,
+  html[data-desktop][data-skin="mac"] .dk-widget .dkc-grid .dkc-day.sat { background: transparent !important; }
+  html[data-skin="mac"] #macMenubar .mb-sys { display: none !important; }
+}
