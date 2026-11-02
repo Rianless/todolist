@@ -232,6 +232,19 @@ async function installApp() {
   updateParcelShareHelp();
 }
 
+// 택배가 어디서 생겼는지 표시: 가계부 지출에서 자동으로 쌓인 것(날짜·금액·내역)과 직접 등록한 것을 구분한다
+function parcelSourceTag(p, esc) {
+  const md = d => { const m = String(d || '').match(/^\d{4}-(\d{2})-(\d{2})/); return m ? `${Number(m[1])}/${Number(m[2])}` : ''; };
+  const tagStyle = 'display:inline-block;margin-right:4px;padding:0 6px;border-radius:999px;font-size:10px;font-weight:700;';
+  if (p.ledgerId != null) {
+    const e = (typeof ledger !== 'undefined' ? ledger : []).find(x => x.id === p.ledgerId);
+    const detail = e ? [md(e.date), Number(e.amount) ? Number(e.amount).toLocaleString() + '원' : ''].filter(Boolean).join(' · ') : md(p.createdAt);
+    return `<span style="${tagStyle}color:#fff;background:#3b82f6;">💳 가계부</span>${detail ? esc(detail) + ' · ' : ''}`;
+  }
+  const d = md(p.createdAt);
+  return `<span style="${tagStyle}color:var(--text2);background:var(--border2,#ddd);">✍️ 직접</span>${d ? esc(d) + ' · ' : ''}`;
+}
+
 function renderParcelList() {
   updateParcelShareHelp();
   const sel = document.getElementById('parcelCarrier');
@@ -275,7 +288,7 @@ function renderParcelList() {
       <span class="bm-icon" style="font-size:20px;">${p.done ? '✅' : Parcels.customsStage(p) === 'wait' ? '🛃' : Parcels.isPending(p) ? '⏳' : '📦'}</span>
       <div class="bm-text">
         <div class="bm-title">${esc(Parcels.labelOf(p))}</div>
-        <div class="bm-url">${p.ledgerId != null ? '💳 ' : ''}${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.customsStage(p) === 'wait' ? `🛃 통관 중${p.hbl ? ' · ' + esc(p.hbl) : ''} · 눌러서 유니패스 조회` : Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : `<select aria-label="택배사 바꾸기" title="택배사 바꾸기" style="font-size:10px;max-width:120px;" onclick="event.stopPropagation()" onchange="changeParcelCarrier(${p.id}, this.value)">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === p.carrier ? ' selected' : ''}>${c.name}</option>`).join('')}</select>${p.guess ? ' <span style="color:var(--red,#e5484d);">⚠ 추정</span>' : ''} · ${esc(p.number)}`}</div>
+        <div class="bm-url">${parcelSourceTag(p, esc)}${p.shop ? '🛍️ ' + esc(p.shop) + ' · ' : ''}${Parcels.customsStage(p) === 'wait' ? `🛃 통관 중${p.hbl ? ' · ' + esc(p.hbl) : ''} · 눌러서 유니패스 조회` : Parcels.isPending(p) ? '운송장 대기 중 · 눌러서 번호 입력' : `<select aria-label="택배사 바꾸기" title="택배사 바꾸기" style="font-size:10px;max-width:120px;" onclick="event.stopPropagation()" onchange="changeParcelCarrier(${p.id}, this.value)">${Parcels.CARRIERS.map(c => `<option value="${c.id}"${c.id === p.carrier ? ' selected' : ''}>${c.name}</option>`).join('')}</select>${p.guess ? ' <span style="color:var(--red,#e5484d);">⚠ 추정</span>' : ''} · ${esc(p.number)}`}</div>
       </div>
       ${!p.done && Parcels.customsStage(p) === 'wait' ? `<button class="bm-del" title="통관 완료" onclick="parcelCustomsCleared(${p.id});event.stopPropagation()">🛃</button>` : ''}
       <button class="bm-del" title="수정" onclick="editParcelStart(${p.id});event.stopPropagation()">✏️</button>
