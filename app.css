@@ -8291,7 +8291,7 @@ html[data-skin="mac"] .modal-sheet .modal-header {
 }
 html[data-skin="mac"] .modal-sheet .modal-title { flex: 1; text-align: center; font-size: 13px !important; font-weight: 600; color: #3a3a3c !important; }
 html[data-skin="mac"] .modal-sheet .modal-header .modal-close {
-  position: absolute; right: 12px; top: calc(50% + 3px); transform: translateY(-50%); width: 22px !important; height: 22px !important; min-height: 0 !important; padding: 0 !important;
+  position: absolute; right: 12px; top: calc(50% + 3px); margin-top: -11px !important; width: 22px !important; height: 22px !important; min-height: 0 !important; padding: 0 !important;
   font-size: 11px !important; line-height: 22px; border-radius: 50% !important; background: rgba(0,0,0,.08) !important; border: none !important; box-shadow: none !important; color: #6e6e73 !important;
 }
 html[data-skin="mac"] .modal-sheet .modal-header .modal-close:hover { background: rgba(0,0,0,.16) !important; }
