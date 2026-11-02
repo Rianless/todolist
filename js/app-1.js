@@ -864,12 +864,33 @@ function skinApplyAttrs(opts) {
   }
 }
 
+// 맥 스킨(PC 폭)에서는 달성률 막대·알림/검색 단추를 작업표시줄 안으로 옮겨 시계 옆에 붙인다.
+// 그 밖의 화면에서는 원래 자리(머리글)로 되돌린다.
+const _dkTrayHome = {};
+function dkDockTray() {
+  const h = document.documentElement, bar = document.getElementById('desktopTaskbar');
+  if (!bar) return;
+  const want = h.getAttribute('data-skin') === 'mac' && h.hasAttribute('data-desktop') && window.innerWidth >= 900;
+  [['progBarWrap', '.progress-bar-wrap'], ['dkHdrCtl', '.header-controls']].forEach(([key, sel]) => {
+    const el = document.querySelector(sel);
+    if (!el) return;
+    if (want) {
+      if (!_dkTrayHome[key]) { _dkTrayHome[key] = document.createComment('dk-tray-' + key); el.parentNode.insertBefore(_dkTrayHome[key], el); }
+      if (el.parentNode !== bar) bar.insertBefore(el, document.getElementById('dkClock'));
+    } else if (_dkTrayHome[key] && _dkTrayHome[key].parentNode && el.parentNode === bar) {
+      _dkTrayHome[key].parentNode.insertBefore(el, _dkTrayHome[key]);
+    }
+  });
+}
+window.addEventListener('resize', dkDockTray);
+
 function applySkin(name) {
   if (name === 'w98') name = 'desktop';
   const h = document.documentElement;
   h.setAttribute('data-skin-pref', name === 'classic' ? 'classic' : name === 'mac' ? 'mac' : 'desktop');
   h.removeAttribute('data-desktop'); h.removeAttribute('data-desktop-win'); h.removeAttribute('data-desktop-max');
   skinApplyAttrs();
+  dkDockTray();
   try { localStorage.setItem('rianless_skin', name); } catch (e) {}
   statsGuard();
   desktopSync();
