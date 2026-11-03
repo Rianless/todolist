@@ -26,6 +26,7 @@ assert.strictEqual(L.guessCategory({ type: 'expense', title: '배달의민족', 
 // EUC-KR 도 읽는다
 const euc = new Uint8Array([0xB3, 0xAF, 0xC2, 0xA5]); // "날짜"
 assert.strictEqual(L.decodeBytes(euc), '날짜');
+assert.strictEqual(L.guessCategory({ title: '플레이툰', type: 'expense' }), '돈지랄');
 console.log('ledger import tests passed');
 
 // 엑셀(.xlsx) — openpyxl 로 만든 샘플
