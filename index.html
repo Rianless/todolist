@@ -1001,20 +1001,18 @@
 </div>
 
 <!-- 간편입력: 주소 뒤에 ?quick=1 을 붙여 열면(갤럭시 루틴 등) 한 줄로 가계부에 적는다 -->
-<div class="modal-overlay" id="quickLedgerModal" role="dialog" aria-modal="true" aria-labelledby="quickLedgerTitle">
-  <div class="modal-sheet">
-    <div class="modal-header">
-      <div>
-        <div class="modal-title" id="quickLedgerTitle">어디에 얼마 썼어요?</div>
-        <div class="cheongdo-manager-help">예) 올리브영 만원 · 스벅 4500 · 택시 1만2천원 · 용돈 5만원 받음</div>
-      </div>
-      <button class="modal-close" type="button" onclick="closeQuickLedger()" aria-label="닫기">✕</button>
+<div class="modal-overlay" id="quickLedgerModal" role="dialog" aria-modal="true" aria-labelledby="quickLedgerTitle" onclick="if(event.target===this)closeQuickLedger()">
+  <div class="quick-banner">
+    <div class="quick-banner-head">
+      <div class="quick-banner-title" id="quickLedgerTitle">💰 어디에 얼마 썼어요?</div>
+      <button class="quick-banner-close" type="button" onclick="closeQuickLedger()" aria-label="닫기">✕</button>
     </div>
-    <div class="modal-body">
+    <div class="quick-banner-help">예) 올리브영 만원 · 스벅 4500 · 택시 1만2천원 · 용돈 5만원 받음</div>
+    <div class="quick-banner-row">
       <input class="form-input" id="quickLedgerInput" type="text" maxlength="60" placeholder="올리브영 만원" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter'){submitQuickLedger();}" oninput="previewQuickLedger()">
-      <div id="quickLedgerPreview" class="cheongdo-manager-help" style="margin:8px 0;min-height:18px;"></div>
-      <button type="button" class="lc-add-btn" style="width:100%;" onclick="submitQuickLedger()">가계부에 적기</button>
+      <button type="button" class="lc-add-btn" onclick="submitQuickLedger()">적기</button>
     </div>
+    <div id="quickLedgerPreview" class="quick-banner-help" style="min-height:16px;margin:6px 0 0;"></div>
   </div>
 </div>
 
