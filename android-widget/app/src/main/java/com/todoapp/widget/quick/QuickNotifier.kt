@@ -85,8 +85,14 @@ object QuickNotifier {
         NotificationManagerCompat.from(ctx).notify(notifId, n)
     }
 
-    /** 결과 한 줄을 보여 주고 잠시 뒤 스스로 사라진다. (답장 알림의 로딩 표시를 끄는 역할도 한다) */
-    fun showResult(ctx: Context, notifId: Int, message: String, timeoutMs: Long = 4000L) {
+    /** 입력칸 알림이 쓰던 번호와 겹치지 않게, 결과 알림은 번호를 따로 쓴다. (같은 번호로 덮어쓰면 새 알림으로 치지 않아 위에서 내려오지 않는다) */
+    private const val RESULT_ID_OFFSET = 500_000_000
+
+    /** 저장 결과 알림이 알림창에 남아 있는 시간 */
+    const val RESULT_TIMEOUT_MS = 10_000L
+
+    /** 처리 중임을 조용히 알린다. 소리·팝업 없이 입력칸 알림을 대신하고 잠시 뒤 사라진다. */
+    fun showProgress(ctx: Context, notifId: Int, message: String, timeoutMs: Long = 15000L) {
         if (!canNotify(ctx)) return
         ensureChannel(ctx)
         val n = NotificationCompat.Builder(ctx, CHANNEL_ID)
@@ -98,5 +104,28 @@ object QuickNotifier {
             .setAutoCancel(true)
             .build()
         NotificationManagerCompat.from(ctx).notify(notifId, n)
+    }
+
+    /**
+     * 결과를 화면 위에서 내려오는 새 알림으로 보여 준다.
+     * 위에서 내려와 확인할 시간을 준 뒤, timeoutMs(기본 10초) 뒤에 알림창에서도 스스로 지워진다.
+     * timeoutMs 가 0 이하면 사용자가 밀어서 지우기 전까지 남는다.
+     */
+    fun showResult(ctx: Context, notifId: Int, message: String, timeoutMs: Long = RESULT_TIMEOUT_MS) {
+        if (!canNotify(ctx)) return
+        ensureChannel(ctx)
+        val nm = NotificationManagerCompat.from(ctx)
+        nm.cancel(notifId)   // 입력칸·저장 중 알림을 걷어 내고(답장 알림의 로딩 표시도 함께 끝난다) 새 알림으로 바꾼다
+        val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
+            .setSmallIcon(android.R.drawable.stat_notify_chat)
+            .setContentTitle("💰 가계부")
+            .setContentText(message)
+            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setPriority(NotificationCompat.PRIORITY_HIGH)
+            .setCategory(NotificationCompat.CATEGORY_MESSAGE)
+            .setOnlyAlertOnce(false)
+            .setAutoCancel(true)
+        if (timeoutMs > 0L) builder.setTimeoutAfter(timeoutMs)
+        nm.notify(notifId + RESULT_ID_OFFSET, builder.build())
     }
 }
