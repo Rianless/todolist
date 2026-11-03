@@ -15,6 +15,8 @@ assert.strictEqual(p.type, 'income');
 assert.strictEqual(parseNotification('이벤트가 도착했어요'), null);
 assert.strictEqual(parseNotification('이디야 4,500원 결제 취소').cancel, true);
 
+// 벌크는 커피 카테고리
+assert.strictEqual(parseNotification('벌크에서 4,500원 결제했어요').category, '커피');
 // 직접 입력한 짧은 문장
 const q = t => { const r = parseQuickEntry(t); return r && [r.type, r.amount, r.title, r.category]; };
 assert.deepStrictEqual(q('올리브영 만원'), ['expense', 10000, '올리브영', '쇼핑']);
@@ -25,6 +27,7 @@ assert.deepStrictEqual(q('GS25 3,200원'), ['expense', 3200, 'GS25', '생활']);
 assert.deepStrictEqual(q('용돈 5만원 받음'), ['income', 50000, '용돈', '용돈']);
 assert.strictEqual(parseQuickEntry('천안 다녀옴'), null);
 // 한글 숫자
+assert.deepStrictEqual(q('벌크 4500'), ['expense', 4500, '벌크', '커피']);
 assert.deepStrictEqual(q('마트 오천원'), ['expense', 5000, '마트', '생활']);
 assert.deepStrictEqual(q('이마트 3천원'), ['expense', 3000, '이마트', '생활']);
 assert.deepStrictEqual(q('점심 팔천오백원'), ['expense', 8500, '점심', '식비']);
@@ -76,6 +79,14 @@ const call = async (body, token = 'secret', method = 'POST') => {
   r = await call({ quick: '올리브영 만원' });
   assert.strictEqual(r.body.added.amount, 10000);
   assert.strictEqual(r.body.added.memo, '간편입력(폰)');
+  // 카테고리 목록을 저장해 둔 경우 새 카테고리(커피)가 목록에도 더해진다
+  row = { ...row, data: { ...row.data, ledgerCategories: { expense: ['식비', '기타'], income: ['급여'] } } };
+  r = await call({ quick: '벌크 5천원' });
+  assert.strictEqual(r.body.added.category, '커피');
+  assert.deepStrictEqual(row.data.ledgerCategories.expense, ['식비', '기타', '커피']);
+  r = await call({ quick: '벌크 6천원' });   // 이미 있으면 다시 더하지 않는다
+  assert.deepStrictEqual(row.data.ledgerCategories.expense, ['식비', '기타', '커피']);
+  assert.deepStrictEqual(row.data.ledgerCategories.income, ['급여']);
   r = await call({ quick: '그냥 메모' });
   assert.ok(r.body.ignored);
   console.log('ledger api tests passed');

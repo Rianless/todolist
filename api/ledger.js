@@ -66,6 +66,11 @@ module.exports = async (req, res) => {
       const id = Number.isFinite(data.ledgerNextId) ? data.ledgerNextId : Math.max(5000, ...ledger.map(e => (e.id || 0) + 1));
       const item = { id, date, type: entry.type, amount: entry.amount, title: entry.title, category: entry.category, memo, accountId: null, auto: true, autoAt: nowMs };
       const next = { ...data, ledger: [...ledger, item], ledgerNextId: id + 1 };
+      // 지출 카테고리 목록을 직접 저장해 둔 경우, 새 카테고리(예: 커피)를 목록에도 더해 앱에서 바로 고를 수 있게 한다
+      const cats = data.ledgerCategories;
+      if (cats && Array.isArray(cats.expense) && item.type === 'expense' && item.category && item.category !== '기타' && !cats.expense.includes(item.category)) {
+        next.ledgerCategories = { ...cats, expense: [...cats.expense, item.category] };
+      }
       const now = new Date().toISOString();
       const w = await fetch(`${endpoint}?id=eq.main&updated_at=eq.${encodeURIComponent(rows[0].updated_at)}`, {
         method: 'PATCH', headers: { ...headers, Prefer: 'return=representation' },
