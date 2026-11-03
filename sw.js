@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v153-shortcut-collapse';
+const CACHE_NAME = 'todolist-v154-ledger-quick';
 const ASSETS = [
   './',
   './index.html',
@@ -24,6 +24,7 @@ const ASSETS = [
   './js/savetube.js',
   './parcels.js',
   './ledger-import.js',
+  './ledger-quick.js',
   './dday.js'
 ];
 
