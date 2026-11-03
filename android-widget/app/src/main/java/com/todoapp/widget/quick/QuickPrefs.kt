@@ -10,6 +10,11 @@ class QuickPrefs(context: Context) {
         get() = sp.getBoolean("enabled", true)
         set(v) = sp.edit().putBoolean("enabled", v).apply()
 
+    /** true 면 결제 알림이 오면 묻지 않고 알림 글 그대로 바로 저장한다. 기본은 꺼짐(입력칸 알림). */
+    var autoSave: Boolean
+        get() = sp.getBoolean("autoSave", false)
+        set(v) = sp.edit().putBoolean("autoSave", v).apply()
+
     var baseUrl: String
         get() = sp.getString("baseUrl", DEFAULT_URL) ?: DEFAULT_URL
         set(v) = sp.edit().putString("baseUrl", v.trim()).apply()

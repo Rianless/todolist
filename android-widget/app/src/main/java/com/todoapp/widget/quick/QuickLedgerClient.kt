@@ -21,7 +21,15 @@ sealed class QuickResult {
 
 /** 글 한 줄을 /api/ledger 의 quick 입력으로 보낸다. 반드시 백그라운드 스레드에서 부른다. */
 object QuickLedgerClient {
-    fun send(baseUrl: String, token: String, quickText: String): QuickResult {
+    /** 직접 적은 글("올리브영 만원")을 보낸다. */
+    fun send(baseUrl: String, token: String, quickText: String): QuickResult =
+        post(baseUrl, token, JSONObject().put("quick", quickText))
+
+    /** 알림 글 그대로("…에서 4,500원 결제했어요")를 보낸다. 서버가 가게 이름·금액을 읽어서 저장한다. */
+    fun sendNotificationText(baseUrl: String, token: String, notificationText: String): QuickResult =
+        post(baseUrl, token, JSONObject().put("text", notificationText).put("memo", "자동입력(알림)"))
+
+    private fun post(baseUrl: String, token: String, bodyJson: JSONObject): QuickResult {
         val endpoint = QuickLedgerLogic.ledgerEndpoint(baseUrl)
             ?: return QuickResult.Failed("서버 주소가 올바르지 않아요")
         if (token.isBlank()) return QuickResult.NoToken
@@ -35,7 +43,7 @@ object QuickLedgerClient {
                 setRequestProperty("Content-Type", "application/json; charset=utf-8")
                 setRequestProperty("x-ledger-token", token)
             }
-            val body = JSONObject().put("quick", quickText).toString()
+            val body = bodyJson.toString()
             conn.outputStream.use { it.write(body.toByteArray(Charsets.UTF_8)) }
             val code = conn.responseCode
             val text = (if (code < 400) conn.inputStream else conn.errorStream)

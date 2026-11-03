@@ -34,6 +34,10 @@ object QuickLedgerLogic {
         return "$r ${amount}원"
     }
 
+    /** 저장이 끝난 뒤 알림에 보여 줄 한 줄. 예) "✓ 지출 올리브영 10,000원을 적었어요" */
+    fun savedMessage(type: String, title: String, amount: Long): String =
+        "✓ ${if (type == "income") "수입" else "지출"} $title ${"%,d".format(amount)}원을 적었어요"
+
     /** 패키지 이름 목록(쉼표·줄바꿈 구분)을 정리한다. */
     fun parsePackages(raw: String): Set<String> =
         raw.split(',', '\n', ' ').map { it.trim() }.filter { it.isNotEmpty() }.toSet()

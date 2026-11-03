@@ -4,7 +4,7 @@ import android.app.Notification
 import android.service.notification.NotificationListenerService
 import android.service.notification.StatusBarNotification
 
-/** 지정한 앱(기본: 토스)의 결제 알림이 오면 "어디에 썼어요?" 입력칸 알림을 띄운다. */
+/** 지정한 앱(기본: 토스)의 결제 알림이 오면 "어디에 썼어요?" 입력칸 알림을 띄운다. (자동 저장을 켰으면 묻지 않고 바로 저장) */
 class QuickNotificationListener : NotificationListenerService() {
     private var lastKey = ""
     private var lastAt = 0L
@@ -29,6 +29,13 @@ class QuickNotificationListener : NotificationListenerService() {
         lastKey = text
         lastAt = now
 
-        QuickNotifier.showPrompt(applicationContext, (now % 1_000_000_000L).toInt(), text)
+        val notifId = (now % 1_000_000_000L).toInt()
+        if (prefs.autoSave) {
+            // 묻지 않고 알림 글 그대로 저장한다. 읽지 못하거나 전송에 실패하면 입력칸 알림으로 바꿔 보여 준다.
+            val app = applicationContext
+            kotlin.concurrent.thread(name = "quick-ledger-auto") { QuickSaver.saveAsIs(app, notifId, text) }
+        } else {
+            QuickNotifier.showPrompt(applicationContext, notifId, text)
+        }
     }
 }
