@@ -1007,7 +1007,7 @@
       <div class="quick-banner-title" id="quickLedgerTitle">💰 어디에 얼마 썼어요?</div>
       <button class="quick-banner-close" type="button" onclick="closeQuickLedger()" aria-label="닫기">✕</button>
     </div>
-    <div class="quick-banner-help">예) 올리브영 만원 · 스벅 4500 · 택시 1만2천원 · 용돈 5만원 받음</div>
+    <div class="quick-banner-help">예) 올리브영 만원 · 편의점 4500 · 택시 1만2천원 · 용돈 5만원 받음</div>
     <div class="quick-banner-row">
       <input class="form-input" id="quickLedgerInput" type="text" maxlength="60" placeholder="올리브영 만원" autocomplete="off" enterkeyhint="done" onkeydown="if(event.key==='Enter'){submitQuickLedger();}" oninput="previewQuickLedger()">
       <button type="button" class="lc-add-btn" onclick="submitQuickLedger()">적기</button>
@@ -1446,6 +1446,7 @@
           <div style="display:flex;gap:6px;">
             <button type="button" class="ledger-cat-manage-btn" id="l_shortcut_save" onclick="saveLedgerShortcut()">+ 지금 입력을 단축어로 저장</button>
             <button type="button" class="ledger-cat-manage-btn" id="l_shortcut_more" style="display:none;" onclick="toggleLedgerShortcutsExpand()">더보기 ▾</button>
+            <button type="button" class="ledger-cat-manage-btn" id="l_shortcut_edit" style="display:none;" onclick="toggleLedgerShortcutEdit()">편집</button>
           </div>
         </div>
 
