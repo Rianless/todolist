@@ -6,19 +6,19 @@ process.env.SUPABASE_SERVICE_ROLE_KEY = 'k';
 process.env.LEDGER_TOKEN = 'secret';
 
 // 문구 해석
-let p = parseNotification('스타벅스에서 4,500원 결제했어요');
-assert.deepStrictEqual([p.type, p.amount, p.title, p.category], ['expense', 4500, '스타벅스', '카페']);
+let p = parseNotification('이디야에서 4,500원 결제했어요');
+assert.deepStrictEqual([p.type, p.amount, p.title, p.category], ['expense', 4500, '이디야', '카페']);
 p = parseNotification('토스뱅크 체크카드 12,500원 결제 · GS25');
 assert.deepStrictEqual([p.type, p.amount, p.title, p.category], ['expense', 12500, 'GS25', '장보기']);
 p = parseNotification('김토스님에게 30,000원 입금됐어요');
 assert.strictEqual(p.type, 'income');
 assert.strictEqual(parseNotification('이벤트가 도착했어요'), null);
-assert.strictEqual(parseNotification('스타벅스 4,500원 결제 취소').cancel, true);
+assert.strictEqual(parseNotification('이디야 4,500원 결제 취소').cancel, true);
 
 // 직접 입력한 짧은 문장
 const q = t => { const r = parseQuickEntry(t); return r && [r.type, r.amount, r.title, r.category]; };
 assert.deepStrictEqual(q('올리브영 만원'), ['expense', 10000, '올리브영', '쇼핑']);
-assert.deepStrictEqual(q('스벅 4500'), ['expense', 4500, '스벅', '식비']);
+assert.deepStrictEqual(q('이디야 4500'), ['expense', 4500, '이디야', '식비']);
 assert.deepStrictEqual(q('택시 1만2천원'), ['expense', 12000, '택시', '교통']);
 assert.deepStrictEqual(q('올리브영에서 1.5만원 썼어'), ['expense', 15000, '올리브영', '쇼핑']);
 assert.deepStrictEqual(q('GS25 3,200원'), ['expense', 3200, 'GS25', '생활']);
@@ -34,7 +34,7 @@ assert.deepStrictEqual(q('일식 만원'), ['expense', 10000, '일식', '기타'
 assert.deepStrictEqual(q('만두 3천원'), ['expense', 3000, '만두', '기타']);
 assert.deepStrictEqual(q('GS25 마트 오천원'), ['expense', 5000, 'GS25 마트', '생활']);
 assert.deepStrictEqual(q('택시 1만2천원'), ['expense', 12000, '택시', '교통']);
-assert.strictEqual(parseQuickEntry('오늘 스벅'), null);
+assert.strictEqual(parseQuickEntry('오늘 이디야'), null);
 assert.strictEqual(parseQuickEntry('이마트'), null);
 
 let row = { id: 'main', data: { ledger: [], ledgerNextId: 5000 }, updated_at: 't0' };
@@ -55,13 +55,13 @@ const call = async (body, token = 'secret', method = 'POST') => {
 };
 
 (async () => {
-  assert.strictEqual((await call({ text: '스타벅스에서 4,500원 결제했어요' }, 'bad')).code, 401);
-  let r = await call({ text: '스타벅스에서 4,500원 결제했어요' });
+  assert.strictEqual((await call({ text: '이디야에서 4,500원 결제했어요' }, 'bad')).code, 401);
+  let r = await call({ text: '이디야에서 4,500원 결제했어요' });
   assert.strictEqual(r.code, 200);
   assert.strictEqual(row.data.ledger.length, 1);
   assert.strictEqual(row.data.ledger[0].id, 5000);
   assert.strictEqual(row.data.ledgerNextId, 5001);
-  r = await call({ text: '스타벅스에서 4,500원 결제했어요' });
+  r = await call({ text: '이디야에서 4,500원 결제했어요' });
   assert.ok(r.body.duplicate);
   assert.strictEqual(row.data.ledger.length, 1);
   r = await call({ text: '광고입니다' });

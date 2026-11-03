@@ -20,13 +20,13 @@ function parseAmount(text) {
 
 function guessMerchant(text) {
   const t = String(text).replace(/\s+/g, ' ').trim();
-  // "스타벅스에서 4,500원 결제" / "스타벅스 4,500원 결제"
+  // "이디야에서 4,500원 결제" / "이디야 4,500원 결제"
   let m = t.match(/([^\s·,]+?)(?:에서|에)\s*(?:\d{1,3}(?:,\d{3})*|\d+)\s*원/);
   if (m) return m[1];
-  // "4,500원 결제 · 스타벅스" / "4,500원 스타벅스 결제"
+  // "4,500원 결제 · 이디야" / "4,500원 이디야 결제"
   m = t.match(/(?:\d{1,3}(?:,\d{3})*|\d+)\s*원\s*(?:결제|승인|사용|출금)?\s*[·|:\-]?\s*([^\s·,]+)/);
   if (m && !EXPENSE_RE.test(m[1]) && !INCOME_RE.test(m[1])) return m[1];
-  // "스타벅스 4,500원"
+  // "이디야 4,500원"
   m = t.match(/([^\s·,]+)\s*(?:\d{1,3}(?:,\d{3})*|\d+)\s*원/);
   if (m && !/토스|카드|결제|승인/.test(m[1])) return m[1];
   return '';

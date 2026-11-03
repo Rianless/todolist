@@ -22,7 +22,7 @@ const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFix
   'investCashflows', 'investCountsInAssets', 'investEventsForMonth', 'shiftDate', 'routineOccursOn', 'isRoutineDone',
   'routineStreak', 'routineRange', 'routineWeek', 'routineMonth', 'routineBestStreak', 'ledgerDayData', 'desktopTickerText', 'desktopWeekSubs', 'desktopMonthSubs',
   'statsMonthTotals', 'statsMonthlyTrend', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
-  'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText', 'ledgerSubMonthTotal'];
+  'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText', 'ledgerSubMonthTotal', 'ledgerShortcutAmountText'];
 
 const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
@@ -279,4 +279,15 @@ console.log('OK (index logic)');
   assert.deepStrictEqual(day.subs.map(s => [s.name, s.counted]), [['Netflix', true], ['보험', false]]);   // 끈 구독도 목록에는 남는다
   assert.strictEqual(day.expense, 13000);
   console.log('per-sub ledger toggle ok');
+}
+
+// 단축어 카드의 금액 표기: 지출 -, 수입 +, 1만 이상은 '만' 단위, 금액이 없으면 '금액 입력'
+{
+  const t = (type, amount) => A.ledgerShortcutAmountText({ type, amount });
+  assert.strictEqual(t('expense', 4500), '-4,500');
+  assert.strictEqual(t('expense', 12000), '-1.2만');
+  assert.strictEqual(t('income', 2500000), '+250만');
+  assert.strictEqual(t('income', 50000), '+5만');
+  assert.strictEqual(t('expense', 0), '금액 입력');
+  console.log('ledger shortcut amount text ok');
 }

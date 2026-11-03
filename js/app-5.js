@@ -730,7 +730,14 @@ function saveSubscription() {
   showToast(wasEditing ? '구독을 수정했습니다' : '구독을 저장했습니다', { type: 'success', duration: 1800 });
 }
 
-function closeLedger() { document.getElementById('ledgerModal').classList.remove('open'); }
+function closeLedger() {
+  if (ledgerShortcutEditing) {   // 편집 중에 닫으면 다음에 열 때는 다시 한 줄로 접힌 상태
+    ledgerShortcutEditing = false;
+    const box = document.getElementById('l_shortcut_list');
+    if (box) box.classList.add('collapsed');
+  }
+  document.getElementById('ledgerModal').classList.remove('open');
+}
 
 
 
@@ -1579,24 +1586,38 @@ function rememberLedgerAccount(id) {
 }
 
 /* ── 가계부 단축어 ── */
+let ledgerShortcutEditing = false;   // 편집 중일 때만 카드 모서리에 ✕ 를 보여 준다
+
+// 카드에 보일 금액: 4,500 / 1.2만 / 250만. 수입은 +, 지출은 -. 금액이 없는 단축어는 '금액 입력'
+function ledgerShortcutAmountText(s) {
+  if (!s.amount) return '금액 입력';
+  const n = s.amount;
+  const body = n >= 10000 ? String(Math.round(n / 1000) / 10).replace(/\.0$/, '') + '만' : n.toLocaleString('ko-KR');
+  return (s.type === 'income' ? '+' : '-') + body;
+}
+
 function renderLedgerShortcuts() {
   const group = document.getElementById('l_shortcut_group');
   if (!group) return;
   group.style.display = editingLedgerId === null && !ledgerSub ? '' : 'none';
+  if (!ledgerShortcuts.length) ledgerShortcutEditing = false;
   const box = document.getElementById('l_shortcut_list');
   box.textContent = '';
+  box.classList.toggle('editing', ledgerShortcutEditing);
   ledgerShortcuts.forEach(s => {
-    const wrap = document.createElement('span');
-    wrap.className = 'ledger-shortcut ' + s.type;
+    const card = document.createElement('div');
+    card.className = 'ledger-shortcut ' + s.type;
     const use = document.createElement('button');
     use.type = 'button';
     use.className = 'ledger-shortcut-use';
-    use.textContent = s.label;
-    if (s.amount) {
-      const amt = document.createElement('small');
-      amt.textContent = s.amount.toLocaleString('ko-KR');
-      use.appendChild(amt);
-    }
+    use.setAttribute('aria-label', `${s.label} ${s.amount ? s.amount.toLocaleString('ko-KR') + '원' : '금액 직접 입력'}`);
+    const name = document.createElement('span');
+    name.className = 'ledger-shortcut-name';
+    name.textContent = s.label;
+    const amt = document.createElement('span');
+    amt.className = 'ledger-shortcut-amt' + (s.amount ? '' : ' empty');
+    amt.textContent = ledgerShortcutAmountText(s);
+    use.append(name, amt);
     use.onclick = () => applyLedgerShortcut(s.id);
     const del = document.createElement('button');
     del.type = 'button';
@@ -1604,10 +1625,23 @@ function renderLedgerShortcuts() {
     del.textContent = '✕';
     del.setAttribute('aria-label', `${s.label} 단축어 삭제`);
     del.onclick = () => deleteLedgerShortcut(s.id);
-    wrap.append(use, del);
-    box.appendChild(wrap);
+    card.append(use, del);
+    box.appendChild(card);
   });
+  const edit = document.getElementById('l_shortcut_edit');
+  if (edit) {
+    edit.style.display = ledgerShortcuts.length ? '' : 'none';
+    edit.textContent = ledgerShortcutEditing ? '완료' : '편집';
+  }
   updateLedgerShortcutMore();
+}
+
+// 편집 모드: 켜면 전체를 펼치고 카드마다 ✕ 를 보여 주며, 끄면 다시 한 줄로 접는다
+function toggleLedgerShortcutEdit() {
+  ledgerShortcutEditing = !ledgerShortcutEditing;
+  const box = document.getElementById('l_shortcut_list');
+  box.classList.toggle('collapsed', !ledgerShortcutEditing);
+  renderLedgerShortcuts();
 }
 
 // 칩이 한 줄을 넘칠 때만 '더보기' 버튼을 보여 준다

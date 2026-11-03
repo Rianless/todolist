@@ -3679,25 +3679,29 @@ body::after {
 #ledgerCatModal { z-index: 9500; }
 .ledger-filter-selects { margin-top: 8px; }
 
-/* 가계부 단축어 칩 */
-.ledger-shortcuts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+/* 가계부 단축어: 3열 카드 (이름 위, 금액 아래). ✕ 는 '편집'을 눌렀을 때만 카드 모서리에 보인다 */
+.ledger-shortcuts { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 8px; margin-bottom: 8px; }
 .ledger-shortcuts:empty { display: none; }
-/* 접힌 상태: 한 줄만 보이고 넘치는 칩은 숨김 (더보기로 펼침) */
-.ledger-shortcuts.collapsed { max-height: 32px; overflow: hidden; }
-.ledger-shortcut {
-  display: inline-flex; align-items: center; border: 1px solid var(--border2); border-radius: 999px;
-  background: var(--panel2); overflow: hidden;
-}
+/* 접힌 상태: 한 줄만 보이고 넘치는 카드는 숨김 (더보기로 펼침) */
+.ledger-shortcuts.collapsed { max-height: 58px; overflow: hidden; }
+.ledger-shortcut { position: relative; min-width: 0; }
 .ledger-shortcut-use {
-  border: none; background: none; color: var(--text); font-family: inherit; font-size: 12px; font-weight: 700;
-  padding: 6px 4px 6px 12px; cursor: pointer; white-space: nowrap;
+  width: 100%; height: 56px; display: flex; flex-direction: column; justify-content: center; align-items: flex-start; gap: 3px;
+  border: 1px solid var(--border2); border-radius: 14px; background: var(--panel2);
+  padding: 0 10px; cursor: pointer; font-family: inherit; text-align: left; min-width: 0;
 }
-.ledger-shortcut-use small { font-weight: 500; color: var(--text3); margin-left: 4px; }
-.ledger-shortcut.income .ledger-shortcut-use { color: var(--green); }
-.ledger-shortcut.expense .ledger-shortcut-use { color: var(--red); }
+.ledger-shortcut-name, .ledger-shortcut-amt { display: block; max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.ledger-shortcut-name { font-size: 13px; font-weight: 700; color: var(--text); }
+.ledger-shortcut-amt { font-size: 12px; font-weight: 800; }
+.ledger-shortcut.expense .ledger-shortcut-amt { color: var(--red); }
+.ledger-shortcut.income .ledger-shortcut-amt { color: var(--green); }
+.ledger-shortcut-amt.empty { color: var(--text3) !important; font-weight: 600; }
 .ledger-shortcut-del {
-  border: none; background: none; color: var(--text3); font-size: 11px; padding: 6px 10px 6px 4px; cursor: pointer;
+  display: none; position: absolute; top: 4px; right: 4px; width: 22px; height: 22px; padding: 0;
+  border-radius: 50%; border: 1px solid var(--border2); background: var(--panel); color: var(--text3); font-size: 10px; cursor: pointer;
 }
+.ledger-shortcuts.editing .ledger-shortcut-del { display: block; }
+.ledger-shortcuts.editing .ledger-shortcut-name { padding-right: 20px; }
 .ledger-chip.transfer.active { background: #6b7280; }
 
 .ledger-entry-amount.transfer { color: var(--accent); }
