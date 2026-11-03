@@ -5,7 +5,7 @@ object QuickLedgerLogic {
     private val AMOUNT_RE = Regex("""(\d{1,3}(?:,\d{3})+|\d+)\s*원""")
     private val PAYMENT_RE = Regex("결제|승인|출금|사용|이체|송금|보냈")
     private val CANCEL_RE = Regex("취소|환불|환급")
-    private val HAS_AMOUNT_IN_REPLY_RE = Regex("""\d|[만천백]\s*원""")
+    private val HAS_AMOUNT_IN_REPLY_RE = Regex("""\d|[일이삼사오육칠팔구][십백천만억]|[십백천만억]\s*원""")
 
     /** 알림 글에서 첫 금액(원)을 뽑는다. 없으면 null. */
     fun extractAmount(text: String): Long? {

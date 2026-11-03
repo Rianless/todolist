@@ -27,8 +27,16 @@ class QuickLedgerLogicTest {
         assertEquals("스벅 4500", QuickLedgerLogic.buildQuickText(" 스벅 4500 ", "x 3,000원 결제"))
     }
 
+    @Test fun keepsReplyWithKoreanNumerals() {
+        assertEquals("마트 오천원", QuickLedgerLogic.buildQuickText("마트 오천원", "토스 4,500원 결제"))
+        assertEquals("마트 오천", QuickLedgerLogic.buildQuickText("마트 오천", "토스 4,500원 결제"))
+        assertEquals("올리브영 만원", QuickLedgerLogic.buildQuickText("올리브영 만원", "토스 4,500원 결제"))
+    }
+
     @Test fun addsOriginalAmountWhenReplyIsOnlyAName() {
         assertEquals("올리브영 4500원", QuickLedgerLogic.buildQuickText("올리브영", "토스 4,500원 결제"))
+        assertEquals("이마트 4500원", QuickLedgerLogic.buildQuickText("이마트", "토스 4,500원 결제"))
+        assertEquals("오리고기 4500원", QuickLedgerLogic.buildQuickText("오리고기", "토스 4,500원 결제"))
     }
 
     @Test fun leavesReplyAloneWhenNoAmountAnywhere() {
