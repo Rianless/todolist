@@ -11,9 +11,10 @@ module.exports = async (req, res) => {
   res.setHeader('Cache-Control', 'no-store');
   if (req.method !== 'POST') return res.status(405).json({ error: 'Method not allowed' });
 
-  const token = process.env.LEDGER_TOKEN;
+  // 환경변수 값을 붙여넣을 때 앞뒤에 공백·줄바꿈이 섞이기 쉬워서, 양쪽 모두 앞뒤 공백을 지우고 비교한다.
+  const token = String(process.env.LEDGER_TOKEN || '').trim();
   if (!token) return res.status(503).json({ error: 'LEDGER_TOKEN 환경변수 설정이 필요합니다.' });
-  if (req.headers['x-ledger-token'] !== token) return res.status(401).json({ error: '토큰이 올바르지 않습니다.' });
+  if (String(req.headers['x-ledger-token'] || '').trim() !== token) return res.status(401).json({ error: '토큰이 올바르지 않습니다.' });
 
   const url = process.env.SUPABASE_URL;
   const key = process.env.SUPABASE_SERVICE_ROLE_KEY || process.env.SUPABASE_KEY;

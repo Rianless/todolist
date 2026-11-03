@@ -54,8 +54,13 @@ const call = async (body, token = 'secret', method = 'POST') => {
   assert.strictEqual(row.data.ledger.length, 1);
   r = await call({ text: '광고입니다' });
   assert.ok(r.body.ignored);
+  process.env.LEDGER_TOKEN = 'secret\n';   // Vercel 값 끝에 줄바꿈이 섞여 저장된 경우도 통과해야 한다
+  r = await call({ quick: '다이소 3천원' }, 'secret');
+  assert.strictEqual(r.code, 200);
+  assert.strictEqual((await call({ quick: '다이소 3천원' }, 'nope')).code, 401);
+  process.env.LEDGER_TOKEN = 'secret';
   r = await call({ type: 'expense', amount: 3000, title: '버스' });
-  assert.strictEqual(row.data.ledger.length, 2);
+  assert.strictEqual(row.data.ledger.length, 3);
   r = await call({ quick: '올리브영 만원' });
   assert.strictEqual(r.body.added.amount, 10000);
   assert.strictEqual(r.body.added.memo, '간편입력(폰)');
