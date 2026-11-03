@@ -82,7 +82,7 @@ class QuickSettingsActivity : AppCompatActivity() {
             text = "③ 테스트 알림 보내기"
             setOnClickListener {
                 prefs.token = token.text.toString(); prefs.baseUrl = url.text.toString()
-                QuickNotifier.showPrompt(applicationContext, 777, "스타벅스 4,500원 결제했어요")
+                QuickNotifier.showPrompt(applicationContext, 777, "테스트 결제 4,500원")
                 Toast.makeText(context, "알림 칸을 내려 보세요", Toast.LENGTH_SHORT).show()
             }
         }
