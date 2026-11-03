@@ -1,7 +1,7 @@
 // POST /api/ledger — 폰 자동화(MacroDroid/Tasker)가 토스 알림을 보내면 가계부에 한 줄 추가한다.
 // 헤더 x-ledger-token 이 환경변수 LEDGER_TOKEN 과 같아야 한다.
-// 본문: { text: "알림 원문" }  또는  { type, amount, title, category, date, memo }
-const { parseNotification } = require('./_ledgerParse');
+// 본문: { text: "알림 원문" }  또는  { quick: "올리브영 만원" }(직접 입력한 짧은 문장)  또는  { type, amount, title, category, date, memo }
+const { parseNotification, parseQuickEntry } = require('./_ledgerParse');
 
 function kstDate(now = new Date()) {
   return new Date(now.getTime() + 9 * 3600 * 1000).toISOString().slice(0, 10);
@@ -21,7 +21,13 @@ module.exports = async (req, res) => {
 
   const body = req.body && typeof req.body === 'object' ? req.body : {};
   let entry;
-  if (body.text !== undefined) {
+  let memoDefault = '자동입력(토스)';
+  if (body.quick !== undefined) {
+    const q = parseQuickEntry(body.quick);
+    if (!q) return res.status(200).json({ ignored: true, reason: '금액을 찾지 못했어요. 예: 올리브영 만원' });
+    entry = q;
+    memoDefault = '간편입력(폰)';
+  } else if (body.text !== undefined) {
     const p = parseNotification(body.text);
     if (!p) return res.status(200).json({ ignored: true, reason: '가계부 알림이 아님' });
     if (p.cancel) return res.status(200).json({ ignored: true, reason: '취소/환불 알림은 직접 정리해 주세요', parsed: p });
@@ -36,7 +42,7 @@ module.exports = async (req, res) => {
     };
   }
   const date = /^\d{4}-\d{2}-\d{2}$/.test(body.date || '') ? body.date : kstDate();
-  const memo = String(body.memo || '자동입력(토스)').slice(0, 100);
+  const memo = String(body.memo || memoDefault).slice(0, 100);
 
   const endpoint = `${url}/rest/v1/app_state`;
   const headers = { apikey: key, Authorization: `Bearer ${key}`, 'Content-Type': 'application/json' };
