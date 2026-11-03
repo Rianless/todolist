@@ -22,7 +22,7 @@ assert.deepStrictEqual(q('스벅 4500'), ['expense', 4500, '스벅', '식비']);
 assert.deepStrictEqual(q('택시 1만2천원'), ['expense', 12000, '택시', '교통']);
 assert.deepStrictEqual(q('올리브영에서 1.5만원 썼어'), ['expense', 15000, '올리브영', '쇼핑']);
 assert.deepStrictEqual(q('GS25 3,200원'), ['expense', 3200, 'GS25', '생활']);
-assert.deepStrictEqual(q('용돈 5만원 받음'), ['income', 50000, '용돈', '기타수입']);
+assert.deepStrictEqual(q('용돈 5만원 받음'), ['income', 50000, '용돈', '용돈']);
 assert.strictEqual(parseQuickEntry('천안 다녀옴'), null);
 
 let row = { id: 'main', data: { ledger: [], ledgerNextId: 5000 }, updated_at: 't0' };

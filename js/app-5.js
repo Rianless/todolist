@@ -1755,3 +1755,43 @@ function renderAssetTotal() {
   sub.textContent = `통장 ${Math.round(bank).toLocaleString()}원 · 투자·저축 ${Math.round(invest).toLocaleString()}원`;
   el.append(label, val, sub);
 }
+
+
+/* ── 가계부 간편입력 (?quick=1) ── */
+function openQuickLedger() {
+  const input = document.getElementById('quickLedgerInput');
+  input.value = '';
+  document.getElementById('quickLedgerPreview').textContent = '';
+  document.getElementById('quickLedgerModal').classList.add('open');
+  setTimeout(() => input.focus(), 50);
+}
+function closeQuickLedger() { document.getElementById('quickLedgerModal').classList.remove('open'); }
+function previewQuickLedger() {
+  const q = LedgerQuick.parseQuickEntry(document.getElementById('quickLedgerInput').value);
+  document.getElementById('quickLedgerPreview').textContent = q
+    ? `${q.type === 'income' ? '수입' : '지출'} · ${q.title} · ${q.amount.toLocaleString()}원 · ${q.category}`
+    : '';
+}
+function submitQuickLedger() {
+  const input = document.getElementById('quickLedgerInput');
+  const q = LedgerQuick.parseQuickEntry(input.value);
+  if (!q) {
+    input.classList.add('form-error');
+    setTimeout(() => input.classList.remove('form-error'), 1500);
+    showToast('금액을 못 찾았어요. 예) 올리브영 만원', { type: 'error', duration: 2500 });
+    return;
+  }
+  ledger.push({ id: ledgerNextId++, date: fmtDate(new Date()), type: q.type, amount: q.amount, title: q.title, category: q.category, memo: '간편입력', accountId: null });
+  if (!(ledgerCategories[q.type] || []).includes(q.category)) (ledgerCategories[q.type] = ledgerCategories[q.type] || []).push(q.category);
+  closeQuickLedger();
+  saveData();
+  if (currentMainTab === 'category') renderCategoryView();
+  showToast(`${q.type === 'income' ? '수입' : '지출'} ${q.title} ${q.amount.toLocaleString()}원을 적었어요`, { type: 'success', duration: 2200 });
+}
+function handleQuickLedgerUrl() {
+  let params;
+  try { params = new URLSearchParams(location.search); } catch (e) { return; }
+  if (!params.has('quick')) return;
+  try { history.replaceState(null, '', location.pathname); } catch (e) {}   // 새로고침해도 또 열리지 않게 주소를 정리
+  openQuickLedger();
+}

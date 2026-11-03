@@ -11,6 +11,7 @@
     { "source": "/state-merge.js", "destination": "/state-merge.js" },
     { "source": "/parcels.js", "destination": "/parcels.js" },
     { "source": "/ledger-import.js", "destination": "/ledger-import.js" },
+    { "source": "/ledger-quick.js", "destination": "/ledger-quick.js" },
     { "source": "/dday.js", "destination": "/dday.js" },
     { "source": "/manifest.json", "destination": "/manifest.json" },
     { "source": "/icon-192.png", "destination": "/icon-192.png" },

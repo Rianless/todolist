@@ -470,6 +470,7 @@ const armParcelTapGuard = () => { parcelTapGuardUntil = Date.now() + 900; };
 let attachingParcelId = null;
 let editingParcelId = null;
 window.addEventListener('load', () => setTimeout(handleParcelShare, 400));
+window.addEventListener('load', () => setTimeout(handleQuickLedgerUrl, 600));
 window.addEventListener('load', () => setTimeout(offerLedgerCleanup, 4000));
 
 // ── 공유 메뉴에 이 앱이 나오게 하는 안내 ──
