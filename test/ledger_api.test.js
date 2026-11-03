@@ -24,6 +24,18 @@ assert.deepStrictEqual(q('올리브영에서 1.5만원 썼어'), ['expense', 150
 assert.deepStrictEqual(q('GS25 3,200원'), ['expense', 3200, 'GS25', '생활']);
 assert.deepStrictEqual(q('용돈 5만원 받음'), ['income', 50000, '용돈', '용돈']);
 assert.strictEqual(parseQuickEntry('천안 다녀옴'), null);
+// 한글 숫자
+assert.deepStrictEqual(q('마트 오천원'), ['expense', 5000, '마트', '생활']);
+assert.deepStrictEqual(q('이마트 3천원'), ['expense', 3000, '이마트', '생활']);
+assert.deepStrictEqual(q('점심 팔천오백원'), ['expense', 8500, '점심', '식비']);
+assert.deepStrictEqual(q('올리브영 이십오만원'), ['expense', 250000, '올리브영', '쇼핑']);
+assert.deepStrictEqual(q('올리브영 삼만오천'), ['expense', 35000, '올리브영', '쇼핑']);
+assert.deepStrictEqual(q('일식 만원'), ['expense', 10000, '일식', '기타']);
+assert.deepStrictEqual(q('만두 3천원'), ['expense', 3000, '만두', '기타']);
+assert.deepStrictEqual(q('GS25 마트 오천원'), ['expense', 5000, 'GS25 마트', '생활']);
+assert.deepStrictEqual(q('택시 1만2천원'), ['expense', 12000, '택시', '교통']);
+assert.strictEqual(parseQuickEntry('오늘 스벅'), null);
+assert.strictEqual(parseQuickEntry('이마트'), null);
 
 let row = { id: 'main', data: { ledger: [], ledgerNextId: 5000 }, updated_at: 't0' };
 global.fetch = async (url, opts = {}) => {

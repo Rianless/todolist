@@ -4,9 +4,12 @@
 // ── 직접 입력한 짧은 문장 해석 ──
 // "올리브영 만원", "스벅 4500", "택시 1만2천원", "용돈 5만원 받음" 처럼 대충 쓴 글을 항목·금액으로 나눈다.
 const QUICK_INCOME_RE = /입금|월급|용돈|수입|받음|받았|환급/;
-const UNIT = { 만: 10000, 천: 1000, 백: 100 };
-const SPAN_RE = /(?:(?:\d[\d,]*(?:\.\d+)?)?[만천백])+(?:\d[\d,]*)?|\d[\d,]*(?:\.\d+)?/g;
-const TOKEN_RE = /(\d[\d,]*(?:\.\d+)?)?([만천백])|\d[\d,]*(?:\.\d+)?/g;
+// 금액 글자: 아라비아 숫자(1,200 · 1.5), 한글 숫자(일~구), 작은 단위(십·백·천), 큰 단위(만·억)
+const SPAN_RE = /(?:\d[\d,]*(?:\.\d+)?|[일이삼사오육칠팔구십백천만억])+/g;
+const TOKEN_RE = /\d[\d,]*(?:\.\d+)?|[일이삼사오육칠팔구]|[십백천만억]/g;
+const HANGUL_DIGIT = { 일: 1, 이: 2, 삼: 3, 사: 4, 오: 5, 육: 6, 칠: 7, 팔: 8, 구: 9 };
+const SMALL_UNIT = { 십: 10, 백: 100, 천: 1000 };
+const BIG_UNIT = { 만: 1e4, 억: 1e8 };
 const QUICK_RULES = [
   [/올리브영|다이소|무신사|쿠팡|옷|신발|쇼핑/, '쇼핑'],
   [/스타벅스|스벅|투썸|이디야|메가커피|컴포즈|빽다방|카페|커피|식당|김밥|치킨|피자|맥도날드|버거|배민|배달|밥|점심|저녁|아침/, '식비'],
@@ -16,13 +19,16 @@ const QUICK_RULES = [
   [/넷플릭스|유튜브|멜론|디즈니|왓챠|스포티파이|영화|공연/, '문화/여가'],
 ];
 
+// "1만2천" · "오천" · "이십오만" · "삼만오천" · "4,500" · "1.5만" → 숫자
 function spanToNumber(span) {
-  let total = 0;
-  for (const m of span.matchAll(TOKEN_RE)) {
-    if (m[2]) total += (m[1] ? Number(m[1].replace(/,/g, '')) : 1) * UNIT[m[2]];
-    else total += Number(m[0].replace(/,/g, ''));
+  let total = 0, section = 0, n = null;
+  for (const t of span.match(TOKEN_RE) || []) {
+    if (HANGUL_DIGIT[t]) n = HANGUL_DIGIT[t];
+    else if (SMALL_UNIT[t]) { section += (n === null ? 1 : n) * SMALL_UNIT[t]; n = null; }
+    else if (BIG_UNIT[t]) { const sec = section + (n === null ? 0 : n); total += (sec || 1) * BIG_UNIT[t]; section = 0; n = null; }
+    else n = Number(t.replace(/,/g, ''));
   }
-  return Math.round(total);
+  return Math.round(total + section + (n === null ? 0 : n));
 }
 
 // 반환: null 또는 { type, amount, title, category }
@@ -32,8 +38,10 @@ function parseQuickEntry(text) {
   const cands = [];
   for (const m of raw.matchAll(SPAN_RE)) {
     const won = raw.slice(m.index + m[0].length).startsWith('원');
-    const hasDigit = /\d/.test(m[0]);
-    if (!hasDigit && !won) continue; // "천안" 같은 글자는 금액이 아님
+    // "이마트"의 '이', "천안"의 '천', "만두"의 '만' 같은 글자가 금액으로 읽히지 않게 한다:
+    // 원이 붙었거나, 아라비아 숫자가 있거나, 한글 숫자와 단위가 함께 있을 때만 금액으로 본다.
+    const valid = won || /\d/.test(m[0]) || (/[일이삼사오육칠팔구]/.test(m[0]) && /[십백천만억]/.test(m[0]));
+    if (!valid) continue;
     const amount = spanToNumber(m[0]);
     if (amount > 0) cands.push({ start: m.index, end: m.index + m[0].length + (won ? 1 : 0), amount, won });
   }
