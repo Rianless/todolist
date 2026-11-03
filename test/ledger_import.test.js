@@ -2,9 +2,9 @@ const assert = require('assert');
 const L = require('../ledger-import');
 
 // 입금/출금 열이 따로 있는 형식
-let r = L.toEntries(L.parseCSV('﻿거래일시,적요,출금액,입금액,잔액\n2026-11-01 09:12:33,"스타벅스, 강남점",4500,,100000\n2026.11.02,김토스,,30000,130000\n2026-11-02,,,,\n'));
+let r = L.toEntries(L.parseCSV('﻿거래일시,적요,출금액,입금액,잔액\n2026-11-01 09:12:33,"벌크, 강남점",4500,,100000\n2026.11.02,김토스,,30000,130000\n2026-11-02,,,,\n'));
 assert.strictEqual(r.entries.length, 2);
-assert.deepStrictEqual([r.entries[0].type, r.entries[0].amount, r.entries[0].title, r.entries[0].date], ['expense', 4500, '스타벅스, 강남점', '2026-11-01']);
+assert.deepStrictEqual([r.entries[0].type, r.entries[0].amount, r.entries[0].title, r.entries[0].date], ['expense', 4500, '벌크, 강남점', '2026-11-01']);
 assert.deepStrictEqual([r.entries[1].type, r.entries[1].amount, r.entries[1].date], ['income', 30000, '2026-11-02']);
 
 // 구분 + 금액 열 형식, 위에 안내 줄이 있어도 제목 줄을 찾는다
@@ -18,8 +18,8 @@ assert.strictEqual(r.entries[0].type, 'expense');
 assert.ok(L.toEntries(L.parseCSV('가,나\n1,2')).error);
 
 // 중복 제거
-const ex = [{ date: '2026-11-01', type: 'expense', amount: 4500, title: '스타벅스, 강남점' }];
-const d = L.dedupe(L.toEntries(L.parseCSV('거래일시,적요,출금액,입금액\n2026-11-01,"스타벅스, 강남점",4500,\n2026-11-01,"스타벅스, 강남점",4500,\n')).entries, ex);
+const ex = [{ date: '2026-11-01', type: 'expense', amount: 4500, title: '벌크, 강남점' }];
+const d = L.dedupe(L.toEntries(L.parseCSV('거래일시,적요,출금액,입금액\n2026-11-01,"벌크, 강남점",4500,\n2026-11-01,"벌크, 강남점",4500,\n')).entries, ex);
 assert.strictEqual(d.dups.length, 1); assert.strictEqual(d.fresh.length, 1);
 assert.strictEqual(L.guessCategory({ type: 'expense', title: '배달의민족', category: '' }), '식비');
 
@@ -35,6 +35,6 @@ console.log('ledger import tests passed');
   const rows = await L.readTable(fs.readFileSync(f));
   const r = L.toEntries(rows);
   assert.deepStrictEqual(r.entries.map(e => [e.date, e.type, e.amount, e.title]), [
-    ['2026-11-01', 'expense', 4500, '스타벅스 & 강남점'], ['2026-11-02', 'income', 30000, '김토스'], ['2026-11-03', 'expense', 3200, '가나다']]);
+    ['2026-11-01', 'expense', 4500, '벌크 & 강남점'], ['2026-11-02', 'income', 30000, '김토스'], ['2026-11-03', 'expense', 3200, '가나다']]);
   console.log('xlsx import test passed');
 })().catch(e => { console.error(e); process.exit(1); });
