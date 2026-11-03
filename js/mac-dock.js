@@ -20,7 +20,7 @@
   var uid = Math.random().toString(36).slice(2, 7);
   // 폰(900px 미만)은 터치라 커지는 효과 없이 조금 작은 아이콘으로 나란히 둔다
   function isPhone() { return window.innerWidth < 900; }
-  var mx = null, fi = -1, raf = 0, BASE = isPhone() ? 44 : 48, MAX = 84, SPREAD = 96, GAP = 6;
+  var mx = null, fi = -1, raf = 0, BASE = isPhone() ? 44 : 48, MAX = 84, SPREAD = 72, GAP = 6, ZONE = 45;   // ZONE: 독 위로 몇 px 안에 들어와야 반응할지
   var A = APPS.map(function (ap, i) {
     var gid = 'u208g' + uid + i;
     var b = document.createElement('button'); b.type = 'button'; b.className = 'u208-a'; b.setAttribute('aria-label', ap.name + ' 열기');
@@ -55,11 +55,12 @@
     if (busy) raf = requestAnimationFrame(frame);
   }
   function run() { if (!raf) raf = requestAnimationFrame(frame); }
-  // 커서가 독 근처(위쪽 150px까지)에 있을 때만 반응합니다. 독은 늘 화면 가운데 정렬이라 가운데를 기준으로 잽니다
+  // 커서가 독 바로 근처(위쪽 ZONE px까지)에 있을 때만 반응합니다. 독은 늘 화면 가운데 정렬이라 가운데를 기준으로 잽니다
   document.addEventListener('pointermove', function (e) {
     if (!dk.offsetWidth || isPhone()) return;   // 독이 안 보이는 화면(다른 스킨)이거나 터치 폰
-    var y = e.clientY - dk.getBoundingClientRect().bottom;
-    var next = y > -150 && y < 14 ? e.clientX - window.innerWidth / 2 : null;
+    var r = dk.getBoundingClientRect(), y = e.clientY - r.bottom;
+    var inX = e.clientX > r.left - 20 && e.clientX < r.right + 20;   // 독 좌우 끝에서 20px 안쪽일 때만
+    var next = inX && y > -ZONE && y < 14 ? e.clientX - window.innerWidth / 2 : null;
     if (next === null && mx === null) return;
     mx = next;
     run();
