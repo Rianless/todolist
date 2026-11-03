@@ -17,6 +17,7 @@ assert.strictEqual(parseNotification('이디야 4,500원 결제 취소').cancel,
 
 // 벌크는 커피 카테고리
 assert.strictEqual(parseNotification('벌크에서 4,500원 결제했어요').category, '커피');
+assert.strictEqual(parseNotification('플레이툰에서 3,000원 결제했어요').category, '돈지랄');
 assert.strictEqual(parseNotification('김토스님에게 30,000원 입금됐어요').category, '기타');   // 앱의 수입 카테고리 이름
 assert.strictEqual(parseNotification('카드 승인 12,000원').title, '결제');                // 가게 이름을 못 읽으면 일반 이름
 // 직접 입력한 짧은 문장
@@ -30,6 +31,7 @@ assert.deepStrictEqual(q('용돈 5만원 받음'), ['income', 50000, '용돈', '
 assert.strictEqual(parseQuickEntry('천안 다녀옴'), null);
 // 한글 숫자
 assert.deepStrictEqual(q('벌크 4500'), ['expense', 4500, '벌크', '커피']);
+assert.deepStrictEqual(q('플레이툰 5천원'), ['expense', 5000, '플레이툰', '돈지랄']);
 assert.deepStrictEqual(q('마트 오천원'), ['expense', 5000, '마트', '생활']);
 assert.deepStrictEqual(q('이마트 3천원'), ['expense', 3000, '이마트', '생활']);
 assert.deepStrictEqual(q('점심 팔천오백원'), ['expense', 8500, '점심', '식비']);
