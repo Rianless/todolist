@@ -3682,6 +3682,8 @@ body::after {
 /* 가계부 단축어 칩 */
 .ledger-shortcuts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
 .ledger-shortcuts:empty { display: none; }
+/* 접힌 상태: 한 줄만 보이고 넘치는 칩은 숨김 (더보기로 펼침) */
+.ledger-shortcuts.collapsed { max-height: 32px; overflow: hidden; }
 .ledger-shortcut {
   display: inline-flex; align-items: center; border: 1px solid var(--border2); border-radius: 999px;
   background: var(--panel2); overflow: hidden;

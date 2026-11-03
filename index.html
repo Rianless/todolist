@@ -1426,8 +1426,11 @@
 
         <div class="form-group" id="l_shortcut_group">
           <label class="form-label">⚡ 단축어 <span style="font-weight:400;color:var(--text3);">눌러서 항목·금액·카테고리 한 번에 채우기</span></label>
-          <div class="ledger-shortcuts" id="l_shortcut_list"></div>
-          <button type="button" class="ledger-cat-manage-btn" id="l_shortcut_save" onclick="saveLedgerShortcut()">+ 지금 입력을 단축어로 저장</button>
+          <div class="ledger-shortcuts collapsed" id="l_shortcut_list"></div>
+          <div style="display:flex;gap:6px;">
+            <button type="button" class="ledger-cat-manage-btn" id="l_shortcut_save" onclick="saveLedgerShortcut()">+ 지금 입력을 단축어로 저장</button>
+            <button type="button" class="ledger-cat-manage-btn" id="l_shortcut_more" style="display:none;" onclick="toggleLedgerShortcutsExpand()">더보기 ▾</button>
+          </div>
         </div>
 
         <div class="form-group">

@@ -677,6 +677,8 @@ function openLedger(date, forSub=false) {
   history.pushState({modal:'ledger'}, '');
 
   document.getElementById('ledgerModal').classList.add('open');
+  document.getElementById('l_shortcut_list').classList.add('collapsed');
+  updateLedgerShortcutMore();   // 창이 열린 뒤에야 넘침을 잴 수 있다
 
   setTimeout(() => document.getElementById(forSub ? 'f_subname' : 'l_amount').focus(), 200);
 
@@ -1605,6 +1607,25 @@ function renderLedgerShortcuts() {
     wrap.append(use, del);
     box.appendChild(wrap);
   });
+  updateLedgerShortcutMore();
+}
+
+// 칩이 한 줄을 넘칠 때만 '더보기' 버튼을 보여 준다
+function updateLedgerShortcutMore() {
+  const box = document.getElementById('l_shortcut_list');
+  const more = document.getElementById('l_shortcut_more');
+  if (!box || !more) return;
+  const collapsed = box.classList.contains('collapsed');
+  box.classList.add('collapsed');            // 넘침 여부는 접은 상태에서 잰다
+  const overflow = box.scrollHeight > box.clientHeight + 1;
+  if (!collapsed) box.classList.remove('collapsed');
+  more.style.display = overflow || !collapsed ? '' : 'none';
+  more.textContent = collapsed ? '더보기 ▾' : '접기 ▴';
+}
+
+function toggleLedgerShortcutsExpand() {
+  document.getElementById('l_shortcut_list').classList.toggle('collapsed');
+  updateLedgerShortcutMore();
 }
 
 function applyLedgerShortcut(id) {
