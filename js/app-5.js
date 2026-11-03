@@ -672,6 +672,7 @@ function openLedger(date, forSub=false) {
     resetLedgerParcelForm(null);
   setLedgerExtrasDraft([]);
   updateLedgerSubToggle(forSub);
+  renderLedgerShortcuts();
 
   history.pushState({modal:'ledger'}, '');
 
@@ -775,6 +776,7 @@ function editLedgerEntry(id) {
     fillLedgerAccountSelect(entry.accountId);
     resetLedgerParcelForm(linkedParcelOf(id));
   setLedgerExtrasDraft(entry.type === 'expense' ? entry.extras : []);
+  renderLedgerShortcuts();
 
   document.getElementById('ledgerModal').classList.add('open');
   history.pushState({modal:'ledger'}, '');
@@ -1572,6 +1574,82 @@ function getLedgerCategoryValue() {
 function rememberLedgerAccount(id) {
   lastLedgerAccountId = id;
   try { localStorage.setItem('rianless_ledger_account', String(id)); } catch (e) { /* 무시 */ }
+}
+
+/* ── 가계부 단축어 ── */
+function renderLedgerShortcuts() {
+  const group = document.getElementById('l_shortcut_group');
+  if (!group) return;
+  group.style.display = editingLedgerId === null && !ledgerSub ? '' : 'none';
+  const box = document.getElementById('l_shortcut_list');
+  box.textContent = '';
+  ledgerShortcuts.forEach(s => {
+    const wrap = document.createElement('span');
+    wrap.className = 'ledger-shortcut ' + s.type;
+    const use = document.createElement('button');
+    use.type = 'button';
+    use.className = 'ledger-shortcut-use';
+    use.textContent = s.label;
+    if (s.amount) {
+      const amt = document.createElement('small');
+      amt.textContent = s.amount.toLocaleString('ko-KR');
+      use.appendChild(amt);
+    }
+    use.onclick = () => applyLedgerShortcut(s.id);
+    const del = document.createElement('button');
+    del.type = 'button';
+    del.className = 'ledger-shortcut-del';
+    del.textContent = '✕';
+    del.setAttribute('aria-label', `${s.label} 단축어 삭제`);
+    del.onclick = () => deleteLedgerShortcut(s.id);
+    wrap.append(use, del);
+    box.appendChild(wrap);
+  });
+}
+
+function applyLedgerShortcut(id) {
+  const s = ledgerShortcuts.find(x => x.id === id);
+  if (!s) return;
+  setLedgerType(s.type);
+  fillLedgerCategorySelect(s.type, s.category || '');
+  document.getElementById('l_title').value = s.title || s.label;
+  document.getElementById('l_amount').value = s.amount ? s.amount.toLocaleString('ko-KR') : '';
+  updateLedgerExtrasTotal();
+  onLedgerParcelHint();
+  // 금액이 정해져 있으면 바로 저장 버튼으로, 아니면 금액 입력으로
+  if (!s.amount) document.getElementById('l_amount').focus();
+}
+
+function saveLedgerShortcut() {
+  const title = document.getElementById('l_title').value.trim();
+  if (!title) {
+    showToast('항목명을 먼저 입력해 주세요', { type: 'info', duration: 1800 });
+    document.getElementById('l_title').focus();
+    return;
+  }
+  const label = title.slice(0, 12);
+  const data = {
+    label,
+    type: ledgerType,
+    title: title.slice(0, 40),
+    amount: parseLedgerAmount(document.getElementById('l_amount').value) || 0,
+    category: getLedgerCategoryValue()
+  };
+  const existing = ledgerShortcuts.find(s => s.label === label && s.type === data.type);
+  if (existing) Object.assign(existing, data);
+  else ledgerShortcuts.push({ id: ledgerShortcutNextId++, ...data });
+  saveData();
+  renderLedgerShortcuts();
+  showToast(existing ? `'${label}' 단축어를 갱신했어요` : `'${label}' 단축어를 저장했어요`, { type: 'success', duration: 1800 });
+}
+
+function deleteLedgerShortcut(id) {
+  const s = ledgerShortcuts.find(x => x.id === id);
+  if (!s) return;
+  ledgerShortcuts = ledgerShortcuts.filter(x => x.id !== id);
+  saveData();
+  renderLedgerShortcuts();
+  showToast(`'${s.label}' 단축어를 지웠어요`, { type: 'info', duration: 1500 });
 }
 
 function formatSignedAmount(input) {
