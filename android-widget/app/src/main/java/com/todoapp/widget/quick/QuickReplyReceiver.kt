@@ -25,7 +25,7 @@ class QuickReplyReceiver : BroadcastReceiver() {
             }
             QuickNotifier.ACTION_SAVE -> {
                 // 저장 중임을 바로 보여 준다 (서버 응답이 올 때까지 입력칸 알림이 남아 있지 않게)
-                QuickNotifier.showResult(app, notifId, "저장하는 중…", 15000L)
+                QuickNotifier.showProgress(app, notifId, "저장하는 중…")
                 runInBackground { QuickSaver.saveAsIs(app, notifId, original) }
             }
         }
