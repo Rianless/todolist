@@ -8464,3 +8464,22 @@ html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 11px; }
   html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] .dkw-body, html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] .dkw-body { padding: 4px 12px 12px; }
   html[data-desktop][data-skin="mac"] .dk-widget[data-w="parcel"] .dkw-title button, html[data-desktop][data-skin="mac"] .dk-widget[data-w="dday"] .dkw-title button { padding: 0 9px !important; }
 }
+
+
+/* 간편입력: 폰 기본 알림처럼 화면 위에서 아래로 내려오는 카드 */
+#quickLedgerModal { align-items: flex-start; background: rgba(0,0,0,0.35); backdrop-filter: none; }
+.quick-banner {
+  width: calc(100% - 16px); max-width: 480px; margin: calc(env(safe-area-inset-top, 0px) + 8px) auto 0;
+  background: var(--panel2); color: var(--text); border: 1px solid var(--border);
+  border-radius: 18px; padding: 12px 14px 12px; box-shadow: 0 8px 28px rgba(0,0,0,0.35);
+  animation: quickBannerDrop .28s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes quickBannerDrop { from { transform: translateY(-120%); opacity: 0; } to { transform: translateY(0); opacity: 1; } }
+.quick-banner-head { display: flex; align-items: center; justify-content: space-between; gap: 8px; }
+.quick-banner-title { font-size: 15px; font-weight: 700; }
+.quick-banner-close { background: none; border: none; color: var(--text3); font-size: 16px; padding: 4px 6px; cursor: pointer; }
+.quick-banner-help { font-size: 11px; color: var(--text3); margin: 4px 0 8px; }
+.quick-banner-row { display: flex; gap: 8px; }
+.quick-banner-row .form-input { flex: 1; min-width: 0; }
+.quick-banner-row .lc-add-btn { flex: none; }
+@media (prefers-reduced-motion: reduce) { .quick-banner { animation: none; } }
