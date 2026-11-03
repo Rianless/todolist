@@ -88,6 +88,9 @@ object QuickNotifier {
     /** 입력칸 알림이 쓰던 번호와 겹치지 않게, 결과 알림은 번호를 따로 쓴다. (같은 번호로 덮어쓰면 새 알림으로 치지 않아 위에서 내려오지 않는다) */
     private const val RESULT_ID_OFFSET = 500_000_000
 
+    /** 저장 결과 알림이 알림창에 남아 있는 시간 */
+    const val RESULT_TIMEOUT_MS = 10_000L
+
     /** 처리 중임을 조용히 알린다. 소리·팝업 없이 입력칸 알림을 대신하고 잠시 뒤 사라진다. */
     fun showProgress(ctx: Context, notifId: Int, message: String, timeoutMs: Long = 15000L) {
         if (!canNotify(ctx)) return
@@ -105,9 +108,10 @@ object QuickNotifier {
 
     /**
      * 결과를 화면 위에서 내려오는 새 알림으로 보여 준다.
-     * timeoutMs 가 0 이면 사용자가 밀어서 지우기 전까지 알림창에 남는다.
+     * 위에서 내려와 확인할 시간을 준 뒤, timeoutMs(기본 10초) 뒤에 알림창에서도 스스로 지워진다.
+     * timeoutMs 가 0 이하면 사용자가 밀어서 지우기 전까지 남는다.
      */
-    fun showResult(ctx: Context, notifId: Int, message: String, timeoutMs: Long = 0L) {
+    fun showResult(ctx: Context, notifId: Int, message: String, timeoutMs: Long = RESULT_TIMEOUT_MS) {
         if (!canNotify(ctx)) return
         ensureChannel(ctx)
         val nm = NotificationManagerCompat.from(ctx)
