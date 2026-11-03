@@ -7494,6 +7494,11 @@ html[data-skin="mac"] button, html[data-skin="mac"] .add-btn, html[data-skin="ma
 }
 html[data-skin="mac"] button:hover { background: #f5f5f7; }
 html[data-skin="mac"] button:active { background: #e8e8ed; }
+/* 선택된 칩(전체·수입·지출·이체)은 마우스를 올리거나 눌러도 자기 색을 유지 (위의 공통 버튼 규칙이 하얗게 덮어쓰지 않도록) */
+html[data-skin="mac"] .ledger-chip.active:hover, html[data-skin="mac"] .ledger-chip.active:active { background: var(--accent); }
+html[data-skin="mac"] .ledger-chip.income.active:hover, html[data-skin="mac"] .ledger-chip.income.active:active { background: var(--green); }
+html[data-skin="mac"] .ledger-chip.expense.active:hover, html[data-skin="mac"] .ledger-chip.expense.active:active { background: var(--red); }
+html[data-skin="mac"] .ledger-chip.transfer.active:hover, html[data-skin="mac"] .ledger-chip.transfer.active:active { background: #6b7280; }
 html[data-skin="mac"] .add-btn, html[data-skin="mac"] .fab, html[data-skin="mac"] .fab-add, html[data-skin="mac"] .add-fab {
   background: linear-gradient(#4da3ff, #007aff) !important; color: #fff !important; border: 1px solid #0a6fe0 !important;
 }
