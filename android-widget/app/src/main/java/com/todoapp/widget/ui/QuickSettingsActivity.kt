@@ -48,6 +48,11 @@ class QuickSettingsActivity : AppCompatActivity() {
             textSize = 14f
         }
         val enabledSwitch = Switch(this).apply { text = "결제 알림에 입력칸 띄우기"; isChecked = prefs.enabled; setPadding(0, dp(12), 0, 0) }
+        val autoSwitch = Switch(this).apply { text = "묻지 않고 알림 그대로 바로 저장 (자동)"; isChecked = prefs.autoSave; setPadding(0, dp(8), 0, 0) }
+        val autoHelp = TextView(this).apply {
+            text = "켜면 결제 알림이 오는 즉시 알림 속 가게 이름과 금액으로 가계부에 저장해요. 가게 이름을 못 읽으면 '결제'라는 이름으로 저장될 수 있어요. 끄면 입력칸 알림이 떠요."
+            textSize = 12f
+        }
         val token = field(prefs.token, "가계부 비밀번호 (LEDGER_TOKEN)", secret = true)
         val url = field(prefs.baseUrl, "https://...vercel.app")
         val pkgs = field(prefs.packages, "viva.republica.toss")
@@ -57,6 +62,7 @@ class QuickSettingsActivity : AppCompatActivity() {
             text = "저장"
             setOnClickListener {
                 prefs.enabled = enabledSwitch.isChecked
+                prefs.autoSave = autoSwitch.isChecked
                 prefs.token = token.text.toString()
                 prefs.baseUrl = url.text.toString()
                 prefs.packages = pkgs.text.toString()
@@ -88,7 +94,7 @@ class QuickSettingsActivity : AppCompatActivity() {
         }
 
         listOf<View>(
-            intro, enabledSwitch,
+            intro, enabledSwitch, autoSwitch, autoHelp,
             label("가계부 비밀번호 (Vercel 의 LEDGER_TOKEN 과 같은 값)"), token,
             label("가계부 서버 주소"), url,
             label("감시할 앱 이름(패키지). 기본은 토스. 여러 개면 쉼표로 구분"), pkgs,

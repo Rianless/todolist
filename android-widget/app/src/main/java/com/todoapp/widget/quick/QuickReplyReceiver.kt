@@ -6,38 +6,35 @@ import android.content.Intent
 import androidx.core.app.RemoteInput
 import kotlin.concurrent.thread
 
-/** 알림 입력칸에 적은 글을 받아 서버(/api/ledger)로 보낸다. */
+/** 알림의 두 버튼을 받는다: 입력칸에 적은 글 보내기(ACTION_REPLY) / 알림 글 그대로 저장(ACTION_SAVE) */
 class QuickReplyReceiver : BroadcastReceiver() {
     override fun onReceive(context: Context, intent: Intent) {
-        if (intent.action != QuickNotifier.ACTION_REPLY) return
-        val reply = RemoteInput.getResultsFromIntent(intent)
-            ?.getCharSequence(QuickNotifier.KEY_REPLY)?.toString().orEmpty().trim()
         val original = intent.getStringExtra(QuickNotifier.EXTRA_ORIGINAL).orEmpty()
         val notifId = intent.getIntExtra(QuickNotifier.EXTRA_NOTIF_ID, 0)
         val app = context.applicationContext
-        if (reply.isEmpty()) {
-            QuickNotifier.showPrompt(app, notifId, original, "글을 적어 주세요. 예) 올리브영 만원")
-            return
+
+        when (intent.action) {
+            QuickNotifier.ACTION_REPLY -> {
+                val reply = RemoteInput.getResultsFromIntent(intent)
+                    ?.getCharSequence(QuickNotifier.KEY_REPLY)?.toString().orEmpty().trim()
+                if (reply.isEmpty()) {
+                    QuickNotifier.showPrompt(app, notifId, original, "글을 적어 주세요. 예) 올리브영 만원")
+                    return
+                }
+                runInBackground { QuickSaver.saveReply(app, notifId, original, reply) }
+            }
+            QuickNotifier.ACTION_SAVE -> {
+                // 저장 중임을 바로 보여 준다 (서버 응답이 올 때까지 입력칸 알림이 남아 있지 않게)
+                QuickNotifier.showResult(app, notifId, "저장하는 중…", 15000L)
+                runInBackground { QuickSaver.saveAsIs(app, notifId, original) }
+            }
         }
+    }
+
+    private fun runInBackground(work: () -> Unit) {
         val pending = goAsync()
         thread(name = "quick-ledger-send") {
-            try {
-                val prefs = QuickPrefs(app)
-                val text = QuickLedgerLogic.buildQuickText(reply, original)
-                when (val r = QuickLedgerClient.send(prefs.baseUrl, prefs.token, text)) {
-                    is QuickResult.Added -> QuickNotifier.showResult(
-                        app, notifId,
-                        "✓ ${if (r.type == "income") "수입" else "지출"} ${r.title} ${"%,d".format(r.amount)}원을 적었어요"
-                    )
-                    QuickResult.Duplicate -> QuickNotifier.showResult(app, notifId, "이미 적힌 내역이에요")
-                    QuickResult.NoAmount -> QuickNotifier.showPrompt(app, notifId, original, "금액을 못 찾았어요. 예) 올리브영 만원")
-                    QuickResult.NoToken -> QuickNotifier.showResult(app, notifId, "앱에 비밀번호가 저장돼 있지 않아요. 설정에서 입력 후 '저장'을 눌러 주세요", 8000L)
-                    QuickResult.BadToken -> QuickNotifier.showResult(app, notifId, "서버가 비밀번호를 거절했어요 (앱에 저장된 ${prefs.token.length}자). Vercel 값과 같은지 확인해 주세요", 8000L)
-                    is QuickResult.Failed -> QuickNotifier.showPrompt(app, notifId, original, "전송 실패: ${r.message}. 다시 적어 주세요")
-                }
-            } finally {
-                pending.finish()
-            }
+            try { work() } finally { pending.finish() }
         }
     }
 }

@@ -7,9 +7,9 @@ process.env.LEDGER_TOKEN = 'secret';
 
 // 문구 해석
 let p = parseNotification('이디야에서 4,500원 결제했어요');
-assert.deepStrictEqual([p.type, p.amount, p.title, p.category], ['expense', 4500, '이디야', '카페']);
+assert.deepStrictEqual([p.type, p.amount, p.title, p.category], ['expense', 4500, '이디야', '식비']);
 p = parseNotification('토스뱅크 체크카드 12,500원 결제 · GS25');
-assert.deepStrictEqual([p.type, p.amount, p.title, p.category], ['expense', 12500, 'GS25', '장보기']);
+assert.deepStrictEqual([p.type, p.amount, p.title, p.category], ['expense', 12500, 'GS25', '생활']);
 p = parseNotification('김토스님에게 30,000원 입금됐어요');
 assert.strictEqual(p.type, 'income');
 assert.strictEqual(parseNotification('이벤트가 도착했어요'), null);
@@ -17,6 +17,8 @@ assert.strictEqual(parseNotification('이디야 4,500원 결제 취소').cancel,
 
 // 벌크는 커피 카테고리
 assert.strictEqual(parseNotification('벌크에서 4,500원 결제했어요').category, '커피');
+assert.strictEqual(parseNotification('김토스님에게 30,000원 입금됐어요').category, '기타');   // 앱의 수입 카테고리 이름
+assert.strictEqual(parseNotification('카드 승인 12,000원').title, '결제');                // 가게 이름을 못 읽으면 일반 이름
 // 직접 입력한 짧은 문장
 const q = t => { const r = parseQuickEntry(t); return r && [r.type, r.amount, r.title, r.category]; };
 assert.deepStrictEqual(q('올리브영 만원'), ['expense', 10000, '올리브영', '쇼핑']);

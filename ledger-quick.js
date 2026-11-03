@@ -52,13 +52,21 @@ function parseQuickEntry(text) {
   let title = (raw.slice(0, pick.start) + ' ' + raw.slice(pick.end)).replace(/\s+/g, ' ').trim();
   title = title.replace(/(?:에서|에)?\s*(?:썼어|썼다|썼음|씀|결제|사용|지출|입금|받음|받았어|받았다)\S*$/, '').trim();
   title = title.replace(/(?:에서|에)$/, '').trim() || (type === 'income' ? '수입' : '지출');
-  let category = type === 'income' ? (/월급|급여/.test(raw) ? '급여' : /용돈/.test(raw) ? '용돈' : '기타') : '기타';
-  if (type === 'expense') for (const [re, cat] of QUICK_RULES) if (re.test(title)) { category = cat; break; }
-  return { type, amount: pick.amount, title, category };
+  return { type, amount: pick.amount, title, category: guessQuickCategory(title, type, raw) };
+}
+
+// 가게 이름으로 앱의 카테고리를 고른다. (간편입력과 알림 자동입력이 같은 규칙표를 쓴다)
+function guessQuickCategory(title, type, context) {
+  if (type === 'income') {
+    const t = String(context || title || '');
+    return /월급|급여/.test(t) ? '급여' : /용돈/.test(t) ? '용돈' : '기타';
+  }
+  for (const [re, cat] of QUICK_RULES) if (re.test(title)) return cat;
+  return '기타';
 }
 
 
-  const api = { parseQuickEntry };
+  const api = { parseQuickEntry, guessQuickCategory };
   if (typeof module !== 'undefined' && module.exports) module.exports = api;
   else window.LedgerQuick = api;
 })();

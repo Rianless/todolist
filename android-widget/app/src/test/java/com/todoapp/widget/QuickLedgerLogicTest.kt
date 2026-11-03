@@ -44,6 +44,11 @@ class QuickLedgerLogicTest {
         assertEquals("", QuickLedgerLogic.buildQuickText("  ", "4,500원 결제"))
     }
 
+    @Test fun savedMessageShowsWhatWasSaved() {
+        assertEquals("✓ 지출 올리브영 10,000원을 적었어요", QuickLedgerLogic.savedMessage("expense", "올리브영", 10000))
+        assertEquals("✓ 수입 용돈 50,000원을 적었어요", QuickLedgerLogic.savedMessage("income", "용돈", 50000))
+    }
+
     @Test fun parsesPackagesAndEndpoint() {
         assertEquals(setOf("a.b", "c.d"), QuickLedgerLogic.parsePackages("a.b, c.d\n"))
         assertEquals("https://x.app/api/ledger", QuickLedgerLogic.ledgerEndpoint(" https://x.app/ "))

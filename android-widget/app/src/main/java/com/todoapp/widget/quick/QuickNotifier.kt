@@ -18,6 +18,7 @@ object QuickNotifier {
     const val CHANNEL_ID = "quick_ledger_prompt"
     const val KEY_REPLY = "quick_reply"
     const val ACTION_REPLY = "com.todoapp.widget.ACTION_QUICK_REPLY"
+    const val ACTION_SAVE = "com.todoapp.widget.ACTION_QUICK_SAVE"
     const val EXTRA_ORIGINAL = "original"
     const val EXTRA_NOTIF_ID = "notifId"
 
@@ -58,6 +59,15 @@ object QuickNotifier {
             .addRemoteInput(remoteInput)
             .setAllowGeneratedReplies(false)
             .build()
+        // 알림 글 그대로 저장하는 버튼 (입력칸이 없어서 변경 불가 PendingIntent 로 만든다)
+        val saveIntent = Intent(ctx, QuickReplyReceiver::class.java).apply {
+            this.action = ACTION_SAVE
+            putExtra(EXTRA_ORIGINAL, original)
+            putExtra(EXTRA_NOTIF_ID, notifId)
+        }
+        val savePi = PendingIntent.getBroadcast(
+            ctx, notifId + 1, saveIntent, PendingIntent.FLAG_UPDATE_CURRENT or PendingIntent.FLAG_IMMUTABLE
+        )
         val text = error ?: "${original.take(60)}\n어디에 썼는지 적어 주세요. (예: 올리브영 만원)"
         val n = NotificationCompat.Builder(ctx, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_notify_chat)
@@ -70,6 +80,7 @@ object QuickNotifier {
             .setOnlyAlertOnce(false)
             .setTimeoutAfter(30 * 60 * 1000L)
             .addAction(action)
+            .addAction(android.R.drawable.ic_menu_save, "그대로 저장", savePi)
             .build()
         NotificationManagerCompat.from(ctx).notify(notifId, n)
     }
