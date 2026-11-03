@@ -7,4 +7,6 @@
     <string name="action_export">Export JSON</string>
     <string name="bookmark_widget_label">나의 하루 · 북마크</string>
     <string name="bookmark_widget_description">웹앱에 저장한 북마크를 폴더별로 보고 바로 엽니다</string>
+    <string name="action_quick_ledger">결제 알림 간편입력 설정</string>
+    <string name="quick_listener_label">가계부 간편입력</string>
 </resources>

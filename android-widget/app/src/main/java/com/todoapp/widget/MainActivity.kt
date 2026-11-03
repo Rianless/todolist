@@ -108,6 +108,10 @@ class MainActivity : AppCompatActivity() {
                 }
                 true
             }
+            R.id.action_quick_ledger -> {
+                startActivity(Intent(this, com.todoapp.widget.ui.QuickSettingsActivity::class.java))
+                true
+            }
             else -> super.onOptionsItemSelected(item)
         }
     }
