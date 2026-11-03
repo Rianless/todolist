@@ -16,7 +16,7 @@ class QuickPrefs(context: Context) {
 
     var token: String
         get() = sp.getString("token", "") ?: ""
-        set(v) = sp.edit().putString("token", v.trim()).apply()
+        set(v) = sp.edit().putString("token", v.filterNot { it.isWhitespace() }).apply()   // 비밀번호에는 공백이 없으니 붙여넣을 때 섞인 공백·줄바꿈은 모두 지운다
 
     /** 알림을 감시할 앱 패키지 이름들 (쉼표로 구분). 기본은 토스. */
     var packages: String

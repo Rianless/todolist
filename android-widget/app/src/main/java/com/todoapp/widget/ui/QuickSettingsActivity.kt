@@ -104,6 +104,6 @@ class QuickSettingsActivity : AppCompatActivity() {
         val posting = NotificationManagerCompat.from(this).areNotificationsEnabled()
         status.text = "알림 읽기: ${if (listening) "허용됨 ✓" else "아직 허용 안 됨 ✗"}\n" +
             "알림 표시: ${if (posting) "허용됨 ✓" else "아직 허용 안 됨 ✗"}\n" +
-            "비밀번호: ${if (prefs.token.isNotBlank()) "입력됨 ✓" else "비어 있음 ✗"}"
+            "비밀번호: ${if (prefs.token.isNotBlank()) "저장됨 ✓ (${prefs.token.length}자)" else "비어 있음 ✗"}"
     }
 }

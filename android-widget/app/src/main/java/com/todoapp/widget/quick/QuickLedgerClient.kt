@@ -11,7 +11,9 @@ sealed class QuickResult {
     object Duplicate : QuickResult()
     /** 서버가 글에서 금액을 못 찾음 */
     object NoAmount : QuickResult()
-    /** 비밀번호가 틀림 */
+    /** 앱에 비밀번호를 아직 저장하지 않음 */
+    object NoToken : QuickResult()
+    /** 서버가 비밀번호를 거절함 */
     object BadToken : QuickResult()
     /** 네트워크·서버 오류 */
     data class Failed(val message: String) : QuickResult()
@@ -22,7 +24,7 @@ object QuickLedgerClient {
     fun send(baseUrl: String, token: String, quickText: String): QuickResult {
         val endpoint = QuickLedgerLogic.ledgerEndpoint(baseUrl)
             ?: return QuickResult.Failed("서버 주소가 올바르지 않아요")
-        if (token.isBlank()) return QuickResult.BadToken
+        if (token.isBlank()) return QuickResult.NoToken
         var conn: HttpURLConnection? = null
         return try {
             conn = (URL(endpoint).openConnection() as HttpURLConnection).apply {
