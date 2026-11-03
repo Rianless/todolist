@@ -8483,3 +8483,13 @@ html[data-desktop][data-skin="mac"] .dk-widget .dkc-dow { font-size: 11px; }
 .quick-banner-row .form-input { flex: 1; min-width: 0; }
 .quick-banner-row .lc-add-btn { flex: none; }
 @media (prefers-reduced-motion: reduce) { .quick-banner { animation: none; } }
+
+/* 간편입력 카드: 맥 테마는 유리 질감, 윈도우 98 테마는 각진 창 */
+html[data-skin="mac"] #quickLedgerModal { background: rgba(0,0,0,.18) !important; }
+html[data-skin="mac"] .quick-banner {
+  background: rgba(255,255,255,.88); -webkit-backdrop-filter: saturate(180%) blur(30px); backdrop-filter: saturate(180%) blur(30px);
+  border: 1px solid rgba(0,0,0,.10); border-radius: 18px; box-shadow: 0 12px 40px rgba(0,0,0,.28);
+}
+html[data-skin="mac"] .quick-banner-title { font-weight: 600; }
+html[data-skin="mac"] .quick-banner-close { border-radius: 50%; background: rgba(0,0,0,.08); width: 24px; height: 24px; padding: 0; line-height: 24px; font-size: 12px; }
+html[data-skin="w98"] .quick-banner { border-radius: 0; }
