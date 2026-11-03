@@ -3678,6 +3678,24 @@ body::after {
 /* 내역 추가 창 위에서도 카테고리 관리 창이 보이도록 */
 #ledgerCatModal { z-index: 9500; }
 .ledger-filter-selects { margin-top: 8px; }
+
+/* 가계부 단축어 칩 */
+.ledger-shortcuts { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 8px; }
+.ledger-shortcuts:empty { display: none; }
+.ledger-shortcut {
+  display: inline-flex; align-items: center; border: 1px solid var(--border2); border-radius: 999px;
+  background: var(--panel2); overflow: hidden;
+}
+.ledger-shortcut-use {
+  border: none; background: none; color: var(--text); font-family: inherit; font-size: 12px; font-weight: 700;
+  padding: 6px 4px 6px 12px; cursor: pointer; white-space: nowrap;
+}
+.ledger-shortcut-use small { font-weight: 500; color: var(--text3); margin-left: 4px; }
+.ledger-shortcut.income .ledger-shortcut-use { color: var(--green); }
+.ledger-shortcut.expense .ledger-shortcut-use { color: var(--red); }
+.ledger-shortcut-del {
+  border: none; background: none; color: var(--text3); font-size: 11px; padding: 6px 10px 6px 4px; cursor: pointer;
+}
 .ledger-chip.transfer.active { background: #6b7280; }
 
 .ledger-entry-amount.transfer { color: var(--accent); }

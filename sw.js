@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v151-phone-revert';
+const CACHE_NAME = 'todolist-v152-ledger-shortcuts';
 const ASSETS = [
   './',
   './index.html',

@@ -204,6 +204,9 @@ let ledgerCategories = {
   expense: [...LEDGER_DEFAULT_CATEGORIES.expense],
   income: [...LEDGER_DEFAULT_CATEGORIES.income]
 };
+// 가계부 단축어: 자주 쓰는 내역을 한 번 눌러 채운다 ({ id, label, type, title, amount, category })
+let ledgerShortcuts = [];
+let ledgerShortcutNextId = 1;
 let calWeekOffset = 0;      // 주 뷰 오프셋 (week탭용)
 
 let selectedCatColor = '#ff6ef7';

@@ -161,6 +161,27 @@ function sanitizeLedgerCategories(value) {
   return { expense: clean(value.expense), income: clean(value.income) };
 }
 
+function sanitizeLedgerShortcuts(value) {
+  if (!Array.isArray(value)) return null;
+  const seen = new Set();
+  const out = [];
+  value.forEach(s => {
+    if (!s || typeof s !== 'object') return;
+    const label = String(s.label || '').trim().slice(0, 12);
+    const type = s.type === 'income' ? 'income' : 'expense';
+    const id = Number(s.id);
+    if (!label || !Number.isFinite(id) || seen.has(id)) return;
+    seen.add(id);
+    out.push({
+      id, label, type,
+      title: String(s.title || '').trim().slice(0, 40),
+      amount: Math.max(0, Math.round(Number(s.amount) || 0)),
+      category: String(s.category || '').trim().slice(0, 20)
+    });
+  });
+  return out;
+}
+
 
 
 function getCatColor(name) {
@@ -195,6 +216,7 @@ function saveData() {
       categories,
       hiddenCheongdoCats,
       ledgerCategories,
+      ledgerShortcuts,
 
       ledger,
 
@@ -216,6 +238,7 @@ function saveData() {
       itemOrder,
       nextId,
       ledgerNextId,
+      ledgerShortcutNextId,
 
       theme: document.documentElement.getAttribute('data-theme') || 'dark'
 
@@ -244,6 +267,8 @@ function getCloudStatePayload() {
     categories,
     hiddenCheongdoCats,
     ledgerCategories,
+    ledgerShortcuts,
+    ledgerShortcutNextId,
     ledger,
     accounts,
     accountNextId,
@@ -423,6 +448,8 @@ function applyCloudState(payload) {
   if (Array.isArray(payload.categories)) categories = payload.categories;
   if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
   { const lc = sanitizeLedgerCategories(payload.ledgerCategories); if (lc) ledgerCategories = lc; }
+  { const ls = sanitizeLedgerShortcuts(payload.ledgerShortcuts); if (ls) ledgerShortcuts = ls; }
+  if (Number.isFinite(payload.ledgerShortcutNextId)) ledgerShortcutNextId = payload.ledgerShortcutNextId;
   if (Array.isArray(payload.ledger)) ledger = payload.ledger;
   if (Array.isArray(payload.accounts)) accounts = payload.accounts;
   if (Array.isArray(payload.transfers)) transfers = payload.transfers;
@@ -456,7 +483,7 @@ function applyCloudState(payload) {
   if (payload.theme) document.documentElement.setAttribute('data-theme', payload.theme);
 
   localStorage.setItem(STORAGE_KEY, JSON.stringify({
-    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, routines, routineNextId, routineLog, routineChecks, routineOverrides, itemOrder, nextId, ledgerNextId,
+    items, subscriptions, categories, hiddenCheongdoCats, ledgerCategories, ledgerShortcuts, ledgerShortcutNextId, ledger, accounts, accountNextId, transfers, transferNextId, investments, investmentNextId, investTaxRate, routines, routineNextId, routineLog, routineChecks, routineOverrides, itemOrder, nextId, ledgerNextId,
     theme: document.documentElement.getAttribute('data-theme') || 'dark'
   }));
   localStorage.setItem('rianless_memos', JSON.stringify(memos));
@@ -644,8 +671,10 @@ function loadData() {
       if (payload.categories)    categories    = payload.categories;
       if (Array.isArray(payload.hiddenCheongdoCats)) hiddenCheongdoCats = payload.hiddenCheongdoCats;
       { const lc = sanitizeLedgerCategories(payload.ledgerCategories); if (lc) ledgerCategories = lc; }
+      { const ls = sanitizeLedgerShortcuts(payload.ledgerShortcuts); if (ls) ledgerShortcuts = ls; }
+      if (Number.isFinite(payload.ledgerShortcutNextId)) ledgerShortcutNextId = payload.ledgerShortcutNextId;
 
-      if (payload.ledger)        ledger        = payload.ledger;
+      if (payload.ledger)       ledger        = payload.ledger;
       if (!payload.ledgerCategories) {
         // 예전 데이터: 내역에 쓰인 직접 입력 카테고리를 목록에 옮겨 담는다
         ledger.forEach(e => {
