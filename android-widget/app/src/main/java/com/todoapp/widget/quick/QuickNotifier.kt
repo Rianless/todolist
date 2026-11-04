@@ -8,6 +8,8 @@ import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
 import android.os.Build
+import android.widget.RemoteViews
+import com.todoapp.widget.R
 import androidx.core.app.NotificationCompat
 import androidx.core.app.NotificationManagerCompat
 import androidx.core.app.RemoteInput
@@ -21,6 +23,14 @@ object QuickNotifier {
     const val ACTION_SAVE = "com.todoapp.widget.ACTION_QUICK_SAVE"
     const val EXTRA_ORIGINAL = "original"
     const val EXTRA_NOTIF_ID = "notifId"
+
+    /** 알림 본문을 둥근 아이콘 카드 모양으로 그린다. 접힌 모양은 한 줄, 펼친 모양은 여러 줄. */
+    private fun card(ctx: Context, title: String, text: String, expanded: Boolean): RemoteViews =
+        RemoteViews(ctx.packageName, R.layout.notification_quick).apply {
+            setTextViewText(R.id.nq_title, title)
+            setTextViewText(R.id.nq_text, text)
+            setInt(R.id.nq_text, "setMaxLines", if (expanded) 5 else 1)
+        }
 
     private fun ensureChannel(ctx: Context) {
         if (Build.VERSION.SDK_INT < Build.VERSION_CODES.O) return
@@ -71,9 +81,12 @@ object QuickNotifier {
         val text = error ?: "${original.take(60)}\n어디에 썼는지 적어 주세요. (예: 올리브영 만원)"
         val n = NotificationCompat.Builder(ctx, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_notify_chat)
-            .setContentTitle("💰 어디에 썼어요?")
+            .setContentTitle("어디에 썼어요?")
             .setContentText(text.lineSequence().first())
-            .setStyle(NotificationCompat.BigTextStyle().bigText(text))
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(card(ctx, "어디에 썼어요?", text.lineSequence().first(), false))
+            .setCustomBigContentView(card(ctx, "어디에 썼어요?", text, true))
+            .setColor(0xFF6366F1.toInt())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setAutoCancel(true)
@@ -118,9 +131,12 @@ object QuickNotifier {
         nm.cancel(notifId)   // 입력칸·저장 중 알림을 걷어 내고(답장 알림의 로딩 표시도 함께 끝난다) 새 알림으로 바꾼다
         val builder = NotificationCompat.Builder(ctx, CHANNEL_ID)
             .setSmallIcon(android.R.drawable.stat_notify_chat)
-            .setContentTitle("💰 가계부")
+            .setContentTitle("가계부")
             .setContentText(message)
-            .setStyle(NotificationCompat.BigTextStyle().bigText(message))
+            .setStyle(NotificationCompat.DecoratedCustomViewStyle())
+            .setCustomContentView(card(ctx, "가계부", message.lineSequence().first(), false))
+            .setCustomBigContentView(card(ctx, "가계부", message, true))
+            .setColor(0xFF6366F1.toInt())
             .setPriority(NotificationCompat.PRIORITY_HIGH)
             .setCategory(NotificationCompat.CATEGORY_MESSAGE)
             .setOnlyAlertOnce(false)
