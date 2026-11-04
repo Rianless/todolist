@@ -493,33 +493,53 @@ function openMemoAdd(id) {
   document.getElementById('memoModalTitle').textContent = m ? '메모 수정' : '메모 추가';
   document.getElementById('memoText').value = m ? m.content : '';
   document.getElementById('memoTitleField').value = m ? String(m.title || '') : '';
+  memoModalFiles = m ? MemoFiles.normalize(m.files) : [];
+  memoModalFresh = [];
+  memoAttachTarget = 'modal';
+  memoAttachRefresh();
   history.pushState({modal:'memo'}, '');
   document.getElementById('memoModal').classList.add('open');
   setTimeout(() => document.getElementById('memoText').focus(), 200);
 }
 
-function closeMemoModal() { document.getElementById('memoModal').classList.remove('open'); }
+// 창을 닫는다. 저장하지 않고 닫을 때(discard)는 이 창에서 새로 올린 파일을 서버에서 지운다.
+function closeMemoModal(discard = true) {
+  if (discard && memoModalFresh.length) MemoFiles.remove(memoModalFresh);
+  memoModalFresh = []; memoModalFiles = [];
+  document.getElementById('memoModal').classList.remove('open');
+}
 
 function saveMemoModal() {
   const text = document.getElementById('memoText').value.replace(/\s+$/, '');
   const title = document.getElementById('memoTitleField').value.trim();
-  if (!text.trim() && !title) { closeMemoModal(); return; }
+  if (memoUploading > 0) { showToast('파일을 올리는 중이에요. 잠시만 기다려 주세요', { type: 'info' }); return; }
+  const files = memoModalFiles.slice();
+  if (!text.trim() && !title && !files.length) { closeMemoModal(); return; }
   if (editingMemoId !== null) {
     const m = memos.find(x => x.id === editingMemoId);
-    if (m) { m.content = text; if (title) m.title = title; else delete m.title; m.updated = new Date().toISOString(); }
+    if (m) {
+      // 수정하면서 뗀 파일은 서버에서도 지운다
+      MemoFiles.remove(MemoFiles.normalize(m.files).filter(f => !files.some(x => x.id === f.id)));
+      m.content = text; if (title) m.title = title; else delete m.title;
+      if (files.length) m.files = files; else delete m.files;
+      m.updated = new Date().toISOString();
+    }
   } else {
     const nm = { id: memoNextId++, content: text, date: fmtDate(new Date()), updated: new Date().toISOString() };
     if (title) nm.title = title;
+    if (files.length) nm.files = files;
     memos.push(nm);
   }
   editingMemoId = null;
-  closeMemoModal();
+  closeMemoModal(false);
   saveMemos();
   renderMemoAll();
 }
 
 function deleteMemo(id) {
 
+  const gone = memos.find(m => m.id === id);
+  if (gone) MemoFiles.remove(MemoFiles.normalize(gone.files));
   memos = memos.filter(m => m.id !== id);
 
   saveMemos();
@@ -573,6 +593,7 @@ function renderMemoList() {
       <div class="memo-item-date">${m.pinned ? '📌 ' : ''}${m.date}</div>
       ${String(m.title || '').trim() ? `<div class="memo-item-title">${escapeLedgerText(m.title.trim())}</div>` : ''}
       <div class="memo-item-content">${escapeLedgerText(m.content)}</div>
+      ${memoFilesHtml(m.files)}
       <button class="memo-item-pin" aria-label="${m.pinned ? '고정 해제' : '맨 위에 고정'}" onclick="toggleMemoPin(${m.id});event.stopPropagation()">${m.pinned ? '📌' : '📍'}</button>
       <button class="memo-item-del" aria-label="메모 삭제" onclick="deleteMemo(${m.id});event.stopPropagation()">✕</button>
     </div>`).join('');

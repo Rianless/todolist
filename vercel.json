@@ -13,6 +13,7 @@
     { "source": "/ledger-import.js", "destination": "/ledger-import.js" },
     { "source": "/ledger-quick.js", "destination": "/ledger-quick.js" },
     { "source": "/dday.js", "destination": "/dday.js" },
+    { "source": "/memo-files.js", "destination": "/memo-files.js" },
     { "source": "/manifest.json", "destination": "/manifest.json" },
     { "source": "/icon-192.png", "destination": "/icon-192.png" },
     { "source": "/icon-512.png", "destination": "/icon-512.png" },

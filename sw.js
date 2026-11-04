@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v155-dock-zone';
+const CACHE_NAME = 'todolist-v156-memo-files';
 const ASSETS = [
   './',
   './index.html',
@@ -25,7 +25,8 @@ const ASSETS = [
   './parcels.js',
   './ledger-import.js',
   './ledger-quick.js',
-  './dday.js'
+  './dday.js',
+  './memo-files.js'
 ];
 
 // 설치: 핵심 자산 프리캐시

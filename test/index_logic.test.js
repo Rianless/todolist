@@ -24,7 +24,7 @@ const NAMES = ['fmtDate', 'wholeMonthsBetween', 'daysBetweenDates', 'investIsFix
   'statsMonthTotals', 'statsMonthlyTrend', 'statsCategoryBreakdown', 'routineHeat', 'routineRates',
   'memoTitle', 'memoPreview', 'memoFilter', 'memoSort', 'memoHighlight', 'escapeLedgerText', 'ledgerExtrasOf', 'ledgerExtrasSum', 'ledgerExtrasText', 'ledgerSubMonthTotal', 'ledgerShortcutAmountText'];
 
-const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, assert });
+const ctx = vm.createContext({ DOW_KO: ['일','월','화','수','목','금','토'], investTaxRate: 15.4, accounts: [{ id: 1 }], routines: [], routineLog: {}, INVEST_ICONS: {}, MemoFiles: require('../memo-files'), assert });
 vm.runInContext(NAMES.map(extractFunction).join('\n\n') + '\nthis.api = { ' + NAMES.join(', ') + ' };', ctx);
 // vm 안에서 만든 배열·객체는 다른 realm 이라 deepStrictEqual 이 거부하므로 JSON 으로 옮겨 받는다
 const A = Object.fromEntries(NAMES.map(n => [n, (...args) => JSON.parse(JSON.stringify(ctx.api[n](...args) ?? null))]));
@@ -243,6 +243,8 @@ const jeok = { kind: '적금', monthly: 500000, rate: 5, startDate: '2026-04-09'
   assert.deepStrictEqual(A.memoFilter(list, ' apple ').map(m => m.id), [1]);
   assert.deepStrictEqual(A.memoFilter(list, '').map(m => m.id), [1, 2, 3, 4]);
   assert.deepStrictEqual(A.memoFilter(list, '없는말'), []);
+  // 첨부한 파일 이름으로도 찾는다
+  assert.deepStrictEqual(A.memoFilter([...list, { id: 5, content: '', files: [{ id: 'abc12345', name: '영수증.pdf' }] }], '영수증').map(m => m.id), [5]);
   assert.deepStrictEqual(A.memoSort(list).map(m => m.id), [3, 2, 4, 1]);   // 고정 → 최근 수정 → (같은 날은 id 큰 순)
   assert.strictEqual(A.memoHighlight('a<b>Apple', 'apple'), 'a&lt;b&gt;<mark>Apple</mark>');
   assert.strictEqual(A.memoHighlight('<x>', ''), '&lt;x&gt;');
