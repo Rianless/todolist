@@ -367,7 +367,7 @@
               <div class="ledger-filter" id="ledgerFilter">
                 <input class="form-input ledger-search" id="ledgerSearch" type="search" placeholder="항목 · 카테고리 · 메모 · 금액 검색" aria-label="가계부 검색" oninput="onLedgerFilterChange()" onclick="event.stopPropagation()">
                 <div class="ledger-filter-row ledger-filter-row-types">
-                  <div class="ledger-chips" id="ledgerTypeChips">
+                  <div class="ledger-chips ft" id="ledgerTypeChips">
                     <button type="button" class="ledger-chip active" data-type="all" onclick="setLedgerTypeFilter('all');event.stopPropagation()">전체</button>
                     <button type="button" class="ledger-chip income" data-type="income" onclick="setLedgerTypeFilter('income');event.stopPropagation()">수입</button>
                     <button type="button" class="ledger-chip expense" data-type="expense" onclick="setLedgerTypeFilter('expense');event.stopPropagation()">지출</button>
@@ -988,7 +988,7 @@
       <button class="modal-close" type="button" onclick="closeLedgerCatManager()" aria-label="닫기">✕</button>
     </div>
     <div class="modal-body">
-      <div class="ledger-chips" style="margin-bottom:12px;">
+      <div class="ledger-chips ft" style="margin-bottom:12px;">
         <button type="button" class="ledger-chip expense active" id="lcTabExpense" onclick="setLedgerCatTab('expense')" style="flex:1;">지출</button>
         <button type="button" class="ledger-chip income" id="lcTabIncome" onclick="setLedgerCatTab('income')" style="flex:1;">수입</button>
       </div>
