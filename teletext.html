@@ -1,0 +1,126 @@
+<!doctype html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>문자 방송 화면</title>
+<style>
+/* 문자 방송 화면 — 순수 HTML/CSS, JS 없음
+   값: 띠 #3b3e98 · 제목 #ead47c · 한 바퀴 10s */
+.ttx {
+  --ttx-band:  #3b3e98;
+  --ttx-title: #ead47c;
+  --ttx-cycle: 10s;
+  --ttx-row:   1.6em;           /* 한 줄 높이 (스트립 이동 단위) */
+
+  width: min(100%, 480px);
+  aspect-ratio: 4 / 3;
+  background: #000;
+  color: #fff;
+  font: 700 clamp(13px, 4.2vw, 20px)/var(--ttx-row) "Share Tech Mono", ui-monospace, "Courier New", monospace;
+  letter-spacing: .04em;
+  text-transform: uppercase;
+  padding: .6em .8em;
+  box-sizing: border-box;
+  display: flex; flex-direction: column; gap: .5em;
+  overflow: hidden;
+  border-radius: 8px;
+}
+.ttx * { box-sizing: border-box; }
+
+/* 위쪽 띠: 쪽 번호 + 시계 */
+.ttx-bar {
+  display: flex; justify-content: space-between; align-items: center;
+  background: var(--ttx-band);
+  padding: 0 .6em;
+  height: var(--ttx-row);
+}
+
+/* 세로로 쌓은 값을 한 칸씩 끊어서 넘기는 창 */
+.ttx-win  { display: inline-block; height: var(--ttx-row); overflow: hidden; vertical-align: top; }
+.ttx-strip { display: flex; flex-direction: column; will-change: transform; }
+.ttx-strip > span { height: var(--ttx-row); display: block; }
+
+/* 쪽 번호: 휙휙 넘기다(0~6s) 목표 쪽(P 108)에 멈춤. 칸 8개 → 7칸 이동 */
+.ttx-page .ttx-strip { animation: ttx-page var(--ttx-cycle) infinite; }
+@keyframes ttx-page {
+  0%        { transform: translateY(0); }
+  8%        { transform: translateY(calc(var(--ttx-row) * -1)); }
+  16%       { transform: translateY(calc(var(--ttx-row) * -2)); }
+  24%       { transform: translateY(calc(var(--ttx-row) * -3)); }
+  32%       { transform: translateY(calc(var(--ttx-row) * -4)); }
+  40%       { transform: translateY(calc(var(--ttx-row) * -5)); }
+  48%       { transform: translateY(calc(var(--ttx-row) * -6)); }
+  56%, 94%  { transform: translateY(calc(var(--ttx-row) * -7)); }
+  100%      { transform: translateY(0); }
+}
+
+/* 시계: 초의 끝자리가 1초마다 한 칸씩 흘러감 (0~9) */
+.ttx-sec .ttx-strip { animation: ttx-sec var(--ttx-cycle) steps(10) infinite; }
+@keyframes ttx-sec {
+  from { transform: translateY(0); }
+  to   { transform: translateY(calc(var(--ttx-row) * -10)); }
+}
+
+/* 제목 */
+.ttx-title {
+  color: var(--ttx-title);
+  font-size: 1.5em; line-height: 1.2;
+  margin: 0;
+}
+
+/* 네모 블록 그림 (모자이크 문자 느낌) */
+.ttx-art {
+  flex: 1; min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(16, 1fr);
+  grid-template-rows: repeat(8, 1fr);
+  gap: 2px;
+}
+.ttx-art i { background: var(--c, #000); animation: ttx-blink var(--ttx-cycle) steps(1) infinite; animation-delay: var(--d, 0s); }
+@keyframes ttx-blink { 0%, 60% { opacity: 1; } 62%, 70% { opacity: .25; } 72%, 100% { opacity: 1; } }
+
+/* 아래 안내 줄 */
+.ttx-foot { display: flex; gap: .4em; }
+.ttx-foot b { flex: 1; text-align: center; font-weight: 700; color: #000; }
+
+/* 움직임 줄이기: 멈춘 완성 모습 (P 108 · 시계 :57) */
+@media (prefers-reduced-motion: reduce) {
+  .ttx-strip, .ttx-art i { animation: none !important; }
+  .ttx-page .ttx-strip { transform: translateY(calc(var(--ttx-row) * -7)); }
+  .ttx-sec  .ttx-strip { transform: translateY(calc(var(--ttx-row) * -7)); }
+}
+
+/* ── 데모 페이지용 ── */
+body { margin: 0; min-height: 100vh; display: grid; place-items: center; background: #111; padding: 16px; }
+</style>
+</head>
+<body>
+
+<div class="ttx" role="img" aria-label="옛날 문자 방송 화면: 쪽 번호가 넘어가고 시계의 초가 흐릅니다">
+  <div class="ttx-bar" aria-hidden="true">
+    <span>P<span class="ttx-win ttx-page"><span class="ttx-strip"><span>100</span><span>101</span><span>102</span><span>103</span><span>104</span><span>105</span><span>106</span><span>108</span></span></span></span>
+    <span>TODO 문자방송</span>
+    <span>12:34:5<span class="ttx-win ttx-sec"><span class="ttx-strip"><span>0</span><span>1</span><span>2</span><span>3</span><span>4</span><span>5</span><span>6</span><span>7</span><span>8</span><span>9</span><span>0</span></span></span></span>
+  </div>
+
+  <h2 class="ttx-title" aria-hidden="true">오늘의 할 일</h2>
+
+  <div class="ttx-art" aria-hidden="true">
+    <!-- 색 블록: --c 색, --d 깜빡임 시작 지연 -->
+    <i style="--c:#d33;grid-area:1/1/4/5"></i>
+    <i style="--c:#2a2;grid-area:1/5/4/9;--d:.6s"></i>
+    <i style="--c:#ead47c;grid-area:1/9/4/13;--d:1.2s"></i>
+    <i style="--c:#3b3e98;grid-area:1/13/4/17;--d:1.8s"></i>
+    <i style="--c:#0cc;grid-area:4/1/9/7;--d:2.4s"></i>
+    <i style="--c:#c3c;grid-area:4/7/9/11;--d:3s"></i>
+    <i style="--c:#fff;grid-area:4/11/9/17;--d:3.6s"></i>
+  </div>
+
+  <div class="ttx-foot" aria-hidden="true">
+    <b style="background:#d33">할일</b><b style="background:#2a2">일정</b><b style="background:#ead47c">가계부</b><b style="background:#0cc">메모</b>
+  </div>
+</div>
+
+</body>
+</html>
