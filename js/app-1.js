@@ -14,16 +14,15 @@ function showToast(msg, opts = {}) {
 
   const duration = opts.duration ?? 2500;
 
-  const icons = { success: '✓', error: '✕', info: 'ⓘ' };
-
+  const marks = {
+    success: '<path d="M5 12.5l4.4 4.4L19 7.4"/>',
+    error: '<path d="M7 7l10 10M17 7L7 17"/>',
+    info: '<path d="M12 11v6M12 7.2v.01"/>',
+  };
   const toast = document.createElement('div');
-
   toast.className = `toast ${type}`;
-
   toast.setAttribute('role', type === 'error' ? 'alert' : 'status');
-
-  toast.innerHTML = `<span class="toast-icon" aria-hidden="true">${icons[type] || ''}</span><span class="toast-msg"></span>`;
-
+  toast.innerHTML = `<i class="toast-icon" aria-hidden="true"><svg viewBox="0 0 24 24">${marks[type] || marks.success}</svg></i><span class="toast-msg"></span>`;
   toast.querySelector('.toast-msg').textContent = msg;
 
   if (opts.action) {
@@ -46,6 +45,19 @@ function showToast(msg, opts = {}) {
 
   }
 
+  const x = document.createElement('button');
+  x.className = 'toast-x';
+  x.type = 'button';
+  x.setAttribute('aria-label', '알림 닫기');
+  x.innerHTML = '<svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg>';
+  x.onclick = () => _removeToast(toast);
+  toast.appendChild(x);
+  if (duration > 0) {
+    const bar = document.createElement('i');
+    bar.className = 'toast-bar';
+    toast.style.setProperty('--toast-dur', duration + 'ms');
+    toast.appendChild(bar);
+  }
   container.appendChild(toast);
 
   if (duration > 0) {

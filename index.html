@@ -1006,8 +1006,9 @@
 <div class="modal-overlay" id="quickLedgerModal" role="dialog" aria-modal="true" aria-labelledby="quickLedgerTitle" onclick="if(event.target===this)closeQuickLedger()">
   <div class="quick-banner">
     <div class="quick-banner-head">
-      <div class="quick-banner-title" id="quickLedgerTitle">💰 어디에 얼마 썼어요?</div>
-      <button class="quick-banner-close" type="button" onclick="closeQuickLedger()" aria-label="닫기">✕</button>
+      <i class="quick-banner-mk" aria-hidden="true">💰</i>
+      <div class="quick-banner-title" id="quickLedgerTitle">어디에 얼마 썼어요?</div>
+      <button class="quick-banner-close" type="button" onclick="closeQuickLedger()" aria-label="닫기"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M7 7l10 10M17 7L7 17"/></svg></button>
     </div>
     <div class="quick-banner-help">예) 올리브영 만원 · 편의점 4500 · 택시 1만2천원 · 용돈 5만원 받음</div>
     <div class="quick-banner-row">
