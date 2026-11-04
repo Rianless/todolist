@@ -3704,6 +3704,33 @@ body::after {
 .ledger-shortcuts.editing .ledger-shortcut-name { padding-right: 20px; }
 .ledger-chip.transfer.active { background: #6b7280; }
 
+/* 서류철 탭: 가계부 수입/지출 필터 · 카테고리 관리 토글 (윈98 스킨은 제외) */
+html:not([data-skin="w98"]) .ledger-chips.ft { gap: 2px; border: 0; border-bottom: 1px solid var(--border2); border-radius: 0; overflow: visible; }
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip {
+  display: inline-flex; align-items: center; justify-content: center; gap: 6px;
+  padding: 8px 12px 7px; border-radius: 10px 10px 0 0; margin-bottom: -1px;
+  --c: var(--accent); transition: background .3s, color .3s, box-shadow .3s;
+}
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip[hidden] { display: none; }
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.income { --c: var(--green); }
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.expense { --c: var(--red); }
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.transfer { --c: #6b7280; }
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip::before {
+  content: ""; width: 7px; height: 7px; border-radius: 2px; background: var(--c);
+  transition: transform .4s cubic-bezier(.3, 1.45, .5, 1);
+}
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip:not(.active):hover { background: var(--panel2); color: var(--text); }
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.active,
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.income.active,
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.expense.active,
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.transfer.active {
+  background: var(--panel2); color: var(--text); box-shadow: inset 0 2px 0 var(--c), 1px 0 0 var(--border2), -1px 0 0 var(--border2);
+}
+html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip.active::before { transform: scale(1.25) rotate(45deg); }
+@media (prefers-reduced-motion: reduce) {
+  html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip, html:not([data-skin="w98"]) .ledger-chips.ft .ledger-chip::before { transition: none !important; }
+}
+
 .ledger-entry-amount.transfer { color: var(--accent); }
 
 /* 가계부 목록: 날짜별 묶음 머리글 + 그날 합계 */
