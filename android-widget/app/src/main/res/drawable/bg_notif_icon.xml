@@ -1,5 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<!-- 알림 왼쪽의 둥근 아이콘 바탕 (웹앱 알림의 둥근 아이콘과 같은 색) -->
-<shape xmlns:android="http://schemas.android.com/apk/res/android" android:shape="oval">
-    <solid android:color="#266366F1" />
-</shape>
