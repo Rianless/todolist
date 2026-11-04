@@ -1308,7 +1308,7 @@ function memoPreview(content, hasTitle) {
 function memoFilter(list, query) {
   const q = String(query || '').trim().toLowerCase();
   if (!q) return list.slice();
-  return list.filter(m => (String(m.title || '') + '\n' + String(m.content || '')).toLowerCase().includes(q));
+  return list.filter(m => (String(m.title || '') + '\n' + String(m.content || '') + '\n' + MemoFiles.normalize(m.files).map(f => f.name).join('\n')).toLowerCase().includes(q));
 }
 // 고정한 메모가 맨 위, 그다음 최근에 고친 순
 function memoSort(list) {
@@ -1329,6 +1329,103 @@ function memoHighlight(text, query) {
 function memoLinkify(text) {
   return escapeLedgerText(text).replace(/(https?:\/\/[^\s<]+)/g, '<a href="$1" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()">$1</a>');
 }
+// ── 메모 첨부파일 (사진·문서) ──
+// 사진은 작은 그림으로, 그 밖의 파일은 이름·크기가 적힌 칩으로 보여 준다. editable 이면 ✕ 로 뗄 수 있다.
+let memoAttachTarget = null;     // 파일 고르기 창을 연 곳: 'modal' | 'compose' | 'editor'
+let memoUploading = 0;           // 지금 올리는 중인 파일 수
+let memoModalFiles = [];         // 메모 추가/수정 창에 붙어 있는 파일
+let memoModalFresh = [];         // 이 창에서 새로 올린 파일 (취소하면 서버에서 지운다)
+let memoComposeFiles = [];       // 메모 피드 입력칸에 붙어 있는 파일
+function memoFilesHtml(files, removeFn) {
+  const list = MemoFiles.normalize(files);
+  if (!list.length) return '';
+  const esc = escapeLedgerText;
+  return `<div class="mf-files">` + list.map((f, i) => {
+    const url = esc(MemoFiles.fileUrl(f));
+    const x = removeFn ? `<button type="button" class="mf-file-x" aria-label="첨부 빼기" onclick="${removeFn}(${i});event.stopPropagation()">✕</button>` : '';
+    return MemoFiles.isImage(f)
+      ? `<span class="mf-file mf-file-img"><a href="${url}" target="_blank" rel="noopener noreferrer" onclick="event.stopPropagation()" title="${esc(f.name)}"><img loading="lazy" alt="${esc(f.name)}" src="${url}"></a>${x}</span>`
+      : `<span class="mf-file"><a href="${url}" download="${esc(f.name)}" onclick="event.stopPropagation()" title="${esc(f.name)}"><span class="mf-file-ico">📎</span><span class="mf-file-name">${esc(f.name)}</span><small>${esc(MemoFiles.formatSize(f.size))}</small></a>${x}</span>`;
+  }).join('') + `</div>`;
+}
+function memoAttachPick(target) {
+  const input = document.getElementById('memoFileInput');
+  if (!input) return;
+  memoAttachTarget = target;
+  input.value = '';
+  input.click();
+}
+// 고른 파일을 차례로 올린 뒤 add(info) 로 넘긴다. current 는 이미 붙어 있는 개수.
+async function memoAttachUpload(fileList, current, add) {
+  const files = Array.from(fileList || []);
+  let count = current;
+  for (const file of files) {
+    const problem = MemoFiles.checkNew(file, count);
+    if (problem) { showToast(problem, { type: 'error' }); if (count >= MemoFiles.MAX_FILES) break; continue; }
+    memoUploading++; memoAttachRefresh();
+    try { add(await MemoFiles.upload(file)); count++; }
+    catch (e) { showToast(e.message || '파일을 올리지 못했어요', { type: 'error' }); }
+    finally { memoUploading--; memoAttachRefresh(); }
+  }
+}
+function memoAttachChosen(input) {
+  const target = memoAttachTarget;
+  if (target === 'modal') {
+    memoAttachUpload(input.files, memoModalFiles.length, f => { memoModalFiles.push(f); memoModalFresh.push(f); });
+  } else if (target === 'compose') {
+    memoAttachUpload(input.files, memoComposeFiles.length, f => { memoComposeFiles.push(f); });
+  } else if (target === 'editor') {
+    const m = memoCurrent();
+    if (!m) return;
+    memoAttachUpload(input.files, MemoFiles.normalize(m.files).length, f => {
+      m.files = MemoFiles.normalize(m.files).concat(f);
+      m.updated = new Date().toISOString();
+      saveMemos();
+    });
+  }
+}
+// 첨부 칩·버튼 상태를 화면에 보이는 모든 곳에 다시 그린다
+function memoAttachRefresh() {
+  const busy = memoUploading > 0;
+  const modal = document.getElementById('memoModalFiles');
+  if (modal) modal.innerHTML = memoFilesHtml(memoModalFiles, 'memoModalFileRemove') + (busy && memoAttachTarget === 'modal' ? '<div class="mf-uploading">올리는 중…</div>' : '');
+  document.querySelectorAll('.mf-compose').forEach(box => {
+    const slot = box.querySelector('.mf-compose-files');
+    if (slot) slot.innerHTML = memoFilesHtml(memoComposeFiles, 'memoComposeFileRemove') + (busy && memoAttachTarget === 'compose' ? '<div class="mf-uploading">올리는 중…</div>' : '');
+    const ta = box.querySelector('.mf-input');
+    if (ta) memoFeedInput(ta);
+  });
+  const bar = document.getElementById('memoFileBar'), m = memoCurrent();
+  if (bar) bar.innerHTML = m ? memoFilesHtml(m.files, 'memoEditorFileRemove') + (busy && memoAttachTarget === 'editor' ? '<div class="mf-uploading">올리는 중…</div>' : '') : '';
+  const attach = document.getElementById('memoAttachBtn');
+  if (attach) attach.disabled = !m || busy;
+  if (!busy && memoAttachTarget === 'editor') renderMemoAll();   // 메모장에 붙인 파일은 피드 위젯에도 보이게
+}
+function memoModalFileRemove(i) {
+  const f = memoModalFiles.splice(i, 1)[0];
+  if (f && memoModalFresh.some(x => x.id === f.id)) {     // 이 창에서 방금 올린 건 바로 서버에서도 지운다
+    memoModalFresh = memoModalFresh.filter(x => x.id !== f.id);
+    MemoFiles.remove(f);
+  }
+  memoAttachRefresh();
+}
+function memoComposeFileRemove(i) {
+  const f = memoComposeFiles.splice(i, 1)[0];
+  if (f) MemoFiles.remove(f);
+  memoAttachRefresh();
+}
+function memoEditorFileRemove(i) {
+  const m = memoCurrent();
+  if (!m) return;
+  const list = MemoFiles.normalize(m.files);
+  const f = list.splice(i, 1)[0];
+  if (!f) return;
+  if (list.length) m.files = list; else delete m.files;
+  m.updated = new Date().toISOString();
+  MemoFiles.remove(f);
+  saveMemos();
+  renderMemoAll();
+}
 function memoPostTime(m) {
   const d = new Date(m.updated || '');
   if (isNaN(d)) return String(m.date || '');
@@ -1342,7 +1439,7 @@ function memoPostHtml(m, query) {
     `<div class="mf-avatar" aria-hidden="true">${escapeLedgerText(nick.charAt(0).toUpperCase())}</div>` +
     `<div class="mf-body"><div class="mf-meta"><b>${escapeLedgerText(nick)}</b><span>${m.pinned ? '📌 ' : ''}${escapeLedgerText(memoPostTime(m))}</span></div>` +
     (String(m.title || '').trim() ? `<div class="mf-title"><b>${escapeLedgerText(m.title.trim())}</b></div>` : '') +
-    `<div class="mf-content">${body}</div>` +
+    `<div class="mf-content">${body}</div>` + memoFilesHtml(m.files) +
     `<div class="mf-actions"><button type="button" onclick="openMemoAdd(${m.id})">✏️ 수정</button>` +
     `<button type="button" onclick="toggleMemoPin(${m.id})">${m.pinned ? '📌 고정 해제' : '📍 고정'}</button>` +
     `<button type="button" onclick="memoRemove(${m.id})">🗑️ 삭제</button></div></div></article>`;
@@ -1358,7 +1455,8 @@ function memoComposerHtml() {
   const nick = localStorage.getItem('rianless_nickname') || 'Rianless';
   return `<div class="mf-compose"><div class="mf-avatar" aria-hidden="true">${escapeLedgerText(nick.charAt(0).toUpperCase())}</div>` +
     `<div class="mf-compose-main"><textarea class="mf-input" maxlength="${MEMO_MAX}" rows="3" placeholder="무슨 일이 일어나고 있나요?" aria-label="메모 입력" oninput="memoFeedInput(this)" onkeydown="memoFeedKey(event, this)"></textarea>` +
-    `<div class="mf-compose-bar"><span class="mf-count">0/${MEMO_MAX}</span><button type="button" class="mf-send" disabled onclick="memoSend(this.closest('.mf-compose').querySelector('.mf-input'))">SEND</button></div></div></div>`;
+    `<div class="mf-compose-files">${memoFilesHtml(memoComposeFiles, 'memoComposeFileRemove')}</div>` +
+    `<div class="mf-compose-bar"><button type="button" class="mf-attach" title="사진·파일 붙이기" aria-label="사진·파일 붙이기" onclick="memoAttachPick('compose')">📎</button><span class="mf-count">0/${MEMO_MAX}</span><button type="button" class="mf-send"${memoComposeFiles.length && !memoUploading ? '' : ' disabled'} onclick="memoSend(this.closest('.mf-compose').querySelector('.mf-input'))">SEND</button></div></div></div>`;
 }
 // 홈(달력 > 오늘)의 메모 입력칸으로 간다
 function openHomeMemo() {
@@ -1371,16 +1469,19 @@ function memoComposerOf(el) { return el.closest('.mf-compose'); }
 function memoFeedInput(el) {
   const box = memoComposerOf(el);
   box.querySelector('.mf-count').textContent = `${el.value.length}/${MEMO_MAX}`;
-  box.querySelector('.mf-send').disabled = !el.value.trim();
+  box.querySelector('.mf-send').disabled = (!el.value.trim() && !memoComposeFiles.length) || memoUploading > 0;
 }
 function memoFeedKey(e, el) {
   if (e.key === 'Enter' && (e.ctrlKey || e.metaKey)) { e.preventDefault(); memoSend(el); }
 }
 function memoSend(el) {
   const text = el.value.replace(/\s+$/, '');
-  if (!text.trim()) return;
+  if ((!text.trim() && !memoComposeFiles.length) || memoUploading > 0) return;
   const now = new Date();
-  memos.push({ id: memoNextId++, content: text.slice(0, MEMO_MAX), date: fmtDate(now), updated: now.toISOString() });
+  const post = { id: memoNextId++, content: text.slice(0, MEMO_MAX), date: fmtDate(now), updated: now.toISOString() };
+  if (memoComposeFiles.length) post.files = memoComposeFiles;
+  memoComposeFiles = [];
+  memos.push(post);
   el.value = '';
   memoFeedInput(el);
   const home = el.closest('#todayPage') ? '#todayPage' : el.closest('#desktopWidgets') ? '#desktopWidgets' : null;
@@ -1402,7 +1503,7 @@ function memoCurrent() { return memos.find(x => x.id === memoActive) || null; }
 // 아직 아무것도 안 쓴 빈 메모는 지운다 (keepId 는 남김)
 function memoPruneEmpty(keepId) {
   const before = memos.length;
-  memos = memos.filter(m => m.id === keepId || String(m.content || '').trim() || String(m.title || '').trim() || m.pinned);
+  memos = memos.filter(m => m.id === keepId || String(m.content || '').trim() || String(m.title || '').trim() || m.pinned || MemoFiles.normalize(m.files).length);
   if (memos.length !== before) { saveMemos(); memoTabs = memoTabs.filter(id => memos.some(m => m.id === id)); }
 }
 
@@ -1472,7 +1573,8 @@ function memoTogglePin() {
 function memoDeleteActive() {
   const m = memoCurrent(); if (!m) return;
   memoFlush();
-  if ((String(m.content || '').trim() || String(m.title || '').trim()) && !confirm(`'${memoDisplayTitle(m)}' 메모를 지울까요?`)) return;
+  if ((String(m.content || '').trim() || String(m.title || '').trim() || MemoFiles.normalize(m.files).length) && !confirm(`'${memoDisplayTitle(m)}' 메모를 지울까요?`)) return;
+  MemoFiles.remove(MemoFiles.normalize(m.files));
   memos = memos.filter(x => x.id !== m.id);
   memoTabs = memoTabs.filter(x => x !== m.id);
   memoActive = memoTabs.length && !memoIsPhone() ? memoTabs[memoTabs.length - 1] : null;
@@ -1521,6 +1623,10 @@ function renderMemoEditor() {
   const pin = document.getElementById('memoPinBtn'), del = document.getElementById('memoDelBtn');
   if (pin) { pin.disabled = !m; pin.textContent = m && m.pinned ? '📌 고정 해제' : '📌 고정'; }
   if (del) del.disabled = !m;
+  const bar = document.getElementById('memoFileBar');
+  if (bar) bar.innerHTML = m ? memoFilesHtml(m.files, 'memoEditorFileRemove') : '';
+  const attach = document.getElementById('memoAttachBtn');
+  if (attach) attach.disabled = !m || memoUploading > 0;
   renderMemoStatus();
 }
 function renderMemoApp() {

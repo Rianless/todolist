@@ -843,12 +843,14 @@
         <div class="mm-tools">
           <button type="button" class="mm-back" onclick="memoBack()">◀ 목록</button>
           <button type="button" id="memoPinBtn" onclick="memoTogglePin()" title="맨 위에 고정">📌 고정</button>
+          <button type="button" id="memoAttachBtn" onclick="memoAttachPick('editor')" title="사진·파일 붙이기">📎 첨부</button>
           <button type="button" id="memoDelBtn" onclick="memoDeleteActive()" title="이 메모 지우기">🗑️ 지우기</button>
           <span class="mm-tools-hint">입력하면 자동으로 저장돼요</span>
         </div>
         <div class="mm-doc">
           <input type="text" id="memoTitleInput" class="mm-title-input" maxlength="60" placeholder="제목 (비우면 첫 줄이 제목이 돼요)" oninput="memoInput()" aria-label="메모 제목" autocomplete="off">
           <textarea id="memoEditor" class="mm-editor" spellcheck="false" oninput="memoInput()" placeholder="왼쪽에서 메모를 고르거나 '새 메모'를 눌러 시작하세요." aria-label="메모 내용"></textarea>
+          <div class="mm-files" id="memoFileBar"></div>
         </div>
         <div class="mm-status" id="memoStatus"></div>
       </section>
@@ -1678,6 +1680,11 @@
           <label class="form-label">메모 내용</label>
           <textarea class="form-textarea" id="memoText" rows="7" placeholder="메모를 입력하세요. Enter로 줄을 바꿀 수 있어요."></textarea>
         </div>
+        <div class="form-group">
+          <label class="form-label">사진 · 파일 (최대 5개, 4MB 이하)</label>
+          <div id="memoModalFiles"></div>
+          <button type="button" class="mf-attach-btn" onclick="memoAttachPick('modal')">📎 사진·파일 붙이기</button>
+        </div>
       </div>
       <div class="modal-actions">
         <button class="btn-cancel" onclick="closeMemoModal()">취소</button>
@@ -2078,6 +2085,8 @@
 <script src="/ledger-import.js"></script>
 <script src="/ledger-quick.js"></script>
 <script src="/dday.js"></script>
+<script src="/memo-files.js"></script>
+<input type="file" id="memoFileInput" multiple hidden onchange="memoAttachChosen(this)">
 <script src="/js/app-1.js"></script>
 <script src="/js/app-2.js"></script>
 <script src="/js/app-3.js"></script>
