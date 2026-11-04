@@ -8598,6 +8598,40 @@ html[data-skin="w98"] .quick-banner { border-radius: 0; }
 html[data-skin="mac"] .quick-banner-close { width: 22px; height: 22px; border: 0 !important; box-shadow: none !important; background: none; border-radius: 50% !important; }
 html[data-skin="w98"] .quick-banner-mk { border-radius: 0; }
 
+/* 맥 스킨 전용: 가계부 내역을 유리 카드 한 줄로 (둥근 아이콘 · 이름/카테고리 · 금액/뱃지) */
+.ledger-entry-ic, .ledger-entry-badge { display: none; }
+html[data-skin="mac"] #ledgerList .ledger-entry {
+  position: relative; gap: 10px; min-height: 54px; padding: 8px 12px; border-radius: 16px;
+  background: linear-gradient(150deg, #ffffffc2, #ffffffa6), radial-gradient(90% 80% at 0% 0%, #3a6cf033, #3a6cf000 70%), radial-gradient(90% 80% at 100% 100%, #8b6cf233, #8b6cf200 70%), #f1f2fb;
+  border: 1px solid #ffffffd9; box-shadow: 0 12px 28px -18px #3a6cf099, inset 0 1px 0 #fff;
+  animation: macEntryIn .45s cubic-bezier(.2,.8,.2,1) both;
+}
+html[data-skin="mac"] #ledgerList > :nth-child(3) { animation-delay: .05s; }
+html[data-skin="mac"] #ledgerList > :nth-child(4) { animation-delay: .1s; }
+html[data-skin="mac"] #ledgerList > :nth-child(5) { animation-delay: .15s; }
+html[data-skin="mac"] #ledgerList > :nth-child(6) { animation-delay: .2s; }
+@keyframes macEntryIn { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+html[data-skin="mac"] #ledgerList .ledger-entry-date { display: none; }
+html[data-skin="mac"] #ledgerList .ledger-entry-ic {
+  display: grid; place-items: center; flex: none; width: 30px; height: 30px; border-radius: 50%;
+  font: 650 12px/1 inherit; font-style: normal; color: var(--red); background: #ff3b3022;
+}
+html[data-skin="mac"] #ledgerList .ledger-entry-ic.income { color: #12925d; background: #12925d1c; }
+html[data-skin="mac"] #ledgerList .ledger-entry-ic.transfer { color: #5b6270; background: #6b728022; }
+html[data-skin="mac"] #ledgerList .ledger-entry-title { font-size: 13px; font-weight: 650; color: #1d2340; }
+html[data-skin="mac"] #ledgerList .ledger-entry-cat { color: #646b8f; }
+html[data-skin="mac"] #ledgerList .ledger-entry-amount { display: grid; justify-items: end; gap: 4px; font-size: 12.5px; font-variant-numeric: tabular-nums; }
+html[data-skin="mac"] #ledgerList .ledger-entry-badge {
+  display: inline-block; padding: 3px 8px; border-radius: 99px; font-size: 10px; font-weight: 650; line-height: 1;
+  color: var(--red); background: #ff3b3017;
+}
+html[data-skin="mac"] #ledgerList .ledger-entry-badge.income { color: #12925d; background: #12925d17; }
+html[data-skin="mac"] #ledgerList .ledger-entry-badge.transfer { color: #5b6270; background: #6b728017; }
+html[data-skin="mac"] #ledgerList .ledger-entry-edit, html[data-skin="mac"] #ledgerList .ledger-entry-del {
+  border: 0 !important; box-shadow: none !important; background: none; border-radius: 6px !important; padding: 2px 4px; font-size: 12px; color: #8087a8;
+}
+@media (prefers-reduced-motion: reduce) { html[data-skin="mac"] #ledgerList .ledger-entry { animation: none; } }
+
 /* ── 메모 첨부파일 (사진·문서) ── */
 .mf-files { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; min-width: 0; }
 .mf-file { position: relative; display: inline-flex; max-width: 100%; min-width: 0; }
