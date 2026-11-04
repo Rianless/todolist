@@ -1192,7 +1192,9 @@ function renderLedgerCard() {
 
     const sign = e.type === 'income' ? '+' : '-';
 
+    const ic = escapeLedgerText(Array.from(e.category || e.title || '·')[0]);
     return head + `<div class="ledger-entry">
+      <i class="ledger-entry-ic ${e.type}" aria-hidden="true">${ic}</i>
       <div class="ledger-entry-date">${d}</div>
 
       <div class="ledger-entry-info">
@@ -1203,7 +1205,7 @@ function renderLedgerCard() {
 
       </div>
 
-      <div class="ledger-entry-amount ${e.type}">${sign}${e.amount.toLocaleString()}원</div>
+      <div class="ledger-entry-amount ${e.type}">${sign}${e.amount.toLocaleString()}원<span class="ledger-entry-badge ${e.type}">${e.type === 'income' ? '수입' : '지출'}</span></div>
 
       <button class="ledger-entry-edit" onclick="editLedgerEntry(${e.id});event.stopPropagation()" aria-label="${escapeLedgerText(e.title)} 수정">수정</button>
 
@@ -1385,12 +1387,13 @@ function transferRowHtml(t) {
   const from = accountName(t.fromId) || '삭제된 통장';
   const to = accountName(t.toId) || '삭제된 통장';
   return `<div class="ledger-entry transfer">
+      <i class="ledger-entry-ic transfer" aria-hidden="true">⇄</i>
       <div class="ledger-entry-date">${t.date.slice(5)}</div>
       <div class="ledger-entry-info">
         <div class="ledger-entry-title">이체 · ${escapeLedgerText(from)} → ${escapeLedgerText(to)}</div>
         ${t.memo ? `<div class="ledger-entry-cat">${escapeLedgerText(t.memo)}</div>` : ''}
       </div>
-      <div class="ledger-entry-amount transfer">${t.amount.toLocaleString()}원</div>
+      <div class="ledger-entry-amount transfer">${t.amount.toLocaleString()}원<span class="ledger-entry-badge transfer">이체</span></div>
       <button class="ledger-entry-edit" onclick="openTransferModal(${t.id});event.stopPropagation()" aria-label="이체 수정">수정</button>
       <button class="ledger-entry-del" onclick="deleteTransfer(${t.id});event.stopPropagation()" aria-label="이체 삭제">✕</button>
     </div>`;
