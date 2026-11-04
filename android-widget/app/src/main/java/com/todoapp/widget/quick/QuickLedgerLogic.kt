@@ -7,9 +7,18 @@ object QuickLedgerLogic {
     private val CANCEL_RE = Regex("취소|환불|환급")
     private val HAS_AMOUNT_IN_REPLY_RE = Regex("""\d|[일이삼사오육칠팔구][십백천만억]|[십백천만억]\s*원""")
 
-    /** 알림 글에서 첫 금액(원)을 뽑는다. 없으면 null. */
+    private const val AMT = """(?:\d{1,3}(?:,\d{3})+|\d+)"""
+    // 캐시백·적립·할인·잔액 같은 금액은 결제 금액이 아니니 미리 걷어 낸다. (서버의 stripIgnoredAmounts 와 같은 규칙)
+    private val IGNORED_BEFORE_RE = Regex("(?:캐시백|적립|리워드|혜택|쿠폰|할인|잔액|잔고|한도)[^\\d·,.!?]{0,5}?$AMT\\s*(?:원|P|p)?")
+    private val IGNORED_AFTER_RE = Regex("$AMT\\s*(?:원|P|p)?\\s*(?:캐시백|적립|리워드|쿠폰|할인)")
+
+    /** 알림 글에서 캐시백·적립·잔액 금액을 빼 낸다. 말이 금액 앞에 오는 경우를 먼저 지워야 결제 금액이 안 지워진다. */
+    fun stripIgnoredAmounts(text: String): String =
+        text.replace(IGNORED_BEFORE_RE, " ").replace(IGNORED_AFTER_RE, " ").replace(Regex("\\s+"), " ").trim()
+
+    /** 알림 글에서 결제 금액(원)을 뽑는다. 캐시백·적립·잔액은 제외. 없으면 null. */
     fun extractAmount(text: String): Long? {
-        val m = AMOUNT_RE.find(text) ?: return null
+        val m = AMOUNT_RE.find(stripIgnoredAmounts(text)) ?: return null
         return m.groupValues[1].replace(",", "").toLongOrNull()?.takeIf { it > 0 }
     }
 

@@ -18,6 +18,19 @@ assert.strictEqual(parseNotification('이디야 4,500원 결제 취소').cancel,
 // 벌크는 커피 카테고리
 assert.strictEqual(parseNotification('벌크에서 4,500원 결제했어요').category, '커피');
 assert.strictEqual(parseNotification('플레이툰에서 3,000원 결제했어요').category, '돈지랄');
+// 캐시백·적립·잔액 금액은 결제 금액으로 읽지 않는다
+const pn = s => { const r = parseNotification(s); return r && [r.type, r.amount, r.title]; };
+assert.deepStrictEqual(pn('이디야에서 4,500원 결제했어요 · 캐시백 10원 적립'), ['expense', 4500, '이디야']);
+assert.deepStrictEqual(pn('캐시백 10원 적립! 이디야에서 4,500원 결제했어요'), ['expense', 4500, '이디야']);
+assert.deepStrictEqual(pn('캐시백 적립 10원 · 이디야 4,500원 결제'), ['expense', 4500, '이디야']);
+assert.deepStrictEqual(pn('이디야에서 4,500원 결제 10원 캐시백'), ['expense', 4500, '이디야']);
+assert.deepStrictEqual(pn('결제 4,500원 적립 10원'), ['expense', 4500, '결제']);
+assert.deepStrictEqual(pn('4,500원 출금 · 잔액 1,234,567원'), ['expense', 4500, '결제']);
+assert.deepStrictEqual(pn('잔액 1,234,567원 · 이디야 4,500원 출금'), ['expense', 4500, '이디야']);
+assert.deepStrictEqual(pn('쿠폰 500원 할인 적용, 이디야 3,500원 결제'), ['expense', 3500, '이디야']);
+assert.strictEqual(pn('10원 캐시백이 적립됐어요'), null);      // 캐시백만 온 알림은 기록하지 않는다
+assert.strictEqual(pn('10원 캐시백 받으셨어요'), null);
+assert.deepStrictEqual(pn('GS25 4,500원 결제'), ['expense', 4500, 'GS25']);
 assert.strictEqual(parseNotification('김토스님에게 30,000원 입금됐어요').category, '기타');   // 앱의 수입 카테고리 이름
 assert.strictEqual(parseNotification('카드 승인 12,000원').title, '결제');                // 가게 이름을 못 읽으면 일반 이름
 // 직접 입력한 짧은 문장
