@@ -8579,6 +8579,25 @@ html[data-skin="mac"] .quick-banner-title { font-weight: 600; }
 html[data-skin="mac"] .quick-banner-close { border-radius: 50%; background: rgba(0,0,0,.08); width: 24px; height: 24px; padding: 0; line-height: 24px; font-size: 12px; }
 html[data-skin="w98"] .quick-banner { border-radius: 0; }
 
+/* 결제 알림 입력창: 알림(토스트)과 같은 카드 모양 — 둥근 아이콘 + 제목 + 닫기, 살짝 튕기며 내려옴 */
+.quick-banner {
+  border-radius: 14px; background: var(--panel); border-color: var(--border2); padding: 13px 14px 14px;
+  box-shadow: 0 18px 36px -18px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.2);
+  animation: quickBannerDrop .45s cubic-bezier(.2,.95,.3,1.12) both;
+}
+@keyframes quickBannerDrop { from { transform: translateY(-40px) scale(.95); opacity: 0; } to { transform: none; opacity: 1; } }
+.quick-banner-head { justify-content: flex-start; gap: 12px; }
+.quick-banner-mk {
+  display: grid; place-items: center; flex: none; width: 32px; height: 32px; border-radius: 50%;
+  background: color-mix(in srgb, var(--accent) 15%, transparent); font-style: normal; font-size: 16px; line-height: 1;
+}
+.quick-banner-title { flex: 1; min-width: 0; font-weight: 650; }
+.quick-banner-close { display: grid; place-items: center; width: 22px; height: 22px; padding: 0; margin-left: auto; color: var(--text3); }
+.quick-banner-close svg { width: 18px; height: 18px; fill: none; stroke: currentColor; stroke-width: 1.9; stroke-linecap: round; stroke-linejoin: round; }
+.quick-banner-help { margin: 8px 0 8px; }
+html[data-skin="mac"] .quick-banner-close { width: 22px; height: 22px; border: 0 !important; box-shadow: none !important; background: none; border-radius: 50% !important; }
+html[data-skin="w98"] .quick-banner-mk { border-radius: 0; }
+
 /* ── 메모 첨부파일 (사진·문서) ── */
 .mf-files { display: flex; flex-wrap: wrap; gap: 6px; margin: 4px 0 6px; min-width: 0; }
 .mf-file { position: relative; display: inline-flex; max-width: 100%; min-width: 0; }
