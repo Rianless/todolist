@@ -4520,6 +4520,49 @@ body, .app-header, .tab-bar, .mp-card, .modal-sheet, .fab-add,
 
 
 
+/* ── 알림(토스트): 둥근 아이콘 + 닫기 + 줄어드는 시간 막대 ── */
+#toastContainer .toast {
+  --tc: var(--accent);
+  position: relative; overflow: hidden; clip-path: none; letter-spacing: 0;
+  padding: 13px 40px 15px 14px; gap: 12px;
+  border: 1px solid var(--border2); border-left: 1px solid var(--border2); border-radius: 14px !important;
+  background: var(--panel); box-shadow: 0 18px 36px -18px rgba(0,0,0,.55), 0 2px 6px rgba(0,0,0,.2);
+  font-family: inherit; font-size: 14px; font-weight: 650;
+  animation: toastIn .4s cubic-bezier(.2,.95,.3,1.12) both;
+}
+#toastContainer .toast.success { --tc: var(--green); }
+#toastContainer .toast.error   { --tc: var(--red); }
+#toastContainer .toast.info    { --tc: var(--accent); }
+#toastContainer .toast-icon {
+  display: grid; place-items: center; width: 32px; height: 32px; border-radius: 50%; flex: none;
+  background: color-mix(in srgb, var(--tc) 15%, transparent); color: var(--tc); font-style: normal;
+}
+#toastContainer .toast-icon svg, #toastContainer .toast-x svg { fill: none; stroke: currentColor; stroke-linecap: round; stroke-linejoin: round; }
+#toastContainer .toast-icon svg { width: 18px; height: 18px; stroke-width: 2.4; stroke-dasharray: 22; animation: toastMark .45s .12s cubic-bezier(.3,.7,.3,1) both; }
+#toastContainer .toast-x {
+  position: absolute; top: 11px; right: 11px; width: 18px; height: 18px; padding: 0;
+  border: 0; background: none; color: var(--text3); cursor: pointer;
+}
+#toastContainer .toast-x svg { width: 100%; height: 100%; stroke-width: 1.9; }
+#toastContainer .toast-bar {
+  position: absolute; left: 0; right: 0; bottom: 0; height: 2.5px; background: var(--tc); opacity: .85;
+  transform-origin: left; animation: toastBar var(--toast-dur, 2.5s) linear forwards;
+}
+#toastContainer .toast.out { animation: toastOut .22s ease forwards; }
+@keyframes toastIn {
+  from { opacity: 0; transform: translateY(-18px) scale(.95); }
+  to   { opacity: 1; transform: none; }
+}
+@keyframes toastOut { from { opacity: 1; transform: none; } to { opacity: 0; transform: translateX(34px) scale(.97); } }
+@keyframes toastMark { from { stroke-dashoffset: 22; } to { stroke-dashoffset: 0; } }
+@keyframes toastBar { from { transform: scaleX(1); } to { transform: scaleX(0); } }
+@media (prefers-reduced-motion: reduce) {
+  #toastContainer .toast, #toastContainer .toast-icon svg { animation: none !important; }
+  #toastContainer .toast-bar { animation: none; transform: scaleX(.62); }
+}
+html[data-skin="w98"] #toastContainer .toast { border-radius: 0 !important; }
+html[data-skin="mac"] #toastContainer .toast-x { border: 0 !important; box-shadow: none !important; background: none; border-radius: 50% !important; }
+
 /* ── CUSTOM CONFIRM DIALOG ── */
 
 .confirm-sheet {
