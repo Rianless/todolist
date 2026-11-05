@@ -1,4 +1,4 @@
-const CACHE_NAME = 'todolist-v156-memo-files';
+const CACHE_NAME = 'todolist-v157-calculator';
 const ASSETS = [
   './',
   './index.html',
@@ -26,7 +26,8 @@ const ASSETS = [
   './ledger-import.js',
   './ledger-quick.js',
   './dday.js',
-  './memo-files.js'
+  './memo-files.js',
+  './calculator.js'
 ];
 
 // 설치: 핵심 자산 프리캐시
