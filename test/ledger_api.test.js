@@ -32,6 +32,12 @@ assert.deepStrictEqual(pn('쿠폰 500원 할인 적용, 이디야 3,500원 결�
 assert.deepStrictEqual(pn('9원 캐시백 🎉 3,000원 결제 | 인터넷쇼핑몰(1)_TOSS\n잔액 114원(토스뱅크 체크카드)'), ['expense', 3000, '인터넷쇼핑몰(1)_TOSS']);
 assert.deepStrictEqual(pn('캐시백 🎉 9원 3,000원 결제'), ['expense', 3000, '결제']);       // 지우지 못해도 결제 말이 붙은 금액을 고른다
 assert.deepStrictEqual(pn('캐시백 9원 · 잔액 114원 · 3,000원 승인'), ['expense', 3000, '결제']);
+// 삼성 월렛 알림: 제목 "3,500원 결제 완료", 본문 가게 이름
+assert.deepStrictEqual(pn("3,500원 결제 완료 DUNKIN'DONUTS"), ['expense', 3500, "DUNKIN'DONUTS"]);
+assert.strictEqual(parseNotification("3,500원 결제 완료 DUNKIN'DONUTS").category, '식비');
+assert.deepStrictEqual(pn('13,000원 결제 완료 호천당(순천점)'), ['expense', 13000, '호천당(순천점)']);
+assert.strictEqual(pn('포인트 50원 적립됨 머니 즉석당첨 이벤트'), null);                 // 포인트 적립 알림은 기록하지 않는다
+assert.strictEqual(pn('포인트 52원 적립됨 [우리은행계좌] 1.5% 추가적립'), null);
 assert.strictEqual(pn('10원 캐시백이 적립됐어요'), null);      // 캐시백만 온 알림은 기록하지 않는다
 assert.strictEqual(pn('10원 캐시백 받으셨어요'), null);
 assert.deepStrictEqual(pn('GS25 4,500원 결제'), ['expense', 4500, 'GS25']);

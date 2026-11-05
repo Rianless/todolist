@@ -25,11 +25,26 @@ class QuickPrefs(context: Context) {
 
     /** 알림을 감시할 앱 패키지 이름들 (쉼표로 구분). 기본은 토스. */
     var packages: String
-        get() = sp.getString("packages", DEFAULT_PACKAGES) ?: DEFAULT_PACKAGES
+        get() {
+            migratePackages()
+            return sp.getString("packages", DEFAULT_PACKAGES) ?: DEFAULT_PACKAGES
+        }
         set(v) = sp.edit().putString("packages", v.trim()).apply()
+
+    /** 버전 2: 이미 감시 목록을 저장해 둔 경우에도 삼성 월렛을 한 번만 더해 준다. (이후에 직접 지우면 다시 넣지 않는다) */
+    private fun migratePackages() {
+        if (sp.getInt("packagesVersion", 1) >= 2) return
+        val saved = sp.getString("packages", null)
+        val edit = sp.edit().putInt("packagesVersion", 2)
+        if (saved != null && SAMSUNG_WALLET !in QuickLedgerLogic.parsePackages(saved)) {
+            edit.putString("packages", if (saved.isBlank()) SAMSUNG_WALLET else "${saved.trim().trimEnd(',')},$SAMSUNG_WALLET")
+        }
+        edit.apply()
+    }
 
     companion object {
         const val DEFAULT_URL = "https://todolist-liart-mu.vercel.app"
-        const val DEFAULT_PACKAGES = "viva.republica.toss"
+        const val DEFAULT_PACKAGES = "viva.republica.toss,com.samsung.android.spay"
+        const val SAMSUNG_WALLET = "com.samsung.android.spay"
     }
 }

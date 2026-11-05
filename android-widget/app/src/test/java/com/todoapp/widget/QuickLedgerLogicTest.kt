@@ -33,6 +33,14 @@ class QuickLedgerLogicTest {
         assertEquals("플레이툰 3000원", QuickLedgerLogic.buildQuickText("플레이툰", "9원 캐시백 \uD83C\uDF89 3,000원 결제 | 인터넷쇼핑몰(1)_TOSS\n잔액 114원(토스뱅크 체크카드)"))
     }
 
+    @Test fun readsSamsungWalletNotifications() {
+        assertTrue(QuickLedgerLogic.isPaymentText("3,500원 결제 완료 DUNKIN'DONUTS"))
+        assertEquals(3500L, QuickLedgerLogic.extractAmount("3,500원 결제 완료 DUNKIN'DONUTS"))
+        assertEquals(13000L, QuickLedgerLogic.extractAmount("13,000원 결제 완료 호천당(순천점)"))
+        assertFalse(QuickLedgerLogic.isPaymentText("포인트 50원 적립됨 머니 즉석당첨 이벤트"))
+        assertFalse(QuickLedgerLogic.isPaymentText("포인트 52원 적립됨 [우리은행계좌] 1.5% 추가적립"))
+    }
+
     @Test fun detectsPaymentNotifications() {
         assertTrue(QuickLedgerLogic.isPaymentText("토스뱅크 체크카드 12,500원 결제 · GS25"))
         assertTrue(QuickLedgerLogic.isPaymentText("5,000원 출금되었어요"))
