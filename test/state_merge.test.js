@@ -117,4 +117,16 @@ const copy = o => JSON.parse(JSON.stringify(o));
   assert.deepStrictEqual(Object.keys(m.routineOverrides).sort(), ['2026-10-08', '2026-10-09', '2026-10-10']);
 }
 
+// 단축어: 기준 없이 합칠 때 한쪽이 빈 목록이어도 다른 쪽 단축어가 지워지지 않는다
+{
+  const sc = { id: 1, label: '점심', type: 'expense', title: '점심', amount: 9000, category: '식비' };
+  const m1 = mergeStates(null, { ledgerShortcuts: [] }, { ledgerShortcuts: [sc], ledgerShortcutNextId: 2 });
+  assert.deepStrictEqual(m1.ledgerShortcuts, [sc]);
+  const m2 = mergeStates(null, { ledgerShortcuts: [sc] }, { ledgerShortcuts: [] });
+  assert.deepStrictEqual(m2.ledgerShortcuts, [sc]);
+  // 이 기기에서 지운 건 그대로 지워진다
+  const m3 = mergeStates({ ledgerShortcuts: [sc] }, { ledgerShortcuts: [] }, { ledgerShortcuts: [sc] });
+  assert.deepStrictEqual(m3.ledgerShortcuts, []);
+}
+
 console.log('OK (state merge)');

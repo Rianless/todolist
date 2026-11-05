@@ -17,6 +17,7 @@
     subscriptions: subscriptionKey,
     categories: byName,
     ledger: byId,
+    ledgerShortcuts: byId,
     accounts: byId,
     transfers: byId,
     investments: byId,
@@ -30,7 +31,7 @@
   };
   // 새 id 를 받을 수 있는 컬렉션과, 그 id 를 만드는 카운터
   const COUNTER_OF = {
-    items: 'nextId', ledger: 'ledgerNextId', accounts: 'accountNextId', transfers: 'transferNextId',
+    items: 'nextId', ledger: 'ledgerNextId', ledgerShortcuts: 'ledgerShortcutNextId', accounts: 'accountNextId', transfers: 'transferNextId',
     investments: 'investmentNextId', routines: 'routineNextId', memos: 'memoNextId', diaries: 'diaryNextId', ddays: 'ddayNextId', bookmarks: 'bookmarkNextId', bookmarkFolders: 'bookmarkFolderNextId', parcels: 'parcelNextId'
   };
 
