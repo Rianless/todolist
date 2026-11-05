@@ -530,51 +530,6 @@
         </div>
 
 
-        <!-- ── 계산기 카드 ── -->
-        <div class="mp-card" id="mpCardCalc">
-          <div class="mp-card-header" onclick="toggleMpCard('mpCardCalc')">
-            <span class="mp-card-icon">🧮</span>
-            <span class="mp-card-label">계산기</span>
-            <span class="mp-card-chevron">▼</span>
-          </div>
-          <div class="mp-card-body">
-            <div class="mp-card-inner">
-              <div class="calc">
-                <div class="calc-screen" aria-live="polite">
-                  <div class="calc-expr" id="calcExpr">0</div>
-                  <div class="calc-result" id="calcResult"></div>
-                </div>
-                <div class="calc-keys">
-                  <button type="button" class="calc-fn" onclick="calcPress('C')">C</button>
-                  <button type="button" class="calc-fn" onclick="calcPress('(')">(</button>
-                  <button type="button" class="calc-fn" onclick="calcPress(')')">)</button>
-                  <button type="button" class="calc-op" onclick="calcPress('÷')">÷</button>
-                  <button type="button" onclick="calcPress('7')">7</button>
-                  <button type="button" onclick="calcPress('8')">8</button>
-                  <button type="button" onclick="calcPress('9')">9</button>
-                  <button type="button" class="calc-op" onclick="calcPress('×')">×</button>
-                  <button type="button" onclick="calcPress('4')">4</button>
-                  <button type="button" onclick="calcPress('5')">5</button>
-                  <button type="button" onclick="calcPress('6')">6</button>
-                  <button type="button" class="calc-op" onclick="calcPress('−')">−</button>
-                  <button type="button" onclick="calcPress('1')">1</button>
-                  <button type="button" onclick="calcPress('2')">2</button>
-                  <button type="button" onclick="calcPress('3')">3</button>
-                  <button type="button" class="calc-op" onclick="calcPress('+')">+</button>
-                  <button type="button" onclick="calcPress('0')">0</button>
-                  <button type="button" onclick="calcPress('.')">.</button>
-                  <button type="button" class="calc-fn" onclick="calcPress('%')">%</button>
-                  <button type="button" class="calc-eq" onclick="calcPress('=')">=</button>
-                </div>
-                <div class="ledger-actions">
-                  <button type="button" class="ledger-export-btn" onclick="calcPress('⌫')">지우기 ⌫</button>
-                  <button type="button" class="ledger-export-btn" id="calcCopyBtn" onclick="calcCopy()">결과 복사</button>
-                </div>
-              </div>
-            </div>
-          </div>
-        </div>
-
 
 
       </div>
@@ -998,6 +953,42 @@
     <div class="u208-dk" role="toolbar" aria-label="앱 독"></div>
     <div class="u208-tip" aria-hidden="true"></div>
   </div>
+  <!-- 계산기 팝업(PC): 제목 줄을 끌어 자유롭게 옮긴다 -->
+  <div id="calcPopup" class="calc-popup" role="dialog" aria-modal="false" aria-label="계산기" onclick="event.stopPropagation()">
+    <div class="calc-title" id="calcTitle"><span>🧮 계산기</span><button type="button" onclick="closeCalcPopup()" aria-label="계산기 닫기">✕</button></div>
+    <div class="calc">
+      <div class="calc-screen" aria-live="polite">
+        <div class="calc-expr" id="calcExpr">0</div>
+        <div class="calc-result" id="calcResult"></div>
+      </div>
+      <div class="calc-keys">
+        <button type="button" class="calc-fn" onclick="calcPress('C')">C</button>
+        <button type="button" class="calc-fn" onclick="calcPress('(')">(</button>
+        <button type="button" class="calc-fn" onclick="calcPress(')')">)</button>
+        <button type="button" class="calc-op" onclick="calcPress('÷')">÷</button>
+        <button type="button" onclick="calcPress('7')">7</button>
+        <button type="button" onclick="calcPress('8')">8</button>
+        <button type="button" onclick="calcPress('9')">9</button>
+        <button type="button" class="calc-op" onclick="calcPress('×')">×</button>
+        <button type="button" onclick="calcPress('4')">4</button>
+        <button type="button" onclick="calcPress('5')">5</button>
+        <button type="button" onclick="calcPress('6')">6</button>
+        <button type="button" class="calc-op" onclick="calcPress('−')">−</button>
+        <button type="button" onclick="calcPress('1')">1</button>
+        <button type="button" onclick="calcPress('2')">2</button>
+        <button type="button" onclick="calcPress('3')">3</button>
+        <button type="button" class="calc-op" onclick="calcPress('+')">+</button>
+        <button type="button" onclick="calcPress('0')">0</button>
+        <button type="button" onclick="calcPress('.')">.</button>
+        <button type="button" class="calc-fn" onclick="calcPress('%')">%</button>
+        <button type="button" class="calc-eq" onclick="calcPress('=')">=</button>
+      </div>
+      <div class="calc-actions">
+        <button type="button" onclick="calcPress('⌫')">⌫ 지우기</button>
+        <button type="button" id="calcCopyBtn" onclick="calcCopy()">결과 복사</button>
+      </div>
+    </div>
+  </div>
   <!-- 바탕화면 스킨(PC): 가계부·마이페이지 아이콘을 누르면 뜨는 폴더 창 -->
   <div id="deskFolder" class="dk-folder" role="dialog" aria-modal="false" aria-labelledby="deskFolderTitle" onclick="event.stopPropagation()">
     <div class="dk-folder-title"><span id="deskFolderTitle"></span><button type="button" onclick="closeDesktopFolder()" aria-label="폴더 닫기">✕</button></div>
@@ -1008,6 +999,7 @@
   <div id="desktopStartMenu" role="menu" onclick="event.stopPropagation()">
     <button type="button" role="menuitem" onclick="desktopOpen('calendar')">📅 달력</button>
     <button type="button" role="menuitem" onclick="desktopOpen('category')">💰 가계부</button>
+    <button type="button" role="menuitem" onclick="openCalcPopup()">🧮 계산기</button>
     <button type="button" role="menuitem" onclick="desktopOpen('bookmark')">🔖 북마크</button>
     <button type="button" role="menuitem" onclick="desktopOpen('diary')">📔 다이어리</button>
     <button type="button" role="menuitem" onclick="desktopOpen('memo')">📝 메모</button>

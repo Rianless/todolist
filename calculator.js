@@ -90,15 +90,56 @@
     const b = $('calcCopyBtn');
     if (b) { b.textContent = '복사됨'; setTimeout(() => { b.textContent = '결과 복사'; }, 1200); }
   };
+  // 팝업 열기·닫기·끌어서 옮기기
+  window.openCalcPopup = function () {
+    const pop = $('calcPopup');
+    if (!pop) return;
+    if (typeof closeStartMenu === 'function') closeStartMenu();
+    pop.classList.add('open');
+    if (!pop.dataset.placed) {   // 처음 열 때만 화면 오른쪽 위쪽에 놓는다. 그 뒤로는 옮긴 자리를 그대로 둔다
+      pop.dataset.placed = '1';
+      let x = window.innerWidth - pop.offsetWidth - 40, y = 80;
+      try { const p = JSON.parse(localStorage.getItem('rianless_calc_pos') || 'null'); if (p) { x = p.x; y = p.y; } } catch (e) { /* 무시 */ }
+      place(pop, x, y);
+    } else place(pop, parseFloat(pop.style.left) || 0, parseFloat(pop.style.top) || 0);
+    show();
+  };
+  window.closeCalcPopup = function () { const pop = $('calcPopup'); if (pop) pop.classList.remove('open'); };
+  // 화면 밖으로 나가 제목 줄을 잡을 수 없게 되지 않도록 가둔다
+  function place(pop, x, y) {
+    pop.style.left = Math.max(0, Math.min(x, window.innerWidth - pop.offsetWidth)) + 'px';
+    pop.style.top = Math.max(0, Math.min(y, window.innerHeight - 40)) + 'px';
+  }
+  document.addEventListener('DOMContentLoaded', () => {
+    const pop = $('calcPopup'), bar = $('calcTitle');
+    if (!pop || !bar) return;
+    bar.addEventListener('pointerdown', e => {
+      if (e.target.closest('button')) return;
+      const ox = e.clientX - pop.offsetLeft, oy = e.clientY - pop.offsetTop;
+      bar.setPointerCapture(e.pointerId);
+      const move = ev => place(pop, ev.clientX - ox, ev.clientY - oy);
+      const up = () => {
+        bar.removeEventListener('pointermove', move);
+        bar.removeEventListener('pointerup', up);
+        bar.removeEventListener('pointercancel', up);
+        try { localStorage.setItem('rianless_calc_pos', JSON.stringify({ x: pop.offsetLeft, y: pop.offsetTop })); } catch (er) { /* 무시 */ }
+      };
+      bar.addEventListener('pointermove', move);
+      bar.addEventListener('pointerup', up);
+      bar.addEventListener('pointercancel', up);
+      e.preventDefault();
+    });
+    window.addEventListener('resize', () => { if (pop.classList.contains('open')) place(pop, pop.offsetLeft, pop.offsetTop); });
+  });
   document.addEventListener('keydown', e => {
-    const card = $('mpCardCalc');
-    if (!card || !card.classList.contains('open')) return;
+    const pop = $('calcPopup');
+    if (!pop || !pop.classList.contains('open')) return;
     if (/^(INPUT|TEXTAREA|SELECT)$/.test((e.target.tagName || ''))) return;
     if (e.ctrlKey || e.metaKey || e.altKey) return;
     if (/^[0-9.+\-*/()%]$/.test(e.key)) calcPress(e.key);
     else if (e.key === 'Enter' || e.key === '=') calcPress('=');
     else if (e.key === 'Backspace') calcPress('⌫');
-    else if (e.key === 'Escape') calcPress('C');
+    else if (e.key === 'Escape') { if (expr) calcPress('C'); else closeCalcPopup(); }
     else return;
     e.preventDefault();
   });
