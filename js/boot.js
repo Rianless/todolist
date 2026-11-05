@@ -303,7 +303,7 @@ const DK_FOLDERS = {
     { icon: '🔖', label: '구독', tab: 'category', card: 'mpCardSubs' },
     { icon: '🏦', label: '자산', tab: 'category', card: 'mpCardAccounts' },
     { icon: '📊', label: '통계', tab: 'category', card: 'mpCardStats' },
-    { icon: '🧮', label: '계산기', tab: 'category', card: 'mpCardCalc' },
+    { icon: '🧮', label: '계산기', fn: 'openCalcPopup' },
   ] },
   mypage: { title: '📁 마이페이지', items: [
     { icon: '🎨', label: '화면 설정', tab: 'mypage', card: 'mpCardDisplay' },
