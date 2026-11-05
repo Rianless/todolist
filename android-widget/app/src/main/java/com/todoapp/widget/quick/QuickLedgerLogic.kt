@@ -7,10 +7,33 @@ object QuickLedgerLogic {
     private val CANCEL_RE = Regex("취소|환불|환급")
     private val HAS_AMOUNT_IN_REPLY_RE = Regex("""\d|[일이삼사오육칠팔구][십백천만억]|[십백천만억]\s*원""")
 
-    /** 알림 글에서 첫 금액(원)을 뽑는다. 없으면 null. */
+    private const val AMT = """(?:\d{1,3}(?:,\d{3})+|\d+)"""
+    // 캐시백·적립·할인·잔액 같은 금액은 결제 금액이 아니니 미리 걷어 낸다. (서버의 stripIgnoredAmounts 와 같은 규칙)
+    // 말과 금액 사이에는 공백·콜론만 허용한다. 이모지·글자가 끼면 다음 금액은 결제 금액일 수 있다. (예: "9원 캐시백 🎉 3,000원 결제")
+    private val IGNORED_BEFORE_RE = Regex("(?:(?:캐시백|적립|리워드|혜택|쿠폰|할인|잔액|잔고|한도)[\\s:：-]{0,3})+$AMT\\s*(?:원|P|p)?")
+    private val IGNORED_AFTER_RE = Regex("$AMT\\s*(?:원|P|p)?\\s{0,2}(?:캐시백|적립|리워드|쿠폰|할인)")
+    private val PAY_AFTER_RE = Regex("^\\s*(?:결제|승인|출금|사용|이체|송금|보냈)")
+    private val PAY_BEFORE_RE = Regex("(?:결제|승인|출금|사용|이체|송금)\\s*[:：]?\\s*$")
+
+    /** 알림 글에서 캐시백·적립·잔액 금액을 빼 낸다. 말이 금액 앞에 오는 경우를 먼저 지워야 결제 금액이 안 지워진다. */
+    fun stripIgnoredAmounts(text: String): String =
+        text.replace(IGNORED_BEFORE_RE, " ").replace(IGNORED_AFTER_RE, " ").replace(Regex("\\s+"), " ").trim()
+
+    /** 알림 글에서 결제 금액(원)을 뽑는다. 캐시백·적립·잔액은 제외. 없으면 null. */
     fun extractAmount(text: String): Long? {
-        val m = AMOUNT_RE.find(text) ?: return null
-        return m.groupValues[1].replace(",", "").toLongOrNull()?.takeIf { it > 0 }
+        val t = stripIgnoredAmounts(text)
+        // 금액이 여러 개면 "3,000원 결제" 처럼 결제·승인·출금 말이 바로 붙은 금액을 먼저 고른다. 없으면 맨 앞 금액.
+        var bestScore = 0
+        var best: Long? = null
+        for (m in AMOUNT_RE.findAll(t)) {
+            val value = m.groupValues[1].replace(",", "").toLongOrNull()?.takeIf { it > 0 } ?: continue
+            val end = m.range.last + 1
+            val after = t.substring(end, minOf(t.length, end + 8))
+            val before = t.substring(maxOf(0, m.range.first - 6), m.range.first)
+            val score = if (PAY_AFTER_RE.containsMatchIn(after) || PAY_BEFORE_RE.containsMatchIn(before)) 2 else 1
+            if (score > bestScore) { bestScore = score; best = value }
+        }
+        return best
     }
 
     /** 가계부에 적을 만한 결제 알림인지: 금액이 있고, 결제·출금 같은 말이 있고, 취소·환불이 아니다. */
