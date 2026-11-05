@@ -8652,3 +8652,16 @@ html[data-skin="mac"] #ledgerList .ledger-entry-edit, html[data-skin="mac"] #led
 .mm-files { flex: none; padding: 0 16px 10px; }
 .mm-files:empty { display: none; }
 .mm-files .mf-file > a { color: #000; background: #f4f4f4; border-color: #c0c0c0; }
+
+/* 계산기 (가계부 폴더) */
+.calc { max-width: 320px; margin: 0 auto; }
+.calc-screen { padding: 10px 12px; margin-bottom: 8px; border-radius: 8px; background: rgba(0,0,0,.25); text-align: right; min-height: 64px; word-break: break-all; }
+.calc-expr { font-size: 22px; font-weight: 700; }
+.calc-result { font-size: 15px; opacity: .75; min-height: 20px; }
+.calc-keys { display: grid; grid-template-columns: repeat(4, 1fr); gap: 6px; }
+.calc-keys button { min-height: 44px; font-size: 18px; border-radius: 8px; border: 1px solid rgba(128,128,128,.35); background: rgba(128,128,128,.14); color: inherit; cursor: pointer; }
+.calc-keys button:active { filter: brightness(1.3); }
+.calc-keys .calc-op { background: rgba(0,170,255,.22); }
+.calc-keys .calc-fn { background: rgba(128,128,128,.28); }
+.calc-keys .calc-eq { background: rgba(0,170,255,.55); font-weight: 700; }
+.calc .ledger-actions { margin-top: 8px; }

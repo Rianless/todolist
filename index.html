@@ -530,6 +530,52 @@
         </div>
 
 
+        <!-- ── 계산기 카드 ── -->
+        <div class="mp-card" id="mpCardCalc">
+          <div class="mp-card-header" onclick="toggleMpCard('mpCardCalc')">
+            <span class="mp-card-icon">🧮</span>
+            <span class="mp-card-label">계산기</span>
+            <span class="mp-card-chevron">▼</span>
+          </div>
+          <div class="mp-card-body">
+            <div class="mp-card-inner">
+              <div class="calc">
+                <div class="calc-screen" aria-live="polite">
+                  <div class="calc-expr" id="calcExpr">0</div>
+                  <div class="calc-result" id="calcResult"></div>
+                </div>
+                <div class="calc-keys">
+                  <button type="button" class="calc-fn" onclick="calcPress('C')">C</button>
+                  <button type="button" class="calc-fn" onclick="calcPress('(')">(</button>
+                  <button type="button" class="calc-fn" onclick="calcPress(')')">)</button>
+                  <button type="button" class="calc-op" onclick="calcPress('÷')">÷</button>
+                  <button type="button" onclick="calcPress('7')">7</button>
+                  <button type="button" onclick="calcPress('8')">8</button>
+                  <button type="button" onclick="calcPress('9')">9</button>
+                  <button type="button" class="calc-op" onclick="calcPress('×')">×</button>
+                  <button type="button" onclick="calcPress('4')">4</button>
+                  <button type="button" onclick="calcPress('5')">5</button>
+                  <button type="button" onclick="calcPress('6')">6</button>
+                  <button type="button" class="calc-op" onclick="calcPress('−')">−</button>
+                  <button type="button" onclick="calcPress('1')">1</button>
+                  <button type="button" onclick="calcPress('2')">2</button>
+                  <button type="button" onclick="calcPress('3')">3</button>
+                  <button type="button" class="calc-op" onclick="calcPress('+')">+</button>
+                  <button type="button" onclick="calcPress('0')">0</button>
+                  <button type="button" onclick="calcPress('.')">.</button>
+                  <button type="button" class="calc-fn" onclick="calcPress('%')">%</button>
+                  <button type="button" class="calc-eq" onclick="calcPress('=')">=</button>
+                </div>
+                <div class="ledger-actions">
+                  <button type="button" class="ledger-export-btn" onclick="calcPress('⌫')">지우기 ⌫</button>
+                  <button type="button" class="ledger-export-btn" id="calcCopyBtn" onclick="calcCopy()">결과 복사</button>
+                </div>
+              </div>
+            </div>
+          </div>
+        </div>
+
+
 
       </div>
 
@@ -2081,6 +2127,7 @@
 
 <script src="/state-merge.js"></script>
 <script src="/bookmarks.js"></script>
+<script src="/calculator.js"></script>
 <script src="/js/savetube.js"></script>
 <script src="/parcels.js"></script>
 <script src="/ledger-import.js"></script>
