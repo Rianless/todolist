@@ -22,11 +22,15 @@ class QuickLedgerLogicTest {
         assertEquals(4500L, QuickLedgerLogic.extractAmount("잔액 1,234,567원 · 이디야 4,500원 출금"))
         assertEquals(4500L, QuickLedgerLogic.extractAmount("4,500원 출금 · 잔액 1,234,567원"))
         assertNull(QuickLedgerLogic.extractAmount("10원 캐시백이 적립됐어요"))
+        // 실제 토스뱅크 알림: 제목에 캐시백, 본문에 결제 금액과 잔액
+        assertEquals(3000L, QuickLedgerLogic.extractAmount("9원 캐시백 \uD83C\uDF89 3,000원 결제 | 인터넷쇼핑몰(1)_TOSS\n잔액 114원(토스뱅크 체크카드)"))
+        assertEquals(3000L, QuickLedgerLogic.extractAmount("캐시백 9원 · 잔액 114원 · 3,000원 승인"))
         assertFalse(QuickLedgerLogic.isPaymentText("10원 캐시백 결제 적립"))
     }
 
     @Test fun addsPaymentAmountNotCashbackWhenReplyIsOnlyAName() {
         assertEquals("올리브영 4500원", QuickLedgerLogic.buildQuickText("올리브영", "캐시백 10원 적립 · 4,500원 결제"))
+        assertEquals("플레이툰 3000원", QuickLedgerLogic.buildQuickText("플레이툰", "9원 캐시백 \uD83C\uDF89 3,000원 결제 | 인터넷쇼핑몰(1)_TOSS\n잔액 114원(토스뱅크 체크카드)"))
     }
 
     @Test fun detectsPaymentNotifications() {
