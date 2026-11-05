@@ -668,7 +668,7 @@ function openLedger(date, forSub=false) {
 
   setLedgerType('expense');
   fillLedgerCategorySelect('expense', '');
-    fillLedgerAccountSelect(lastLedgerAccountId);
+    fillLedgerAccountSelect(null);   // 새 내역은 늘 '통장 선택 안 함'으로 시작 (직전에 쓴 통장을 기억하지 않는다)
     resetLedgerParcelForm(null);
   setLedgerExtrasDraft([]);
   updateLedgerSubToggle(forSub);
