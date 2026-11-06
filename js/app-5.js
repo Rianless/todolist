@@ -1672,6 +1672,10 @@ function applyLedgerShortcut(id) {
   fillLedgerCategorySelect(s.type, s.category || '');
   document.getElementById('l_title').value = s.title || s.label;
   document.getElementById('l_amount').value = s.amount ? s.amount.toLocaleString('ko-KR') : '';
+  // 통장이 저장된 단축어만 통장을 채운다 (없어졌거나 저장 안 한 단축어는 지금 고른 통장을 그대로 둔다)
+  if (s.accountId !== null && s.accountId !== undefined && accounts.some(a => a.id === Number(s.accountId))) {
+    document.getElementById('l_account').value = String(s.accountId);
+  }
   updateLedgerExtrasTotal();
   onLedgerParcelHint();
   // 금액이 정해져 있으면 바로 저장 버튼으로, 아니면 금액 입력으로
@@ -1691,7 +1695,8 @@ function saveLedgerShortcut() {
     type: ledgerType,
     title: title.slice(0, 40),
     amount: parseLedgerAmount(document.getElementById('l_amount').value) || 0,
-    category: getLedgerCategoryValue()
+    category: getLedgerCategoryValue(),
+    accountId: document.getElementById('l_account').value ? Number(document.getElementById('l_account').value) : null
   };
   const existing = ledgerShortcuts.find(s => s.label === label && s.type === data.type);
   if (existing) Object.assign(existing, data);

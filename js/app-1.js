@@ -184,11 +184,13 @@ function sanitizeLedgerShortcuts(value) {
     const id = Number(s.id);
     if (!label || !Number.isFinite(id) || seen.has(id)) return;
     seen.add(id);
+    const accountId = s.accountId === null || s.accountId === undefined || s.accountId === '' ? NaN : Number(s.accountId);
     out.push({
       id, label, type,
       title: String(s.title || '').trim().slice(0, 40),
       amount: Math.max(0, Math.round(Number(s.amount) || 0)),
-      category: String(s.category || '').trim().slice(0, 20)
+      category: String(s.category || '').trim().slice(0, 20),
+      accountId: Number.isFinite(accountId) ? accountId : null
     });
   });
   return out;
