@@ -7942,8 +7942,9 @@ html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(1) > .dk-w
 html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(1) > .dk-widget:nth-child(2) { flex: 1.5 1 0; }
 html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(1) > .dk-widget:nth-child(3) { flex: 1.2 1 0; }
 html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-widget:nth-child(1) { flex: 1.3 1 0; }
-html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-widget:nth-child(2) { flex: 0.9 1 0; }
-html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-widget:nth-child(3) { flex: 1.5 1 0; }
+/* 가운데 열 순서: 오늘 → 메모 → 택배 (택배·메모 자리를 바꿈. 크기 비율은 위젯 따라감) */
+html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-widget[data-w="memo"] { order: 2; flex: 1.5 1 0; }
+html[data-desktop][data-skin="mac"] .dk-widgets > .dk-stack:nth-child(2) > .dk-widget[data-w="parcel"] { order: 3; flex: 0.9 1 0; }
 }
 
 /* ───────── 맥 모양 덮어쓰기 (PC 바탕화면) ───────── */
